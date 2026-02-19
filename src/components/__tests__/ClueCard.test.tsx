@@ -6,7 +6,7 @@
  * Sub-task 12.1
  */
 import React from 'react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ClueCard } from '../EvidenceBoard/ClueCard';
 import type { Clue } from '../../types';

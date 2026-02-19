@@ -140,7 +140,7 @@ describe('Store slice isolation — Property 1', () => {
   it('updateClueStatus does not mutate investigator, npcs, flags, or narrative slices', () => {
     fc.assert(
       fc.property(
-        fc.constantFrom('new', 'examined', 'connected', 'deduced', 'contested', 'spent' as const),
+        fc.constantFrom('new' as const, 'examined' as const, 'connected' as const, 'deduced' as const, 'contested' as const, 'spent' as const),
         (status) => {
           resetStore();
           const before = snapshotSiblings('clues');
