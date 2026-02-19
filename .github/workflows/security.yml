@@ -1,0 +1,55 @@
+name: OWASP Security Scan
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    # Every Monday at 08:00 UTC
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write  # required to upload SARIF results
+
+jobs:
+  npm-audit:
+    name: npm audit (OWASP A06)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Fail on high/critical severity vulnerabilities
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+
+  dependency-check:
+    name: OWASP Dependency-Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'gaslight-and-grimoire'
+          path: '.'
+          format: 'SARIF'
+          # Fail build on CVSS score >= 7 (high/critical)
+          args: >
+            --failOnCVSS 7
+            --enableRetired
+            --exclude "**/node_modules/.cache/**"
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()  # upload even if the scan found issues
+        with:
+          sarif_file: reports/dependency-check-report.sarif
