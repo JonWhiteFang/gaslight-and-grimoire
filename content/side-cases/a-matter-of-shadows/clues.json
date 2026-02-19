@@ -1,0 +1,26 @@
+{
+  "clues": [
+    {
+      "id": "amos-clue-courier-description",
+      "type": "testimony",
+      "title": "Description of the Missing Courier",
+      "description": "A young woman, slight build, red scarf, nervous hands. Last seen leaving the Tooley Street dosshouse before dawn two nights ago. The night-keeper Briggs remembers her — she paid in advance and asked no questions.",
+      "sceneSource": "amos-act1-southwark-bridge",
+      "tags": ["courier", "Tooley Street", "Lamplighters", "person"],
+      "connectsTo": ["amos-clue-package-contents"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "amos-clue-package-contents",
+      "type": "testimony",
+      "title": "Contents of the Package",
+      "description": "The package contained a list of Lamplighter informants embedded within three rival factions. The courier was instructed to destroy it rather than allow capture. In the wrong hands, the list is a death warrant for every name on it.",
+      "sceneSource": "amos-act1-wren-reveals",
+      "tags": ["package", "Lamplighters", "informants", "factions", "sensitive"],
+      "connectsTo": ["amos-clue-courier-description"],
+      "status": "new",
+      "isRevealed": false
+    }
+  ]
+}

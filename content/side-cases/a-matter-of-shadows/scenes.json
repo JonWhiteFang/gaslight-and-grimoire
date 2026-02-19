@@ -1,0 +1,220 @@
+{
+  "scenes": [
+    {
+      "id": "amos-act1-southwark-bridge",
+      "act": 1,
+      "narrative": "Southwark Bridge at midnight. The Thames below is black and slow. A Lamplighter contact — a woman who gives her name only as 'Wren' — tells you the courier's last known location was a dosshouse on Tooley Street. She hands you a description and a warning: 'Don't ask what was in the package.'",
+      "ambientAudio": "ambient-thames-night",
+      "cluesAvailable": [
+        {
+          "clueId": "amos-clue-courier-description",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "amos-choice-tooley-street",
+          "text": "Head directly to the Tooley Street dosshouse.",
+          "outcomes": {
+            "critical": "amos-act1-dosshouse",
+            "success": "amos-act1-dosshouse",
+            "partial": "amos-act1-dosshouse",
+            "failure": "amos-act1-dosshouse",
+            "fumble": "amos-act1-dosshouse"
+          }
+        },
+        {
+          "id": "amos-choice-press-wren",
+          "text": "Press Wren about the package before she disappears.",
+          "faculty": "influence",
+          "difficulty": 12,
+          "outcomes": {
+            "critical": "amos-act1-wren-reveals",
+            "success": "amos-act1-wren-hints",
+            "partial": "amos-act1-wren-hints",
+            "failure": "amos-act1-dosshouse",
+            "fumble": "amos-act1-dosshouse"
+          }
+        }
+      ]
+    },
+    {
+      "id": "amos-act1-dosshouse",
+      "act": 1,
+      "narrative": "The Tooley Street dosshouse is a sagging three-storey building that smells of tallow and damp wool. The night-keeper, a rheumy man named Briggs, remembers the courier — a young woman, red scarf, nervous hands. She took a room two nights ago and left before dawn. Her bed is cold. Under the mattress you find a torn corner of oilskin wrapping, still faintly waxed.",
+      "ambientAudio": "ambient-southwark-night",
+      "cluesAvailable": [
+        {
+          "clueId": "amos-clue-courier-description",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "amos-choice-question-briggs",
+          "text": "Question Briggs more carefully about who else came asking.",
+          "faculty": "perception",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "amos-act1-wren-reveals",
+            "success": "amos-act1-wren-hints",
+            "partial": "amos-act2-resolution",
+            "failure": "amos-act2-resolution",
+            "fumble": "amos-act2-resolution"
+          }
+        },
+        {
+          "id": "amos-choice-follow-trail",
+          "text": "The oilskin is a courier's wrapping. Follow the trail south toward the river stairs.",
+          "outcomes": {
+            "critical": "amos-act2-resolution",
+            "success": "amos-act2-resolution",
+            "partial": "amos-act2-resolution",
+            "failure": "amos-act2-resolution",
+            "fumble": "amos-act2-resolution"
+          }
+        }
+      ]
+    },
+    {
+      "id": "amos-act1-wren-reveals",
+      "act": 1,
+      "narrative": "Wren's composure cracks — just for a moment. 'The package was a list,' she says, voice barely above the river noise. 'Names. Lamplighter informants embedded in three factions. If that list reaches the wrong hands, people die.' She looks past you into the dark. 'The courier knew what she was carrying. That's why she ran.'",
+      "ambientAudio": "ambient-thames-night",
+      "cluesAvailable": [
+        {
+          "clueId": "amos-clue-package-contents",
+          "method": "dialogue"
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "amos-wren-revealed-package",
+          "value": true
+        }
+      ],
+      "choices": [
+        {
+          "id": "amos-choice-to-dosshouse-informed",
+          "text": "Now that you know what's at stake, head to the dosshouse with fresh eyes.",
+          "outcomes": {
+            "critical": "amos-act1-dosshouse",
+            "success": "amos-act1-dosshouse",
+            "partial": "amos-act1-dosshouse",
+            "failure": "amos-act1-dosshouse",
+            "fumble": "amos-act1-dosshouse"
+          }
+        },
+        {
+          "id": "amos-choice-straight-to-resolution",
+          "text": "You have enough. Move directly to intercept before the list changes hands.",
+          "outcomes": {
+            "critical": "amos-act2-resolution",
+            "success": "amos-act2-resolution",
+            "partial": "amos-act2-resolution",
+            "failure": "amos-act2-resolution",
+            "fumble": "amos-act2-resolution"
+          }
+        }
+      ]
+    },
+    {
+      "id": "amos-act1-wren-hints",
+      "act": 1,
+      "narrative": "Wren shakes her head, but something in her eyes shifts. 'The package was sensitive. Sensitive enough that the courier was told to destroy it rather than let it be taken.' She pulls her coat tighter. 'Find her before whoever else is looking does. Tooley Street. Go.'",
+      "ambientAudio": "ambient-thames-night",
+      "choices": [
+        {
+          "id": "amos-choice-to-dosshouse-hinted",
+          "text": "Head to the Tooley Street dosshouse.",
+          "outcomes": {
+            "critical": "amos-act1-dosshouse",
+            "success": "amos-act1-dosshouse",
+            "partial": "amos-act1-dosshouse",
+            "failure": "amos-act1-dosshouse",
+            "fumble": "amos-act1-dosshouse"
+          }
+        }
+      ]
+    },
+    {
+      "id": "amos-act2-resolution",
+      "act": 2,
+      "narrative": "You find the courier — a young woman named Elspeth — sheltering beneath Pickle Herring Stairs, the package still tucked inside her coat. She is frightened but unharmed. The shadows that followed her were cast by a rival faction's watcher, now gone cold at the sight of you. The list is intact. Elspeth presses it into your hands without a word.\n\nYou return it to Wren at a pre-arranged drop. She does not thank you. She does not need to. The Lamplighters remember their debts.",
+      "ambientAudio": "ambient-thames-night",
+      "cluesAvailable": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "amos-case-complete",
+          "value": true
+        },
+        {
+          "type": "reputation",
+          "target": "Lamplighters",
+          "delta": 1
+        }
+      ],
+      "choices": [
+        {
+          "id": "amos-choice-keep-list",
+          "text": "Keep a copy of the list before handing it over. Knowledge is leverage.",
+          "outcomes": {
+            "critical": "amos-act2-end-leverage",
+            "success": "amos-act2-end-leverage",
+            "partial": "amos-act2-end-leverage",
+            "failure": "amos-act2-end-leverage",
+            "fumble": "amos-act2-end-leverage"
+          }
+        },
+        {
+          "id": "amos-choice-return-intact",
+          "text": "Return the list intact. Some debts are worth more than secrets.",
+          "outcomes": {
+            "critical": "amos-act2-end-loyal",
+            "success": "amos-act2-end-loyal",
+            "partial": "amos-act2-end-loyal",
+            "failure": "amos-act2-end-loyal",
+            "fumble": "amos-act2-end-loyal"
+          }
+        }
+      ]
+    },
+    {
+      "id": "amos-act2-end-loyal",
+      "act": 2,
+      "narrative": "The list goes back to the Lamplighters, untouched. Wren's expression is unreadable, but she holds your gaze a moment longer than necessary. 'You'll hear from us,' she says. In this city, that is as close to trust as anyone gets.",
+      "ambientAudio": "ambient-thames-night",
+      "cluesAvailable": [],
+      "onEnter": [
+        {
+          "type": "reputation",
+          "target": "Lamplighters",
+          "delta": 1
+        },
+        {
+          "type": "flag",
+          "target": "amos-returned-list-intact",
+          "value": true
+        }
+      ],
+      "choices": []
+    },
+    {
+      "id": "amos-act2-end-leverage",
+      "act": 2,
+      "narrative": "You memorise three names before sealing the package. The Lamplighters get their list. You get something harder to quantify — a thread you can pull, if you ever need to. Wren watches you go with eyes that suggest she knows exactly what you did. She says nothing. Neither do you.",
+      "ambientAudio": "ambient-thames-night",
+      "cluesAvailable": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "amos-kept-list-copy",
+          "value": true
+        }
+      ],
+      "choices": []
+    }
+  ]
+}

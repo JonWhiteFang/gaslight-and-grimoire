@@ -1,0 +1,71 @@
+{
+  "clues": [
+    {
+      "id": "wc-clue-cipher-note",
+      "type": "physical",
+      "title": "The Cipher Note",
+      "description": "A folded slip of paper bearing a sequence of symbols that repeat at irregular intervals. The ink is fresh — no more than six hours old.",
+      "sceneSource": "wc-act1-arrival",
+      "connectsTo": ["wc-clue-hermetic-primer", "wc-clue-printshop-type"],
+      "tags": ["paper", "cipher", "whitechapel", "hermetic"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "wc-clue-cobblestone-symbol",
+      "type": "physical",
+      "title": "Cobblestone Carving",
+      "description": "A shallow glyph scratched into the cobblestone near the body. It matches the final symbol on the cipher note precisely.",
+      "sceneSource": "wc-act1-arrival",
+      "connectsTo": ["wc-clue-cipher-note", "wc-clue-hermetic-primer"],
+      "tags": ["stone", "glyph", "whitechapel", "hermetic"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "wc-clue-hermetic-primer",
+      "type": "occult",
+      "title": "Hermetic Primer Fragment",
+      "description": "A torn page from what appears to be an initiation manual for the Hermetic Order of the Grey Dawn. The symbols match those on the cipher note.",
+      "sceneSource": "wc-act2-the-web",
+      "connectsTo": ["wc-clue-cipher-note", "wc-clue-cobblestone-symbol"],
+      "grantsFaculty": "lore",
+      "tags": ["paper", "occult", "hermetic", "grey-dawn"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "wc-clue-printshop-type",
+      "type": "physical",
+      "title": "Distinctive Typeface",
+      "description": "The cipher note was printed, not handwritten. The typeface is unusual — a Continental Gothic used by only a handful of London printers.",
+      "sceneSource": "wc-act2-the-web",
+      "connectsTo": ["wc-clue-cipher-note"],
+      "tags": ["paper", "printing", "whitechapel"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "wc-clue-graves-testimony",
+      "type": "testimony",
+      "title": "Graves's Confession",
+      "description": "Inspector Graves admits, reluctantly, that Scotland Yard received an identical cipher three weeks ago — and buried it. Someone above him gave the order.",
+      "sceneSource": "wc-act1-arrival",
+      "connectsTo": ["wc-clue-cipher-note"],
+      "tags": ["police", "cover-up", "graves"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "wc-clue-red-herring-occultist",
+      "type": "redHerring",
+      "title": "Occultist's Calling Card",
+      "description": "A business card for one 'Professor Aldous Vane — Consulting Spiritualist'. Found near the body, it seems damning — but Vane was in Edinburgh at the time of the murder.",
+      "sceneSource": "wc-act1-arrival",
+      "connectsTo": [],
+      "tags": ["paper", "occult", "vane"],
+      "status": "new",
+      "isRevealed": false
+    }
+  ]
+}

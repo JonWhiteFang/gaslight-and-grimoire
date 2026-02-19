@@ -1,0 +1,69 @@
+{
+  "scenes": [
+    {
+      "id": "wc-act3-the-reckoning",
+      "act": 3,
+      "narrative": "The cellar beneath the Dorset Street printshop is lit by a single oil lamp. The man you have been hunting — a former Scotland Yard clerk named Aldgate, now in the employ of someone far above him — stands at the far end with a revolver and the look of a man who has run out of options. The cipher notes are stacked on a workbench beside him. Three murders. A cover-up that reaches to the Deputy Commissioner. And you, alone, in a cellar that smells of ink and old fear. How you end this is up to you.",
+      "ambientAudio": "ambient-cellar",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-force-through",
+          "text": "Rush him before he can fire — close the distance and end this with your hands.",
+          "faculty": "vigor",
+          "difficulty": 14,
+          "advantageIf": ["wc-clue-cobblestone-symbol"],
+          "outcomes": {
+            "critical": "wc-act3-ending-force",
+            "success": "wc-act3-ending-force",
+            "partial": "wc-act3-ending-force",
+            "failure": "wc-act3-ending-negotiate",
+            "fumble": "wc-act3-ending-negotiate"
+          }
+        },
+        {
+          "id": "wc-choice-negotiate-out",
+          "text": "Talk him down — he is a frightened man, not a true believer. Give him a way out.",
+          "faculty": "influence",
+          "difficulty": 14,
+          "advantageIf": ["wc-clue-graves-testimony"],
+          "outcomes": {
+            "critical": "wc-act3-ending-negotiate",
+            "success": "wc-act3-ending-negotiate",
+            "partial": "wc-act3-ending-negotiate",
+            "failure": "wc-act3-ending-force",
+            "fumble": "wc-act3-ending-force"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act3-ending-force",
+      "act": 3,
+      "narrative": "The revolver fires wide as you close the distance. The struggle is brief and brutal. Aldgate goes down hard, and the cipher notes scatter across the cellar floor. When Inspector Graves arrives — summoned by the shot — he finds you standing over a bound and bleeding man, surrounded by evidence of three murders and a conspiracy that reaches to the highest levels of Scotland Yard. Graves looks at the evidence. He looks at you. Then, slowly, he begins to take notes. The Deputy Commissioner will not sleep well tonight.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        { "type": "flag", "target": "wc-case-complete", "value": true },
+        { "type": "flag", "target": "wc-aldgate-arrested", "value": true },
+        { "type": "vitality", "delta": -2 },
+        { "type": "reputation", "target": "Rationalists Circle", "delta": 1 }
+      ]
+    },
+    {
+      "id": "wc-act3-ending-negotiate",
+      "act": 3,
+      "narrative": "You speak quietly and precisely. You tell Aldgate what you know, what you can prove, and — crucially — what you are willing to offer: testimony that he cooperated, that he was coerced, that the real villain sits behind a desk in Scotland Yard. The revolver lowers by degrees. When Graves arrives, Aldgate is sitting on the floor with his hands on his knees, ready to talk. The Deputy Commissioner's name is in the first sentence. The case unravels upward from there, and the Rationalists' Circle finds itself with a very uncomfortable question to answer.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        { "type": "flag", "target": "wc-case-complete", "value": true },
+        { "type": "flag", "target": "wc-aldgate-turned", "value": true },
+        { "type": "disposition", "target": "npc-graves", "delta": 2 },
+        { "type": "reputation", "target": "Rationalists Circle", "delta": -1 },
+        { "type": "reputation", "target": "Hermetic Order of the Grey Dawn", "delta": 1 }
+      ]
+    }
+  ]
+}

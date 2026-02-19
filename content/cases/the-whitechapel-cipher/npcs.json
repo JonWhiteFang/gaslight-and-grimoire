@@ -1,0 +1,34 @@
+{
+  "npcs": [
+    {
+      "id": "npc-graves",
+      "name": "Inspector Graves",
+      "faction": "Rationalists Circle",
+      "disposition": 2,
+      "suspicion": 0,
+      "memoryFlags": {},
+      "isAlive": true,
+      "isAccessible": true
+    },
+    {
+      "id": "npc-vane",
+      "name": "Professor Aldous Vane",
+      "faction": "Hermetic Order of the Grey Dawn",
+      "disposition": 0,
+      "suspicion": 3,
+      "memoryFlags": {},
+      "isAlive": true,
+      "isAccessible": true
+    },
+    {
+      "id": "npc-printer",
+      "name": "Ezra Mott",
+      "faction": null,
+      "disposition": -1,
+      "suspicion": 2,
+      "memoryFlags": {},
+      "isAlive": true,
+      "isAccessible": true
+    }
+  ]
+}

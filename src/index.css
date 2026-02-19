@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-size-base: 16px;
+  --high-contrast: 0;
+}
+
+body {
+  font-size: var(--font-size-base);
+}
+
+.high-contrast {
+  --color-bg: #000000;
+  --color-text: #ffffff;
+  --color-border: #ffffff;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.reduced-motion * {
+  animation-duration: 0ms !important;
+  transition-duration: 0ms !important;
+}

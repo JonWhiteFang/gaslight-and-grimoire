@@ -1,0 +1,72 @@
+{
+  "variants": [
+    {
+      "id": "wc-act1-arrival-variant-grey-dawn-rep",
+      "act": 1,
+      "variantOf": "wc-act1-arrival",
+      "variantCondition": {
+        "type": "factionReputation",
+        "target": "Hermetic Order of the Grey Dawn",
+        "value": 3
+      },
+      "narrative": "The hansom cab deposits you at the edge of Whitechapel. Inspector Graves meets you at the cordon — but so does a hooded figure who melts back into the fog the moment you step down. Someone in the Order knows you are here. 'Third one this month,' Graves says, handing you the cipher note. His eyes flick to where the figure stood. The symbols on the note are familiar to you now — you have seen their like in Order correspondence. That knowledge may prove useful.",
+      "ambientAudio": "ambient-whitechapel-night",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-cipher-note",
+          "method": "automatic"
+        },
+        {
+          "clueId": "wc-clue-cobblestone-symbol",
+          "method": "exploration"
+        },
+        {
+          "clueId": "wc-clue-red-herring-occultist",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-examine-note-variant",
+          "text": "Study the cipher note carefully — your familiarity with the Order's symbols gives you an edge.",
+          "faculty": "reason",
+          "difficulty": 12,
+          "advantageIf": ["wc-clue-hermetic-primer"],
+          "outcomes": {
+            "critical": "wc-act1-cipher-decoded",
+            "success": "wc-act1-cipher-partial",
+            "partial": "wc-act1-cipher-partial",
+            "failure": "wc-act1-cipher-stumped",
+            "fumble": "wc-act1-cipher-stumped"
+          }
+        },
+        {
+          "id": "wc-choice-question-graves-variant",
+          "text": "Press Inspector Graves for details he hasn't volunteered.",
+          "faculty": "influence",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "wc-act1-graves-confides",
+            "success": "wc-act1-graves-talks",
+            "partial": "wc-act1-graves-talks",
+            "failure": "wc-act1-graves-clams",
+            "fumble": "wc-act1-graves-hostile"
+          }
+        },
+        {
+          "id": "wc-choice-survey-scene-variant",
+          "text": "Survey the wider crime scene before the constables trample the evidence.",
+          "faculty": "perception",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "wc-act1-scene-full",
+            "success": "wc-act1-scene-partial",
+            "partial": "wc-act1-scene-partial",
+            "failure": "wc-act1-scene-nothing",
+            "fumble": "wc-act1-scene-nothing"
+          }
+        }
+      ]
+    }
+  ]
+}

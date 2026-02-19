@@ -1,0 +1,236 @@
+{
+  "scenes": [
+    {
+      "id": "wc-act2-the-web",
+      "act": 2,
+      "narrative": "The threads converge. The cipher is not merely a calling card — it is a key. Someone has been encoding meeting times and locations in plain sight, using the symbols of the Hermetic Order of the Grey Dawn as a private postal system. The question is whether the murders are the message, or merely the postage. Two paths present themselves: the printshop on Dorset Street, where the typeface may betray the note's origin, and Professor Vane's townhouse in Bloomsbury, where the Order's symbols may yield their meaning.",
+      "ambientAudio": "ambient-london-day",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-visit-printshop",
+          "text": "Follow the rational thread — visit the printshop on Dorset Street.",
+          "faculty": "reason",
+          "difficulty": 10,
+          "advantageIf": ["wc-clue-printshop-type"],
+          "outcomes": {
+            "critical": "wc-act2-printshop",
+            "success": "wc-act2-printshop",
+            "partial": "wc-act2-printshop",
+            "failure": "wc-act2-printshop",
+            "fumble": "wc-act2-printshop"
+          }
+        },
+        {
+          "id": "wc-choice-confront-vane",
+          "text": "Follow the occult thread — confront Professor Vane about the Order's symbols.",
+          "faculty": "influence",
+          "difficulty": 12,
+          "advantageIf": ["wc-clue-hermetic-primer"],
+          "outcomes": {
+            "critical": "wc-act2-vane-confrontation",
+            "success": "wc-act2-vane-confrontation",
+            "partial": "wc-act2-vane-confrontation",
+            "failure": "wc-act2-vane-confrontation",
+            "fumble": "wc-act2-vane-confrontation"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act2-printshop",
+      "act": 2,
+      "narrative": "The printshop on Dorset Street is a cramped, ink-smelling establishment wedged between a pawnbroker and a gin-house. Ezra Mott, the proprietor, is a lean man with stained fingers and the watchful eyes of someone who has survived Whitechapel by knowing when to keep his mouth shut. He greets you with the particular wariness of a man who has something to hide and knows you know it.",
+      "ambientAudio": "ambient-printshop",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-printshop-type",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-mott-intimidate",
+          "text": "Lean on Mott — he is frightened, and frightened men talk.",
+          "faculty": "nerve",
+          "difficulty": 12,
+          "outcomes": {
+            "critical": "wc-act2-printshop-success",
+            "success": "wc-act2-printshop-success",
+            "partial": "wc-act2-printshop-success",
+            "failure": "wc-act2-printshop-fail",
+            "fumble": "wc-act2-printshop-fail"
+          },
+          "npcEffect": {
+            "npcId": "npc-printer",
+            "dispositionDelta": -1,
+            "suspicionDelta": 2
+          }
+        },
+        {
+          "id": "wc-choice-mott-persuade",
+          "text": "Appeal to Mott's self-interest — whoever is using his press is a danger to him too.",
+          "faculty": "influence",
+          "difficulty": 14,
+          "advantageIf": ["wc-clue-graves-testimony"],
+          "outcomes": {
+            "critical": "wc-act2-printshop-success",
+            "success": "wc-act2-printshop-success",
+            "partial": "wc-act2-printshop-fail",
+            "failure": "wc-act2-printshop-fail",
+            "fumble": "wc-act2-printshop-fail"
+          },
+          "npcEffect": {
+            "npcId": "npc-printer",
+            "dispositionDelta": 1,
+            "suspicionDelta": -1
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act2-printshop-success",
+      "act": 2,
+      "narrative": "Mott breaks. The words come out in a rush: a man came to him three weeks ago, paid in gold sovereigns, and commissioned a run of cipher notes using a typeface Mott had imported from Frankfurt. The man wore a good coat and spoke like a gentleman. He gave no name, but he left a forwarding address — a cellar on Dorset Street, two doors down. 'I didn't know what they were for,' Mott says. 'I swear it.' You believe him. That almost makes it worse.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-printshop-success-proceed",
+          "text": "The cellar. That is where this ends.",
+          "outcomes": {
+            "critical": "wc-act3-the-reckoning",
+            "success": "wc-act3-the-reckoning",
+            "partial": "wc-act3-the-reckoning",
+            "failure": "wc-act3-the-reckoning",
+            "fumble": "wc-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        { "type": "disposition", "target": "npc-printer", "delta": 1 }
+      ]
+    },
+    {
+      "id": "wc-act2-printshop-fail",
+      "act": 2,
+      "narrative": "Mott stonewalls you. His jaw sets and his eyes go flat, and no amount of pressure or persuasion moves him. He has been frightened by someone more frightening than you, and that someone has left a deeper impression. You leave with the typeface evidence but without the name or address you needed. The cellar will have to be found another way.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-printshop-fail-proceed",
+          "text": "Mott will not help. Find the cellar through other means.",
+          "outcomes": {
+            "critical": "wc-act3-the-reckoning",
+            "success": "wc-act3-the-reckoning",
+            "partial": "wc-act3-the-reckoning",
+            "failure": "wc-act3-the-reckoning",
+            "fumble": "wc-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        { "type": "composure", "delta": -1 }
+      ]
+    },
+    {
+      "id": "wc-act2-vane-confrontation",
+      "act": 2,
+      "narrative": "Professor Vane receives you in his Bloomsbury study, surrounded by shelves of arcane volumes and the faint smell of incense. He is a small, precise man with the manner of someone accustomed to being underestimated. When you produce the cipher note, his composure does not crack — but his eyes do. He recognises it. 'Where did you get this?' he asks, very quietly.",
+      "ambientAudio": "ambient-study",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-hermetic-primer",
+          "method": "dialogue"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-vane-press",
+          "text": "Press Vane directly — his calling card was at the scene.",
+          "faculty": "influence",
+          "difficulty": 14,
+          "advantageIf": ["wc-clue-red-herring-occultist"],
+          "outcomes": {
+            "critical": "wc-act2-vane-success",
+            "success": "wc-act2-vane-success",
+            "partial": "wc-act2-vane-fail",
+            "failure": "wc-act2-vane-fail",
+            "fumble": "wc-act2-vane-fail"
+          },
+          "npcEffect": {
+            "npcId": "npc-vane",
+            "dispositionDelta": -1,
+            "suspicionDelta": 1
+          }
+        },
+        {
+          "id": "wc-choice-vane-lore",
+          "text": "Appeal to his expertise — ask him to translate the cipher as a scholar.",
+          "faculty": "lore",
+          "difficulty": 12,
+          "advantageIf": ["wc-clue-cobblestone-symbol"],
+          "outcomes": {
+            "critical": "wc-act2-vane-success",
+            "success": "wc-act2-vane-success",
+            "partial": "wc-act2-vane-fail",
+            "failure": "wc-act2-vane-fail",
+            "fumble": "wc-act2-vane-fail"
+          },
+          "npcEffect": {
+            "npcId": "npc-vane",
+            "dispositionDelta": 1,
+            "suspicionDelta": 0
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act2-vane-success",
+      "act": 2,
+      "narrative": "Vane's resistance crumbles. He produces a torn page from an Order initiation manual — the Hermetic Primer — and lays it beside the cipher note. The symbols align perfectly. 'Someone has stolen our sacred script and turned it into a murder weapon,' he says, his voice tight with outrage. 'The cellar on Dorset Street — that is where the renegade chapter meets. I have been trying to expose them for months.' He gives you the address. His alibi, you note, is airtight.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-vane-success-proceed",
+          "text": "Vane is not the villain. The cellar is.",
+          "outcomes": {
+            "critical": "wc-act3-the-reckoning",
+            "success": "wc-act3-the-reckoning",
+            "partial": "wc-act3-the-reckoning",
+            "failure": "wc-act3-the-reckoning",
+            "fumble": "wc-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        { "type": "disposition", "target": "npc-vane", "delta": 2 },
+        { "type": "reputation", "target": "Hermetic Order of the Grey Dawn", "delta": 1 }
+      ]
+    },
+    {
+      "id": "wc-act2-vane-fail",
+      "act": 2,
+      "narrative": "Vane retreats behind a wall of scholarly hauteur. 'I am afraid I cannot help you,' he says, and rings for his manservant. You are shown out into the Bloomsbury drizzle with nothing but the Hermetic Primer fragment and the growing certainty that Vane knows more than he is saying — though whether from guilt or fear, you cannot yet determine. The cellar will have to be found through other means.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-vane-fail-proceed",
+          "text": "Vane will not help. Find the cellar another way.",
+          "outcomes": {
+            "critical": "wc-act3-the-reckoning",
+            "success": "wc-act3-the-reckoning",
+            "partial": "wc-act3-the-reckoning",
+            "failure": "wc-act3-the-reckoning",
+            "fumble": "wc-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        { "type": "composure", "delta": -1 }
+      ]
+    }
+  ]
+}

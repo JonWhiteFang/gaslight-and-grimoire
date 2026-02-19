@@ -1,0 +1,14 @@
+{
+  "id": "the-whitechapel-cipher",
+  "title": "The Whitechapel Cipher",
+  "synopsis": "A series of coded messages left at murder scenes in Whitechapel points to a conspiracy that reaches from the rookeries to the halls of power. Someone is using the language of the occult to mask very rational crimes — or are they?",
+  "acts": 3,
+  "facultyDistribution": {
+    "reason": 4,
+    "perception": 3,
+    "nerve": 2,
+    "vigor": 2,
+    "influence": 3,
+    "lore": 2
+  }
+}

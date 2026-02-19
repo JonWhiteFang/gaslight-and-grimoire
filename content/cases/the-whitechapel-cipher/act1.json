@@ -1,0 +1,304 @@
+{
+  "scenes": [
+    {
+      "id": "wc-act1-arrival",
+      "act": 1,
+      "narrative": "The hansom cab deposits you at the edge of Whitechapel as a November fog rolls in from the Thames. Inspector Graves meets you at the cordon, his expression grim beneath the gaslight. 'Third one this month,' he says, handing you a folded note. 'Same cipher. Same symbol carved into the cobblestones.' The body has already been removed, but the scene remains — wet cobblestones, a guttering lamp, and the faint smell of printer's ink beneath the iron tang of blood.",
+      "ambientAudio": "ambient-whitechapel-night",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-cipher-note",
+          "method": "automatic"
+        },
+        {
+          "clueId": "wc-clue-cobblestone-symbol",
+          "method": "exploration"
+        },
+        {
+          "clueId": "wc-clue-red-herring-occultist",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-examine-note",
+          "text": "Study the cipher note carefully under the gaslight.",
+          "faculty": "reason",
+          "difficulty": 12,
+          "advantageIf": ["wc-clue-hermetic-primer"],
+          "outcomes": {
+            "critical": "wc-act1-cipher-decoded",
+            "success": "wc-act1-cipher-partial",
+            "partial": "wc-act1-cipher-partial",
+            "failure": "wc-act1-cipher-stumped",
+            "fumble": "wc-act1-cipher-stumped"
+          }
+        },
+        {
+          "id": "wc-choice-question-graves",
+          "text": "Press Inspector Graves for details he hasn't volunteered.",
+          "faculty": "influence",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "wc-act1-graves-confides",
+            "success": "wc-act1-graves-talks",
+            "partial": "wc-act1-graves-talks",
+            "failure": "wc-act1-graves-clams",
+            "fumble": "wc-act1-graves-hostile"
+          }
+        },
+        {
+          "id": "wc-choice-survey-scene",
+          "text": "Survey the wider crime scene before the constables trample the evidence.",
+          "faculty": "perception",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "wc-act1-scene-full",
+            "success": "wc-act1-scene-partial",
+            "partial": "wc-act1-scene-partial",
+            "failure": "wc-act1-scene-nothing",
+            "fumble": "wc-act1-scene-nothing"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act1-cipher-decoded",
+      "act": 1,
+      "narrative": "The symbols resolve themselves with startling clarity. This is no mystical cipher — it is a substitution code built on Hermetic glyphs, but the underlying structure is purely mechanical. You can read it: a time, a place, and a name. The name is 'Mott'. The place is a printshop on Dorset Street. The time was last night. Someone used the Order's sacred symbols as a postal code, and the murders are the postmarks.",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-printshop-type",
+          "method": "check",
+          "requiresFaculty": { "faculty": "reason", "minimum": 12 }
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-decoded-proceed",
+          "text": "You have what you need. Press on to unravel the web.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act1-cipher-partial",
+      "act": 1,
+      "narrative": "The cipher yields fragments. The symbols are familiar — you have seen their like in pamphlets from the Hermetic Order of the Grey Dawn, though you cannot read them fluently. The repetition pattern suggests a substitution code rather than true occult script. One cluster of symbols recurs: it may be a name, or a place. You will need more context to be certain.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-partial-proceed",
+          "text": "Partial knowledge is still knowledge. Move on.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act1-cipher-stumped",
+      "act": 1,
+      "narrative": "The symbols defeat you entirely. They resemble nothing in your experience — neither standard cryptography nor any occult script you recognise. The note is evidence, certainly, but its meaning remains locked. You fold it carefully and pocket it. Perhaps someone else can shed light on its origins.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-stumped-proceed",
+          "text": "The cipher will have to wait. There are other avenues.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        { "type": "composure", "delta": -1 }
+      ]
+    },
+    {
+      "id": "wc-act1-graves-confides",
+      "act": 1,
+      "narrative": "Graves's composure cracks. He pulls you aside, away from the constables, and speaks in a low, urgent voice. 'Scotland Yard received an identical cipher three weeks ago. I was ordered to bury it — told it was a hoax. But the man who gave that order has since been promoted to Deputy Commissioner.' He presses a folded paper into your hand — a copy of the original cipher. 'I should not be telling you this.'",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-graves-testimony",
+          "method": "dialogue"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-confides-proceed",
+          "text": "Thank Graves and follow the thread upward.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        { "type": "disposition", "target": "npc-graves", "delta": 2 }
+      ]
+    },
+    {
+      "id": "wc-act1-graves-talks",
+      "act": 1,
+      "narrative": "Graves is guarded but not unhelpful. He confirms that this is the third victim in as many weeks, all found with the same cipher note and the same carved symbol. 'The Yard is calling it a lunatic,' he says, 'but lunatics don't use the same code three times running.' He will say no more, but the admission is enough.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-talks-proceed",
+          "text": "Enough to work with. Press on.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act1-graves-clams",
+      "act": 1,
+      "narrative": "Graves's expression closes like a shutter. 'I've told you everything relevant,' he says, in a tone that makes clear he has told you nothing at all. He turns back to his constables, and you are left with the fog and the gaslight and the uneasy sense that the Inspector knows considerably more than he is willing to share.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-clams-proceed",
+          "text": "Graves is a dead end for now. Look elsewhere.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        { "type": "suspicion", "target": "npc-graves", "delta": 1 }
+      ]
+    },
+    {
+      "id": "wc-act1-graves-hostile",
+      "act": 1,
+      "narrative": "You push too hard. Graves's eyes go cold. 'I don't know who sent for you,' he says, 'but this is a police matter, and I'll thank you to stay out of it.' He signals to a constable, and you are escorted back behind the cordon. The Inspector watches you go with an expression that is not quite anger — it is fear.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-hostile-proceed",
+          "text": "Graves is hostile. You will have to work around him.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        { "type": "disposition", "target": "npc-graves", "delta": -2 },
+        { "type": "suspicion", "target": "npc-graves", "delta": 2 },
+        { "type": "composure", "delta": -1 }
+      ]
+    },
+    {
+      "id": "wc-act1-scene-full",
+      "act": 1,
+      "narrative": "Your eye catches everything. The cobblestone carving is fresh — the chisel marks still bright. The victim's boots are caked with a distinctive pale clay found only near the Dorset Street tanneries. A scrap of paper caught beneath a drain cover bears a partial address: '...ott, Dorset St.' And the calling card — Professor Vane's — is placed too deliberately, too visibly. It is meant to be found. It is a misdirection.",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-cobblestone-symbol",
+          "method": "exploration"
+        },
+        {
+          "clueId": "wc-clue-red-herring-occultist",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-scene-full-proceed",
+          "text": "The scene has given up its secrets. Follow the trail.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act1-scene-partial",
+      "act": 1,
+      "narrative": "You find the cobblestone carving — a glyph that matches the final symbol on the cipher note precisely. The constables have already disturbed much of the scene, but this detail survived their boots. Whatever the cipher means, the carving is its signature: someone wanted this found.",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-cobblestone-symbol",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-scene-partial-proceed",
+          "text": "The carving is a start. Move on.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act1-scene-nothing",
+      "act": 1,
+      "narrative": "The constables have done their work too thoroughly. By the time you reach the scene's edges, boots have smeared the cobblestones and a well-meaning sergeant has swept the gutter clean. Whatever was here is gone. You are left with the cipher note and the fog, and the nagging sense that you have missed something important.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-scene-nothing-proceed",
+          "text": "Nothing more to be gained here. Move on.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        { "type": "composure", "delta": -1 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "npcs": [
+    {
+      "id": "npc-wren",
+      "name": "Wren",
+      "faction": "Lamplighters",
+      "disposition": 3,
+      "suspicion": 0,
+      "memoryFlags": {},
+      "isAlive": true,
+      "isAccessible": true
+    }
+  ]
+}
