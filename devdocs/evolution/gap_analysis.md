@@ -165,7 +165,7 @@ These are ordered by effort (smallest first) and can each be a single PR.
 | 10 | ~~Extract `computeChoiceResult` pure function~~ | ✅ DONE | `narrativeEngine.ts` | — |
 | 11 | ~~Create audio subscription (extract SFX from slices)~~ | ✅ DONE | `audioSubscription.ts` + 3 slices | — |
 | 12 | ~~Add case completion screen~~ | ✅ DONE | `CaseCompletion/` + `App.tsx` | — |
-| 13 | Encounter UI component | ~150–200 lines | New component | Med |
+| 13 | ~~Encounter UI component~~ | ✅ DONE | `EncounterPanel/` + act3.json | — |
 
 Items 1–3 fix broken features. Items 4–8 are cleanup. Items 9–13 are new features.
 

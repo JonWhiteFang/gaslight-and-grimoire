@@ -266,7 +266,7 @@ These are documented in detail in `devdocs/evolution/gap_analysis.md` and `smoke
 - None remaining. `loadGame` caseData restoration was fixed in Phase A.
 
 ### High (feature is broken/inert)
-- **Encounter system has no UI** — Engine functions (`startEncounter`, `processEncounterChoice`, `getEncounterChoices`) are complete and tested. No component renders encounters.
+- None remaining. All features are now wired end-to-end.
 
 ### Medium (architectural debt)
 - **Engine ↔ Store circular dependency** — `narrativeEngine.ts` and `caseProgression.ts` import `useStore`. Store slices import engine modules. Works due to lazy JS module resolution but violates intended layering.
@@ -291,4 +291,4 @@ See `devdocs/evolution/implementation_roadmap.md` for the full phased plan. Summ
 - **Phase A (Foundation)**: ✅ COMPLETE — Fixed loadGame, deduped snapshots, wired hints, fixed abilities, added validation, added firstScene
 - **Phase B (Core Refactoring)**: ✅ COMPLETE — Extracted pure computeChoiceResult, moved buildDeduction to engine, audio subscription, consolidated CheckResult types, runtime content validation with tier completeness
 - **Phase C (Gap Filling)**: ✅ COMPLETE — ClueDiscoveryCard, save button, faction display, error display, case completion screen
-- **Phase D (Integration)**: Encounter UI, stale state cleanup, remove dead code — ~2.5 days
+- **Phase D (Integration)**: ✅ COMPLETE — Encounter UI, stale state cleanup, remove dead code

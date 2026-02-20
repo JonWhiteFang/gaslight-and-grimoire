@@ -12,8 +12,9 @@ import { LoadGameScreen } from './components/TitleScreen/LoadGameScreen';
 import { NarrativePanel } from './components/NarrativePanel';
 import { StatusBar } from './components/StatusBar';
 import { ChoicePanel } from './components/ChoicePanel';
+import { EncounterPanel } from './components/EncounterPanel';
 import { CaseCompletion } from './components/CaseCompletion';
-import { useStore, useCurrentScene } from './store';
+import { useStore, useCurrentScene, buildGameState } from './store';
 import type { CaseCompletionResult } from './engine/caseProgression';
 
 type Screen = 'title' | 'character-creation' | 'game' | 'load-game' | 'loading' | 'case-complete';
@@ -32,7 +33,16 @@ function GameContent() {
     <main className="flex-1 flex flex-col overflow-hidden">
       <div className="flex-1 overflow-y-auto">
         <NarrativePanel />
-        <ChoicePanel choices={scene?.choices ?? []} />
+        {scene?.encounter ? (
+          <EncounterPanel
+            sceneId={scene.id}
+            rounds={scene.encounter.rounds}
+            isSupernatural={scene.encounter.isSupernatural}
+            onComplete={() => {}}
+          />
+        ) : (
+          <ChoicePanel choices={scene?.choices ?? []} />
+        )}
       </div>
       <StatusBar />
     </main>

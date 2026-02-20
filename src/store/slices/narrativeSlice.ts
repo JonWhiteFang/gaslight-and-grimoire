@@ -20,7 +20,6 @@ export interface NarrativeSlice {
   caseData: CaseData | null;
   goToScene: (sceneId: string) => void;
   setCheckResult: (result: CheckResult | null) => void;
-  startNewCase: (caseId: string) => void;
   loadAndStartCase: (caseId: string) => Promise<void>;
   completeCase: (caseId: string) => CaseCompletionResult;
 }
@@ -53,19 +52,6 @@ export const createNarrativeSlice: StateCreator<
       state.lastCheckResult = result;
     }),
 
-  startNewCase: (caseId) =>
-    set((state) => {
-      state.currentCase = caseId;
-      state.sceneHistory = [];
-      // Reset ability for the new case
-      state.investigator.abilityUsed = false;
-      // Clear ability flags from world slice
-      delete state.flags['ability-auto-succeed-reason'];
-      delete state.flags['ability-auto-succeed-vigor'];
-      delete state.flags['ability-auto-succeed-influence'];
-      delete state.flags['ability-veil-sight-active'];
-    }),
-
   /**
    * Loads case JSON, populates clues/NPCs, and navigates to the first scene.
    */
@@ -89,6 +75,12 @@ export const createNarrativeSlice: StateCreator<
       delete state.flags['ability-auto-succeed-vigor'];
       delete state.flags['ability-auto-succeed-influence'];
       delete state.flags['ability-veil-sight-active'];
+
+      // Clear stale state from previous case
+      state.clues = {};
+      state.npcs = {};
+      state.deductions = {};
+      state.lastCheckResult = null;
 
       // Populate clues and NPCs from loaded case data
       for (const [id, clue] of Object.entries(data.clues)) {

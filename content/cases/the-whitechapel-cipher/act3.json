@@ -34,9 +34,124 @@
             "failure": "wc-act3-ending-force",
             "fumble": "wc-act3-ending-force"
           }
+        },
+        {
+          "id": "wc-choice-descend-deeper",
+          "text": "There is a passage behind the shelves. The symbols on the wall are glowing faintly. Follow them.",
+          "requiresClue": "wc-clue-hermetic-primer",
+          "outcomes": {
+            "critical": "wc-act3-cellar-encounter",
+            "success": "wc-act3-cellar-encounter",
+            "partial": "wc-act3-cellar-encounter",
+            "failure": "wc-act3-cellar-encounter",
+            "fumble": "wc-act3-cellar-encounter"
+          }
         }
       ],
       "onEnter": []
+    },
+    {
+      "id": "wc-act3-cellar-encounter",
+      "act": 3,
+      "narrative": "The passage opens into a vaulted chamber beneath the printshop. The air is thick with the smell of old incense and something else — something that prickles at the edge of perception. The symbols carved into the walls are not merely decorative. They pulse with a cold, grey light, and the shadows between them move with a purpose that has nothing to do with the guttering lamp in your hand. Something is here. Something that was summoned and never properly dismissed.",
+      "ambientAudio": "ambient-cellar",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        { "type": "composure", "delta": -1 }
+      ],
+      "encounter": {
+        "isSupernatural": true,
+        "rounds": [
+          {
+            "roundNumber": 1,
+            "isSupernatural": true,
+            "choices": [
+              {
+                "id": "wc-enc-ward-lore",
+                "text": "Recite the Grey Dawn's dismissal ward — the primer described the counter-sigil.",
+                "faculty": "lore",
+                "difficulty": 13,
+                "advantageIf": ["wc-clue-hermetic-primer"],
+                "outcomes": {
+                  "critical": "wc-act3-ending-negotiate",
+                  "success": "wc-act3-ending-negotiate",
+                  "partial": "wc-act3-ending-negotiate",
+                  "failure": "wc-act3-ending-negotiate",
+                  "fumble": "wc-act3-ending-negotiate"
+                },
+                "encounterDamage": {
+                  "composureDelta": -2,
+                  "vitalityDelta": -1
+                }
+              },
+              {
+                "id": "wc-enc-nerve-hold",
+                "text": "Stand your ground. Do not look away. Do not flinch.",
+                "faculty": "nerve",
+                "difficulty": 14,
+                "outcomes": {
+                  "critical": "wc-act3-ending-force",
+                  "success": "wc-act3-ending-force",
+                  "partial": "wc-act3-ending-force",
+                  "failure": "wc-act3-ending-force",
+                  "fumble": "wc-act3-ending-force"
+                },
+                "encounterDamage": {
+                  "composureDelta": -3
+                }
+              },
+              {
+                "id": "wc-enc-escape-r1",
+                "text": "Retreat back through the passage. This is beyond your remit.",
+                "isEscapePath": true,
+                "outcomes": {
+                  "critical": "wc-act3-the-reckoning",
+                  "success": "wc-act3-the-reckoning",
+                  "partial": "wc-act3-the-reckoning",
+                  "failure": "wc-act3-the-reckoning",
+                  "fumble": "wc-act3-the-reckoning"
+                }
+              }
+            ]
+          },
+          {
+            "roundNumber": 2,
+            "isSupernatural": true,
+            "choices": [
+              {
+                "id": "wc-enc-perception-find",
+                "text": "Search for the binding circle's anchor point — there must be a physical focus.",
+                "faculty": "perception",
+                "difficulty": 12,
+                "outcomes": {
+                  "critical": "wc-act3-ending-negotiate",
+                  "success": "wc-act3-ending-negotiate",
+                  "partial": "wc-act3-ending-negotiate",
+                  "failure": "wc-act3-ending-force",
+                  "fumble": "wc-act3-ending-force"
+                },
+                "encounterDamage": {
+                  "composureDelta": -1,
+                  "vitalityDelta": -1
+                }
+              },
+              {
+                "id": "wc-enc-escape-r2",
+                "text": "Flee. Whatever this is, it is not worth your life.",
+                "isEscapePath": true,
+                "outcomes": {
+                  "critical": "wc-act3-the-reckoning",
+                  "success": "wc-act3-the-reckoning",
+                  "partial": "wc-act3-the-reckoning",
+                  "failure": "wc-act3-the-reckoning",
+                  "fumble": "wc-act3-the-reckoning"
+                }
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "wc-act3-ending-force",

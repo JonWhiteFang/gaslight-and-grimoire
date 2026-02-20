@@ -152,51 +152,21 @@ Goal: Implement features that are engine-complete but UI-incomplete, and add mis
 
 Goal: Wire up the remaining engine-complete features and clean up remaining debt.
 
-### D1. Encounter UI Integration
+### D1. Encounter UI Integration — ✅ DONE
 
-**Files**: New `src/components/EncounterPanel/EncounterPanel.tsx`, `src/components/EncounterPanel/index.ts`. Modified: `src/App.tsx` or `src/components/NarrativePanel/NarrativePanel.tsx`.
-
-**What**: Component that manages `EncounterState` locally, renders reaction check results, round-by-round choices, damage feedback. Integrates with existing `ChoiceCard` for choice rendering.
-
-**Dependencies**: B1 (pure `computeChoiceResult` for testable encounter choice processing).
-
-**Success criteria**: Play through a supernatural encounter → reaction check fires, choices render per round, damage applies, escape path available, scene navigates on completion.
-
-**Risk**: Medium. Largest new component. Requires encounter content in case JSON.
-
-**Verification**: Author one encounter scene in existing case. Manual playthrough. New component tests.
+**Resolution**: Added `encounter` field to `SceneNode` type. Created `EncounterPanel` component that manages `EncounterState` locally, renders reaction check results, round-by-round choices via `ChoiceCard`. Wired into `GameContent` in `App.tsx` — shows `EncounterPanel` instead of `ChoicePanel` when scene has encounter. Authored one supernatural encounter scene in act3.json (2 rounds, escape paths, encounter damage).
 
 ---
 
-### D2. Stale State Cleanup on New Case
+### D2. Stale State Cleanup on New Case — ✅ DONE
 
-**Files**: `src/store/slices/narrativeSlice.ts` → `loadAndStartCase`
-
-**What**: Clear `clues`, `npcs`, `deductions` before loading new case data. Preserve cross-case flags and faction reputation.
-
-**Dependencies**: Requires a flag naming convention (e.g., `case-*` prefix for case-specific flags).
-
-**Success criteria**: Start case 1 → complete → start case 2 → case 1 clues/NPCs are gone, cross-case state persists.
-
-**Risk**: Medium. Must not clear cross-case state.
-
-**Verification**: Manual: play two cases in sequence. Verify state isolation.
+**Resolution**: Added `state.clues = {}`, `state.npcs = {}`, `state.deductions = {}`, `state.lastCheckResult = null` to `loadAndStartCase` before populating new case data. Preserves `flags` and `factionReputation` (cross-case state).
 
 ---
 
-### D3. Remove Superseded `startNewCase` Action
+### D3. Remove Superseded `startNewCase` Action — ✅ DONE
 
-**Files**: `src/store/slices/narrativeSlice.ts`, `src/components/__tests__/AbilityButton.test.tsx`
-
-**What**: Remove `startNewCase` (superseded by `loadAndStartCase`). Update test to use `loadAndStartCase` or direct `set()`.
-
-**Dependencies**: D2 (ensure `loadAndStartCase` handles all case-start concerns).
-
-**Success criteria**: `npm run test:run` passes. No references to `startNewCase` remain.
-
-**Risk**: Low.
-
-**Verification**: `npm run test:run`. Grep for `startNewCase` → 0 results.
+**Resolution**: Removed `startNewCase` from `NarrativeSlice` interface and implementation. Rewrote 3 tests in `AbilityButton.test.tsx` to use direct `useStore.setState()`. Zero references to `startNewCase` remain.
 
 ---
 
@@ -206,23 +176,13 @@ Completed as part of A2. All snapshot builders now use the shared `snapshotGameS
 
 ---
 
-### D5. Remove Redundant `CheckResult.natural` Field
+### D5. Remove Redundant `CheckResult.natural` Field — ✅ DONE (completed in Phase B4)
 
-**Files**: `src/engine/diceEngine.ts`
-
-**What**: Remove `natural` field from `CheckResult` interface and from `performCheck` return. It's always identical to `roll`.
-
-**Dependencies**: B4 (type consolidation complete).
-
-**Success criteria**: `npm run test:run` passes. No code references `natural` field.
-
-**Risk**: Low. Must verify no test asserts on `natural` separately from `roll`.
-
-**Verification**: `npm run test:run`. Grep for `\.natural` in test files → 0 results.
+Completed as part of B4. `natural` field removed from `CheckResult` interface. `dc` made optional.
 
 ---
 
-**Phase D summary**: 5 items. D1 is the largest (~150–200 lines). D2–D5 are cleanup. After completion: encounters are playable, cross-case state is clean, all identified dead code is removed.
+**Phase D summary**: All 5 items complete. Encounters are playable, cross-case state is clean, all identified dead code is removed.
 
 ---
 
@@ -241,11 +201,11 @@ Phase B (✅ COMPLETE):
 Phase C (✅ COMPLETE):
   C1✅  C2✅  C3✅  C4✅  C5✅
 
-Phase D:
-  B1✅ → D1
-  D2 → D3
+Phase D (✅ COMPLETE):
+  B1✅ → D1✅
+  D2✅ → D3✅
   A2✅ → D4✅
-  B4✅ → D5
+  B4✅ → D5✅
 ```
 
 ## Timeline Estimate

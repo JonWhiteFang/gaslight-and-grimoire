@@ -145,6 +145,7 @@ export interface SceneNode {
   archetypeExclusive?: Archetype;
   variantOf?: string;
   variantCondition?: Condition;
+  encounter?: { rounds: EncounterRound[]; isSupernatural: boolean };
 }
 
 export interface Choice {

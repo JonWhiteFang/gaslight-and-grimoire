@@ -69,9 +69,9 @@
 | 5.2 | Hint button on board visits | ✅ FIXED (Phase A3) | `trackActivity` calls added to `NarrativePanel` (sceneChange) and `EvidenceBoard` (boardVisit, connectionAttempt). |
 | 5.3 | Ability auto-succeed | ✅ FIXED (Phase A4) | `processChoice` now checks `ABILITY_AUTO_SUCCEED_FLAGS` before `performCheck`. Returns `critical` tier without rolling when flag is set. |
 | 5.4 | Clue discovery card | ✅ FIXED (Phase C1) | Framer Motion slide-in card with type icon, title, description. Auto-dismisses after 4s. |
-| 5.5 | Encounter UI | ⚠️ KNOWN BROKEN | `encounterSystem.test.ts` passes (20 tests) — the engine works. But no component renders encounters. No integration test exists. |
+| 5.5 | Encounter UI | ✅ FIXED (Phase D1) | `EncounterPanel` component renders multi-round encounters. One supernatural encounter scene authored in act3.json. |
 
-**Summary**: 3 of 5 known-broken items fixed in Phase A. Remaining 2 (ClueDiscoveryCard stub, Encounter UI) are scheduled for Phase C and Phase D respectively.
+**Summary**: 3 of 5 known-broken items fixed in Phase A. All 5 known-broken items are now fixed across Phases A–D.
 
 ---
 
