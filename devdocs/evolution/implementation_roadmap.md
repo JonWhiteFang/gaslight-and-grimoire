@@ -110,91 +110,41 @@ Goal: Separate pure logic from side effects. Establish patterns that make future
 
 ---
 
-## Phase C: Gap Filling (Add Missing Features)
+## Phase C: Gap Filling (Add Missing Features) — ✅ COMPLETE
 
 Goal: Implement features that are engine-complete but UI-incomplete, and add missing UI elements.
 
-### C1. Implement ClueDiscoveryCard
+### C1. Implement ClueDiscoveryCard — ✅ DONE
 
-**Files**: `src/components/NarrativePanel/ClueDiscoveryCard.tsx`, `src/components/NarrativePanel/NarrativePanel.tsx`
-
-**What**: Replace stub with Framer Motion slide-in card. Wire `NarrativePanel` to pass discovered clue + visibility flag. Auto-dismiss after 4 seconds.
-
-**Dependencies**: None.
-
-**Success criteria**: Navigate to scene with automatic clues → card slides in with type icon, title, description. Auto-dismisses. Respects `reducedMotion`.
-
-**Risk**: Low.
-
-**Verification**: Manual test. `npm run test:run`.
+**Resolution**: Replaced stub with Framer Motion slide-in card showing type icon, title, description. NarrativePanel tracks last auto-discovered clue and shows card with 4-second auto-dismiss. Respects reducedMotion.
 
 ---
 
-### C2. Add Manual Save Button
+### C2. Add Manual Save Button — ✅ DONE
 
-**Files**: `src/components/HeaderBar/HeaderBar.tsx`
-
-**What**: Add 💾 button that calls `saveGame()`.
-
-**Dependencies**: A1 (load must work for saves to be useful).
-
-**Success criteria**: Click save → save appears in load game list.
-
-**Risk**: Trivial.
-
-**Verification**: Manual: save, then load from list.
+**Resolution**: Added 💾 button to HeaderBar with `onSaveGame` prop. Wired in App.tsx to call `saveGame()`.
 
 ---
 
-### C3. Add Faction Reputation to Case Journal
+### C3. Add Faction Reputation to Case Journal — ✅ DONE
 
-**Files**: `src/components/CaseJournal/CaseJournal.tsx`
-
-**What**: New "Faction Standing" section with narrative labels for reputation values.
-
-**Dependencies**: None.
-
-**Success criteria**: Journal shows faction names with labels (Allied/Favorable/Neutral/Strained/Hostile).
-
-**Risk**: Trivial.
-
-**Verification**: Manual: play scenes that affect faction rep → open journal → verify.
+**Resolution**: Added "Faction Standing" section to CaseJournal with narrative labels (Allied/Favorable/Neutral/Strained/Hostile) based on reputation values.
 
 ---
 
-### C4. Display Load Error on Title Screen
+### C4. Display Load Error on Title Screen — ✅ DONE
 
-**Files**: `src/components/TitleScreen/TitleScreen.tsx`, `src/App.tsx`
-
-**What**: Pass `loadError` as a prop to `TitleScreen`. Render as a dismissible banner.
-
-**Dependencies**: None.
-
-**Success criteria**: If case loading fails, title screen shows error message.
-
-**Risk**: Trivial.
-
-**Verification**: Temporarily break a content URL → verify error banner appears.
+**Resolution**: Added `loadError` and `onDismissError` props to TitleScreen. Renders dismissible red banner when error is present. Wired in App.tsx.
 
 ---
 
-### C5. Case Completion Screen
+### C5. Case Completion Screen — ✅ DONE
 
-**Files**: New `src/components/CaseCompletion/CaseCompletion.tsx`, `src/components/CaseCompletion/index.ts`. Modified: `src/App.tsx`.
-
-**What**: New screen showing faculty bonus granted and vignette unlocked. "Continue" button returns to title.
-
-**Dependencies**: None (engine `completeCase` already works).
-
-**Success criteria**: Trigger case completion → see results screen with correct data.
-
-**Risk**: Low.
-
-**Verification**: Manual: reach case end → verify completion screen.
+**Resolution**: Created `CaseCompletion` component showing faculty bonus and vignette unlock. Added `'case-complete'` screen state to App.tsx with `handleCompleteCase` callback. Trigger will be wired in Phase D when content supports terminal scenes.
 
 ---
 
-**Phase C summary**: 5 items. All independent. ~150 lines total. After completion: clue discovery has visual feedback, manual save works, faction reputation is visible, load errors are displayed, case completion has a screen.
+**Phase C summary**: All 5 items complete. Clue discovery has visual feedback, manual save works, faction reputation is visible, load errors are displayed, case completion has a screen.
 
 ---
 
@@ -288,8 +238,8 @@ Phase B (✅ COMPLETE):
   B2✅ (independent)
   B3✅ (independent)
 
-Phase C (all independent, A1✅ before C2):
-  C1  C2  C3  C4  C5
+Phase C (✅ COMPLETE):
+  C1✅  C2✅  C3✅  C4✅  C5✅
 
 Phase D:
   B1✅ → D1

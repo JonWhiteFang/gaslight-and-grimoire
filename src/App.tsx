@@ -12,9 +12,11 @@ import { LoadGameScreen } from './components/TitleScreen/LoadGameScreen';
 import { NarrativePanel } from './components/NarrativePanel';
 import { StatusBar } from './components/StatusBar';
 import { ChoicePanel } from './components/ChoicePanel';
+import { CaseCompletion } from './components/CaseCompletion';
 import { useStore, useCurrentScene } from './store';
+import type { CaseCompletionResult } from './engine/caseProgression';
 
-type Screen = 'title' | 'character-creation' | 'game' | 'load-game' | 'loading';
+type Screen = 'title' | 'character-creation' | 'game' | 'load-game' | 'loading' | 'case-complete';
 
 // Maps each archetype to the world flag it sets when its ability is activated
 const ABILITY_FLAGS: Record<string, string> = {
@@ -50,7 +52,11 @@ export default function App() {
   const setFlag = useStore((s) => s.setFlag);
   const loadGame = useStore((s) => s.loadGame);
   const loadAndStartCase = useStore((s) => s.loadAndStartCase);
+  const saveGame = useStore((s) => s.saveGame);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [completionResult, setCompletionResult] = useState<CaseCompletionResult | null>(null);
+  const completeCase = useStore((s) => s.completeCase);
+  const currentCase = useStore((s) => s.currentCase);
 
   const handleActivateAbility = useCallback(() => {
     if (abilityUsed) return;
@@ -79,6 +85,13 @@ export default function App() {
     }
   }, [loadAndStartCase]);
 
+  const handleCompleteCase = useCallback(() => {
+    if (!currentCase) return;
+    const result = completeCase(currentCase);
+    setCompletionResult(result);
+    setScreen('case-complete');
+  }, [currentCase, completeCase]);
+
   if (screen === 'title') {
     return (
       <AccessibilityProvider>
@@ -86,6 +99,8 @@ export default function App() {
           onNewGame={() => setScreen('character-creation')}
           onLoadGame={() => setScreen('load-game')}
           onSettings={() => setIsSettingsOpen(true)}
+          loadError={loadError}
+          onDismissError={() => setLoadError(null)}
         />
         {isSettingsOpen && (
           <SettingsPanel onClose={() => setIsSettingsOpen(false)} />
@@ -115,6 +130,21 @@ export default function App() {
     );
   }
 
+  if (screen === 'case-complete' && completionResult) {
+    return (
+      <AccessibilityProvider>
+        <CaseCompletion
+          facultyBonusGranted={completionResult.facultyBonusGranted}
+          vignetteUnlocked={completionResult.vignetteUnlocked}
+          onContinue={() => {
+            setCompletionResult(null);
+            setScreen('title');
+          }}
+        />
+      </AccessibilityProvider>
+    );
+  }
+
   if (screen === 'character-creation') {
     return (
       <AccessibilityProvider>
@@ -132,6 +162,7 @@ export default function App() {
           onOpenNPCGallery={() => setIsGalleryOpen(true)}
           onActivateAbility={handleActivateAbility}
           onOpenSettings={() => setIsSettingsOpen(true)}
+          onSaveGame={saveGame}
         />
         <AmbientAudio />
 

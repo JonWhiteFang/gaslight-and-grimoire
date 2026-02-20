@@ -16,6 +16,7 @@ import { SceneIllustration } from './SceneIllustration';
 import { DiceRollOverlay } from './DiceRollOverlay';
 import { OutcomeBanner } from './OutcomeBanner';
 import { ClueDiscoveryCard } from './ClueDiscoveryCard';
+import type { Clue } from '../../types';
 
 export function NarrativePanel() {
   const currentSceneId = useStore((s) => s.currentScene);
@@ -27,6 +28,10 @@ export function NarrativePanel() {
 
   const scene = useCurrentScene();
   const prevSceneRef = useRef('');
+
+  // Clue discovery card state
+  const [discoveredClue, setDiscoveredClue] = useState<Clue | null>(null);
+  const [clueCardVisible, setClueCardVisible] = useState(false);
 
   // Show the dice overlay while a check result is present
   const [diceVisible, setDiceVisible] = useState(false);
@@ -55,10 +60,21 @@ export function NarrativePanel() {
 
     // Auto-discover clues with method 'automatic'
     const gameState = buildGameState(useStore.getState());
+    let lastDiscoveredId: string | null = null;
     for (const discovery of scene.cluesAvailable) {
       if (discovery.method === 'automatic' && canDiscoverClue(discovery, gameState)) {
         discoverClue(discovery.clueId);
+        lastDiscoveredId = discovery.clueId;
       }
+    }
+
+    // Show discovery card for the last auto-discovered clue
+    if (lastDiscoveredId) {
+      const freshClues = useStore.getState().clues;
+      setDiscoveredClue(freshClues[lastDiscoveredId] ?? null);
+      setClueCardVisible(true);
+      const timer = setTimeout(() => setClueCardVisible(false), 4000);
+      return () => clearTimeout(timer);
     }
   }, [currentSceneId, scene, discoverClue]);
 
@@ -100,8 +116,13 @@ export function NarrativePanel() {
         reducedMotion={reducedMotion}
       />
 
-      {/* Clue discovery notification — stub, fully implemented in Task 10 */}
-      <ClueDiscoveryCard />
+      {/* Clue discovery notification */}
+      <ClueDiscoveryCard
+        clue={discoveredClue ?? undefined}
+        visible={clueCardVisible}
+        reducedMotion={reducedMotion}
+        onDismiss={() => setClueCardVisible(false)}
+      />
     </section>
   );
 }

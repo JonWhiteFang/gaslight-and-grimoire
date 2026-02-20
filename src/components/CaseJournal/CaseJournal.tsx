@@ -16,6 +16,14 @@ const CLUE_TYPE_ICONS: Record<string, string> = {
   redHerring: '🐟',
 };
 
+function reputationLabel(value: number): string {
+  if (value >= 5) return 'Allied';
+  if (value >= 2) return 'Favorable';
+  if (value >= -1) return 'Neutral';
+  if (value >= -4) return 'Strained';
+  return 'Hostile';
+}
+
 function formatFlag(flag: string): string {
   return flag.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
@@ -55,6 +63,7 @@ export function CaseJournal({ onClose }: CaseJournalProps) {
   const clues = useStore((s) => s.clues);
   const flags = useStore((s) => s.flags);
   const deductions = useStore((s) => s.deductions);
+  const factionReputation = useStore((s) => s.factionReputation);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -66,6 +75,8 @@ export function CaseJournal({ onClose }: CaseJournalProps) {
 
   const revealedClues = Object.values(clues).filter((c) => c.isRevealed);
   const deductionList = Object.values(deductions);
+  const factionEntries = Object.entries(factionReputation).filter(([, v]) => v !== 0);
+
   const storyFlags = Object.entries(flags)
     .filter(([key, value]) => value && isStoryFlag(key))
     .map(([key]) => key);
@@ -125,6 +136,17 @@ export function CaseJournal({ onClose }: CaseJournalProps) {
               {storyFlags.map((flag) => (
                 <li key={flag} className="text-sm text-stone-300">
                   • {formatFlag(flag)}
+                </li>
+              ))}
+            </ul>
+          </JournalSection>
+
+          <JournalSection title="Faction Standing" empty={factionEntries.length === 0}>
+            <ul className="space-y-1">
+              {factionEntries.map(([faction, rep]) => (
+                <li key={faction} className="text-sm text-stone-300 flex items-center justify-between">
+                  <span className="text-amber-300">{faction}</span>
+                  <span className="text-xs text-stone-400">{reputationLabel(rep)}</span>
                 </li>
               ))}
             </ul>

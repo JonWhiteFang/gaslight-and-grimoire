@@ -14,6 +14,7 @@ export interface HeaderBarProps {
   onOpenNPCGallery: () => void;
   onActivateAbility: () => void;
   onOpenSettings: () => void;
+  onSaveGame: () => void;
 }
 
 export function HeaderBar({
@@ -22,6 +23,7 @@ export function HeaderBar({
   onOpenNPCGallery,
   onActivateAbility,
   onOpenSettings,
+  onSaveGame,
 }: HeaderBarProps) {
   const currentCase = useStore((s) => s.currentCase);
   const clues = useStore((s) => s.clues);
@@ -112,6 +114,21 @@ export function HeaderBar({
           "
         >
           👥
+        </button>
+
+        {/* Save */}
+        <button
+          type="button"
+          aria-label="Save game"
+          onClick={onSaveGame}
+          className="
+            w-11 h-11 flex items-center justify-center
+            rounded-lg text-lg
+            text-amber-300 hover:text-white hover:bg-stone-800
+            transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400
+          "
+        >
+          💾
         </button>
 
         {/* Settings */}

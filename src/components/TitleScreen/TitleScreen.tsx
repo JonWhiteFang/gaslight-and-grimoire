@@ -5,9 +5,11 @@ export interface TitleScreenProps {
   onNewGame: () => void;
   onLoadGame: () => void;
   onSettings: () => void;
+  loadError?: string | null;
+  onDismissError?: () => void;
 }
 
-export function TitleScreen({ onNewGame, onLoadGame, onSettings }: TitleScreenProps) {
+export function TitleScreen({ onNewGame, onLoadGame, onSettings, loadError, onDismissError }: TitleScreenProps) {
   const [hasSaves, setHasSaves] = useState(false);
 
   useEffect(() => {
@@ -41,6 +43,16 @@ export function TitleScreen({ onNewGame, onLoadGame, onSettings }: TitleScreenPr
             A Victorian Mystery
           </p>
         </div>
+
+        {/* Load error banner */}
+        {loadError && (
+          <div role="alert" className="w-full bg-red-900/80 border border-red-700 rounded px-4 py-3 text-sm text-red-200 flex items-start gap-2">
+            <p className="flex-1">{loadError}</p>
+            {onDismissError && (
+              <button type="button" aria-label="Dismiss error" onClick={onDismissError} className="shrink-0 text-red-400 hover:text-red-200">✕</button>
+            )}
+          </div>
+        )}
 
         {/* Menu buttons */}
         <nav aria-label="Main menu" className="flex flex-col gap-3 w-full">

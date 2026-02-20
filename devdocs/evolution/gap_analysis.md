@@ -26,17 +26,9 @@ Ordered by impact on the playable experience.
 
 ---
 
-### 1.4 Clue Discovery Card (MEDIUM)
+### 1.4 ~~Clue Discovery Card~~ — ✅ FIXED (Phase C1)
 
-**Gap**: `ClueDiscoveryCard` is a stub ("Full implementation in Task 10"). Auto-discovered clues are added to the store but the player gets no visual notification.
-
-**Desired state**: Req 6.3 — slide-in card with type icon, title, summary, auto-dismiss after 4 seconds.
-
-**What's needed**: Wire `NarrativePanel` to pass the most recently discovered clue and a visibility flag to `ClueDiscoveryCard`. Implement the slide-in animation (Framer Motion) and auto-dismiss timer.
-
-**Effort**: ~30 lines across 2 files. Low risk.
-
-**Files**: `src/components/NarrativePanel/ClueDiscoveryCard.tsx`, `src/components/NarrativePanel/NarrativePanel.tsx`
+**Resolution**: Replaced stub with Framer Motion slide-in card. NarrativePanel tracks last auto-discovered clue, shows card with 4s auto-dismiss.
 
 ---
 
@@ -54,45 +46,21 @@ Ordered by impact on the playable experience.
 
 ---
 
-### 1.6 Manual Save Button (LOW)
+### 1.6 ~~Manual Save Button~~ — ✅ FIXED (Phase C2)
 
-**Gap**: `metaSlice.saveGame()` exists and works but no UI element triggers it.
-
-**Desired state**: Req 11.6 — manual save when auto-save is set to "manual".
-
-**What's needed**: A save button in `HeaderBar` or `SettingsPanel`.
-
-**Effort**: ~10 lines. Trivial risk.
-
-**Files**: `src/components/HeaderBar/HeaderBar.tsx` or `src/components/SettingsPanel/SettingsPanel.tsx`
+**Resolution**: Added 💾 button to HeaderBar.
 
 ---
 
-### 1.7 Case Completion Screen (LOW)
+### 1.7 ~~Case Completion Screen~~ — ✅ FIXED (Phase C5)
 
-**Gap**: `CaseProgression.completeCase()` returns `{ facultyBonusGranted, vignetteUnlocked }` but no UI renders these results.
-
-**Desired state**: Design doc §14.1 — after completing a case, show faculty advancement, new contacts, faction shifts, side case unlocks.
-
-**What's needed**: A new screen or overlay in `App.tsx` that renders completion results before returning to the title screen or starting the next case.
-
-**Effort**: New component (~50–100 lines), new screen state in `App.tsx`. Low risk.
-
-**Files**: New `src/components/CaseCompletion/`, `src/App.tsx`
+**Resolution**: Created CaseCompletion component and 'case-complete' screen state in App.tsx. Trigger to be wired in Phase D.
 
 ---
 
-### 1.8 Faction Reputation Display (LOW)
+### 1.8 ~~Faction Reputation Display~~ — ✅ FIXED (Phase C3)
 
-**Gap**: Faction reputation is tracked and used for vignette unlocks but never shown to the player.
-
-**Desired state**: Implied by Req 19 — players should understand their faction standing.
-
-**What's needed**: A faction reputation section in `CaseJournal` or a dedicated panel.
-
-**Effort**: ~20 lines added to `CaseJournal.tsx`. Trivial risk.
-
-**Files**: `src/components/CaseJournal/CaseJournal.tsx`
+**Resolution**: Added "Faction Standing" section to CaseJournal with narrative labels.
 
 ---
 
@@ -190,13 +158,13 @@ These are ordered by effort (smallest first) and can each be a single PR.
 | 3 | ~~Add ability flag check in `processChoice`~~ | ✅ DONE | `narrativeEngine.ts` | — |
 | 4 | ~~Deduplicate `snapshotGameState` → shared `buildGameState`~~ | ✅ DONE | `utils/gameState.ts` + 5 files | — |
 | 5 | ~~Move `buildDeduction` to engine layer~~ | ✅ DONE | `engine/buildDeduction.ts` | — |
-| 6 | Add manual save button | ~10 lines | `HeaderBar.tsx` | Trivial |
-| 7 | Add faction reputation to CaseJournal | ~20 lines | `CaseJournal.tsx` | Trivial |
+| 6 | ~~Add manual save button~~ | ✅ DONE | `HeaderBar.tsx` | — |
+| 7 | ~~Add faction reputation to CaseJournal~~ | ✅ DONE | `CaseJournal.tsx` | — |
 | 8 | ~~Add outcome tier completeness to validators~~ | ✅ DONE | `validateCase.mjs`, `narrativeEngine.ts` | — |
-| 9 | Implement ClueDiscoveryCard | ~30 lines | `ClueDiscoveryCard.tsx`, `NarrativePanel.tsx` | Low |
+| 9 | ~~Implement ClueDiscoveryCard~~ | ✅ DONE | `ClueDiscoveryCard.tsx`, `NarrativePanel.tsx` | — |
 | 10 | ~~Extract `computeChoiceResult` pure function~~ | ✅ DONE | `narrativeEngine.ts` | — |
 | 11 | ~~Create audio subscription (extract SFX from slices)~~ | ✅ DONE | `audioSubscription.ts` + 3 slices | — |
-| 12 | Add case completion screen | ~80 lines | New component + `App.tsx` | Low |
+| 12 | ~~Add case completion screen~~ | ✅ DONE | `CaseCompletion/` + `App.tsx` | — |
 | 13 | Encounter UI component | ~150–200 lines | New component | Med |
 
 Items 1–3 fix broken features. Items 4–8 are cleanup. Items 9–13 are new features.

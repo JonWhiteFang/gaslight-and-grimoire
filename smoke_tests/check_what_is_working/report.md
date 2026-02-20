@@ -68,7 +68,7 @@
 | 5.1 | Load game restores playable state | ✅ FIXED (Phase A1) | `metaSlice.loadGame` now calls `loadCase` to restore `caseData` after state restoration. |
 | 5.2 | Hint button on board visits | ✅ FIXED (Phase A3) | `trackActivity` calls added to `NarrativePanel` (sceneChange) and `EvidenceBoard` (boardVisit, connectionAttempt). |
 | 5.3 | Ability auto-succeed | ✅ FIXED (Phase A4) | `processChoice` now checks `ABILITY_AUTO_SUCCEED_FLAGS` before `performCheck`. Returns `critical` tier without rolling when flag is set. |
-| 5.4 | Clue discovery card | ⚠️ KNOWN BROKEN | `ClueDiscoveryCard` is a stub. `NarrativePanel` never passes props to it. No test covers the notification flow. |
+| 5.4 | Clue discovery card | ✅ FIXED (Phase C1) | Framer Motion slide-in card with type icon, title, description. Auto-dismisses after 4s. |
 | 5.5 | Encounter UI | ⚠️ KNOWN BROKEN | `encounterSystem.test.ts` passes (20 tests) — the engine works. But no component renders encounters. No integration test exists. |
 
 **Summary**: 3 of 5 known-broken items fixed in Phase A. Remaining 2 (ClueDiscoveryCard stub, Encounter UI) are scheduled for Phase C and Phase D respectively.
