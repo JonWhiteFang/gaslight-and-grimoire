@@ -26,7 +26,7 @@ export function NarrativePanel() {
   const discoverClue = useStore((s) => s.discoverClue);
 
   const scene = useCurrentScene();
-  const prevSceneRef = useRef(currentSceneId);
+  const prevSceneRef = useRef('');
 
   // Show the dice overlay while a check result is present
   const [diceVisible, setDiceVisible] = useState(false);
