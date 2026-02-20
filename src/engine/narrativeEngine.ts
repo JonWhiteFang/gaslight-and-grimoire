@@ -27,7 +27,7 @@ import type {
   VignetteMeta,
 } from '../types';
 import { useStore } from '../store';
-import { performCheck, rollD20 } from './diceEngine';
+import { performCheck, rollD20, resolveDC } from './diceEngine';
 
 // ─── Content Loading ──────────────────────────────────────────────────────────
 
@@ -368,15 +368,16 @@ export function processChoice(
   let total: number | undefined;
   let tier: ChoiceResult['tier'];
 
-  if (choice.faculty && choice.difficulty !== undefined) {
+  if (choice.faculty && (choice.difficulty !== undefined || choice.dynamicDifficulty)) {
     // Perform faculty check
+    const dc = resolveDC(choice, state.investigator);
     const hasAdvantage =
       choice.advantageIf?.some((clueId) => state.clues[clueId]?.isRevealed) ??
       false;
     const result = performCheck(
       choice.faculty,
       state.investigator,
-      choice.difficulty,
+      dc,
       hasAdvantage,
       false,
     );
@@ -407,9 +408,11 @@ export function processChoice(
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url);
+  const base = import.meta.env.BASE_URL ?? '/';
+  const fullUrl = `${base.replace(/\/$/, '')}${url}`;
+  const response = await fetch(fullUrl);
   if (!response.ok) {
-    throw new Error(`[NarrativeEngine] Failed to fetch "${url}": ${response.status} ${response.statusText}`);
+    throw new Error(`[NarrativeEngine] Failed to fetch "${fullUrl}": ${response.status} ${response.statusText}`);
   }
   return response.json() as Promise<T>;
 }

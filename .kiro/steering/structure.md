@@ -53,14 +53,14 @@ src/store/
   types.ts          # GameStore = intersection of all slice types
   slices/
     investigatorSlice.ts   # investigator: Investigator; initInvestigator, updateFaculty, adjustComposure, adjustVitality, useAbility
-    narrativeSlice.ts      # currentScene, currentCase, sceneHistory; goToScene
+    narrativeSlice.ts      # currentScene, currentCase, sceneHistory, caseData; goToScene, loadAndStartCase
     evidenceSlice.ts       # clues: Record<string,Clue>; deductions: Record<string,Deduction>; discoverClue, updateClueStatus, addDeduction
     npcSlice.ts            # npcs: Record<string,NPCState>; adjustDisposition, adjustSuspicion, setNpcMemoryFlag, removeNpc
     worldSlice.ts          # flags: Record<string,boolean>; factionReputation: Record<string,number>; setFlag, adjustReputation
     metaSlice.ts           # settings: GameSettings; saveGame, loadGame, updateSettings
 ```
 
-Always use the exported selector hooks (`useInvestigator`, `useClues`, etc.) rather than subscribing to the full store. For actions, use the corresponding action selectors (`useInvestigatorActions`, `useEvidenceActions`, etc.).
+Always use the exported selector hooks (`useInvestigator`, `useClues`, `useCaseData`, etc.) rather than subscribing to the full store. For actions, use the corresponding action selectors (`useInvestigatorActions`, `useEvidenceActions`, etc.). Use `useCurrentScene()` to get the resolved `SceneNode` for the current scene. Use `buildGameState(store)` to build a `GameState` snapshot for engine functions.
 
 ## Key Data Models
 

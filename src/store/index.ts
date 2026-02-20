@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import type { GameStore } from './types';
+import type { GameState, SceneNode } from '../types';
 import { createInvestigatorSlice } from './slices/investigatorSlice';
 import { createNarrativeSlice } from './slices/narrativeSlice';
 import { createEvidenceSlice } from './slices/evidenceSlice';
 import { createNpcSlice } from './slices/npcSlice';
 import { createWorldSlice } from './slices/worldSlice';
 import { createMetaSlice } from './slices/metaSlice';
+import { resolveScene } from '../engine/narrativeEngine';
 
 // ─── Root Store ───────────────────────────────────────────────────────────────
 
@@ -36,6 +38,7 @@ export const useNpcs = () => useStore((s) => s.npcs);
 export const useFlags = () => useStore((s) => s.flags);
 export const useFactionReputation = () => useStore((s) => s.factionReputation);
 export const useSettings = () => useStore((s) => s.settings);
+export const useCaseData = () => useStore((s) => s.caseData);
 
 // ─── Action selectors ─────────────────────────────────────────────────────────
 
@@ -50,7 +53,10 @@ export const useInvestigatorActions = () =>
   }));
 
 export const useNarrativeActions = () =>
-  useStore((s) => ({ goToScene: s.goToScene }));
+  useStore((s) => ({
+    goToScene: s.goToScene,
+    loadAndStartCase: s.loadAndStartCase,
+  }));
 
 export const useEvidenceActions = () =>
   useStore((s) => ({
@@ -79,3 +85,35 @@ export const useMetaActions = () =>
     saveGame: s.saveGame,
     loadGame: s.loadGame,
   }));
+
+// ─── Derived selectors ────────────────────────────────────────────────────────
+
+/** Builds a GameState snapshot from the store (for engine functions). */
+export function buildGameState(s: GameStore): GameState {
+  return {
+    investigator: s.investigator,
+    currentScene: s.currentScene,
+    currentCase: s.currentCase,
+    clues: s.clues,
+    deductions: s.deductions,
+    npcs: s.npcs,
+    flags: s.flags,
+    factionReputation: s.factionReputation,
+    sceneHistory: s.sceneHistory,
+    settings: s.settings,
+  };
+}
+
+/** Resolves the current SceneNode from loaded caseData, or null if unavailable. */
+export function useCurrentScene(): SceneNode | null {
+  const currentScene = useStore((s) => s.currentScene);
+  const caseData = useStore((s) => s.caseData);
+  const gameState = useStore(buildGameState);
+
+  if (!currentScene || !caseData) return null;
+  try {
+    return resolveScene(currentScene, gameState, caseData);
+  } catch {
+    return null;
+  }
+}

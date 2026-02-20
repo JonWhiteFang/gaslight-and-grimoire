@@ -9,9 +9,12 @@ import { SettingsPanel } from './components/SettingsPanel/SettingsPanel';
 import { AmbientAudio } from './components/AmbientAudio/AmbientAudio';
 import { TitleScreen } from './components/TitleScreen/TitleScreen';
 import { LoadGameScreen } from './components/TitleScreen/LoadGameScreen';
-import { useStore } from './store';
+import { NarrativePanel } from './components/NarrativePanel';
+import { StatusBar } from './components/StatusBar';
+import { ChoicePanel } from './components/ChoicePanel';
+import { useStore, useCurrentScene } from './store';
 
-type Screen = 'title' | 'character-creation' | 'game' | 'load-game';
+type Screen = 'title' | 'character-creation' | 'game' | 'load-game' | 'loading';
 
 // Maps each archetype to the world flag it sets when its ability is activated
 const ABILITY_FLAGS: Record<string, string> = {
@@ -20,6 +23,19 @@ const ABILITY_FLAGS: Record<string, string> = {
   operator: 'ability-auto-succeed-vigor',
   mesmerist: 'ability-auto-succeed-influence',
 };
+
+function GameContent() {
+  const scene = useCurrentScene();
+  return (
+    <main className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
+        <NarrativePanel />
+        <ChoicePanel choices={scene?.choices ?? []} />
+      </div>
+      <StatusBar />
+    </main>
+  );
+}
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('title');
@@ -33,6 +49,8 @@ export default function App() {
   const useAbility = useStore((s) => s.useAbility);
   const setFlag = useStore((s) => s.setFlag);
   const loadGame = useStore((s) => s.loadGame);
+  const loadAndStartCase = useStore((s) => s.loadAndStartCase);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const handleActivateAbility = useCallback(() => {
     if (abilityUsed) return;
@@ -48,6 +66,18 @@ export default function App() {
     },
     [loadGame],
   );
+
+  const handleStartCase = useCallback(async () => {
+    setScreen('loading');
+    setLoadError(null);
+    try {
+      await loadAndStartCase('the-whitechapel-cipher');
+      setScreen('game');
+    } catch (e) {
+      setLoadError(e instanceof Error ? e.message : 'Failed to load case');
+      setScreen('title');
+    }
+  }, [loadAndStartCase]);
 
   if (screen === 'title') {
     return (
@@ -75,10 +105,20 @@ export default function App() {
     );
   }
 
+  if (screen === 'loading') {
+    return (
+      <AccessibilityProvider>
+        <div className="min-h-screen bg-gaslight-ink text-gaslight-fog font-serif flex items-center justify-center">
+          <p className="text-gaslight-amber text-xl animate-pulse">Loading case…</p>
+        </div>
+      </AccessibilityProvider>
+    );
+  }
+
   if (screen === 'character-creation') {
     return (
       <AccessibilityProvider>
-        <CharacterCreation onComplete={() => setScreen('game')} />
+        <CharacterCreation onComplete={handleStartCase} />
       </AccessibilityProvider>
     );
   }
@@ -95,9 +135,7 @@ export default function App() {
         />
         <AmbientAudio />
 
-        <main className="flex-1 flex items-center justify-center">
-          <h1 className="text-4xl text-gaslight-amber">Gaslight &amp; Grimoire</h1>
-        </main>
+        <GameContent />
 
         {/* Overlays */}
         {isEvidenceBoardOpen && (

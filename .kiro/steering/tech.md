@@ -21,7 +21,9 @@ inclusion: always
 ## State Management Rules
 - Single `useStore` (Zustand + Immer) composed from six domain slices
 - Always use exported selector hooks — never subscribe to the full store directly:
-  - `useInvestigator`, `useNarrative`, `useClues`, `useDeductions`, `useNpcs`, `useFlags`, `useFactionReputation`, `useSettings`
+  - `useInvestigator`, `useNarrative`, `useClues`, `useDeductions`, `useNpcs`, `useFlags`, `useFactionReputation`, `useSettings`, `useCaseData`
+- Use `useCurrentScene()` to get the resolved `SceneNode` for the current scene (handles variant resolution)
+- Use `buildGameState(store)` to build a `GameState` snapshot for engine functions
 - Always use action selector hooks for mutations:
   - `useInvestigatorActions`, `useNarrativeActions`, `useEvidenceActions`, `useNpcActions`, `useWorldActions`, `useMetaActions`
 - State shape is flat and normalised: `Record<string, T>` keyed by id — no deeply nested objects or arrays
@@ -31,7 +33,7 @@ inclusion: always
 | Slice | Key state | Key actions |
 |---|---|---|
 | `investigatorSlice` | `investigator` | `initInvestigator`, `updateFaculty`, `adjustComposure`, `adjustVitality`, `useAbility`, `resetAbility` |
-| `narrativeSlice` | `currentScene`, `currentCase`, `sceneHistory` | `goToScene` |
+| `narrativeSlice` | `currentScene`, `currentCase`, `sceneHistory`, `caseData` | `goToScene`, `loadAndStartCase` |
 | `evidenceSlice` | `clues`, `deductions` | `discoverClue`, `updateClueStatus`, `addDeduction` |
 | `npcSlice` | `npcs` | `adjustDisposition`, `adjustSuspicion`, `setNpcMemoryFlag`, `removeNpc` |
 | `worldSlice` | `flags`, `factionReputation` | `setFlag`, `adjustReputation` |

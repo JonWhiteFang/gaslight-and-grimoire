@@ -1,8 +1,9 @@
 import type { StateCreator } from 'zustand';
 import type { GameStore } from '../types';
-import type { OutcomeTier } from '../../types';
+import type { CaseData, OutcomeTier } from '../../types';
 import { AudioManager } from '../../engine/audioManager';
 import { CaseProgression, type CaseCompletionResult } from '../../engine/caseProgression';
+import { loadCase } from '../../engine/narrativeEngine';
 
 export interface CheckResult {
   roll: number;
@@ -16,9 +17,11 @@ export interface NarrativeSlice {
   currentCase: string;
   sceneHistory: string[];
   lastCheckResult: CheckResult | null;
+  caseData: CaseData | null;
   goToScene: (sceneId: string) => void;
   setCheckResult: (result: CheckResult | null) => void;
   startNewCase: (caseId: string) => void;
+  loadAndStartCase: (caseId: string) => Promise<void>;
   completeCase: (caseId: string) => CaseCompletionResult;
 }
 
@@ -32,6 +35,7 @@ export const createNarrativeSlice: StateCreator<
   currentCase: '',
   sceneHistory: [],
   lastCheckResult: null,
+  caseData: null,
 
   goToScene: (sceneId) =>
     set((state) => {
@@ -60,6 +64,36 @@ export const createNarrativeSlice: StateCreator<
       delete state.flags['ability-auto-succeed-influence'];
       delete state.flags['ability-veil-sight-active'];
     }),
+
+  /**
+   * Loads case JSON, populates clues/NPCs, and navigates to the first scene.
+   */
+  loadAndStartCase: async (caseId) => {
+    const data = await loadCase(caseId);
+    const firstSceneId = Object.keys(data.scenes)[0];
+
+    set((state) => {
+      state.caseData = data;
+      state.currentCase = data.meta.id;
+      state.sceneHistory = [];
+      state.investigator.abilityUsed = false;
+      delete state.flags['ability-auto-succeed-reason'];
+      delete state.flags['ability-auto-succeed-vigor'];
+      delete state.flags['ability-auto-succeed-influence'];
+      delete state.flags['ability-veil-sight-active'];
+
+      // Populate clues and NPCs from loaded case data
+      for (const [id, clue] of Object.entries(data.clues)) {
+        state.clues[id] = clue;
+      }
+      for (const [id, npc] of Object.entries(data.npcs)) {
+        state.npcs[id] = npc;
+      }
+    });
+
+    // Navigate to first scene (triggers scene-transition SFX via goToScene)
+    get().goToScene(firstSceneId);
+  },
 
   /**
    * Completes a case: persists state, grants faculty bonus, unlocks vignettes.

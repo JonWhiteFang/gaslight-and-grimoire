@@ -429,11 +429,27 @@ vi.mock('../../store', () => {
       audioVolume: { ambient: 0.5, sfx: 0.5 },
     },
     goToScene: vi.fn(),
+    setCheckResult: vi.fn(),
   };
 
+  const useStoreFn = (selector?: (s: typeof storeState) => unknown) =>
+    selector ? selector(storeState) : storeState;
+  useStoreFn.getState = () => storeState;
+
   return {
-    useStore: (selector?: (s: typeof storeState) => unknown) =>
-      selector ? selector(storeState) : storeState,
+    useStore: useStoreFn,
+    buildGameState: (s: typeof storeState) => ({
+      investigator: s.investigator,
+      currentScene: s.currentScene,
+      currentCase: s.currentCase,
+      clues: s.clues,
+      deductions: s.deductions,
+      npcs: s.npcs,
+      flags: s.flags,
+      factionReputation: s.factionReputation,
+      sceneHistory: s.sceneHistory,
+      settings: s.settings,
+    }),
   };
 });
 

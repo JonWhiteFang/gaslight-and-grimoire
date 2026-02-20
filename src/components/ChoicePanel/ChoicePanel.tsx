@@ -6,8 +6,8 @@
  *          threshold is met.
  */
 import React, { useCallback } from 'react';
-import { useStore } from '../../store';
-import { evaluateConditions } from '../../engine/narrativeEngine';
+import { useStore, buildGameState } from '../../store';
+import { evaluateConditions, processChoice } from '../../engine/narrativeEngine';
 import { ChoiceCard } from './ChoiceCard';
 import type { Choice, GameState } from '../../types';
 
@@ -19,25 +19,6 @@ export interface ChoicePanelProps {
 }
 
 // ─── Condition helpers ────────────────────────────────────────────────────────
-
-/**
- * Builds the minimal GameState-compatible object needed by evaluateConditions
- * from the Zustand store snapshot.
- */
-function buildGameState(store: ReturnType<typeof useStore.getState>): GameState {
-  return {
-    investigator: store.investigator,
-    currentScene: store.currentScene,
-    currentCase: store.currentCase,
-    clues: store.clues,
-    deductions: store.deductions,
-    npcs: store.npcs,
-    flags: store.flags,
-    factionReputation: store.factionReputation,
-    sceneHistory: store.sceneHistory,
-    settings: store.settings,
-  };
-}
 
 /**
  * Returns true when all explicit requirements on a Choice are satisfied.
@@ -69,11 +50,11 @@ export function isChoiceVisible(choice: Choice, state: GameState): boolean {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ChoicePanel({ choices, onChoiceSelected }: ChoicePanelProps) {
-  const storeSnapshot = useStore();
-  const goToScene = useStore((s) => s.goToScene);
-
-  const gameState = buildGameState(storeSnapshot);
-  const { investigator, clues, deductions } = storeSnapshot;
+  const investigator = useStore((s) => s.investigator);
+  const clues = useStore((s) => s.clues);
+  const deductions = useStore((s) => s.deductions);
+  const setCheckResult = useStore((s) => s.setCheckResult);
+  const gameState = useStore(buildGameState);
 
   const revealedClueIds = new Set(
     Object.values(clues)
@@ -90,16 +71,22 @@ export function ChoicePanel({ choices, onChoiceSelected }: ChoicePanelProps) {
       const choice = choices.find((c) => c.id === choiceId);
       if (!choice) return;
 
-      // For choices without a Faculty check, navigate directly to the success outcome.
-      // Full dice-roll orchestration (Task 8) will replace this path.
-      if (!choice.faculty) {
-        const nextScene = choice.outcomes.success ?? choice.outcomes.partial ?? '';
-        if (nextScene) goToScene(nextScene);
+      const currentState = buildGameState(useStore.getState());
+      const result = processChoice(choice, currentState);
+
+      // Show dice roll overlay for faculty checks
+      if (result.roll !== undefined && result.tier) {
+        setCheckResult({
+          roll: result.roll,
+          modifier: result.modifier ?? 0,
+          total: result.total ?? result.roll,
+          tier: result.tier,
+        });
       }
 
       onChoiceSelected?.(choiceId);
     },
-    [choices, goToScene, onChoiceSelected],
+    [choices, setCheckResult, onChoiceSelected],
   );
 
   if (visibleChoices.length === 0) {
