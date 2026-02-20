@@ -39,7 +39,8 @@ All narrative content lives under `/content` as JSON. Game logic lives under `/s
           ├── <AmbientAudio />      # Non-rendering: ambient track from scene.ambientAudio
           ├── <GameContent>
           │   ├── <NarrativePanel />  # Scene text, illustration, dice roll overlay, clue discovery card
-          │   └── <ChoicePanel />     # Choice cards rendered from current SceneNode.choices
+          │   ├── <ChoicePanel />     # Choice cards rendered from current SceneNode.choices
+          │   └── <EncounterPanel />   # Multi-round encounter UI (when scene has encounter field)
           ├── <StatusBar />         # Vitality meter, composure meter
           ├── <EvidenceBoard />     # Overlay: clue cards, connection threads, deduction button
           ├── <CaseJournal />       # Overlay: clues gathered, deductions, key events

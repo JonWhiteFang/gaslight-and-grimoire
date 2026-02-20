@@ -23,7 +23,7 @@ Comprehensive archaeology and evolution docs live under `devdocs/`. **Read these
 - `devdocs/archaeology/traces/trace_05_npc_faction_propagation.md` — adjustDisposition → adjustReputation cross-slice
 - `devdocs/archaeology/traces/trace_06_save_load.md` — save/autosave/load → SaveManager → localStorage
 - `devdocs/archaeology/traces/trace_07_hint_system.md` — hintEngine singleton → HintButton
-- `devdocs/archaeology/traces/trace_08_encounter_system.md` — startEncounter → processEncounterChoice (engine only, no UI)
+- `devdocs/archaeology/traces/trace_08_encounter_system.md` — startEncounter → processEncounterChoice → EncounterPanel
 - `devdocs/archaeology/traces/trace_09_accessibility_settings.md` — SettingsPanel → AccessibilityProvider → DOM
 - `devdocs/archaeology/traces/trace_10_audio_pipeline.md` — Store slices → AudioManager/AmbientAudio → Howler
 
@@ -71,7 +71,8 @@ Components live in `src/components/[Name]/` with `index.ts` barrel exports. Stat
           ├── <AmbientAudio />      # Non-rendering: ambient track from scene.ambientAudio
           ├── <GameContent>
           │   ├── <NarrativePanel />  # Scene text, illustration, dice roll overlay, clue discovery card
-          │   └── <ChoicePanel />     # Choice cards rendered from current SceneNode.choices
+          │   ├── <ChoicePanel />     # Choice cards rendered from current SceneNode.choices
+          │   └── <EncounterPanel />   # Multi-round encounter UI (when scene has encounter field)
           ├── <StatusBar />         # Vitality meter, composure meter
           ├── <EvidenceBoard />     # Overlay: clue cards, connection threads, deduction button
           ├── <CaseJournal />       # Overlay: clues gathered, deductions, key events
@@ -162,7 +163,7 @@ Rules:
 - `NpcSuspicionTier`: `normal (0-2) | evasive (3-5) | concealing (6-8) | hostile (9-10)`
 - `Condition` — gates scene access and choices (types: `hasClue`, `hasDeduction`, `hasFlag`, `facultyMin`, `archetypeIs`, `npcDisposition`, `npcSuspicion`, `factionReputation`)
 - `Effect` — mutates game state on scene entry (types: `composure`, `vitality`, `flag`, `disposition`, `suspicion`, `reputation`, `discoverClue`)
-- `SceneNode` — atomic narrative unit with `choices`, `cluesAvailable`, `conditions`, `onEnter` effects, optional `variantOf`/`variantCondition`
+- `SceneNode` — atomic narrative unit with `choices`, `cluesAvailable`, `conditions`, `onEnter` effects, optional `variantOf`/`variantCondition`, optional `encounter`
 - `Choice` — may have `faculty`/`difficulty` for checks, `advantageIf` clue refs, `outcomes` per tier, `npcEffect`, encounter extensions (`worseAlternative`, `isEscapePath`, `encounterDamage`)
 
 ## Engine Behaviour
@@ -184,7 +185,8 @@ Rules:
 - `canDiscoverClue` — pure gate check for `ClueDiscovery` requirements.
 - `validateContent` — checks for broken scene-graph edges and missing clue references.
 
-### Encounters (also in narrativeEngine.ts)
+### Encounters (narrativeEngine.ts + EncounterPanel)
+- Triggered by `SceneNode.encounter` field — `GameContent` renders `EncounterPanel` instead of `ChoicePanel`.
 - `startEncounter` — for supernatural encounters, performs Nerve/Lore reaction check at DC 12. Failure: composure damage + worseAlternative replacement.
 - `processEncounterChoice` — faculty check + damage application. Supernatural = dual-axis (composure + vitality). Mundane = single axis.
 - `getEncounterChoices` — filters choices by conditions, annotates occult advantage, always includes escape paths.

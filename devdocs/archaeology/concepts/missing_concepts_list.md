@@ -16,11 +16,8 @@ Concepts that are absent from the codebase but are implied by the architecture, 
 
 ## High (significant UX or correctness gap)
 
-### Encounter UI
-The encounter engine (`startEncounter`, `processEncounterChoice`, `getEncounterChoices`) is fully implemented but has no UI consumer. No component renders encounter rounds, reaction check results, or escape path options. Encounters are unreachable by players.
-- **Status**: Missing
-- **Where it should be**: a new `src/components/EncounterPanel/` or integration into `ChoicePanel`
-- **Trace**: trace_08_encounter_system.md §8
+### Encounter UI — ✅ FIXED (Phase D1)
+Created `EncounterPanel` component. Added `encounter` field to `SceneNode`. Authored supernatural encounter scene in act3.json. `GameContent` renders `EncounterPanel` when scene has encounter field.
 
 ### Case Completion Screen
 `CaseProgression.completeCase()` returns `{ facultyBonusGranted, vignetteUnlocked }` but no UI renders these results. The player has no feedback that a case ended, what bonus they received, or what new content unlocked.
@@ -71,11 +68,8 @@ Created `src/store/audioSubscription.ts` with store subscription. All `AudioMana
 ### First Scene ID in Meta — ✅ FIXED (Phase A6)
 Added `firstScene` to `CaseMeta`/`VignetteMeta`. Both existing cases have it set. `loadAndStartCase` uses it with fallback.
 
-### Stale State Cleanup on New Case
-`loadAndStartCase` populates `state.clues` and `state.npcs` from the new case but doesn't clear clues/NPCs from a previous case. Starting a second case would merge old and new data.
-- **Status**: Missing
-- **Where it should be**: `src/store/slices/narrativeSlice.ts` → `loadAndStartCase`, clear `state.clues = {}` and `state.npcs = {}` before populating
-- **Trace**: trace_01_case_loading.md §10
+### Stale State Cleanup on New Case — ✅ FIXED (Phase D2)
+`loadAndStartCase` now clears `clues`, `npcs`, `deductions`, and `lastCheckResult` before populating new case data. Preserves cross-case `flags` and `factionReputation`.
 
 ---
 
