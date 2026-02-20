@@ -20,6 +20,7 @@ import type { GameState } from '../../types';
 export function NarrativePanel() {
   const currentSceneId = useStore((s) => s.currentScene);
   const reducedMotion = useStore((s) => s.settings.reducedMotion);
+  const textSpeed = useStore((s) => s.settings.textSpeed);
   const lastCheckResult = useStore((s) => s.lastCheckResult);
   const setCheckResult = useStore((s) => s.setCheckResult);
   const discoverClue = useStore((s) => s.discoverClue);
@@ -105,6 +106,7 @@ export function NarrativePanel() {
       {/* Narrative text with typewriter effect (Req 2.2, 2.3) */}
       <SceneText
         text={scene?.narrative ?? ''}
+        textSpeed={textSpeed}
         reducedMotion={reducedMotion}
       />
 

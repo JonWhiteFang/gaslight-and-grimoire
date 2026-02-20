@@ -35,7 +35,7 @@ export function DiceRollOverlay({
         role="status"
         aria-live="polite"
         aria-label={`Dice roll: ${roll} ${modifierLabel} = ${total}`}
-        className="flex flex-col items-center gap-2 p-4 rounded-lg bg-gaslight-surface/80 border border-gaslight-amber/30"
+        className="flex flex-col items-center gap-2 p-4 rounded-lg bg-gaslight-slate/80 border border-gaslight-amber/30"
         initial={reducedMotion ? false : { opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={reducedMotion ? {} : { opacity: 0, scale: 0.8 }}
@@ -52,23 +52,23 @@ export function DiceRollOverlay({
         </motion.div>
 
         {/* Roll breakdown */}
-        <div className="flex items-center gap-2 text-sm font-mono text-gaslight-parchment">
+        <div className="flex items-center gap-2 text-sm font-mono text-gaslight-fog">
           <span aria-label={`Roll: ${roll}`} className="text-2xl font-bold text-gaslight-amber">
             {roll}
           </span>
-          <span className="text-gaslight-parchment/60" aria-hidden="true">
+          <span className="text-gaslight-fog/60" aria-hidden="true">
             {modifierLabel}
           </span>
-          <span className="text-gaslight-parchment/60" aria-hidden="true">=</span>
+          <span className="text-gaslight-fog/60" aria-hidden="true">=</span>
           <span
             aria-label={`Total: ${total}`}
-            className="text-2xl font-bold text-gaslight-parchment"
+            className="text-2xl font-bold text-gaslight-fog"
           >
             {total}
           </span>
         </div>
 
-        <p className="text-xs text-gaslight-parchment/50 sr-only">
+        <p className="text-xs text-gaslight-fog/50 sr-only">
           Roll {roll}, modifier {modifierLabel}, total {total}
         </p>
       </motion.div>

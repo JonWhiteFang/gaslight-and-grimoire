@@ -28,20 +28,20 @@ Issues found during full codebase review, grouped by severity.
 
 ## High — Logic Errors & Data Bugs
 
-### 7. AmbientAudio uses scene ID as audio filename
-`src/components/AmbientAudio/AmbientAudio.tsx:30` — Constructs path as `/audio/ambient/${currentScene}.mp3` using the scene ID. SceneNode has an `ambientAudio` field specifically for this purpose, but it's never read.
+### ~~7. AmbientAudio uses scene ID as audio filename~~ ✅ RESOLVED
+~~`src/components/AmbientAudio/AmbientAudio.tsx`~~ — Fixed: Now reads `scene.ambientAudio` via `useCurrentScene()` and prefixes with `BASE_URL`.
 
 ### ~~8. NarrativePanel passes no props to child components~~ ✅ RESOLVED
 ~~`NarrativePanel.tsx`~~ — Fixed: SceneIllustration receives `src` from the resolved scene. ClueDiscoveryCard remains a stub (Task 10).
 
-### 9. HintButton level doesn't reset on scene change
-`src/components/HeaderBar/HintButton.tsx` — Maintains its own `currentLevel` state (1→2→3). The hintEngine's `resetForScene()` resets internal tracking, but HintButton's React state persists. After a scene change, hints start at whatever level was reached previously instead of level 1.
+### ~~9. HintButton level doesn't reset on scene change~~ ✅ RESOLVED
+~~`src/components/HeaderBar/HintButton.tsx`~~ — Fixed: `useEffect` keyed on `gameState.currentScene` resets level to 1.
 
-### 10. OutcomeBanner is invisible in reduced motion mode
-`src/components/NarrativePanel/OutcomeBanner.tsx:80` — When `reducedMotion` is true, calls `onDismiss` via `setTimeout(0)`, which dismisses the banner before the user can read it. Should use a reasonable delay (e.g. 2000ms) regardless of motion preference.
+### ~~10. OutcomeBanner is invisible in reduced motion mode~~ ✅ RESOLVED
+~~`src/components/NarrativePanel/OutcomeBanner.tsx`~~ — Fixed: Reduced motion branch now uses `DISPLAY_DURATION_MS` (2000ms).
 
-### 11. `textSpeed` setting is never used
-`GameSettings.textSpeed` has three values (`typewriter | fast | instant`) but `SceneText` only checks `reducedMotion` for instant display. The `fast` and `instant` text speed settings have no effect.
+### ~~11. `textSpeed` setting is never used~~ ✅ RESOLVED
+~~`SceneText`~~ — Fixed: New `textSpeed` prop controls reveal speed. NarrativePanel passes it from settings.
 
 ### 12. `saveGame` always overwrites a single slot
 `src/store/slices/metaSlice.ts:40` — `saveGame` hardcodes the ID as `'autosave'`. The LoadGameScreen UI implies multiple saves, but only one can ever exist.
@@ -59,20 +59,17 @@ Issues found during full codebase review, grouped by severity.
 ### 15. HeaderBar creates unstable selector objects
 `src/components/HeaderBar/HeaderBar.tsx:30` — The `useStore` selector creates a new `GameState` object on every render, defeating Zustand's shallow equality check. HintButton re-renders on every store change.
 
-### 16. Duplicate `calculateModifier` function
-`src/components/CharacterCreation/FacultyAllocation.tsx:6` — Redefines `calculateModifier` identically to `diceEngine.ts`. Should import from diceEngine.
+### ~~16. Duplicate `calculateModifier` function~~ ✅ RESOLVED
+~~`src/components/CharacterCreation/FacultyAllocation.tsx`~~ — Fixed: Imports and re-exports from `diceEngine.ts`.
 
-### 17. Missing barrel exports
-`AccessibilityProvider/`, `AmbientAudio/`, and `SettingsPanel/` directories lack `index.ts` barrel exports, violating the component convention documented in AGENTS.md.
+### ~~17. Missing barrel exports~~ ✅ RESOLVED
+Fixed: Added `index.ts` barrel exports for AccessibilityProvider, AmbientAudio, and SettingsPanel.
 
 ### 18. `validateCase.mjs` is hardcoded to one case
 `scripts/validateCase.mjs` — Only validates `the-whitechapel-cipher`. Should accept a case name argument or iterate all cases/side-cases.
 
-### 19. Undefined Tailwind classes in use
-- `ChoiceCard.tsx` uses `bg-gaslight-dark` — not defined in tailwind.config.js
-- `DiceRollOverlay.tsx` uses `bg-gaslight-surface` and `text-gaslight-parchment` — not defined
-
-These will silently produce no styling.
+### ~~19. Undefined Tailwind classes in use~~ ✅ RESOLVED
+Fixed: Replaced `gaslight-dark` → `gaslight-ink`, `gaslight-surface` → `gaslight-slate`, `gaslight-parchment` → `gaslight-fog`.
 
 ---
 

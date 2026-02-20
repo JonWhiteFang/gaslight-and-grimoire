@@ -1,23 +1,24 @@
 import { useEffect, useRef } from 'react';
 import { Howl } from 'howler';
-import { useNarrative, useSettings } from '../../store';
+import { useCurrentScene, useSettings } from '../../store';
 
 const FADE_DURATION = 1000; // ms
 
 /**
  * Non-rendering component that manages ambient audio playback.
- * - Loads and loops the ambient track for the current scene.
+ * - Loads and loops the ambient track specified by the scene's ambientAudio field.
  * - Cross-fades between tracks on scene transition.
  * - Respects audioVolume.ambient from settings.
  */
 export function AmbientAudio() {
-  const { currentScene } = useNarrative();
+  const scene = useCurrentScene();
+  const ambientTrack = scene?.ambientAudio ?? null;
   const settings = useSettings();
   const ambientVolume = settings.audioVolume.ambient;
 
   const currentHowlRef = useRef<Howl | null>(null);
 
-  // Cross-fade when scene changes
+  // Cross-fade when ambient track changes
   useEffect(() => {
     const previous = currentHowlRef.current;
 
@@ -30,13 +31,13 @@ export function AmbientAudio() {
       });
     }
 
-    // Only load a new track if there's a scene to play
-    if (!currentScene) {
+    if (!ambientTrack) {
       currentHowlRef.current = null;
       return;
     }
 
-    const src = `/audio/ambient/${currentScene}.mp3`;
+    const base = import.meta.env.BASE_URL ?? '/';
+    const src = `${base.replace(/\/$/, '')}/audio/ambient/${ambientTrack}.mp3`;
     const howl = new Howl({
       src: [src],
       loop: true,
@@ -58,7 +59,7 @@ export function AmbientAudio() {
       howl.unload();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentScene]);
+  }, [ambientTrack]);
 
   // Update volume on the current Howl when the setting changes
   useEffect(() => {

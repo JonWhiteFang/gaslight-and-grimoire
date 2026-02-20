@@ -90,11 +90,11 @@ export function OutcomeBanner({
     setShown(true);
 
     if (reducedMotion) {
-      // Instant transition — dismiss immediately after one render cycle
+      // Still show for the full duration so the user can read the result
       const id = setTimeout(() => {
         setShown(false);
         onDismiss?.();
-      }, 0);
+      }, DISPLAY_DURATION_MS);
       return () => clearTimeout(id);
     }
 

@@ -1,10 +1,8 @@
 import React from 'react';
 import type { Archetype, Faculty } from '../../types';
 import { ARCHETYPES, FACULTIES, FACULTY_LABELS, BASE_FACULTY_SCORE, BONUS_POINTS_TOTAL } from '../../data/archetypes';
-
-export function calculateModifier(score: number): number {
-  return Math.floor((score - 10) / 2);
-}
+import { calculateModifier } from '../../engine/diceEngine';
+export { calculateModifier };
 
 interface Props {
   archetype: Archetype;

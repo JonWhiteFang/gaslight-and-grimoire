@@ -6,7 +6,7 @@
  *
  * Requirements: 13.1–13.6
  */
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSettings } from '../../store';
 import {
@@ -30,6 +30,12 @@ export function HintButton({ gameState }: HintButtonProps) {
   const [activeHint, setActiveHint] = useState<HintContent | null>(null);
 
   const visible = shouldShowHint(hintsEnabled);
+
+  // Reset hint level when scene changes
+  useEffect(() => {
+    setCurrentLevel(1);
+    setActiveHint(null);
+  }, [gameState.currentScene]);
 
   const handleClick = useCallback(() => {
     const hint = getHint(currentLevel, gameState);

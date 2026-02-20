@@ -8,22 +8,24 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 
-/** Characters revealed per tick in typewriter mode */
-const CHARS_PER_TICK = 2;
-
-/** Milliseconds between ticks */
-const TICK_MS = 30;
+/** Speed presets: [charsPerTick, tickMs] */
+const SPEED_CONFIG = {
+  typewriter: { chars: 2, ms: 30 },
+  fast: { chars: 6, ms: 15 },
+} as const;
 
 export interface SceneTextProps {
   /** The full narrative text to display */
   text: string;
+  /** Controls text reveal speed. 'instant' shows all text immediately. */
+  textSpeed?: 'typewriter' | 'fast' | 'instant';
   /** When true, renders all text instantly (accessibility: reduced motion) */
   reducedMotion?: boolean;
   /** Called when the full text has been revealed */
   onComplete?: () => void;
 }
 
-export function SceneText({ text, reducedMotion = false, onComplete }: SceneTextProps) {
+export function SceneText({ text, textSpeed = 'typewriter', reducedMotion = false, onComplete }: SceneTextProps) {
   const [displayed, setDisplayed] = useState('');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const onCompleteRef = useRef(onComplete);
@@ -45,19 +47,19 @@ export function SceneText({ text, reducedMotion = false, onComplete }: SceneText
       return;
     }
 
-    if (reducedMotion) {
+    if (reducedMotion || textSpeed === 'instant') {
       // Instant render — no animation
       setDisplayed(text);
       onCompleteRef.current?.();
       return;
     }
 
-    // Typewriter mode: reveal CHARS_PER_TICK characters every TICK_MS ms
+    const { chars, ms } = SPEED_CONFIG[textSpeed] ?? SPEED_CONFIG.typewriter;
     let index = 0;
     setDisplayed('');
 
     intervalRef.current = setInterval(() => {
-      index += CHARS_PER_TICK;
+      index += chars;
       if (index >= text.length) {
         setDisplayed(text);
         if (intervalRef.current !== null) {
@@ -68,7 +70,7 @@ export function SceneText({ text, reducedMotion = false, onComplete }: SceneText
       } else {
         setDisplayed(text.slice(0, index));
       }
-    }, TICK_MS);
+    }, ms);
 
     return () => {
       if (intervalRef.current !== null) {
@@ -76,7 +78,7 @@ export function SceneText({ text, reducedMotion = false, onComplete }: SceneText
         intervalRef.current = null;
       }
     };
-  }, [text, reducedMotion]);
+  }, [text, textSpeed, reducedMotion]);
 
   return (
     <p
