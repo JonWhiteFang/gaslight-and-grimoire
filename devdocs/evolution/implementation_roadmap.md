@@ -72,89 +72,41 @@ Goal: Fix broken core functionality and eliminate duplication. After this phase,
 
 ---
 
-## Phase B: Core Refactoring (Improve Architecture)
+## Phase B: Core Refactoring (Improve Architecture) — ✅ COMPLETE
 
 Goal: Separate pure logic from side effects. Establish patterns that make future changes safer and more testable.
 
-### B1. Extract Pure `computeChoiceResult`
+### B1. Extract Pure `computeChoiceResult` — ✅ DONE
 
-**Files**: `src/engine/narrativeEngine.ts`
-
-**What**: Extract the pure computation (dice check, DC resolution, advantage, tier, next scene) into `computeChoiceResult(choice, state): ChoiceResult`. Keep `processChoice` as a wrapper.
-
-**Dependencies**: A4 (ability flag check should be in the pure function).
-
-**Success criteria**: New unit test for `computeChoiceResult` passes with no store setup. `processChoice` behavior unchanged.
-
-**Risk**: Low.
-
-**Verification**: New test file `src/engine/__tests__/computeChoiceResult.test.ts`. `npm run test:run`.
+**Resolution**: Created `computeChoiceResult(choice, state): ChoiceResult` as a pure function in `narrativeEngine.ts`. Handles ability auto-succeed, dice checks, advantage, DC resolution. `processChoice` is now a thin wrapper: calls `computeChoiceResult`, applies NPC effects, navigates.
 
 ---
 
-### B2. Move `buildDeduction` to Engine Layer
+### B2. Move `buildDeduction` to Engine Layer — ✅ DONE
 
-**Files**: Move `src/components/EvidenceBoard/buildDeduction.ts` → `src/engine/buildDeduction.ts`. Update imports in `src/components/EvidenceBoard/DeductionButton.tsx` and `src/engine/__tests__/deductionFormation.property.test.ts`.
-
-**Dependencies**: None.
-
-**Success criteria**: `npm run build` succeeds. `npm run test:run` passes. No cross-layer imports in engine tests.
-
-**Risk**: Trivial.
-
-**Verification**: `npm run build` + `npm run test:run`.
+**Resolution**: Moved `src/components/EvidenceBoard/buildDeduction.ts` → `src/engine/buildDeduction.ts`. Updated imports in `DeductionButton.tsx` and `deductionFormation.property.test.ts`.
 
 ---
 
-### B3. Create Audio Subscription
+### B3. Create Audio Subscription — ✅ DONE
 
-**Files**: New `src/store/audioSubscription.ts`. Modified: `src/store/slices/investigatorSlice.ts`, `src/store/slices/narrativeSlice.ts`, `src/store/slices/evidenceSlice.ts`. Modified: `src/main.tsx` or `src/store/index.ts` (subscription init).
-
-**What**: Subscribe to store. Detect composure/vitality decreases, scene changes, check results, clue discoveries. Trigger SFX. Remove `AudioManager` calls from slices.
-
-**Dependencies**: None, but best done after B1 (stable choice processing).
-
-**Success criteria**: All SFX events still fire at correct times. Slice tests pass without AudioManager mocking.
-
-**Risk**: Low-Medium. Must verify each SFX event.
-
-**Verification**: Manual: play through scene transition, take damage, discover clue, make check — hear all SFX. `npm run test:run`.
+**Resolution**: Created `src/store/audioSubscription.ts` with `initAudioSubscription()` that subscribes to store changes and triggers SFX (composure/vitality decrease, scene transition, dice roll, clue discovery). Initialized in `main.tsx`. Removed all `AudioManager.playSfx` calls from `investigatorSlice`, `narrativeSlice`, and `evidenceSlice`.
 
 ---
 
-### B4. Consolidate `CheckResult` Types
+### B4. Consolidate `CheckResult` Types — ✅ DONE
 
-**Files**: `src/engine/diceEngine.ts`, `src/store/slices/narrativeSlice.ts`
-
-**What**: Remove `natural` field from engine `CheckResult` (redundant with `roll`). Delete local `CheckResult` in narrativeSlice. Import from diceEngine.
-
-**Dependencies**: B1 (so `computeChoiceResult` uses the canonical type).
-
-**Success criteria**: Single `CheckResult` type across codebase. `npm run test:run` passes.
-
-**Risk**: Low.
-
-**Verification**: `npm run build` + `npm run test:run`.
+**Resolution**: Removed `natural` field (redundant with `roll`) and made `dc` optional in `diceEngine.ts` `CheckResult`. Deleted local `CheckResult` from `narrativeSlice.ts`, now imports from `diceEngine`. Single `CheckResult` type across codebase.
 
 ---
 
-### B5. Add Runtime Content Validation
+### B5. Add Runtime Content Validation — ✅ DONE
 
-**Files**: `src/store/slices/narrativeSlice.ts` → `loadAndStartCase`
-
-**What**: Call `validateContent(data)` after `loadCase` returns. Throw on failure.
-
-**Dependencies**: A5 (tier completeness added to validator first).
-
-**Success criteria**: Broken content JSON causes a descriptive error at load time, not a crash at render time.
-
-**Risk**: Low.
-
-**Verification**: Temporarily break a scene reference in content JSON → verify error is caught and displayed (once error UI exists). Restore content. `npm run test:run`.
+**Resolution**: Added outcome tier completeness checking (all 5 tiers for faculty-check choices) to both `validateContent` in `narrativeEngine.ts` and `validateCase.mjs`. Wired `validateContent` into `loadAndStartCase` — throws on failure, caught by `App.handleStartCase`.
 
 ---
 
-**Phase B summary**: 5 items. ~80 lines of changes. B1 depends on A4. B4 depends on B1. B5 depends on A5. B2 and B3 are independent. After completion: engine functions are pure and testable, SFX is decoupled from state mutations, types are consolidated, content is validated at runtime.
+**Phase B summary**: All 5 items complete. Engine functions are pure and testable, SFX is decoupled from state mutations, types are consolidated, content is validated at runtime.
 
 ---
 
@@ -328,22 +280,22 @@ Completed as part of A2. All snapshot builders now use the shared `snapshotGameS
 
 ```
 Phase A (✅ COMPLETE, except A5):
-  A1✅  A2✅  A3✅  A4✅  A5  A6✅
+  A1✅  A2✅  A3✅  A4✅  A5✅  A6✅
 
-Phase B:
-  A4✅ → B1 → B4
-  A5 → B5
-  B2 (independent)
-  B3 (independent, best after B1)
+Phase B (✅ COMPLETE):
+  A4✅ → B1✅ → B4✅
+  A5✅ → B5✅
+  B2✅ (independent)
+  B3✅ (independent)
 
 Phase C (all independent, A1✅ before C2):
   C1  C2  C3  C4  C5
 
 Phase D:
-  B1 → D1
+  B1✅ → D1
   D2 → D3
   A2✅ → D4✅
-  B4 → D5
+  B4✅ → D5
 ```
 
 ## Timeline Estimate

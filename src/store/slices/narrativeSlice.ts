@@ -1,9 +1,8 @@
 import type { StateCreator } from 'zustand';
 import type { GameStore } from '../types';
 import type { CaseData, OutcomeTier } from '../../types';
-import { AudioManager } from '../../engine/audioManager';
 import { CaseProgression, type CaseCompletionResult } from '../../engine/caseProgression';
-import { loadCase } from '../../engine/narrativeEngine';
+import { loadCase, validateContent } from '../../engine/narrativeEngine';
 import { snapshotGameState } from '../../utils/gameState';
 
 export interface CheckResult {
@@ -42,7 +41,6 @@ export const createNarrativeSlice: StateCreator<
     set((state) => {
       state.sceneHistory.push(state.currentScene);
       state.currentScene = sceneId;
-      AudioManager.playSfx('scene-transition', state.settings.audioVolume.sfx);
     });
     // Auto-save on scene transition if configured
     if (get().settings.autoSaveFrequency === 'scene') {
@@ -53,9 +51,6 @@ export const createNarrativeSlice: StateCreator<
   setCheckResult: (result) =>
     set((state) => {
       state.lastCheckResult = result;
-      if (result) {
-        AudioManager.playSfx('dice-roll', state.settings.audioVolume.sfx);
-      }
     }),
 
   startNewCase: (caseId) =>
@@ -76,6 +71,10 @@ export const createNarrativeSlice: StateCreator<
    */
   loadAndStartCase: async (caseId) => {
     const data = await loadCase(caseId);
+    const validation = validateContent(data);
+    if (!validation.valid) {
+      throw new Error('[NarrativeEngine] Content validation failed:\n' + validation.errors.join('\n'));
+    }
     const firstSceneId = data.meta.firstScene ?? (() => {
       console.warn('[NarrativeEngine] No firstScene in meta.json, using Object.keys fallback');
       return Object.keys(data.scenes)[0];

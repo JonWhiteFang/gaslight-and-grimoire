@@ -1,7 +1,6 @@
 import type { StateCreator } from 'zustand';
 import type { GameStore } from '../types';
 import type { Faculty, Investigator } from '../../types';
-import { AudioManager } from '../../engine/audioManager';
 
 export interface InvestigatorSlice {
   investigator: Investigator;
@@ -53,9 +52,6 @@ export const createInvestigatorSlice: StateCreator<
         0,
         Math.min(10, state.investigator.composure + delta),
       );
-      if (delta < 0) {
-        AudioManager.playSfx('composure-decrease', state.settings.audioVolume.sfx);
-      }
     }),
 
   adjustVitality: (delta) =>
@@ -64,9 +60,6 @@ export const createInvestigatorSlice: StateCreator<
         0,
         Math.min(10, state.investigator.vitality + delta),
       );
-      if (delta < 0) {
-        AudioManager.playSfx('vitality-decrease', state.settings.audioVolume.sfx);
-      }
     }),
 
   useAbility: () =>

@@ -104,6 +104,7 @@ src/
   engine/
     narrativeEngine.ts        # Content loading, condition eval, scene resolution, choice processing, encounters
     diceEngine.ts             # d20 rolls, advantage/disadvantage, modifier calc, outcome tiers
+    buildDeduction.ts         # Pure deduction builder from connected clue IDs
     caseProgression.ts        # End-of-case logic, faculty bonuses, vignette unlocks
     hintEngine.ts             # Stateful hint system (3 escalating levels)
     saveManager.ts            # localStorage persistence with versioned migrations, multi-save support
@@ -179,6 +180,7 @@ Rules:
 - `resolveScene` — returns variant scene if its condition is met, otherwise base scene.
 - `applyOnEnterEffects` — applies `Effect[]` to the store (the one non-pure function).
 - `processChoice` — performs faculty check (using `resolveDC` for dynamic difficulty), applies NPC effects, navigates to next scene. Checks archetype ability auto-succeed flags (`ability-auto-succeed-reason`, `ability-auto-succeed-vigor`, `ability-auto-succeed-influence`) before rolling — if set, returns `critical` tier without a dice roll.
+- `computeChoiceResult` — pure function extracted from `processChoice`. Computes the choice outcome (ability auto-succeed, dice check, advantage, DC resolution) without store access. Returns `ChoiceResult`. Used by `processChoice` internally; can be called directly for testing or preview.
 - `canDiscoverClue` — pure gate check for `ClueDiscovery` requirements.
 - `validateContent` — checks for broken scene-graph edges and missing clue references.
 
@@ -268,22 +270,19 @@ These are documented in detail in `devdocs/evolution/gap_analysis.md` and `smoke
 - **`ClueDiscoveryCard` is a stub** — `src/components/NarrativePanel/ClueDiscoveryCard.tsx` has placeholder code. `NarrativePanel` never passes props to it.
 
 ### Medium (architectural debt)
-- **`processChoice` is impure** — Calls `useStore.getState()` for NPC effects and navigation. Makes unit testing require full store setup. See `devdocs/evolution/refactoring_opportunities.md` R1.
-- **SFX inside Immer `set()` callbacks** — `AudioManager.playSfx()` called during state mutations in 3 slice files. Should be a store subscription. See R3.
-- **`buildDeduction` in wrong layer** — `src/components/EvidenceBoard/buildDeduction.ts` is a pure function tested in `src/engine/__tests__/`. Should live in `src/engine/`. See R4.
 - **Engine ↔ Store circular dependency** — `narrativeEngine.ts` and `caseProgression.ts` import `useStore`. Store slices import engine modules. Works due to lazy JS module resolution but violates intended layering.
 
 ## Architectural Warnings
 
 Things to be aware of when making changes:
 
-- **`processChoice` navigates before returning** — It calls `store.goToScene()` internally, then returns `ChoiceResult`. The caller shows the dice overlay after the scene has already changed.
+- **`processChoice` navigates before returning** — It calls `store.goToScene()` internally, then returns `ChoiceResult`. The caller shows the dice overlay after the scene has already changed. Use `computeChoiceResult` for the pure computation without side effects.
 - **`applyOnEnterEffects` is the only impure engine function** — Called from `NarrativePanel` useEffect, not from a store action. It accesses the store via `useStore.getState()`.
 - **Evidence Board connections live in React state, not the store** — Closing and reopening the board loses all connections. This is by design (connections are transient until deduction).
 - **`adjustDisposition` has a hidden cross-slice call** — After updating NPC disposition, it calls `get().adjustReputation(faction, delta * 0.5)` for faction-aligned NPCs. This coupling is in `src/store/slices/npcSlice.ts`.
 - **Faction reputation is unbounded** — Disposition is clamped [-10,+10], suspicion [0,10], composure/vitality [0,10]. Faction reputation has no clamp.
 - **`Object.keys(data.scenes)[0]` is the fallback for first scene** — In `loadAndStartCase`. Used only when `meta.json` lacks a `firstScene` field. Both existing cases now have `firstScene` set explicitly.
-- **No audio files in repo** — The audio system is fully coded but silent. Howler silently handles missing files.
+- **No audio files in repo** — The audio system is fully coded but silent. Howler silently handles missing files. SFX is triggered via a store subscription in `src/store/audioSubscription.ts` (initialized in `main.tsx`), not from slice actions.
 - **`Date.now()` and `Math.random()` used directly** — In `diceEngine.rollD20()`, `hintEngine`, `saveManager`, `metaSlice.saveGame`, `buildDeduction`. Not injectable. Tests work around this.
 
 ## Implementation Roadmap
@@ -291,6 +290,6 @@ Things to be aware of when making changes:
 See `devdocs/evolution/implementation_roadmap.md` for the full phased plan. Summary:
 
 - **Phase A (Foundation)**: ✅ COMPLETE — Fixed loadGame, deduped snapshots, wired hints, fixed abilities, added validation, added firstScene
-- **Phase B (Core Refactoring)**: Extract pure computeChoiceResult, move buildDeduction, audio subscription, consolidate types, runtime validation — ~2 days
+- **Phase B (Core Refactoring)**: ✅ COMPLETE — Extracted pure computeChoiceResult, moved buildDeduction to engine, audio subscription, consolidated CheckResult types, runtime content validation with tier completeness
 - **Phase C (Gap Filling)**: ClueDiscoveryCard, save button, faction display, error display, case completion screen — ~1.5 days
 - **Phase D (Integration)**: Encounter UI, stale state cleanup, remove dead code — ~2.5 days

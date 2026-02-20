@@ -129,18 +129,9 @@ Ordered by impact on the playable experience.
 
 ---
 
-### 2.2 Extract SFX from Store Mutations
+### 2.2 ~~Extract SFX from Store Mutations~~ — ✅ FIXED (Phase B3)
 
-**Current**: `AudioManager.playSfx()` called inside Immer `set()` callbacks in 3 slice files.
-
-**Required change**: Move SFX triggering to a Zustand `subscribe` callback that detects state changes and plays appropriate sounds.
-
-**Incremental path**:
-1. Create `src/store/audioSubscription.ts` — subscribes to store, detects composure/vitality decreases, scene changes, clue discoveries, check results.
-2. Remove `AudioManager` imports from slice files one at a time.
-3. Verify SFX still plays for each event.
-
-**Risk**: Low. Each slice can be migrated independently. Rollback: re-add the `AudioManager` call to the slice.
+**Resolution**: Created `src/store/audioSubscription.ts` with store subscription that detects state changes and triggers SFX. Initialized in `main.tsx`. Removed all `AudioManager.playSfx` calls from slice files.
 
 ---
 
@@ -150,13 +141,9 @@ Ordered by impact on the playable experience.
 
 ---
 
-### 2.4 Move `buildDeduction` to Engine Layer
+### 2.4 ~~Move `buildDeduction` to Engine Layer~~ — ✅ FIXED (Phase B2)
 
-**Current**: `src/components/EvidenceBoard/buildDeduction.ts` is a pure function tested in `src/engine/__tests__/`.
-
-**Required change**: Move to `src/engine/buildDeduction.ts`. Update imports in `DeductionButton.tsx` and the test file.
-
-**Risk**: Trivial. Two import path changes.
+**Resolution**: Moved `src/components/EvidenceBoard/buildDeduction.ts` → `src/engine/buildDeduction.ts`. Updated imports in `DeductionButton.tsx` and the property test.
 
 ---
 
@@ -180,23 +167,15 @@ Fixed in Phase A3. `trackActivity` calls added to `NarrativePanel` and `Evidence
 
 ---
 
-### 3.4 `processChoice` Impurity — Blocks Engine Testability
+### 3.4 ~~`processChoice` Impurity~~ — ✅ FIXED (Phase B1)
 
-`processChoice` calls `useStore.getState()` internally, making it impossible to unit test without a full Zustand store setup. This is the most-called engine function and the hardest to test.
-
-**Blocks**: Adding new choice processing logic (e.g., disadvantage support, ability auto-succeed) with confidence.
-
-**Fix**: Extract `computeChoiceResult` as a pure function. Keep `processChoice` as a wrapper. New logic targets the pure function.
+Fixed in Phase B1. Extracted `computeChoiceResult` as a pure function. `processChoice` is now a thin wrapper.
 
 ---
 
-### 3.5 Outcome Tier Completeness Not Validated — Latent Crash Risk
+### 3.5 ~~Outcome Tier Completeness Not Validated~~ — ✅ FIXED (Phase B5)
 
-Neither `validateCase.mjs` nor `validateContent` checks that faculty-check choices have all 5 outcome tiers defined. A missing tier causes `goToScene(undefined)` → crash at render time.
-
-**Blocks**: Safe content authoring. Any new case content could introduce a crash.
-
-**Fix**: Add tier completeness check to both validators. ~15 lines each.
+Fixed in Phase B5. Both `validateContent` and `validateCase.mjs` now check that faculty-check choices have all 5 outcome tiers. `validateContent` is called at runtime in `loadAndStartCase`.
 
 ---
 
@@ -210,13 +189,13 @@ These are ordered by effort (smallest first) and can each be a single PR.
 | 2 | ~~Wire hint `trackActivity` calls~~ | ✅ DONE | `EvidenceBoard.tsx`, `NarrativePanel.tsx` | — |
 | 3 | ~~Add ability flag check in `processChoice`~~ | ✅ DONE | `narrativeEngine.ts` | — |
 | 4 | ~~Deduplicate `snapshotGameState` → shared `buildGameState`~~ | ✅ DONE | `utils/gameState.ts` + 5 files | — |
-| 5 | Move `buildDeduction` to engine layer | 0 new lines | 3 files (move + 2 import updates) | Trivial |
+| 5 | ~~Move `buildDeduction` to engine layer~~ | ✅ DONE | `engine/buildDeduction.ts` | — |
 | 6 | Add manual save button | ~10 lines | `HeaderBar.tsx` | Trivial |
 | 7 | Add faction reputation to CaseJournal | ~20 lines | `CaseJournal.tsx` | Trivial |
-| 8 | Add outcome tier completeness to validators | ~15 lines each | `validateCase.mjs`, `narrativeEngine.ts` | Low |
+| 8 | ~~Add outcome tier completeness to validators~~ | ✅ DONE | `validateCase.mjs`, `narrativeEngine.ts` | — |
 | 9 | Implement ClueDiscoveryCard | ~30 lines | `ClueDiscoveryCard.tsx`, `NarrativePanel.tsx` | Low |
-| 10 | Extract `computeChoiceResult` pure function | ~20 lines | `narrativeEngine.ts` | Low |
-| 11 | Create audio subscription (extract SFX from slices) | ~40 lines new, ~15 lines removed | 4 files | Low-Med |
+| 10 | ~~Extract `computeChoiceResult` pure function~~ | ✅ DONE | `narrativeEngine.ts` | — |
+| 11 | ~~Create audio subscription (extract SFX from slices)~~ | ✅ DONE | `audioSubscription.ts` + 3 slices | — |
 | 12 | Add case completion screen | ~80 lines | New component + `App.tsx` | Low |
 | 13 | Encounter UI component | ~150–200 lines | New component | Med |
 

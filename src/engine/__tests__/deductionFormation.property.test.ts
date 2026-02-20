@@ -8,7 +8,7 @@
 
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { buildDeduction } from '../../components/EvidenceBoard/buildDeduction';
+import { buildDeduction } from '../buildDeduction';
 import type { Clue, ClueType, ClueStatus } from '../../types';
 
 // ─── Arbitraries ──────────────────────────────────────────────────────────────

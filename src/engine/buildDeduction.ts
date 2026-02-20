@@ -5,7 +5,7 @@
  *
  * Req 7.10: If any connected clue is a Red Herring, isRedHerring must be true.
  */
-import type { Clue, Deduction } from '../../types';
+import type { Clue, Deduction } from '../types';
 
 /**
  * Builds a Deduction object from the given clue IDs and clue map.

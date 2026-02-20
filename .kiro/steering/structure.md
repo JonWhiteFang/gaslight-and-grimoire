@@ -87,13 +87,14 @@ Core enumerations: `Faculty` (`reason | perception | nerve | vigor | influence |
 src/engine/
   narrativeEngine.ts    # Scene resolution, condition evaluation, effect application
   diceEngine.ts         # Faculty checks → OutcomeTier; advantage/disadvantage logic
+  buildDeduction.ts     # Pure deduction builder from connected clue IDs
   caseProgression.ts    # Act transitions, case completion checks
   hintEngine.ts         # Hint generation based on current clues and flags
   saveManager.ts        # localStorage persistence; versioned migrations; multi-save support
   audioManager.ts       # Howler.js ambient/SFX management
 ```
 
-Engine functions are pure where possible. Side effects (store mutations) are applied by calling store actions, not by engines directly mutating state.
+Engine functions are pure where possible. Side effects (store mutations) are applied by calling store actions, not by engines directly mutating state. SFX is triggered via a store subscription in `src/store/audioSubscription.ts`, not from slice actions.
 
 ## Conventions
 

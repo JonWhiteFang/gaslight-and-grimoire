@@ -59,35 +59,23 @@ Faction reputation is tracked, propagated from NPC disposition, and used for vig
 - **Where it should be**: a `RandomProvider` or seed parameter on `rollD20`; a `Clock` interface for time-dependent code
 - **Traces**: trace_03_choice_processing.md §3, trace_07_hint_system.md §9
 
-### Runtime Content Validation
-`validateContent(caseData)` exists but is never called at runtime. Broken content JSON (missing outcome tiers, dangling scene references) causes crashes at render time via `resolveScene` throwing. Calling `validateContent` after `loadCase` would catch these errors before gameplay.
-- **Status**: Missing (function exists, call site missing)
-- **Where it should be**: `src/store/slices/narrativeSlice.ts` → `loadAndStartCase`, after `loadCase` returns
-- **Trace**: trace_01_case_loading.md §9
+### Runtime Content Validation — ✅ FIXED (Phase B5)
+`validateContent` now includes outcome tier completeness checking and is called at runtime in `loadAndStartCase`.
 
-### Outcome Tier Completeness Validation
-`validateCase.mjs` and `validateContent` check that outcome scene IDs exist, but don't check that all 5 outcome tiers are present on faculty-check choices. A missing tier causes `goToScene(undefined)` → crash.
-- **Status**: Missing
-- **Where it should be**: `scripts/validateCase.mjs`, `src/engine/narrativeEngine.ts` → `validateContent`
-- **Trace**: trace_03_choice_processing.md §9
+### Outcome Tier Completeness Validation — ✅ FIXED (Phase B5)
+Both `validateContent` and `validateCase.mjs` now check that faculty-check choices have all 5 outcome tiers.
 
-### Side-Effect-Free Store Mutations
-SFX is triggered inside Immer `set()` callbacks in 5 slice actions. This mixes irreversible side effects with state transformation. A Zustand subscription or middleware pattern would separate concerns.
-- **Status**: Missing (no subscription/middleware pattern exists)
-- **Where it should be**: `src/store/audioSubscription.ts` (new)
-- **Trace**: trace_10_audio_pipeline.md §10
+### Side-Effect-Free Store Mutations — ✅ FIXED (Phase B3)
+Created `src/store/audioSubscription.ts` with store subscription. All `AudioManager.playSfx` calls removed from slice files.
+
+### First Scene ID in Meta — ✅ FIXED (Phase A6)
+Added `firstScene` to `CaseMeta`/`VignetteMeta`. Both existing cases have it set. `loadAndStartCase` uses it with fallback.
 
 ### Stale State Cleanup on New Case
 `loadAndStartCase` populates `state.clues` and `state.npcs` from the new case but doesn't clear clues/NPCs from a previous case. Starting a second case would merge old and new data.
 - **Status**: Missing
 - **Where it should be**: `src/store/slices/narrativeSlice.ts` → `loadAndStartCase`, clear `state.clues = {}` and `state.npcs = {}` before populating
 - **Trace**: trace_01_case_loading.md §10
-
-### First Scene ID in Meta
-`loadAndStartCase` uses `Object.keys(data.scenes)[0]` as the first scene. This relies on JSON key insertion order. A `firstScene` field in `meta.json` would be explicit and safe.
-- **Status**: Missing
-- **Where it should be**: `content/cases/*/meta.json` → add `firstScene` field, `src/engine/narrativeEngine.ts` → `loadCase` or `src/store/slices/narrativeSlice.ts` → `loadAndStartCase`
-- **Trace**: trace_01_case_loading.md §9
 
 ---
 

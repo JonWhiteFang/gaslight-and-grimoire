@@ -12,9 +12,8 @@ export interface CheckResult {
   roll: number;
   modifier: number;
   total: number;
-  dc: number;
+  dc?: number;
   tier: OutcomeTier;
-  natural: number; // the raw d20 value before modifier
 }
 
 // ─── Core Roll Functions ──────────────────────────────────────────────────────
@@ -110,5 +109,5 @@ export function performCheck(
   const total = natural + modifier;
   const tier = resolveCheck(natural, modifier, dc);
 
-  return { roll: natural, modifier, total, dc, tier, natural };
+  return { roll: natural, modifier, total, dc, tier };
 }

@@ -68,6 +68,15 @@ function validateCase(dir) {
           }
         }
       }
+
+      // Check outcome tier completeness for faculty-check choices
+      if (choice.faculty && choice.difficulty !== undefined) {
+        for (const tier of ['critical', 'success', 'partial', 'failure', 'fumble']) {
+          if (!choice.outcomes?.[tier]) {
+            errors.push(`Scene "${scene.id}" -> choice "${choice.id}" -> missing outcome tier "${tier}"`);
+          }
+        }
+      }
     }
     for (const discovery of scene.cluesAvailable || []) {
       if (!clueIds.has(discovery.clueId)) {

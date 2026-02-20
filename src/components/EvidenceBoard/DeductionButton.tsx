@@ -10,7 +10,7 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { performCheck } from '../../engine/diceEngine';
 import { useStore, useInvestigator } from '../../store';
-import { buildDeduction } from './buildDeduction';
+import { buildDeduction } from '../../engine/buildDeduction';
 
 interface DeductionButtonProps {
   connectedClueIds: string[];

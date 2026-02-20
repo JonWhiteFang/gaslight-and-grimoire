@@ -124,6 +124,17 @@ export function validateContent(caseData: CaseData): ValidationResult {
           }
         }
       }
+
+      // Check outcome tier completeness for faculty-check choices
+      if (choice.faculty && (choice.difficulty !== undefined || choice.dynamicDifficulty)) {
+        for (const tier of ['critical', 'success', 'partial', 'failure', 'fumble'] as const) {
+          if (!choice.outcomes[tier]) {
+            const msg = `Scene "${scene.id}" → choice "${choice.id}" → missing outcome tier "${tier}"`;
+            errors.push(msg);
+            console.error(`[NarrativeEngine] ${msg}`);
+          }
+        }
+      }
     }
 
     // Check cluesAvailable references
@@ -362,63 +373,58 @@ const ABILITY_AUTO_SUCCEED_FLAGS: Partial<Record<Faculty, string>> = {
 // ─── Choice Processing ────────────────────────────────────────────────────────
 
 /**
- * Processes a player choice: performs any faculty check, applies npcEffect,
- * and returns the next scene ID with roll details.
- * Req 8.2 — NPC state changes wired to choice npcEffect
+ * Pure computation of a choice outcome. No store access, no side effects.
+ * Handles ability auto-succeed, dice checks, advantage, and DC resolution.
+ */
+export function computeChoiceResult(
+  choice: Choice,
+  state: GameState,
+): ChoiceResult {
+  if (choice.faculty && (choice.difficulty !== undefined || choice.dynamicDifficulty)) {
+    const abilityFlag = ABILITY_AUTO_SUCCEED_FLAGS[choice.faculty];
+    if (abilityFlag && state.flags[abilityFlag]) {
+      return { nextSceneId: choice.outcomes['critical'], tier: 'critical' };
+    }
+
+    const dc = resolveDC(choice, state.investigator);
+    const hasAdvantage =
+      choice.advantageIf?.some((clueId) => state.clues[clueId]?.isRevealed) ?? false;
+    const result = performCheck(choice.faculty, state.investigator, dc, hasAdvantage, false);
+    return {
+      nextSceneId: choice.outcomes[result.tier],
+      roll: result.roll,
+      modifier: result.modifier,
+      total: result.total,
+      tier: result.tier,
+    };
+  }
+
+  return {
+    nextSceneId: choice.outcomes['success'] ?? choice.outcomes['critical'],
+    tier: 'success',
+  };
+}
+
+/**
+ * Processes a player choice: computes the outcome, applies npcEffect,
+ * and navigates to the next scene.
+ * Req 8.2
  */
 export function processChoice(
   choice: Choice,
   state: GameState,
 ): ChoiceResult {
   const store = useStore.getState();
-  let nextSceneId: string;
-  let roll: number | undefined;
-  let modifier: number | undefined;
-  let total: number | undefined;
-  let tier: ChoiceResult['tier'];
+  const result = computeChoiceResult(choice, state);
 
-  if (choice.faculty && (choice.difficulty !== undefined || choice.dynamicDifficulty)) {
-    // Check for archetype ability auto-succeed
-    const abilityFlag = ABILITY_AUTO_SUCCEED_FLAGS[choice.faculty];
-    if (abilityFlag && state.flags[abilityFlag]) {
-      tier = 'critical';
-      nextSceneId = choice.outcomes['critical'];
-    } else {
-      // Perform faculty check
-      const dc = resolveDC(choice, state.investigator);
-      const hasAdvantage =
-        choice.advantageIf?.some((clueId) => state.clues[clueId]?.isRevealed) ??
-        false;
-      const result = performCheck(
-        choice.faculty,
-        state.investigator,
-        dc,
-        hasAdvantage,
-        false,
-      );
-      roll = result.roll;
-      modifier = result.modifier;
-      total = result.total;
-      tier = result.tier;
-      nextSceneId = choice.outcomes[result.tier];
-    }
-  } else {
-    // No check — use success path as default
-    nextSceneId = choice.outcomes['success'] ?? choice.outcomes['critical'];
-    tier = 'success';
-  }
-
-  // Apply NPC effects (Req 8.2)
   if (choice.npcEffect) {
     const { npcId, dispositionDelta, suspicionDelta } = choice.npcEffect;
     store.adjustDisposition(npcId, dispositionDelta);
     store.adjustSuspicion(npcId, suspicionDelta);
   }
 
-  // Navigate to the resolved scene
-  store.goToScene(nextSceneId);
-
-  return { nextSceneId, roll, modifier, total, tier };
+  store.goToScene(result.nextSceneId);
+  return result;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
