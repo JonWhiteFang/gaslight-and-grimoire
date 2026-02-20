@@ -8,45 +8,21 @@
 
 Ordered by impact on the playable experience.
 
-### 1.1 Load Game → Restore Case Data (CRITICAL)
+### 1.1 Load Game → Restore Case Data — ✅ FIXED (Phase A1)
 
-**Gap**: `metaSlice.loadGame` restores all `GameState` fields but doesn't restore `caseData`. After loading a save, `useCurrentScene()` returns null. The game screen is blank.
-
-**Desired state**: Req 11.7 — "restore the complete game state and resume at the saved Scene_Node."
-
-**What's needed**: After restoring `GameState`, call `loadCase(gameState.currentCase)` and set `caseData` on the narrative slice.
-
-**Effort**: ~5 lines in `metaSlice.ts`. Low risk. Blocks the entire "Continue Investigation" flow.
-
-**Files**: `src/store/slices/metaSlice.ts`
+**Resolution**: `metaSlice.loadGame` now calls `await loadCase(gameState.currentCase)` after restoring state and sets `caseData` in a second `set()` call.
 
 ---
 
-### 1.2 Hint Engine Wiring (HIGH)
+### 1.2 Hint Engine Wiring — ✅ FIXED (Phase A3)
 
-**Gap**: `trackActivity()` is never called from any component. The board-visit trigger (3+ visits without connections) is dead. The dwell timer starts from page load, not scene entry.
-
-**Desired state**: Req 13.1 — hints trigger on board visits and scene dwell time.
-
-**What's needed**: 3 `trackActivity` calls: `EvidenceBoard` mount (boardVisit), `EvidenceBoard` connection complete (connectionAttempt), `narrativeSlice.goToScene` (sceneChange).
-
-**Effort**: 3 one-line additions across 2 files. Low risk.
-
-**Files**: `src/components/EvidenceBoard/EvidenceBoard.tsx`, `src/store/slices/narrativeSlice.ts`
+**Resolution**: `trackActivity` calls added to `NarrativePanel` (sceneChange), `EvidenceBoard` (boardVisit on mount, connectionAttempt on connection complete).
 
 ---
 
-### 1.3 Archetype Ability Engine Integration (HIGH)
+### 1.3 Archetype Ability Engine Integration — ✅ FIXED (Phase A4)
 
-**Gap**: Ability activation sets world flags (`ability-auto-succeed-reason`, etc.) in `App.tsx`, but no engine code reads these flags. The dice engine doesn't check for auto-succeed flags. Abilities are cosmetically activated but mechanically inert.
-
-**Desired state**: Req 15.1–15.4 — abilities auto-succeed specific faculty checks.
-
-**What's needed**: In `processChoice` (or `performCheck`), check if the relevant ability flag is set. If so, return a `critical` or `success` result without rolling. Clear the flag after use.
-
-**Effort**: ~10 lines in `narrativeEngine.ts` or `diceEngine.ts`. Medium risk — must not break existing check flow.
-
-**Files**: `src/engine/narrativeEngine.ts` → `processChoice`, or `src/engine/diceEngine.ts` → `performCheck`
+**Resolution**: Added `ABILITY_AUTO_SUCCEED_FLAGS` mapping in `narrativeEngine.ts`. `processChoice` checks for ability flags before `performCheck` — if set, returns `critical` tier without rolling.
 
 ---
 
@@ -168,19 +144,9 @@ Ordered by impact on the playable experience.
 
 ---
 
-### 2.3 Deduplicate GameState Snapshot Builders
+### 2.3 Deduplicate GameState Snapshot Builders — ✅ FIXED (Phase A2)
 
-**Current**: `buildGameState` in `store/index.ts` and `snapshotGameState` in `metaSlice.ts` are identical. `NarrativePanel` also constructs the same object inline.
-
-**Required change**: Single shared function. Must avoid circular imports (store/index.ts imports slices, slices can't import from store/index.ts).
-
-**Incremental path**:
-1. Create `src/store/buildGameState.ts` — imports only from `../types`.
-2. `store/index.ts` re-exports from it.
-3. `metaSlice.ts` imports from it (replacing local `snapshotGameState`).
-4. `NarrativePanel` imports from it (replacing inline construction).
-
-**Risk**: Trivial. Mechanical refactor. Verify with `npm run build` + `npm run test:run`.
+**Resolution**: Created `src/utils/gameState.ts` with single `snapshotGameState` function. `store/index.ts` re-exports as `buildGameState`. All 4 duplicate sites now import from the shared util.
 
 ---
 
@@ -196,33 +162,21 @@ Ordered by impact on the playable experience.
 
 ## 3. Technical Debt Blocking Progress
 
-### 3.1 `loadGame` Doesn't Restore `caseData` — Blocks Save/Load
+### 3.1 ~~`loadGame` Doesn't Restore `caseData`~~ — ✅ FIXED
 
-This is the single most impactful bug. The "Continue Investigation" button on the title screen leads to a blank game screen. Every other save/load feature (autosave, manual save, save list, delete) works correctly, but the load path is broken.
-
-**Blocks**: Any user flow that involves returning to a saved game.
-
-**Fix**: Add `loadCase(gameState.currentCase)` call after state restoration in `loadGame`. ~5 lines.
+Fixed in Phase A1. `loadGame` now calls `loadCase(gameState.currentCase)` after state restoration.
 
 ---
 
-### 3.2 Ability Flags Not Read by Engine — Blocks Archetype Abilities
+### 3.2 ~~Ability Flags Not Read by Engine~~ — ✅ FIXED
 
-Ability activation sets world flags but no engine code reads them. The `performCheck` and `processChoice` functions don't check for auto-succeed flags. This means archetype abilities are visually activated but have no mechanical effect.
-
-**Blocks**: The core archetype differentiation mechanic (Req 15).
-
-**Fix**: Add a flag check in `processChoice` before calling `performCheck`. If the relevant ability flag is set, skip the roll and return success. ~10 lines.
+Fixed in Phase A4. `processChoice` checks `ABILITY_AUTO_SUCCEED_FLAGS` before `performCheck`.
 
 ---
 
-### 3.3 Hint Tracking Not Wired — Blocks Hint System
+### 3.3 ~~Hint Tracking Not Wired~~ — ✅ FIXED
 
-The hint engine's input pipeline is disconnected. `trackActivity` is never called. The board-visit trigger can never fire. The dwell timer starts from page load.
-
-**Blocks**: The hint system's primary trigger mechanism (Req 13.1).
-
-**Fix**: 3 one-line `trackActivity` calls in 2 files.
+Fixed in Phase A3. `trackActivity` calls added to `NarrativePanel` and `EvidenceBoard`.
 
 ---
 
@@ -252,10 +206,10 @@ These are ordered by effort (smallest first) and can each be a single PR.
 
 | # | Improvement | Effort | Files | Risk |
 |---|---|---|---|---|
-| 1 | Fix `loadGame` to restore `caseData` | ~5 lines | `metaSlice.ts` | Low |
-| 2 | Wire hint `trackActivity` calls | 3 lines | `EvidenceBoard.tsx`, `narrativeSlice.ts` | Low |
-| 3 | Add ability flag check in `processChoice` | ~10 lines | `narrativeEngine.ts` | Low-Med |
-| 4 | Deduplicate `snapshotGameState` → shared `buildGameState` | ~15 lines | 3 files | Trivial |
+| 1 | ~~Fix `loadGame` to restore `caseData`~~ | ✅ DONE | `metaSlice.ts` | — |
+| 2 | ~~Wire hint `trackActivity` calls~~ | ✅ DONE | `EvidenceBoard.tsx`, `NarrativePanel.tsx` | — |
+| 3 | ~~Add ability flag check in `processChoice`~~ | ✅ DONE | `narrativeEngine.ts` | — |
+| 4 | ~~Deduplicate `snapshotGameState` → shared `buildGameState`~~ | ✅ DONE | `utils/gameState.ts` + 5 files | — |
 | 5 | Move `buildDeduction` to engine layer | 0 new lines | 3 files (move + 2 import updates) | Trivial |
 | 6 | Add manual save button | ~10 lines | `HeaderBar.tsx` | Trivial |
 | 7 | Add faction reputation to CaseJournal | ~20 lines | `CaseJournal.tsx` | Trivial |
@@ -298,9 +252,9 @@ The issues are all incremental:
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Load game blank screen ships to users | High (it's broken now) | Critical — breaks resume flow | Fix #1: restore caseData on load |
+| ~~Load game blank screen ships to users~~ | ~~High~~ | ~~Critical~~ | ✅ Fixed in Phase A1 |
 | Content author adds choice with missing outcome tier | Medium | High — runtime crash | Fix #8: add tier completeness validation |
-| Ability activation appears to work but does nothing | High (it's broken now) | Medium — misleading UX | Fix #3: add flag check in processChoice |
+| ~~Ability activation appears to work but does nothing~~ | ~~High~~ | ~~Medium~~ | ✅ Fixed in Phase A4 |
 | New engine logic added to impure `processChoice` | Medium | Medium — untestable | Fix #10: extract pure `computeChoiceResult` |
 | Audio files added but SFX timing is wrong due to Immer batching | Low (Immer doesn't batch today) | Low | Fix #11: audio subscription |
 

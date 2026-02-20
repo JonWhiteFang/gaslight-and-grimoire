@@ -4,6 +4,7 @@ import type { CaseData, OutcomeTier } from '../../types';
 import { AudioManager } from '../../engine/audioManager';
 import { CaseProgression, type CaseCompletionResult } from '../../engine/caseProgression';
 import { loadCase } from '../../engine/narrativeEngine';
+import { snapshotGameState } from '../../utils/gameState';
 
 export interface CheckResult {
   roll: number;
@@ -75,7 +76,10 @@ export const createNarrativeSlice: StateCreator<
    */
   loadAndStartCase: async (caseId) => {
     const data = await loadCase(caseId);
-    const firstSceneId = Object.keys(data.scenes)[0];
+    const firstSceneId = data.meta.firstScene ?? (() => {
+      console.warn('[NarrativeEngine] No firstScene in meta.json, using Object.keys fallback');
+      return Object.keys(data.scenes)[0];
+    })();
 
     set((state) => {
       state.caseData = data;
@@ -105,19 +109,6 @@ export const createNarrativeSlice: StateCreator<
    * Req 10.5, 10.6, 10.8
    */
   completeCase: (caseId) => {
-    const store = get();
-    const gameState = {
-      investigator: store.investigator,
-      currentScene: store.currentScene,
-      currentCase: store.currentCase,
-      clues: store.clues,
-      deductions: store.deductions,
-      npcs: store.npcs,
-      flags: store.flags,
-      factionReputation: store.factionReputation,
-      sceneHistory: store.sceneHistory,
-      settings: store.settings,
-    };
-    return CaseProgression.completeCase(caseId, gameState);
+    return CaseProgression.completeCase(caseId, snapshotGameState(get()));
   },
 });

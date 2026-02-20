@@ -13,6 +13,7 @@
  */
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useClues, useDeductions, useStore } from '../../store';
+import { trackActivity } from '../../engine/hintEngine';
 import { ClueCard } from './ClueCard';
 import { ProgressSummary } from './ProgressSummary';
 import { ConnectionThread, type Connection, type ThreadPoint } from './ConnectionThread';
@@ -44,6 +45,11 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
   const [mousePos, setMousePos] = useState<ThreadPoint | null>(null);
 
   const boardRef = useRef<HTMLDivElement>(null);
+
+  // Track board visit for hint engine
+  useEffect(() => {
+    trackActivity({ type: 'boardVisit' });
+  }, []);
 
   const revealedClues = Object.values(clues).filter((c) => c.isRevealed);
   const clueCount = revealedClues.length;
@@ -125,6 +131,7 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
           ]);
           updateClueStatus(connectingFrom, 'connected');
           updateClueStatus(clueId, 'connected');
+          trackActivity({ type: 'connectionAttempt' });
         }
       }
 

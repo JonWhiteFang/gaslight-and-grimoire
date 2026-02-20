@@ -65,13 +65,13 @@
 
 | # | Case | Result | Details |
 |---|---|---|---|
-| 5.1 | Load game restores playable state | ⚠️ KNOWN BROKEN | `metaSlice.loadGame` doesn't call `loadCase` → `caseData` is null after load → blank game screen. No test covers this flow. |
-| 5.2 | Hint button on board visits | ⚠️ KNOWN BROKEN | `trackActivity` never called from components. Hint engine tests pass (they use `_setState` injection), but the integration is missing. |
-| 5.3 | Ability auto-succeed | ⚠️ KNOWN BROKEN | `App.tsx` sets flags, `AbilityButton.test.tsx` tests flag setting (passes), but no engine test verifies the flag is read during `processChoice`. The flags are inert. |
+| 5.1 | Load game restores playable state | ✅ FIXED (Phase A1) | `metaSlice.loadGame` now calls `loadCase` to restore `caseData` after state restoration. |
+| 5.2 | Hint button on board visits | ✅ FIXED (Phase A3) | `trackActivity` calls added to `NarrativePanel` (sceneChange) and `EvidenceBoard` (boardVisit, connectionAttempt). |
+| 5.3 | Ability auto-succeed | ✅ FIXED (Phase A4) | `processChoice` now checks `ABILITY_AUTO_SUCCEED_FLAGS` before `performCheck`. Returns `critical` tier without rolling when flag is set. |
 | 5.4 | Clue discovery card | ⚠️ KNOWN BROKEN | `ClueDiscoveryCard` is a stub. `NarrativePanel` never passes props to it. No test covers the notification flow. |
 | 5.5 | Encounter UI | ⚠️ KNOWN BROKEN | `encounterSystem.test.ts` passes (20 tests) — the engine works. But no component renders encounters. No integration test exists. |
 
-**Summary**: All 5 known-broken items are confirmed. Importantly, the existing test suite passes for all of them because the tests cover the working parts (engine logic, flag setting, component rendering) but not the broken integration points.
+**Summary**: 3 of 5 known-broken items fixed in Phase A. Remaining 2 (ClueDiscoveryCard stub, Encounter UI) are scheduled for Phase C and Phase D respectively.
 
 ---
 
@@ -89,8 +89,8 @@
 - **Audio system is silent**: No `.mp3` files in repo. Howler silently handles missing files. The game runs fine without audio — it's a polish item, not a blocker.
 
 ### What's broken and blocks progress
-1. **Load game blank screen** (5.1): The "Continue Investigation" flow is completely broken. This is the #1 blocker — any user who saves and returns gets a blank screen. Fix: ~5 lines in `metaSlice.ts`.
-2. **Abilities are inert** (5.3): Archetype abilities appear to activate but have no mechanical effect. This undermines the core character differentiation. Fix: ~10 lines in `narrativeEngine.ts`.
-3. **Hint tracking disconnected** (5.2): The hint system's primary trigger never fires. Less critical than #1 and #2 but still a broken feature. Fix: 3 lines across 2 files.
+1. ~~**Load game blank screen** (5.1)~~: ✅ Fixed in Phase A1.
+2. ~~**Abilities are inert** (5.3)~~: ✅ Fixed in Phase A4.
+3. ~~**Hint tracking disconnected** (5.2)~~: ✅ Fixed in Phase A3.
 
-All three blockers are small fixes (Phase 1 of the gap closure plan). The codebase is in excellent shape for starting that work — clean build, full test suite passing, no dependency issues.
+All three Phase A blockers are resolved. Remaining broken features (ClueDiscoveryCard stub, Encounter UI) are additive — they don't block existing functionality.

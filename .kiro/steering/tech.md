@@ -26,6 +26,7 @@ inclusion: always
   - `useInvestigator`, `useNarrative`, `useClues`, `useDeductions`, `useNpcs`, `useFlags`, `useFactionReputation`, `useSettings`, `useCaseData`
 - Use `useCurrentScene()` to get the resolved `SceneNode` for the current scene (handles variant resolution)
 - Use `buildGameState(store)` to build a `GameState` snapshot for engine functions
+  - This is a re-export of `snapshotGameState` from `src/utils/gameState.ts` — the single canonical snapshot builder used by store, engine, and components
 - Always use action selector hooks for mutations:
   - `useInvestigatorActions`, `useNarrativeActions`, `useEvidenceActions`, `useNpcActions`, `useWorldActions`, `useMetaActions`
 - State shape is flat and normalised: `Record<string, T>` keyed by id — no deeply nested objects or arrays

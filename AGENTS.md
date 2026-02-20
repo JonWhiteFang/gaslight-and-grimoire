@@ -84,7 +84,7 @@ Components live in `src/components/[Name]/` with `index.ts` barrel exports. Stat
 ```
 content/
   cases/[case-name]/          # Main cases (3-act structure)
-    meta.json                 # CaseMeta: id, title, synopsis, acts, facultyDistribution
+    meta.json                 # CaseMeta: id, title, synopsis, acts, firstScene, facultyDistribution
     act1.json, act2.json, act3.json  # SceneNode[] per act
     clues.json                # Array of Clue objects
     npcs.json                 # Array of NPCState objects
@@ -95,6 +95,8 @@ content/
 
 src/
   types/index.ts              # ALL type definitions live here
+  utils/
+    gameState.ts              # snapshotGameState — shared GameState builder (used by store + engine)
   store/
     index.ts                  # useStore + selector hooks + action hooks
     types.ts                  # GameStore = intersection of all slices
@@ -176,7 +178,7 @@ Rules:
 - `evaluateConditions` — pure AND logic over `Condition[]` against `GameState`.
 - `resolveScene` — returns variant scene if its condition is met, otherwise base scene.
 - `applyOnEnterEffects` — applies `Effect[]` to the store (the one non-pure function).
-- `processChoice` — performs faculty check (using `resolveDC` for dynamic difficulty), applies NPC effects, navigates to next scene.
+- `processChoice` — performs faculty check (using `resolveDC` for dynamic difficulty), applies NPC effects, navigates to next scene. Checks archetype ability auto-succeed flags (`ability-auto-succeed-reason`, `ability-auto-succeed-vigor`, `ability-auto-succeed-influence`) before rolling — if set, returns `critical` tier without a dice roll.
 - `canDiscoverClue` — pure gate check for `ClueDiscovery` requirements.
 - `validateContent` — checks for broken scene-graph edges and missing clue references.
 
@@ -191,6 +193,7 @@ Rules:
 
 ### Hints (hintEngine.ts)
 - Stateful singleton tracking board visits, connection attempts, scene dwell time.
+- `trackActivity()` called from `NarrativePanel` (scene changes), `EvidenceBoard` (board visits, connection attempts).
 - Triggers after 3+ board visits with no connections OR 5+ minutes on a scene.
 - 3 escalating levels: narrative nudge → specific clue suggestion → direct reveal.
 - Level 3 gated behind Level 2 being shown first. Respects `hintsEnabled` setting.
@@ -201,6 +204,7 @@ Rules:
 - Migration pipeline: v0→v1 adds `factionReputation`. Current version: 1.
 - `saveGame` generates unique IDs (`save-{timestamp}`), capped at 10 manual saves.
 - `autoSave` writes to the `'autosave'` slot, triggered by `goToScene` (scene frequency) or ChoicePanel (choice frequency) based on `autoSaveFrequency` setting.
+- `loadGame` restores all `GameState` fields and re-fetches `caseData` via `loadCase(currentCase)`.
 
 ### Audio (audioManager.ts)
 - Howler.js with lazy-cached Howl instances per SFX event.
@@ -257,18 +261,15 @@ Base faculty score: 8. Bonus points to allocate: 12. Composure and Vitality: 0�
 These are documented in detail in `devdocs/evolution/gap_analysis.md` and `smoke_tests/check_what_is_working/report.md`.
 
 ### Critical (blocks core functionality)
-- **`loadGame` doesn't restore `caseData`** — After loading a save, `useCurrentScene()` returns null → blank game screen. Fix: call `loadCase(gameState.currentCase)` after restoring state in `src/store/slices/metaSlice.ts`.
+- None remaining. `loadGame` caseData restoration was fixed in Phase A.
 
 ### High (feature is broken/inert)
-- **Archetype abilities are mechanically inert** — `App.tsx` sets world flags (`ability-auto-succeed-reason`, etc.) but no engine code reads them. `processChoice` in `src/engine/narrativeEngine.ts` needs a flag check before `performCheck`.
-- **Hint tracking never wired** — `trackActivity()` in `src/engine/hintEngine.ts` is never called from any component. Board-visit trigger is dead. Dwell timer starts from page load, not scene entry.
 - **Encounter system has no UI** — Engine functions (`startEncounter`, `processEncounterChoice`, `getEncounterChoices`) are complete and tested. No component renders encounters.
 - **`ClueDiscoveryCard` is a stub** — `src/components/NarrativePanel/ClueDiscoveryCard.tsx` has placeholder code. `NarrativePanel` never passes props to it.
 
 ### Medium (architectural debt)
 - **`processChoice` is impure** — Calls `useStore.getState()` for NPC effects and navigation. Makes unit testing require full store setup. See `devdocs/evolution/refactoring_opportunities.md` R1.
 - **SFX inside Immer `set()` callbacks** — `AudioManager.playSfx()` called during state mutations in 3 slice files. Should be a store subscription. See R3.
-- **`snapshotGameState` duplicated** — Same 10-field builder exists in `src/store/index.ts`, `src/store/slices/metaSlice.ts`, and inline in `src/components/NarrativePanel/NarrativePanel.tsx`. See R2.
 - **`buildDeduction` in wrong layer** — `src/components/EvidenceBoard/buildDeduction.ts` is a pure function tested in `src/engine/__tests__/`. Should live in `src/engine/`. See R4.
 - **Engine ↔ Store circular dependency** — `narrativeEngine.ts` and `caseProgression.ts` import `useStore`. Store slices import engine modules. Works due to lazy JS module resolution but violates intended layering.
 
@@ -281,7 +282,7 @@ Things to be aware of when making changes:
 - **Evidence Board connections live in React state, not the store** — Closing and reopening the board loses all connections. This is by design (connections are transient until deduction).
 - **`adjustDisposition` has a hidden cross-slice call** — After updating NPC disposition, it calls `get().adjustReputation(faction, delta * 0.5)` for faction-aligned NPCs. This coupling is in `src/store/slices/npcSlice.ts`.
 - **Faction reputation is unbounded** — Disposition is clamped [-10,+10], suspicion [0,10], composure/vitality [0,10]. Faction reputation has no clamp.
-- **`Object.keys(data.scenes)[0]` determines first scene** — In `loadAndStartCase`. Relies on JSON insertion order. Fragile.
+- **`Object.keys(data.scenes)[0]` is the fallback for first scene** — In `loadAndStartCase`. Used only when `meta.json` lacks a `firstScene` field. Both existing cases now have `firstScene` set explicitly.
 - **No audio files in repo** — The audio system is fully coded but silent. Howler silently handles missing files.
 - **`Date.now()` and `Math.random()` used directly** — In `diceEngine.rollD20()`, `hintEngine`, `saveManager`, `metaSlice.saveGame`, `buildDeduction`. Not injectable. Tests work around this.
 
@@ -289,7 +290,7 @@ Things to be aware of when making changes:
 
 See `devdocs/evolution/implementation_roadmap.md` for the full phased plan. Summary:
 
-- **Phase A (Foundation)**: Fix loadGame, dedup snapshots, wire hints, fix abilities, add validation, add firstScene — ~1 day
+- **Phase A (Foundation)**: ✅ COMPLETE — Fixed loadGame, deduped snapshots, wired hints, fixed abilities, added validation, added firstScene
 - **Phase B (Core Refactoring)**: Extract pure computeChoiceResult, move buildDeduction, audio subscription, consolidate types, runtime validation — ~2 days
 - **Phase C (Gap Filling)**: ClueDiscoveryCard, save button, faction display, error display, case completion screen — ~1.5 days
 - **Phase D (Integration)**: Encounter UI, stale state cleanup, remove dead code — ~2.5 days

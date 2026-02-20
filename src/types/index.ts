@@ -233,6 +233,7 @@ export interface CaseMeta {
   synopsis: string;
   acts: number;
   facultyDistribution: Partial<Record<Faculty, number>>;
+  firstScene?: string;
 }
 
 export interface CaseData {
@@ -248,6 +249,7 @@ export interface VignetteMeta {
   title: string;
   synopsis: string;
   triggerCondition?: Condition;
+  firstScene?: string;
 }
 
 export interface VignetteData {

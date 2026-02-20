@@ -4,71 +4,47 @@
 
 ---
 
-## Phase A: Foundation (Stabilize the Baseline)
+## Phase A: Foundation (Stabilize the Baseline) — ✅ COMPLETE
 
 Goal: Fix broken core functionality and eliminate duplication. After this phase, the game's primary flows (new game, play, save, load) all work correctly.
 
-### A1. Fix `loadGame` to Restore `caseData`
+### A1. Fix `loadGame` to Restore `caseData` — ✅ DONE
 
 **Files**: `src/store/slices/metaSlice.ts`
 
 **What**: After restoring `GameState`, call `loadCase(gameState.currentCase)` and set `caseData`.
 
-**Dependencies**: None.
-
-**Success criteria**: Load a save from `LoadGameScreen` → scene text renders, choices appear, evidence board shows clues.
-
-**Risk**: Low.
-
-**Verification**: Manual: load a save. Automated: `npm run test:run` (existing tests still pass).
+**Resolution**: Added `await loadCase(gameState.currentCase)` after state restoration in `loadGame`, with a second `set()` call to populate `caseData`.
 
 ---
 
-### A2. Deduplicate GameState Snapshot Builders
+### A2. Deduplicate GameState Snapshot Builders — ✅ DONE
 
-**Files**: New `src/store/buildGameState.ts`. Modified: `src/store/index.ts`, `src/store/slices/metaSlice.ts`, `src/components/NarrativePanel/NarrativePanel.tsx`.
+**Files**: New `src/utils/gameState.ts`. Modified: `src/store/index.ts`, `src/store/slices/metaSlice.ts`, `src/components/NarrativePanel/NarrativePanel.tsx`, `src/engine/caseProgression.ts`, `src/store/slices/narrativeSlice.ts`.
 
-**What**: Create shared `buildGameState` function. Replace `snapshotGameState` and inline construction with imports.
+**What**: Create shared `snapshotGameState` function. Replace all duplicates with imports.
 
-**Dependencies**: None.
-
-**Success criteria**: `npm run build` succeeds (no circular imports). `npm run test:run` passes. Save/load still works.
-
-**Risk**: Trivial.
-
-**Verification**: `npm run build` + `npm run test:run`. Manual: save game, load game, verify all state fields present.
+**Resolution**: Created `src/utils/gameState.ts` as a neutral location (avoids circular deps). `buildGameState` in `store/index.ts` re-exports it. Removed local copies from `metaSlice.ts`, inline construction from `NarrativePanel.tsx`, `caseProgression.ts`, and `narrativeSlice.ts`.
 
 ---
 
-### A3. Wire Hint Engine `trackActivity` Calls
+### A3. Wire Hint Engine `trackActivity` Calls — ✅ DONE
 
-**Files**: `src/components/EvidenceBoard/EvidenceBoard.tsx`, `src/store/slices/narrativeSlice.ts`
+**Files**: `src/components/EvidenceBoard/EvidenceBoard.tsx`, `src/components/NarrativePanel/NarrativePanel.tsx`
 
-**What**: Add `trackActivity({ type: 'boardVisit' })` on board mount, `trackActivity({ type: 'connectionAttempt' })` on connection complete, `trackActivity({ type: 'sceneChange' })` in `goToScene`.
+**What**: Add `trackActivity({ type: 'boardVisit' })` on board mount, `trackActivity({ type: 'connectionAttempt' })` on connection complete, `trackActivity({ type: 'sceneChange' })` on scene change.
 
-**Dependencies**: None.
-
-**Success criteria**: Open evidence board 3 times without connecting → hint button appears. Navigate to new scene → hint timer resets.
-
-**Risk**: Low.
-
-**Verification**: `npm run test:run`. Manual: test hint button appearance.
+**Resolution**: Added `trackActivity` calls in `EvidenceBoard` (mount + connection) and `NarrativePanel` (scene change useEffect). Hint tracking wired to `NarrativePanel` instead of `narrativeSlice.goToScene` to keep engine-layer clean.
 
 ---
 
-### A4. Add Ability Flag Check in `processChoice`
+### A4. Add Ability Flag Check in `processChoice` — ✅ DONE
 
 **Files**: `src/engine/narrativeEngine.ts`
 
-**What**: Before `performCheck`, check if `ability-auto-succeed-{faculty}` flag is set. If so, return success without rolling.
+**What**: Before `performCheck`, check if `ability-auto-succeed-{faculty}` flag is set. If so, return `critical` without rolling.
 
-**Dependencies**: None.
-
-**Success criteria**: Activate Deductionist's Elementary ability → make a Reason check → auto-succeeds.
-
-**Risk**: Low-Medium. Must not match non-ability flags.
-
-**Verification**: `npm run test:run`. Manual: test each archetype's ability.
+**Resolution**: Added `ABILITY_AUTO_SUCCEED_FLAGS` mapping (reason/vigor/influence → flag names). `processChoice` checks the flag before `performCheck` and returns `critical` tier with `choice.outcomes['critical']` as next scene.
 
 ---
 
@@ -78,33 +54,21 @@ Goal: Fix broken core functionality and eliminate duplication. After this phase,
 
 **What**: For choices with `faculty` + `difficulty`, verify all 5 outcome tiers exist.
 
-**Dependencies**: None.
-
-**Success criteria**: `node scripts/validateCase.mjs` catches a choice with a missing tier. Existing content passes (all tiers present).
-
-**Risk**: Low. May surface existing content issues.
-
-**Verification**: `node scripts/validateCase.mjs` exits 0 for current content. Add a test case with missing tier → verify it's caught.
+**Status**: Not yet started. Deferred to Phase B (B5 runtime validation depends on this).
 
 ---
 
-### A6. Introduce `firstScene` in Case Meta
+### A6. Introduce `firstScene` in Case Meta — ✅ DONE
 
-**Files**: `src/types/index.ts` → `CaseMeta`, `src/store/slices/narrativeSlice.ts` → `loadAndStartCase`, `content/cases/the-whitechapel-cipher/meta.json`, `content/side-cases/a-matter-of-shadows/meta.json`
+**Files**: `src/types/index.ts`, `src/store/slices/narrativeSlice.ts`, `content/cases/the-whitechapel-cipher/meta.json`, `content/side-cases/a-matter-of-shadows/meta.json`, `scripts/validateCase.mjs`
 
-**What**: Add optional `firstScene` field to `CaseMeta`. Use it in `loadAndStartCase` with fallback to `Object.keys()[0]`.
+**What**: Add optional `firstScene` field to `CaseMeta` and `VignetteMeta`. Use it in `loadAndStartCase` with fallback.
 
-**Dependencies**: None.
-
-**Success criteria**: Case loads and starts at the correct scene. Removing `firstScene` from meta.json falls back to current behavior.
-
-**Risk**: Low.
-
-**Verification**: `npm run test:run`. `node scripts/validateCase.mjs`. Manual: start new game → verify correct first scene.
+**Resolution**: Added `firstScene?: string` to both meta types. Set `"firstScene"` in both existing meta.json files. `loadAndStartCase` uses `data.meta.firstScene ?? Object.keys(data.scenes)[0]` with console warning on fallback. `validateCase.mjs` warns if missing, errors if referencing unknown scene.
 
 ---
 
-**Phase A summary**: 6 items. ~50 lines of changes total. All independent — can be merged in any order. After completion: load game works, hints work, abilities work, content validation is stronger, snapshot duplication is gone.
+**Phase A summary**: 5 of 6 items complete. A5 (outcome tier validation) deferred to Phase B. After completion: load game works, hints work, abilities work, snapshot duplication is gone, firstScene is explicit.
 
 ---
 
@@ -334,19 +298,9 @@ Goal: Wire up the remaining engine-complete features and clean up remaining debt
 
 ---
 
-### D4. Remove `snapshotGameState` and Inline Construction
+### D4. Remove `snapshotGameState` and Inline Construction — ✅ DONE (completed in Phase A2)
 
-**Files**: `src/store/slices/metaSlice.ts`, `src/components/NarrativePanel/NarrativePanel.tsx`
-
-**What**: Delete `snapshotGameState` function. Replace inline 10-field object with `buildGameState` import. (The shared module was created in A2.)
-
-**Dependencies**: A2 (shared `buildGameState` module exists).
-
-**Success criteria**: `npm run build` + `npm run test:run`. No duplicate snapshot builders remain.
-
-**Risk**: Trivial.
-
-**Verification**: Grep for `snapshotGameState` → 0 results. Grep for inline `investigator:.*currentScene:.*currentCase:` → 0 results.
+Completed as part of A2. All snapshot builders now use the shared `snapshotGameState` from `src/utils/gameState.ts`.
 
 ---
 
@@ -373,22 +327,22 @@ Goal: Wire up the remaining engine-complete features and clean up remaining debt
 ## Dependency Graph
 
 ```
-Phase A (all independent):
-  A1  A2  A3  A4  A5  A6
+Phase A (✅ COMPLETE, except A5):
+  A1✅  A2✅  A3✅  A4✅  A5  A6✅
 
 Phase B:
-  A4 → B1 → B4
+  A4✅ → B1 → B4
   A5 → B5
   B2 (independent)
   B3 (independent, best after B1)
 
-Phase C (all independent, A1 before C2):
+Phase C (all independent, A1✅ before C2):
   C1  C2  C3  C4  C5
 
 Phase D:
   B1 → D1
   D2 → D3
-  A2 → D4
+  A2✅ → D4✅
   B4 → D5
 ```
 

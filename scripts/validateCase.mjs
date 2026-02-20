@@ -41,6 +41,15 @@ function validateCase(dir) {
   }
 
   const errors = [];
+  const warnings = [];
+
+  // Check firstScene reference
+  const meta = readJson(join(dir, 'meta.json'));
+  if (!meta.firstScene) {
+    warnings.push('meta.json missing "firstScene" field — relying on Object.keys fallback');
+  } else if (!sceneIds.has(meta.firstScene)) {
+    errors.push(`meta.json "firstScene" references unknown scene "${meta.firstScene}"`);
+  }
 
   for (const scene of allScenes) {
     for (const choice of scene.choices || []) {
@@ -67,7 +76,7 @@ function validateCase(dir) {
     }
   }
 
-  return { sceneIds, clueIds, errors };
+  return { sceneIds, clueIds, errors, warnings };
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -97,7 +106,7 @@ let totalErrors = 0;
 
 for (const dir of dirs) {
   const name = dir.split('/').slice(-2).join('/');
-  const { sceneIds, clueIds, errors } = validateCase(dir);
+  const { sceneIds, clueIds, errors, warnings } = validateCase(dir);
 
   if (errors.length === 0) {
     console.log(`✓ ${name} — ${sceneIds.size} scenes, ${clueIds.size} clues`);
@@ -106,6 +115,7 @@ for (const dir of dirs) {
     for (const e of errors) console.error(`    ${e}`);
     totalErrors += errors.length;
   }
+  for (const w of warnings) console.warn(`  ⚠ ${name}: ${w}`);
 }
 
 if (totalErrors > 0) {

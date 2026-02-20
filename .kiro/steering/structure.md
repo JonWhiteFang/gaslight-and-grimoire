@@ -11,7 +11,7 @@ All narrative content lives under `/content` as JSON. Game logic lives under `/s
 ```
 /content
   /cases/[case-name]/
-    meta.json       # CaseMeta: id, title, synopsis, acts, facultyDistribution
+    meta.json       # CaseMeta: id, title, synopsis, acts, firstScene, facultyDistribution
     act1.json       # SceneNode[] for Act I
     act2.json       # SceneNode[] for Act II
     act3.json       # SceneNode[] for Act III
@@ -19,7 +19,7 @@ All narrative content lives under `/content` as JSON. Game logic lives under `/s
     npcs.json       # Record<string, NPCState> keyed by npc id
     variants.json   # SceneNode[] triggered by cross-case flags (variantOf + variantCondition)
   /side-cases/[vignette-name]/
-    meta.json       # VignetteMeta: id, title, synopsis, optional triggerCondition
+    meta.json       # VignetteMeta: id, title, synopsis, optional triggerCondition, optional firstScene
     scenes.json     # Record<string, SceneNode> (two-act structure)
     clues.json
     npcs.json
@@ -64,7 +64,7 @@ src/store/
     metaSlice.ts           # settings: GameSettings; saveGame, loadGame, updateSettings
 ```
 
-Always use the exported selector hooks (`useInvestigator`, `useClues`, `useCaseData`, etc.) rather than subscribing to the full store. For actions, use the corresponding action selectors (`useInvestigatorActions`, `useEvidenceActions`, etc.). Use `useCurrentScene()` to get the resolved `SceneNode` for the current scene. Use `buildGameState(store)` to build a `GameState` snapshot for engine functions.
+Always use the exported selector hooks (`useInvestigator`, `useClues`, `useCaseData`, etc.) rather than subscribing to the full store. For actions, use the corresponding action selectors (`useInvestigatorActions`, `useEvidenceActions`, etc.). Use `useCurrentScene()` to get the resolved `SceneNode` for the current scene. Use `buildGameState(store)` to build a `GameState` snapshot for engine functions — this is a re-export of `snapshotGameState` from `src/utils/gameState.ts`, the single canonical snapshot builder.
 
 ## Key Data Models
 

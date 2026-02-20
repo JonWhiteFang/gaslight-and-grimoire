@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import type { GameStore } from './types';
-import type { GameState, SceneNode } from '../types';
+import type { SceneNode } from '../types';
+import { snapshotGameState } from '../utils/gameState';
 import { createInvestigatorSlice } from './slices/investigatorSlice';
 import { createNarrativeSlice } from './slices/narrativeSlice';
 import { createEvidenceSlice } from './slices/evidenceSlice';
@@ -90,20 +91,7 @@ export const useMetaActions = () =>
 // ─── Derived selectors ────────────────────────────────────────────────────────
 
 /** Builds a GameState snapshot from the store (for engine functions). */
-export function buildGameState(s: GameStore): GameState {
-  return {
-    investigator: s.investigator,
-    currentScene: s.currentScene,
-    currentCase: s.currentCase,
-    clues: s.clues,
-    deductions: s.deductions,
-    npcs: s.npcs,
-    flags: s.flags,
-    factionReputation: s.factionReputation,
-    sceneHistory: s.sceneHistory,
-    settings: s.settings,
-  };
-}
+export const buildGameState = snapshotGameState;
 
 /** Resolves the current SceneNode from loaded caseData, or null if unavailable. */
 export function useCurrentScene(): SceneNode | null {

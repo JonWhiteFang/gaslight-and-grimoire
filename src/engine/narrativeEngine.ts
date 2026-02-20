@@ -18,6 +18,7 @@ import type {
   Effect,
   EncounterRound,
   EncounterState,
+  Faculty,
   GameState,
   NPCState,
   NpcSuspicionTier,
@@ -350,6 +351,14 @@ export function canDiscoverClue(
   return true;
 }
 
+// ─── Ability Auto-Succeed Flags ───────────────────────────────────────────────
+
+const ABILITY_AUTO_SUCCEED_FLAGS: Partial<Record<Faculty, string>> = {
+  reason: 'ability-auto-succeed-reason',
+  vigor: 'ability-auto-succeed-vigor',
+  influence: 'ability-auto-succeed-influence',
+};
+
 // ─── Choice Processing ────────────────────────────────────────────────────────
 
 /**
@@ -369,23 +378,30 @@ export function processChoice(
   let tier: ChoiceResult['tier'];
 
   if (choice.faculty && (choice.difficulty !== undefined || choice.dynamicDifficulty)) {
-    // Perform faculty check
-    const dc = resolveDC(choice, state.investigator);
-    const hasAdvantage =
-      choice.advantageIf?.some((clueId) => state.clues[clueId]?.isRevealed) ??
-      false;
-    const result = performCheck(
-      choice.faculty,
-      state.investigator,
-      dc,
-      hasAdvantage,
-      false,
-    );
-    roll = result.roll;
-    modifier = result.modifier;
-    total = result.total;
-    tier = result.tier;
-    nextSceneId = choice.outcomes[result.tier];
+    // Check for archetype ability auto-succeed
+    const abilityFlag = ABILITY_AUTO_SUCCEED_FLAGS[choice.faculty];
+    if (abilityFlag && state.flags[abilityFlag]) {
+      tier = 'critical';
+      nextSceneId = choice.outcomes['critical'];
+    } else {
+      // Perform faculty check
+      const dc = resolveDC(choice, state.investigator);
+      const hasAdvantage =
+        choice.advantageIf?.some((clueId) => state.clues[clueId]?.isRevealed) ??
+        false;
+      const result = performCheck(
+        choice.faculty,
+        state.investigator,
+        dc,
+        hasAdvantage,
+        false,
+      );
+      roll = result.roll;
+      modifier = result.modifier;
+      total = result.total;
+      tier = result.tier;
+      nextSceneId = choice.outcomes[result.tier];
+    }
   } else {
     // No check — use success path as default
     nextSceneId = choice.outcomes['success'] ?? choice.outcomes['critical'];

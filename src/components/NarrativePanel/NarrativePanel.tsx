@@ -8,14 +8,14 @@
  * Req 2.2, 2.3, 2.4, 4.6, 4.7, 4.8
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { useStore, useCurrentScene } from '../../store';
+import { useStore, useCurrentScene, buildGameState } from '../../store';
 import { applyOnEnterEffects, canDiscoverClue } from '../../engine/narrativeEngine';
+import { trackActivity } from '../../engine/hintEngine';
 import { SceneText } from './SceneText';
 import { SceneIllustration } from './SceneIllustration';
 import { DiceRollOverlay } from './DiceRollOverlay';
 import { OutcomeBanner } from './OutcomeBanner';
 import { ClueDiscoveryCard } from './ClueDiscoveryCard';
-import type { GameState } from '../../types';
 
 export function NarrativePanel() {
   const currentSceneId = useStore((s) => s.currentScene);
@@ -47,24 +47,14 @@ export function NarrativePanel() {
     if (!scene || currentSceneId === prevSceneRef.current) return;
     prevSceneRef.current = currentSceneId;
 
+    trackActivity({ type: 'sceneChange' });
+
     if (scene.onEnter && scene.onEnter.length > 0) {
       applyOnEnterEffects(scene.onEnter);
     }
 
     // Auto-discover clues with method 'automatic'
-    const state = useStore.getState();
-    const gameState: GameState = {
-      investigator: state.investigator,
-      currentScene: state.currentScene,
-      currentCase: state.currentCase,
-      clues: state.clues,
-      deductions: state.deductions,
-      npcs: state.npcs,
-      flags: state.flags,
-      factionReputation: state.factionReputation,
-      sceneHistory: state.sceneHistory,
-      settings: state.settings,
-    };
+    const gameState = buildGameState(useStore.getState());
     for (const discovery of scene.cluesAvailable) {
       if (discovery.method === 'automatic' && canDiscoverClue(discovery, gameState)) {
         discoverClue(discovery.clueId);

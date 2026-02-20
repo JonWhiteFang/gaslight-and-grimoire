@@ -7,6 +7,7 @@
 import type { Faculty, GameState } from '../types';
 import { useStore } from '../store';
 import { SaveManager } from './saveManager';
+import { snapshotGameState } from '../utils/gameState';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -70,19 +71,7 @@ export const CaseProgression = {
     // 3. Persist state (flags, faction reputation, NPC state are already in the
     //    store — just auto-save so they survive across sessions). (Req 10.5)
     const freshState = useStore.getState();
-    const gameState: GameState = {
-      investigator: freshState.investigator,
-      currentScene: freshState.currentScene,
-      currentCase: freshState.currentCase,
-      clues: freshState.clues,
-      deductions: freshState.deductions,
-      npcs: freshState.npcs,
-      flags: freshState.flags,
-      factionReputation: freshState.factionReputation,
-      sceneHistory: freshState.sceneHistory,
-      settings: freshState.settings,
-    };
-    SaveManager.save('autosave', gameState);
+    SaveManager.save('autosave', snapshotGameState(freshState));
 
     return { facultyBonusGranted, vignetteUnlocked };
   },

@@ -1,7 +1,9 @@
 import type { StateCreator } from 'zustand';
 import type { GameStore } from '../types';
-import type { GameSettings, GameState } from '../../types';
+import type { GameSettings } from '../../types';
 import { SaveManager } from '../../engine/saveManager';
+import { loadCase } from '../../engine/narrativeEngine';
+import { snapshotGameState } from '../../utils/gameState';
 
 const MAX_MANUAL_SAVES = 10;
 
@@ -22,21 +24,6 @@ const defaultSettings: GameSettings = {
   autoSaveFrequency: 'scene',
   audioVolume: { ambient: 0.6, sfx: 0.8 },
 };
-
-function snapshotGameState(s: GameStore): GameState {
-  return {
-    investigator: s.investigator,
-    currentScene: s.currentScene,
-    currentCase: s.currentCase,
-    clues: s.clues,
-    deductions: s.deductions,
-    npcs: s.npcs,
-    flags: s.flags,
-    factionReputation: s.factionReputation,
-    sceneHistory: s.sceneHistory,
-    settings: s.settings,
-  };
-}
 
 export const createMetaSlice: StateCreator<
   GameStore,
@@ -92,5 +79,13 @@ export const createMetaSlice: StateCreator<
       state.sceneHistory = gameState.sceneHistory;
       state.settings = gameState.settings;
     });
+
+    // Restore caseData by re-loading the case JSON (Task 2: fix loadGame)
+    if (gameState.currentCase) {
+      const caseData = await loadCase(gameState.currentCase);
+      set((state) => {
+        state.caseData = caseData;
+      });
+    }
   },
 });

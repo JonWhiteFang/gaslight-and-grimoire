@@ -2,6 +2,7 @@
   "id": "a-matter-of-shadows",
   "title": "A Matter of Shadows",
   "synopsis": "A Lamplighter courier has gone missing in Southwark with a package that was never meant to exist. A favour owed, a dark alley, and the uncomfortable feeling that you are being watched from both sides.",
+  "firstScene": "amos-act1-southwark-bridge",
   "triggerCondition": {
     "type": "factionReputation",
     "target": "Lamplighters",

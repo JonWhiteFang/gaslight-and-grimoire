@@ -26,25 +26,9 @@
 
 ---
 
-## R2. Deduplicate GameState Snapshot to Shared Module
+## R2. ~~Deduplicate GameState Snapshot to Shared Module~~ — ✅ DONE (Phase A2)
 
-**Current pattern**: Three locations build the same 10-field `GameState` plain object:
-- `src/store/index.ts` → `buildGameState` (exported)
-- `src/store/slices/metaSlice.ts` → `snapshotGameState` (local function)
-- `src/components/NarrativePanel/NarrativePanel.tsx` → inline 10-field object in `useEffect`
-
-**Proposed pattern**: Create `src/store/buildGameState.ts` that exports the single function. Import it from all three locations. Delete the duplicates.
-
-**Benefits**:
-- **Maintainability**: Adding a field to `GameState` requires changing one function, not three.
-- **Correctness**: Eliminates field drift risk. If `GameState` gains a field and one snapshot builder misses it, saves silently lose data.
-- **AI-friendliness**: AI agents modifying `GameState` only need to update one snapshot function.
-
-**Effort**: ~15 lines in new file. 3 files updated (import changes). 0 new logic.
-
-**Risk**: Trivial. Must avoid circular imports — the new file imports only from `../types`, not from `store/index.ts`.
-
-**ROI**: High effort-to-impact ratio. 15 minutes of work eliminates a class of bugs permanently.
+**Resolution**: Created `src/utils/gameState.ts` exporting `snapshotGameState`. `store/index.ts` re-exports as `buildGameState`. All 4 duplicate sites (metaSlice, NarrativePanel, caseProgression, narrativeSlice) now import from the shared util.
 
 ---
 
@@ -92,22 +76,9 @@ Side effects inside state mutations violate the Immer purity contract and make s
 
 ---
 
-## R5. Introduce `firstScene` Field in Case Meta
+## R5. ~~Introduce `firstScene` Field in Case Meta~~ — ✅ DONE (Phase A6)
 
-**Current pattern**: `src/store/slices/narrativeSlice.ts` → `loadAndStartCase` uses `Object.keys(data.scenes)[0]` to determine the first scene. This relies on JSON key insertion order — correct in modern JS engines but fragile if a tool re-sorts keys.
-
-**Proposed pattern**: Add `firstScene: string` to `CaseMeta` interface and to each `meta.json`. Read it in `loadAndStartCase` instead of `Object.keys()[0]`.
-
-**Benefits**:
-- **Correctness**: Explicit is better than implicit. The first scene is a content authoring decision, not a runtime inference.
-- **Robustness**: Immune to JSON key reordering by formatters, linters, or content tools.
-- **AI-friendliness**: AI agents authoring case content can set the entry point explicitly.
-
-**Effort**: 1 field added to type. 1 line changed in `loadAndStartCase`. 2 `meta.json` files updated.
-
-**Risk**: Low. Fallback to `Object.keys()[0]` if `firstScene` is undefined preserves backward compatibility.
-
-**ROI**: Small effort, eliminates a latent correctness risk.
+**Resolution**: Added `firstScene?: string` to `CaseMeta` and `VignetteMeta`. Both existing meta.json files updated. `loadAndStartCase` uses `data.meta.firstScene` with `Object.keys` fallback + console warning. `validateCase.mjs` validates the field.
 
 ---
 

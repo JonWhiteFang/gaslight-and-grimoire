@@ -4,19 +4,13 @@ Concepts that are absent from the codebase but are implied by the architecture, 
 
 ---
 
-## Critical (blocks core functionality)
+## Critical (blocks core functionality) — ✅ ALL FIXED
 
-### Case Data Restoration on Load
-Loading a save restores `GameState` but not `caseData` (the runtime scene graph). Without it, `useCurrentScene()` returns null and the game is unplayable after load. No code path exists to re-fetch case data after `loadGame`.
-- **Status**: Missing
-- **Where it should be**: `src/store/slices/metaSlice.ts` → `loadGame` should call `loadCase(gameState.currentCase)` and set `caseData`
-- **Trace**: trace_06_save_load.md §8
+### Case Data Restoration on Load — ✅ FIXED (Phase A1)
+`metaSlice.loadGame` now calls `await loadCase(gameState.currentCase)` after restoring state and sets `caseData`.
 
-### Hint Engine Wiring
-`trackActivity()` is never called from any component. Board visit tracking, connection attempt tracking, and scene change tracking are all dead. The hint system's primary trigger (board visits without connections) cannot fire.
-- **Status**: Missing
-- **Where it should be**: `src/components/EvidenceBoard/EvidenceBoard.tsx` (boardVisit, connectionAttempt), `src/store/slices/narrativeSlice.ts` → `goToScene` (sceneChange)
-- **Trace**: trace_07_hint_system.md §8
+### Hint Engine Wiring — ✅ FIXED (Phase A3)
+`trackActivity()` calls added to `NarrativePanel` (sceneChange), `EvidenceBoard` (boardVisit on mount, connectionAttempt on connection complete).
 
 ---
 
