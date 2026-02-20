@@ -43,11 +43,11 @@ Issues found during full codebase review, grouped by severity.
 ### ~~11. `textSpeed` setting is never used~~ ✅ RESOLVED
 ~~`SceneText`~~ — Fixed: New `textSpeed` prop controls reveal speed. NarrativePanel passes it from settings.
 
-### 12. `saveGame` always overwrites a single slot
-`src/store/slices/metaSlice.ts:40` — `saveGame` hardcodes the ID as `'autosave'`. The LoadGameScreen UI implies multiple saves, but only one can ever exist.
+### ~~12. `saveGame` always overwrites a single slot~~ ✅ RESOLVED
+~~`src/store/slices/metaSlice.ts`~~ — Fixed: `saveGame` generates unique IDs, `autoSave` handles the autosave slot separately. Auto-saves trigger on scene/choice per settings. Manual saves capped at 10. LoadGameScreen has delete buttons.
 
-### 13. CaseJournal shows raw internal IDs
-`src/components/CaseJournal/CaseJournal.tsx` — Displays raw scene IDs (`wc-act1-scene1`) and raw flag names (`ability-auto-succeed-reason`) instead of human-readable text.
+### ~~13. CaseJournal shows raw internal IDs~~ ✅ RESOLVED
+~~`src/components/CaseJournal/CaseJournal.tsx`~~ — Fixed: Shows discovered clues with type icons and titles, deduction descriptions, and filtered story-relevant flags with formatted names.
 
 ---
 

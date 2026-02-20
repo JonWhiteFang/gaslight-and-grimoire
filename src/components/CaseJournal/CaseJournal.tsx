@@ -1,13 +1,28 @@
 /**
- * CaseJournal — full-screen overlay with auto-generated case summary.
+ * CaseJournal — full-screen overlay with narrative-friendly case summary.
  *
- * Req 12.10: Auto-updates with a summary of the current Case's key events
- *            in simple prose.
+ * Req 12.10: Auto-updates with a summary of the current Case's key events.
  */
 import { useEffect } from 'react';
 import { useStore } from '../../store';
 
-// ── Section component ─────────────────────────────────────────────────────────
+const INTERNAL_FLAG_PREFIXES = ['ability-', 'vignette-unlocked-', 'last-critical-faculty'];
+
+const CLUE_TYPE_ICONS: Record<string, string> = {
+  physical: '🔍',
+  testimony: '💬',
+  occult: '🔮',
+  deduction: '🧠',
+  redHerring: '🐟',
+};
+
+function formatFlag(flag: string): string {
+  return flag.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function isStoryFlag(flag: string): boolean {
+  return !INTERNAL_FLAG_PREFIXES.some((p) => flag.startsWith(p));
+}
 
 function JournalSection({
   title,
@@ -32,18 +47,15 @@ function JournalSection({
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
-
 export interface CaseJournalProps {
   onClose: () => void;
 }
 
 export function CaseJournal({ onClose }: CaseJournalProps) {
-  const sceneHistory = useStore((s) => s.sceneHistory);
+  const clues = useStore((s) => s.clues);
   const flags = useStore((s) => s.flags);
   const deductions = useStore((s) => s.deductions);
 
-  // Escape key closes
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose();
@@ -52,12 +64,11 @@ export function CaseJournal({ onClose }: CaseJournalProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  // Derive content
-  const visitedScenes = sceneHistory.filter(Boolean);
-  const activeFlags = Object.entries(flags)
-    .filter(([, value]) => value)
-    .map(([key]) => key);
+  const revealedClues = Object.values(clues).filter((c) => c.isRevealed);
   const deductionList = Object.values(deductions);
+  const storyFlags = Object.entries(flags)
+    .filter(([key, value]) => value && isStoryFlag(key))
+    .map(([key]) => key);
 
   return (
     <div
@@ -67,8 +78,6 @@ export function CaseJournal({ onClose }: CaseJournalProps) {
       className="fixed inset-0 z-50 flex flex-col bg-black/80 backdrop-blur-sm"
     >
       <div className="flex flex-col flex-1 overflow-hidden bg-stone-900/95 max-w-2xl w-full mx-auto my-8 rounded-xl border border-stone-700 shadow-2xl">
-
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-stone-700">
           <h2 className="text-amber-200 text-xl font-bold tracking-wide">
             📖 Case Journal
@@ -77,54 +86,45 @@ export function CaseJournal({ onClose }: CaseJournalProps) {
             type="button"
             aria-label="Close Case Journal"
             onClick={onClose}
-            className="
-              text-stone-400 hover:text-white text-2xl font-bold leading-none
-              w-11 h-11 flex items-center justify-center
-              rounded-lg hover:bg-stone-700/60
-              transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white
-            "
+            className="text-stone-400 hover:text-white text-2xl font-bold leading-none w-11 h-11 flex items-center justify-center rounded-lg hover:bg-stone-700/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             ×
           </button>
         </div>
 
-        {/* Journal content */}
         <div className="flex-1 overflow-y-auto px-6 py-5 font-serif text-stone-200">
-
-          {/* Scenes Visited */}
-          <JournalSection
-            title="Scenes Visited"
-            empty={visitedScenes.length === 0}
-          >
-            <p className="text-sm leading-relaxed text-stone-300">
-              Visited:{' '}
-              {visitedScenes.join(', ')}
-            </p>
-          </JournalSection>
-
-          {/* Key Discoveries */}
-          <JournalSection
-            title="Key Discoveries"
-            empty={activeFlags.length === 0}
-          >
-            <ul className="space-y-1">
-              {activeFlags.map((flag) => (
-                <li key={flag} className="text-sm text-stone-300">
-                  • Discovered: {flag}
+          <JournalSection title="Clues Gathered" empty={revealedClues.length === 0}>
+            <ul className="space-y-2">
+              {revealedClues.map((clue) => (
+                <li key={clue.id} className="flex items-start gap-2 text-sm text-stone-300">
+                  <span aria-hidden="true">{CLUE_TYPE_ICONS[clue.type] ?? '📄'}</span>
+                  <div>
+                    <span className="text-amber-300 font-semibold">{clue.title}</span>
+                    <p className="text-stone-400 text-xs mt-0.5">{clue.description}</p>
+                  </div>
                 </li>
               ))}
             </ul>
           </JournalSection>
 
-          {/* Deductions Made */}
-          <JournalSection
-            title="Deductions Made"
-            empty={deductionList.length === 0}
-          >
+          <JournalSection title="Deductions Made" empty={deductionList.length === 0}>
             <ul className="space-y-1">
               {deductionList.map((d) => (
                 <li key={d.id} className="text-sm text-stone-300">
-                  • Deduced: {d.description}
+                  • {d.description}
+                  {d.isRedHerring && (
+                    <span className="text-red-400 text-xs ml-2">(questionable)</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </JournalSection>
+
+          <JournalSection title="Key Events" empty={storyFlags.length === 0}>
+            <ul className="space-y-1">
+              {storyFlags.map((flag) => (
+                <li key={flag} className="text-sm text-stone-300">
+                  • {formatFlag(flag)}
                 </li>
               ))}
             </ul>

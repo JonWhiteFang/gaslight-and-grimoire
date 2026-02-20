@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SaveManager } from '../../engine/saveManager';
 import type { SaveSummary } from '../../engine/saveManager';
 
@@ -22,14 +22,18 @@ function formatTimestamp(iso: string): string {
 }
 
 export function LoadGameScreen({ onLoad, onBack }: LoadGameScreenProps) {
-  const saves: SaveSummary[] = SaveManager.listSaves();
+  const [saves, setSaves] = useState<SaveSummary[]>(() => SaveManager.listSaves());
+
+  function handleDelete(saveId: string) {
+    SaveManager.deleteSave(saveId);
+    setSaves(SaveManager.listSaves());
+  }
 
   return (
     <main
       role="main"
       className="relative min-h-screen bg-stone-950 flex flex-col items-center justify-center overflow-hidden"
     >
-      {/* Atmospheric vignette overlay */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
@@ -55,16 +59,19 @@ export function LoadGameScreen({ onLoad, onBack }: LoadGameScreenProps) {
             className="w-full flex flex-col gap-2"
           >
             {saves.map((save) => (
-              <li key={save.id} role="listitem">
+              <li key={save.id} role="listitem" className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => onLoad(save.id)}
                   aria-label={`Load investigation: ${save.investigatorName}, ${save.caseName}, saved ${formatTimestamp(save.timestamp)}`}
-                  className="w-full min-h-[44px] px-4 py-3 bg-stone-800 hover:bg-stone-700 active:bg-stone-900 text-left rounded border border-stone-600 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  className="flex-1 min-h-[44px] px-4 py-3 bg-stone-800 hover:bg-stone-700 active:bg-stone-900 text-left rounded border border-stone-600 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400"
                 >
                   <div className="flex justify-between items-baseline gap-2">
                     <span className="font-serif text-amber-300 font-semibold truncate">
                       {save.investigatorName || 'Unknown Investigator'}
+                      {save.id === 'autosave' && (
+                        <span className="text-stone-500 text-xs ml-2">(auto)</span>
+                      )}
                     </span>
                     <span className="font-serif text-stone-400 text-sm shrink-0">
                       {formatTimestamp(save.timestamp)}
@@ -73,6 +80,14 @@ export function LoadGameScreen({ onLoad, onBack }: LoadGameScreenProps) {
                   <div className="font-serif text-stone-400 text-sm mt-0.5 truncate">
                     {save.caseName || 'Unknown Case'}
                   </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(save.id)}
+                  aria-label={`Delete save: ${save.investigatorName}`}
+                  className="w-11 h-11 flex items-center justify-center rounded text-stone-500 hover:text-red-400 hover:bg-stone-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400 self-center"
+                >
+                  ✕
                 </button>
               </li>
             ))}

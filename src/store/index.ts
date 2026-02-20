@@ -83,6 +83,7 @@ export const useMetaActions = () =>
   useStore((s) => ({
     updateSettings: s.updateSettings,
     saveGame: s.saveGame,
+    autoSave: s.autoSave,
     loadGame: s.loadGame,
   }));
 

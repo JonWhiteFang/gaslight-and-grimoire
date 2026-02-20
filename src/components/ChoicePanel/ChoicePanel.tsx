@@ -84,6 +84,12 @@ export function ChoicePanel({ choices, onChoiceSelected }: ChoicePanelProps) {
         });
       }
 
+      // Auto-save on choice if configured
+      const store = useStore.getState();
+      if (store.settings.autoSaveFrequency === 'choice') {
+        store.autoSave();
+      }
+
       onChoiceSelected?.(choiceId);
     },
     [choices, setCheckResult, onChoiceSelected],

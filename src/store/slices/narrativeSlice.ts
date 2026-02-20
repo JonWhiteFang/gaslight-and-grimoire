@@ -37,12 +37,17 @@ export const createNarrativeSlice: StateCreator<
   lastCheckResult: null,
   caseData: null,
 
-  goToScene: (sceneId) =>
+  goToScene: (sceneId) => {
     set((state) => {
       state.sceneHistory.push(state.currentScene);
       state.currentScene = sceneId;
       AudioManager.playSfx('scene-transition', state.settings.audioVolume.sfx);
-    }),
+    });
+    // Auto-save on scene transition if configured
+    if (get().settings.autoSaveFrequency === 'scene') {
+      get().autoSave();
+    }
+  },
 
   setCheckResult: (result) =>
     set((state) => {

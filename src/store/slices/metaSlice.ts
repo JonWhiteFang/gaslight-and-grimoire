@@ -3,10 +3,13 @@ import type { GameStore } from '../types';
 import type { GameSettings, GameState } from '../../types';
 import { SaveManager } from '../../engine/saveManager';
 
+const MAX_MANUAL_SAVES = 10;
+
 export interface MetaSlice {
   settings: GameSettings;
   updateSettings: (partial: Partial<GameSettings>) => void;
   saveGame: () => Promise<void>;
+  autoSave: () => void;
   loadGame: (saveId: string) => Promise<void>;
 }
 
@@ -19,6 +22,21 @@ const defaultSettings: GameSettings = {
   autoSaveFrequency: 'scene',
   audioVolume: { ambient: 0.6, sfx: 0.8 },
 };
+
+function snapshotGameState(s: GameStore): GameState {
+  return {
+    investigator: s.investigator,
+    currentScene: s.currentScene,
+    currentCase: s.currentCase,
+    clues: s.clues,
+    deductions: s.deductions,
+    npcs: s.npcs,
+    flags: s.flags,
+    factionReputation: s.factionReputation,
+    sceneHistory: s.sceneHistory,
+    settings: s.settings,
+  };
+}
 
 export const createMetaSlice: StateCreator<
   GameStore,
@@ -34,20 +52,29 @@ export const createMetaSlice: StateCreator<
     }),
 
   saveGame: async () => {
+    const gameState = snapshotGameState(get());
+    const saveId = `save-${Date.now()}`;
+    SaveManager.save(saveId, gameState);
+
+    // Cap manual saves at MAX_MANUAL_SAVES (exclude autosave)
+    const all = SaveManager.listSaves();
+    const manual = all.filter((s) => s.id !== 'autosave');
+    if (manual.length > MAX_MANUAL_SAVES) {
+      // Delete oldest (list is sorted newest-first)
+      for (const old of manual.slice(MAX_MANUAL_SAVES)) {
+        SaveManager.deleteSave(old.id);
+      }
+    }
+  },
+
+  autoSave: () => {
     const s = get();
-    const gameState: GameState = {
-      investigator: s.investigator,
-      currentScene: s.currentScene,
-      currentCase: s.currentCase,
-      clues: s.clues,
-      deductions: s.deductions,
-      npcs: s.npcs,
-      flags: s.flags,
-      factionReputation: s.factionReputation,
-      sceneHistory: s.sceneHistory,
-      settings: s.settings,
-    };
-    SaveManager.save('autosave', gameState);
+    if (!s.currentScene) return;
+    try {
+      SaveManager.save('autosave', snapshotGameState(s));
+    } catch {
+      // localStorage may be unavailable in tests or private browsing
+    }
   },
 
   loadGame: async (saveId: string) => {
