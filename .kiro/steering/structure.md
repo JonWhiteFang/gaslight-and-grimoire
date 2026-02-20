@@ -28,19 +28,23 @@ All narrative content lives under `/content` as JSON. Game logic lives under `/s
 ## Component Hierarchy
 
 ```
-<App>
-└── <AccessibilityProvider>       # Provides a11y settings: reducedMotion, fontSize, highContrast
-    ├── <TitleScreen />
-    ├── <CharacterCreation />     # Archetype selection + faculty point allocation
-    └── <GameScreen>
-        ├── <HeaderBar />         # Ability button, hint button
-        ├── <NarrativePanel />    # Scene text, illustration, dice roll overlay, clue discovery card
-        ├── <StatusBar />         # Vitality meter, composure meter
-        ├── <ChoicePanel />       # Choice cards rendered from current SceneNode.choices
-        ├── <EvidenceBoard />     # Overlay: clue cards, connection threads, deduction button
-        ├── <CaseJournal />       # Overlay
-        ├── <NPCGallery />        # Overlay
-        └── <SettingsPanel />     # Overlay
+<ErrorBoundary>
+  <App>
+  └── <AccessibilityProvider>       # Provides a11y settings: reducedMotion, fontSize, highContrast
+      ├── <TitleScreen />
+      ├── <LoadGameScreen />        # Save list with delete buttons
+      ├── <CharacterCreation />     # Archetype selection + faculty point allocation
+      └── <GameScreen>
+          ├── <HeaderBar />         # Ability button, hint button, overlay toggles
+          ├── <AmbientAudio />      # Non-rendering: ambient track from scene.ambientAudio
+          ├── <GameContent>
+          │   ├── <NarrativePanel />  # Scene text, illustration, dice roll overlay, clue discovery card
+          │   └── <ChoicePanel />     # Choice cards rendered from current SceneNode.choices
+          ├── <StatusBar />         # Vitality meter, composure meter
+          ├── <EvidenceBoard />     # Overlay: clue cards, connection threads, deduction button
+          ├── <CaseJournal />       # Overlay: clues gathered, deductions, key events
+          ├── <NPCGallery />        # Overlay
+          └── <SettingsPanel />     # Overlay
 ```
 
 ## Zustand Store
@@ -85,7 +89,7 @@ src/engine/
   diceEngine.ts         # Faculty checks → OutcomeTier; advantage/disadvantage logic
   caseProgression.ts    # Act transitions, case completion checks
   hintEngine.ts         # Hint generation based on current clues and flags
-  saveManager.ts        # IndexedDB persistence with localStorage fallback; versioned migrations
+  saveManager.ts        # localStorage persistence; versioned migrations; multi-save support
   audioManager.ts       # Howler.js ambient/SFX management
 ```
 
@@ -98,4 +102,4 @@ Engine functions are pure where possible. Side effects (store mutations) are app
 - `Condition` and `Effect` objects are the only mechanism for gating and mutating game state from content JSON; do not add ad-hoc logic in scene handlers.
 - Components live in `src/components/[ComponentName]/` with an `index.ts` barrel export.
 - Tests live in `src/components/__tests__/` and `src/engine/__tests__/`. Property-based tests use the `.property.test.ts` suffix.
-- Content JSON is validated by `scripts/validateCase.mjs` — run it after editing case files.
+- Content JSON is validated by `scripts/validateCase.mjs` — run it after editing case files. Validates all cases by default, or pass a specific case path.

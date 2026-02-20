@@ -38,7 +38,7 @@ src/
     diceEngine.ts             # d20 rolls, advantage/disadvantage, modifier calc, outcome tiers
     caseProgression.ts        # End-of-case logic, faculty bonuses, vignette unlocks
     hintEngine.ts             # Stateful hint system (3 escalating levels)
-    saveManager.ts            # localStorage persistence with versioned migrations
+    saveManager.ts            # localStorage persistence with versioned migrations, multi-save support
     audioManager.ts           # Howler.js SFX management (lazy-cached Howl instances)
   components/                 # React components (each in own directory)
   data/archetypes.ts          # Archetype definitions, faculty constants
@@ -72,7 +72,7 @@ Single `useStore` (Zustand + Immer) composed from six slices:
 | `evidenceSlice` | `clues`, `deductions` | `discoverClue`, `updateClueStatus`, `addDeduction` |
 | `npcSlice` | `npcs` | `adjustDisposition`, `adjustSuspicion`, `setNpcMemoryFlag`, `removeNpc` |
 | `worldSlice` | `flags`, `factionReputation` | `setFlag`, `adjustReputation` |
-| `metaSlice` | `settings` | `updateSettings`, `saveGame`, `loadGame` |
+| `metaSlice` | `settings` | `updateSettings`, `saveGame`, `autoSave`, `loadGame` |
 
 Rules:
 - Always use selector hooks (`useInvestigator`, `useClues`, `useCaseData`, etc.) — never subscribe to the full store.
@@ -133,6 +133,8 @@ Rules:
 - localStorage with `gg_save_` prefix. Index at `gg_save_index`.
 - `SaveFile` wraps `GameState` with `version` + `timestamp`.
 - Migration pipeline: v0→v1 adds `factionReputation`. Current version: 1.
+- `saveGame` generates unique IDs (`save-{timestamp}`), capped at 10 manual saves.
+- `autoSave` writes to the `'autosave'` slot, triggered by `goToScene` (scene frequency) or ChoicePanel (choice frequency) based on `autoSaveFrequency` setting.
 
 ### Audio (audioManager.ts)
 - Howler.js with lazy-cached Howl instances per SFX event.
@@ -146,7 +148,7 @@ Rules:
 - If any connected clue is a `redHerring`, the deduction's `isRedHerring` must be true.
 - No single Faculty should gate critical story progress — always provide alternate paths.
 - Choices must have meaningful consequences; avoid cosmetic-only branching.
-- Run `node scripts/validateCase.mjs` after editing case files to catch broken references.
+- Run `node scripts/validateCase.mjs` after editing case files to catch broken references. Validates all cases by default, or pass a specific case path.
 - Narrative tone: measured, atmospheric, never campy.
 
 ## Tailwind Theme

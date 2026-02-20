@@ -15,8 +15,10 @@ inclusion: always
 - TypeScript 5, Vite 7
 
 ## Persistence
-- IndexedDB primary, localStorage fallback (implemented in `src/engine/saveManager.ts`)
+- localStorage with JSON serialisation (implemented in `src/engine/saveManager.ts`)
 - Save files are wrapped in `SaveFile` with `version` + `timestamp` for forward-compatible migrations
+- `saveGame` generates unique IDs (`save-{timestamp}`), capped at 10 manual saves
+- `autoSave` writes to the `'autosave'` slot based on `autoSaveFrequency` setting
 
 ## State Management Rules
 - Single `useStore` (Zustand + Immer) composed from six domain slices
@@ -37,7 +39,7 @@ inclusion: always
 | `evidenceSlice` | `clues`, `deductions` | `discoverClue`, `updateClueStatus`, `addDeduction` |
 | `npcSlice` | `npcs` | `adjustDisposition`, `adjustSuspicion`, `setNpcMemoryFlag`, `removeNpc` |
 | `worldSlice` | `flags`, `factionReputation` | `setFlag`, `adjustReputation` |
-| `metaSlice` | `settings` | `saveGame`, `loadGame`, `updateSettings` |
+| `metaSlice` | `settings` | `saveGame`, `autoSave`, `loadGame`, `updateSettings` |
 
 ## Common Commands
 ```bash
@@ -52,6 +54,6 @@ npm run build        # tsc + vite build
 - Components live in `src/components/[ComponentName]/` with an `index.ts` barrel export
 - Engine functions (`src/engine/`) are pure where possible; side effects go through store actions, not direct state mutation
 - `Condition` and `Effect` objects are the only mechanism for gating/mutating game state from content JSON — no ad-hoc logic in scene handlers
-- Content JSON (under `/content/`) is validated by `scripts/validateCase.mjs` — run after editing case files
+- Content JSON (under `/content/`) is validated by `scripts/validateCase.mjs` — run after editing case files. Validates all cases by default, or pass a specific case path.
 - Tests live in `src/components/__tests__/` and `src/engine/__tests__/`
 - Property-based tests use the `.property.test.ts` suffix and fast-check
