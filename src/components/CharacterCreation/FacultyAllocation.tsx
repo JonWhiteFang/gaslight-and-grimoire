@@ -46,7 +46,7 @@ export function FacultyAllocation({ archetype, allocated, onChange }: Props) {
                 aria-label={`Decrease ${FACULTY_LABELS[faculty]}`}
                 onClick={() => onChange(faculty, -1)}
                 disabled={extra <= 0}
-                className="w-7 h-7 rounded border border-gaslight-fog/30 text-gaslight-fog disabled:opacity-30 hover:border-gaslight-amber hover:text-gaslight-amber transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                className="w-11 h-11 rounded border border-gaslight-fog/30 text-gaslight-fog disabled:opacity-30 hover:border-gaslight-amber hover:text-gaslight-amber transition-colors flex items-center justify-center"
               >
                 −
               </button>
@@ -62,7 +62,7 @@ export function FacultyAllocation({ archetype, allocated, onChange }: Props) {
                 aria-label={`Increase ${FACULTY_LABELS[faculty]}`}
                 onClick={() => onChange(faculty, 1)}
                 disabled={remaining <= 0}
-                className="w-7 h-7 rounded border border-gaslight-fog/30 text-gaslight-fog disabled:opacity-30 hover:border-gaslight-amber hover:text-gaslight-amber transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                className="w-11 h-11 rounded border border-gaslight-fog/30 text-gaslight-fog disabled:opacity-30 hover:border-gaslight-amber hover:text-gaslight-amber transition-colors flex items-center justify-center"
               >
                 +
               </button>

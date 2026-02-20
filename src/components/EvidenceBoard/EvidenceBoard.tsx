@@ -143,6 +143,41 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
       })()
     : undefined;
 
+  // ── Tag-based brightening helper ────────────────────────────────────────────
+  function shouldBrighten(clueId: string): boolean {
+    if (!connectingFrom || connectingFrom === clueId) return false;
+    const src = clues[connectingFrom];
+    if (!src) return false;
+    const target = clues[clueId];
+    return !!target && src.tags.some((t) => target.tags.includes(t));
+  }
+
+  // ── Recompute thread positions on scroll/resize ───────────────────────────
+  useEffect(() => {
+    const board = boardRef.current;
+    if (!board || connections.length === 0) return;
+
+    function recompute() {
+      setConnections((prev) =>
+        prev.map((conn) => {
+          const fromEl = board!.querySelector<HTMLElement>(`[data-clue-id="${conn.fromId}"]`);
+          const toEl = board!.querySelector<HTMLElement>(`[data-clue-id="${conn.toId}"]`);
+          if (fromEl && toEl) {
+            return { ...conn, fromPoint: getCentre(fromEl, board!), toPoint: getCentre(toEl, board!) };
+          }
+          return conn;
+        }),
+      );
+    }
+
+    board.addEventListener('scroll', recompute);
+    window.addEventListener('resize', recompute);
+    return () => {
+      board.removeEventListener('scroll', recompute);
+      window.removeEventListener('resize', recompute);
+    };
+  }, [connections.length]);
+
   // ── Deduction result handler ──────────────────────────────────────────────
   function handleDeductionResult(result: 'success' | 'failure') {
     if (result === 'failure') {
@@ -235,14 +270,7 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
                     clue={clue}
                     onInitiateConnection={handleInitiateConnection}
                     isConnecting={connectingFrom === clue.id}
-                    isBrightened={
-                      connectingFrom !== null &&
-                      connectingFrom !== clue.id &&
-                      (() => {
-                        const src = clues[connectingFrom];
-                        return !!src && src.tags.some((t) => clue.tags.includes(t));
-                      })()
-                    }
+                    isBrightened={shouldBrighten(clue.id)}
                   />
                 </div>
               ))}

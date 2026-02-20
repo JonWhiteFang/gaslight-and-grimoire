@@ -4,10 +4,9 @@
  * Contains the case title, Evidence Board toggle, Journal button,
  * NPC Gallery button, Ability button, and Menu button.
  */
-import { useStore } from '../../store';
+import { useStore, buildGameState } from '../../store';
 import { AbilityButton } from './AbilityButton';
 import { HintButton } from './HintButton';
-import type { GameState } from '../../types';
 
 export interface HeaderBarProps {
   onOpenEvidenceBoard: () => void;
@@ -29,19 +28,7 @@ export function HeaderBar({
   const archetype = useStore((s) => s.investigator.archetype);
   const abilityUsed = useStore((s) => s.investigator.abilityUsed);
 
-  // Build a minimal GameState snapshot for HintButton context
-  const gameState = useStore((s) => ({
-    investigator: s.investigator,
-    currentScene: s.currentScene,
-    currentCase: s.currentCase,
-    clues: s.clues,
-    deductions: s.deductions,
-    npcs: s.npcs,
-    flags: s.flags,
-    factionReputation: s.factionReputation,
-    sceneHistory: s.sceneHistory,
-    settings: s.settings,
-  })) as GameState;
+  const gameState = useStore(buildGameState);
 
   const hasNewClues = Object.values(clues).some((c) => c.status === 'new');
 

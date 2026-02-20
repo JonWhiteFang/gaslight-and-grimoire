@@ -449,7 +449,7 @@ export function startEncounter(
   let processedRounds = rounds.map((r) => ({ ...r, choices: [...r.choices] }));
 
   if (isSupernatural && rounds.length > 0) {
-    // Prefer Nerve; fall back to Lore (Req 9.3)
+    // Use the higher of Nerve or Lore, with Nerve as tiebreaker (Req 9.3)
     const reactionFaculty =
       state.investigator.faculties['nerve'] >= state.investigator.faculties['lore']
         ? 'nerve' as const

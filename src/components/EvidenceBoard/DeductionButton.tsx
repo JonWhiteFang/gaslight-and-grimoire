@@ -6,7 +6,7 @@
  * Req 7.8: On failure, animate thread slack; reset clues to 'examined' after 2s.
  * Req 7.10: If any connected clue is a Red Herring, isRedHerring = true.
  */
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { performCheck } from '../../engine/diceEngine';
 import { useStore, useInvestigator } from '../../store';
@@ -30,6 +30,8 @@ export function DeductionButton({ connectedClueIds, onResult }: DeductionButtonP
 
   const [phase, setPhase] = useState<Phase>('idle');
   const [lastTier, setLastTier] = useState<string | null>(null);
+  const idsRef = useRef(connectedClueIds);
+  idsRef.current = connectedClueIds;
 
   if (connectedClueIds.length < 2) return null;
 
@@ -53,7 +55,7 @@ export function DeductionButton({ connectedClueIds, onResult }: DeductionButtonP
       setPhase('failure');
       onResult('failure');
       setTimeout(() => {
-        connectedClueIds.forEach((id) => updateClueStatus(id, 'examined'));
+        idsRef.current.forEach((id) => updateClueStatus(id, 'examined'));
         setPhase('idle');
       }, 2000);
     }

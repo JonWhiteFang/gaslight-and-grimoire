@@ -7,8 +7,8 @@
  *
  * Requirements: 12.1, 12.2, 12.4
  */
-import { useEffect } from 'react';
-import { useSettings } from '../../store';
+import { useEffect, useRef } from 'react';
+import { useSettings, useMetaActions } from '../../store';
 
 interface AccessibilityProviderProps {
   children: React.ReactNode;
@@ -23,13 +23,23 @@ function fontSizeToPx(fontSize: 'standard' | 'large' | 'extraLarge' | number): s
 
 export function AccessibilityProvider({ children }: AccessibilityProviderProps) {
   const { fontSize, highContrast, reducedMotion } = useSettings();
+  const { updateSettings } = useMetaActions();
+  const hasDetected = useRef(false);
+
+  // Detect OS prefers-reduced-motion on first mount
+  useEffect(() => {
+    if (hasDetected.current) return;
+    hasDetected.current = true;
+    if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      updateSettings({ reducedMotion: true });
+    }
+  }, [updateSettings]);
 
   // Apply --font-size-base CSS custom property
   useEffect(() => {
-    document.documentElement.style.setProperty(
-      '--font-size-base',
-      fontSizeToPx(fontSize),
-    );
+    const root = document.documentElement;
+    root.style.setProperty('--font-size-base', fontSizeToPx(fontSize));
+    return () => { root.style.removeProperty('--font-size-base'); };
   }, [fontSize]);
 
   // Apply high-contrast class and --high-contrast property
@@ -42,6 +52,10 @@ export function AccessibilityProvider({ children }: AccessibilityProviderProps) 
       root.classList.remove('high-contrast');
       root.style.setProperty('--high-contrast', '0');
     }
+    return () => {
+      root.classList.remove('high-contrast');
+      root.style.removeProperty('--high-contrast');
+    };
   }, [highContrast]);
 
   // Apply reduced-motion class
@@ -52,6 +66,7 @@ export function AccessibilityProvider({ children }: AccessibilityProviderProps) 
     } else {
       root.classList.remove('reduced-motion');
     }
+    return () => { root.classList.remove('reduced-motion'); };
   }, [reducedMotion]);
 
   return <>{children}</>;

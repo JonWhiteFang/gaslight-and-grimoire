@@ -31,6 +31,7 @@ const mockSettings: GameSettings = {
 
 vi.mock('../../store', () => ({
   useSettings: () => mockSettings,
+  useMetaActions: () => ({ updateSettings: vi.fn() }),
 }));
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

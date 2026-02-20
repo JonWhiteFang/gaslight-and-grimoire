@@ -1,8 +1,7 @@
 /**
  * SaveManager — persistence module for Gaslight & Grimoire.
  *
- * Primary storage: localStorage (synchronous, easy to test).
- * TODO: upgrade to IndexedDB for larger save files.
+ * Storage: localStorage with JSON serialisation.
  *
  * Key format:  gg_save_{saveId}
  * Index key:   gg_save_index  (array of SaveSummary, sorted by timestamp desc)
