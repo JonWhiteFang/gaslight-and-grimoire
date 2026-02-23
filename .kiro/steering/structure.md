@@ -40,7 +40,7 @@ All narrative content lives under `/content` as JSON. Game logic lives under `/s
           ├── <HeaderBar />         # Ability button, hint button, overlay toggles
           ├── <AmbientAudio />      # Non-rendering: ambient track from scene.ambientAudio
           ├── <GameContent>
-          │   ├── <NarrativePanel />  # Scene text, illustration, dice roll overlay, clue discovery card
+          │   ├── <NarrativePanel />  # Scene text, illustration, dice roll overlay, clue discovery card, active clue prompts
           │   ├── <ChoicePanel />     # Choice cards rendered from current SceneNode.choices
           │   └── <EncounterPanel />   # Multi-round encounter UI (when scene has encounter field)
           ├── <StatusBar />         # Vitality meter, composure meter
@@ -96,6 +96,7 @@ src/engine/
   hintEngine.ts         # Hint generation based on current clues and flags
   saveManager.ts        # localStorage persistence; versioned migrations; multi-save support
   audioManager.ts       # Howler.js ambient/SFX management
+  cluePrompts.ts        # Atmospheric prompt text generator for exploration/check clue discovery
 ```
 
 Engine functions are pure where possible. Side effects (store mutations) are applied by calling store actions, not by engines directly mutating state. SFX is triggered via a store subscription in `src/store/audioSubscription.ts`, not from slice actions.

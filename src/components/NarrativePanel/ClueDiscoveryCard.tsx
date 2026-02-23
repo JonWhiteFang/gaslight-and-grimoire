@@ -17,17 +17,22 @@ export interface ClueDiscoveryCardProps {
   clue?: Clue;
   visible?: boolean;
   reducedMotion?: boolean;
+  variant?: 'standard' | 'dialogue';
   onDismiss?: () => void;
 }
 
-export function ClueDiscoveryCard({ clue, visible = false, reducedMotion = false, onDismiss }: ClueDiscoveryCardProps) {
+export function ClueDiscoveryCard({ clue, visible = false, reducedMotion = false, variant = 'standard', onDismiss }: ClueDiscoveryCardProps) {
+  const isDialogue = variant === 'dialogue';
+  const icon = isDialogue ? '🗣️' : (CLUE_TYPE_ICONS[clue?.type ?? ''] ?? '📄');
+  const header = isDialogue ? 'Gleaned from Conversation' : 'Clue Discovered';
+
   return (
     <AnimatePresence>
       {visible && clue && (
         <motion.div
           role="status"
           aria-live="polite"
-          aria-label={`Clue discovered: ${clue.title}`}
+          aria-label={`${header}: ${clue.title}`}
           initial={reducedMotion ? { opacity: 0 } : { opacity: 0, x: 80 }}
           animate={{ opacity: 1, x: 0 }}
           exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: 80 }}
@@ -36,11 +41,11 @@ export function ClueDiscoveryCard({ clue, visible = false, reducedMotion = false
         >
           <div className="flex items-start gap-3">
             <span className="text-2xl" aria-hidden="true">
-              {CLUE_TYPE_ICONS[clue.type] ?? '📄'}
+              {icon}
             </span>
             <div className="flex-1 min-w-0">
               <p className="text-xs text-gaslight-amber font-semibold uppercase tracking-wide">
-                Clue Discovered
+                {header}
               </p>
               <p className="text-sm text-gaslight-fog font-bold mt-0.5">{clue.title}</p>
               <p className="text-xs text-stone-400 mt-1 line-clamp-2">{clue.description}</p>

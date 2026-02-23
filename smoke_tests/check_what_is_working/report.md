@@ -104,7 +104,7 @@ All three Phase A blockers are resolved. Remaining broken features (ClueDiscover
 
 | # | Finding | Severity | Status |
 |---|---|---|---|
-| 6.1 | Only `automatic` clue discovery has UI — `exploration`, `check`, `dialogue` methods unimplemented | High | Open |
+| 6.1 | ~~Only `automatic` clue discovery has UI~~ | High | ✅ FIXED (Phase E1) — All four methods work via `SceneCluePrompts` + `NarrativePanel` |
 | 6.2 | Zero audio files (9 SFX + ambient coded but silent) | High | Open |
 | 6.3 | Zero visual assets (illustrations, NPC portraits) | High | Open |
 | 6.4 | Avg 1.1–1.3 choices/scene — most scenes are linear corridors | High | Open |

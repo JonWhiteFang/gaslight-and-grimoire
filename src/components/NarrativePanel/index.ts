@@ -4,3 +4,4 @@ export { SceneIllustration } from './SceneIllustration';
 export { DiceRollOverlay } from './DiceRollOverlay';
 export { OutcomeBanner } from './OutcomeBanner';
 export { ClueDiscoveryCard } from './ClueDiscoveryCard';
+export { SceneCluePrompts } from './SceneCluePrompts';

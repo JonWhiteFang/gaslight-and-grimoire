@@ -388,22 +388,11 @@ The closest candidate would be `narrativeEngine.ts` (400+ lines, 6 responsibilit
 
 > These items address player experience, content depth, and game balance. Derived from `GAME_DESIGN_ANALYSIS.md`. Unlike Phases 1–4 which fixed engineering gaps, Phase 5 focuses on making the game fun, immersive, and replayable.
 
-### 5.1 Implement Active Clue Discovery (exploration, check, dialogue)
+### 5.1 Implement Active Clue Discovery (exploration, check, dialogue) — ✅ COMPLETE
 
-**What**: Add UI triggers for the three non-automatic clue discovery methods.
+**Resolution**: `exploration` renders atmospheric clickable prompts via `SceneCluePrompts` (auto-generated from clue type/title). `check` performs dice rolls via `performCheck` with one-shot-per-scene semantics and narrative failure text. `dialogue` auto-discovers on scene entry with speech-bubble variant `ClueDiscoveryCard`. No content JSON changes required.
 
-**Files**: `src/components/NarrativePanel/NarrativePanel.tsx`, `src/components/ChoicePanel/ChoicePanel.tsx`, content JSON
-
-**Changes**:
-1. `NarrativePanel`: Add "Investigate" button when scene has undiscovered `exploration` clues. Clicking reveals the clue.
-2. `NarrativePanel`: Add faculty-gated "Examine" prompt for `check` clues. Player must pass a check to discover.
-3. `ChoicePanel`: Wire `dialogue` clues into NPC-affecting choices as a side-effect.
-
-**Dependencies**: None.
-
-**Risk**: Medium. Code + content changes required.
-
-**Testing**: Navigate to scenes with each discovery method → verify clues are discoverable through the correct interaction.
+**New files**: `src/engine/cluePrompts.ts`, `src/components/NarrativePanel/SceneCluePrompts.tsx`
 
 ---
 
@@ -441,7 +430,7 @@ The closest candidate would be `narrativeEngine.ts` (400+ lines, 6 responsibilit
 
 **Files**: `src/types/index.ts`, new `src/components/NarrativePanel/DialoguePanel.tsx`, `src/engine/narrativeEngine.ts`, content JSON
 
-**Dependencies**: 5.1 (dialogue clue discovery method).
+**Dependencies**: 5.1 ✅ (dialogue clue discovery method — complete).
 
 **Risk**: Medium-High. Largest new feature in Phase 5.
 

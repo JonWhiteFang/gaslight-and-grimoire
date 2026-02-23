@@ -71,7 +71,7 @@ Components live in `src/components/[Name]/` with `index.ts` barrel exports. Stat
           ├── <HeaderBar />         # Ability button, hint button, overlay toggles
           ├── <AmbientAudio />      # Non-rendering: ambient track from scene.ambientAudio
           ├── <GameContent>
-          │   ├── <NarrativePanel />  # Scene text, illustration, dice roll overlay, clue discovery card
+          │   ├── <NarrativePanel />  # Scene text, illustration, dice roll overlay, clue discovery card, active clue prompts
           │   ├── <ChoicePanel />     # Choice cards rendered from current SceneNode.choices
           │   └── <EncounterPanel />   # Multi-round encounter UI (when scene has encounter field)
           ├── <StatusBar />         # Vitality meter, composure meter
@@ -112,6 +112,7 @@ src/
     hintEngine.ts             # Stateful hint system (3 escalating levels)
     saveManager.ts            # localStorage persistence with versioned migrations, multi-save support
     audioManager.ts           # Howler.js SFX management (lazy-cached Howl instances)
+    cluePrompts.ts            # Atmospheric prompt text generator for exploration/check clue discovery
   components/                 # React components (each in own directory)
   data/archetypes.ts          # Archetype definitions, faculty constants
 
@@ -271,7 +272,7 @@ These are documented in detail in `devdocs/evolution/gap_analysis.md`, `smoke_te
 - None remaining. `loadGame` caseData restoration was fixed in Phase A.
 
 ### High (game design — player experience gaps)
-- **Active clue discovery unimplemented** — Only `automatic` method works. `exploration`, `check`, `dialogue` have no UI trigger. Core gameplay loop is incomplete.
+- ~~**Active clue discovery unimplemented**~~ — ✅ FIXED. All four discovery methods now work: `automatic` and `dialogue` auto-discover on scene entry (dialogue shows speech-bubble variant card), `exploration` renders atmospheric clickable prompts, `check` performs a dice roll via `performCheck`. New files: `src/engine/cluePrompts.ts`, `src/components/NarrativePanel/SceneCluePrompts.tsx`.
 - **Zero audio/visual assets** — Audio system and illustration system are fully coded but no `.mp3` or image files exist. Game is silent with no illustrations.
 - **Thin content** — Avg 1.1–1.3 choices/scene, only 6 clues and 3 NPCs per case, 1 variant per case. Low replayability.
 - **NPCs have no dialogue system** — Disposition/suspicion/memoryFlags exist but no interactive dialogue. `memoryFlags` never populated in content.
@@ -312,4 +313,4 @@ See `devdocs/evolution/implementation_roadmap.md` for the full phased plan. Summ
 - **Phase B (Core Refactoring)**: ✅ COMPLETE — Extracted pure computeChoiceResult, moved buildDeduction to engine, audio subscription, consolidated CheckResult types, runtime content validation with tier completeness
 - **Phase C (Gap Filling)**: ✅ COMPLETE — ClueDiscoveryCard, save button, faction display, error display, case completion screen
 - **Phase D (Integration)**: ✅ COMPLETE — Encounter UI, stale state cleanup, remove dead code
-- **Phase E (Game Design)**: 🔲 NOT STARTED — Active clue discovery, audio/visual assets, content depth, NPC dialogue, recovery mechanics, persistent evidence board, scene history, dice rebalance, consequence feedback, testing expansion. See `GAME_DESIGN_ANALYSIS.md` for full analysis.
+- **Phase E (Game Design)**: 🟡 IN PROGRESS — ~~Active clue discovery~~ ✅, audio/visual assets, content depth, NPC dialogue, recovery mechanics, persistent evidence board, scene history, dice rebalance, consequence feedback, testing expansion. See `GAME_DESIGN_ANALYSIS.md` for full analysis.

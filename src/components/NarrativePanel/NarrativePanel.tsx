@@ -2,8 +2,8 @@
  * NarrativePanel — main scene display area.
  *
  * Composes SceneText, SceneIllustration, DiceRollOverlay, OutcomeBanner,
- * and ClueDiscoveryCard. Wired to the narrative slice so it re-renders on
- * goToScene.
+ * ClueDiscoveryCard, and SceneCluePrompts. Wired to the narrative slice
+ * so it re-renders on goToScene.
  *
  * Req 2.2, 2.3, 2.4, 4.6, 4.7, 4.8
  */
@@ -16,6 +16,7 @@ import { SceneIllustration } from './SceneIllustration';
 import { DiceRollOverlay } from './DiceRollOverlay';
 import { OutcomeBanner } from './OutcomeBanner';
 import { ClueDiscoveryCard } from './ClueDiscoveryCard';
+import { SceneCluePrompts } from './SceneCluePrompts';
 import type { Clue } from '../../types';
 
 export function NarrativePanel() {
@@ -26,6 +27,8 @@ export function NarrativePanel() {
   const setCheckResult = useStore((s) => s.setCheckResult);
   const discoverClue = useStore((s) => s.discoverClue);
   const applyEffects = useStore((s) => s.applyEffects);
+  const clues = useStore((s) => s.clues);
+  const investigator = useStore((s) => s.investigator);
 
   const scene = useCurrentScene();
   const prevSceneRef = useRef('');
@@ -33,6 +36,7 @@ export function NarrativePanel() {
   // Clue discovery card state
   const [discoveredClue, setDiscoveredClue] = useState<Clue | null>(null);
   const [clueCardVisible, setClueCardVisible] = useState(false);
+  const [clueCardVariant, setClueCardVariant] = useState<'standard' | 'dialogue'>('standard');
 
   // Show the dice overlay while a check result is present
   const [diceVisible, setDiceVisible] = useState(false);
@@ -48,7 +52,7 @@ export function NarrativePanel() {
     }
   }, [lastCheckResult]);
 
-  // Apply onEnter effects and auto-discover clues when scene changes
+  // Apply onEnter effects and auto-discover automatic + dialogue clues on scene change
   useEffect(() => {
     if (!scene || currentSceneId === prevSceneRef.current) return;
     prevSceneRef.current = currentSceneId;
@@ -59,20 +63,22 @@ export function NarrativePanel() {
       applyEffects(scene.onEnter);
     }
 
-    // Auto-discover clues with method 'automatic'
     const gameState = buildGameState(useStore.getState());
     let lastDiscoveredId: string | null = null;
+    let lastMethod: string = 'automatic';
+
     for (const discovery of scene.cluesAvailable) {
-      if (discovery.method === 'automatic' && canDiscoverClue(discovery, gameState)) {
+      if ((discovery.method === 'automatic' || discovery.method === 'dialogue') && canDiscoverClue(discovery, gameState)) {
         discoverClue(discovery.clueId);
         lastDiscoveredId = discovery.clueId;
+        lastMethod = discovery.method;
       }
     }
 
-    // Show discovery card for the last auto-discovered clue
     if (lastDiscoveredId) {
       const freshClues = useStore.getState().clues;
       setDiscoveredClue(freshClues[lastDiscoveredId] ?? null);
+      setClueCardVariant(lastMethod === 'dialogue' ? 'dialogue' : 'standard');
       setClueCardVisible(true);
       const timer = setTimeout(() => setClueCardVisible(false), 4000);
       return () => clearTimeout(timer);
@@ -84,6 +90,24 @@ export function NarrativePanel() {
     setDiceVisible(false);
     setCheckResult(null);
   }
+
+  function handleClueDiscovered(clue: Clue) {
+    setDiscoveredClue(clue);
+    setClueCardVariant('standard');
+    setClueCardVisible(true);
+    setTimeout(() => setClueCardVisible(false), 4000);
+  }
+
+  function handleCheckResult(result: { roll: number; modifier: number; total: number; tier: string }) {
+    setCheckResult({
+      roll: result.roll,
+      modifier: result.modifier,
+      total: result.total,
+      tier: result.tier as import('../../types').OutcomeTier,
+    });
+  }
+
+  const gameState = buildGameState(useStore.getState());
 
   return (
     <section
@@ -117,11 +141,26 @@ export function NarrativePanel() {
         reducedMotion={reducedMotion}
       />
 
+      {/* Active clue discovery prompts (exploration + check) */}
+      {scene && (
+        <SceneCluePrompts
+          sceneId={currentSceneId}
+          cluesAvailable={scene.cluesAvailable}
+          clues={clues}
+          gameState={gameState}
+          investigator={investigator}
+          onClueDiscovered={handleClueDiscovered}
+          onCheckResult={handleCheckResult}
+          discoverClue={discoverClue}
+        />
+      )}
+
       {/* Clue discovery notification */}
       <ClueDiscoveryCard
         clue={discoveredClue ?? undefined}
         visible={clueCardVisible}
         reducedMotion={reducedMotion}
+        variant={clueCardVariant}
         onDismiss={() => setClueCardVisible(false)}
       />
     </section>

@@ -233,20 +233,17 @@ Phase D (✅ COMPLETE):
 
 Goal: Transform the technically sound but content-thin game into a compelling player experience with active investigation, atmospheric immersion, balanced mechanics, and meaningful NPC interaction.
 
-### E1. Implement Active Clue Discovery Methods — P0
+### E1. Implement Active Clue Discovery Methods — ✅ COMPLETE
 
-**What**: Only `automatic` clue discovery works. `exploration`, `check`, and `dialogue` methods have no UI trigger. Players passively receive clues instead of actively investigating.
+**What**: All four clue discovery methods now work.
 
-**Files**: `src/components/NarrativePanel/NarrativePanel.tsx`, `src/components/ChoicePanel/ChoicePanel.tsx`, content JSON files
+**Resolution**: 
+- `exploration`: `SceneCluePrompts` component renders atmospheric clickable prompts (auto-generated from clue type/title via `getCluePromptText`). Player clicks to discover.
+- `check`: `SceneCluePrompts` renders faculty-tagged examine prompts. On click, performs a dice roll via `performCheck` (rollD20 + modifier vs `requiresFaculty.minimum` as DC). Success discovers the clue; failure shows narrative snippet. One shot per scene visit, no retry.
+- `dialogue`: `NarrativePanel` auto-discovers dialogue-method clues on scene entry (same as automatic) with a speech-bubble variant of `ClueDiscoveryCard` (🗣️ icon, "Gleaned from Conversation" header).
 
-**Changes**:
-1. Add "Investigate" button to `NarrativePanel` for `exploration`-method clues in the current scene.
-2. Add faculty-gated "Examine" interaction for `check`-method clues (requires passing a faculty check).
-3. Wire `dialogue`-method clues into `ChoicePanel` — discovering clue as side-effect of NPC-affecting choices.
-
-**Dependencies**: None.
-
-**Risk**: Medium. Requires both code changes and content updates to exercise the new methods.
+**New files**: `src/engine/cluePrompts.ts`, `src/components/NarrativePanel/SceneCluePrompts.tsx`
+**Modified files**: `src/components/NarrativePanel/NarrativePanel.tsx`, `src/components/NarrativePanel/ClueDiscoveryCard.tsx`, `src/components/NarrativePanel/index.ts`
 
 ---
 
@@ -287,7 +284,7 @@ Goal: Transform the technically sound but content-thin game into a compelling pl
 
 **Files**: `src/types/index.ts` (new `DialogueNode` type), new `src/components/NarrativePanel/DialoguePanel.tsx`, `src/engine/narrativeEngine.ts` (dialogue evaluation), content JSON files
 
-**Dependencies**: E1 (dialogue clue discovery method).
+**Dependencies**: E1 ✅ (dialogue clue discovery method — complete).
 
 **Risk**: Medium-High. Largest new feature. Requires type additions, new component, engine logic, and content.
 
@@ -385,10 +382,10 @@ Goal: Transform the technically sound but content-thin game into a compelling pl
 Phase A–D (✅ ALL COMPLETE)
 
 Phase E (Game Design Improvements):
-  E1 (active clue discovery)     — independent
+  E1 (active clue discovery)     — ✅ COMPLETE
   E2 (audio/visual assets)       — independent
   E3 (content depth)             — independent
-  E4 (NPC dialogue)              — depends on E1 (dialogue discovery method)
+  E4 (NPC dialogue)              — depends on E1 ✅ (dialogue discovery method)
   E5 (recovery mechanics)        — independent
   E6 (persistent evidence board) — independent
   E7 (scene history)             — independent

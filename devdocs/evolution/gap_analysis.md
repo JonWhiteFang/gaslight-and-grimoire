@@ -211,13 +211,9 @@ The issues are all incremental:
 
 > These gaps were identified through a full game design audit of the codebase, content, and player experience. Unlike sections 1–5 which focused on engineering correctness, these focus on whether the game is fun, immersive, and replayable. See `GAME_DESIGN_ANALYSIS.md` for the full analysis.
 
-### 6.1 Active Clue Discovery Methods Not Implemented (HIGH)
+### ~~6.1 Active Clue Discovery Methods Not Implemented~~ — ✅ FIXED (Phase E1)
 
-**Gap**: Only `automatic` clue discovery works. `exploration`, `check`, and `dialogue` methods defined in `ClueDiscovery.method` have no UI trigger. Players passively receive clues on scene entry.
-
-**Desired state**: Players actively investigate scenes — searching desks (exploration), passing faculty checks to notice details (check), and extracting information from NPCs (dialogue).
-
-**Impact**: The DISCOVER phase of the gameplay loop is hollow. No player agency in finding clues.
+**Resolution**: All four discovery methods now work. `exploration` renders atmospheric clickable prompts via `SceneCluePrompts`. `check` performs dice rolls via `performCheck` with one-shot-per-scene semantics. `dialogue` auto-discovers on scene entry with speech-bubble variant `ClueDiscoveryCard`. New files: `src/engine/cluePrompts.ts`, `src/components/NarrativePanel/SceneCluePrompts.tsx`.
 
 ---
 

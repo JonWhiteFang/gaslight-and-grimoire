@@ -40,10 +40,8 @@ Faction reputation is tracked, propagated from NPC disposition, and used for vig
 - **Status**: Missing
 - **Where it should be**: `src/components/CaseJournal/CaseJournal.tsx` or a new faction panel
 
-### Non-Automatic Clue Discovery Methods
-`ClueDiscovery.method` supports `'exploration'`, `'check'`, and `'dialogue'` in addition to `'automatic'`, but only `'automatic'` is handled in `NarrativePanel`. The other methods have no UI trigger.
-- **Status**: Missing
-- **Where it should be**: `src/components/NarrativePanel/NarrativePanel.tsx` or `src/components/ChoicePanel/`
+### ~~Non-Automatic Clue Discovery Methods~~ — ✅ FIXED (Phase E1)
+All four discovery methods now work via `SceneCluePrompts` (exploration/check) and `NarrativePanel` useEffect (dialogue). New files: `src/engine/cluePrompts.ts`, `src/components/NarrativePanel/SceneCluePrompts.tsx`.
 
 ---
 
@@ -116,8 +114,8 @@ The audio system is fully coded but no `.mp3` files exist in the repository. The
 
 > These were identified through a full game design audit. See `GAME_DESIGN_ANALYSIS.md` for detailed analysis with code references and proposed solutions.
 
-### Active Clue Discovery UI
-Only `automatic` clue discovery has a UI trigger. `exploration`, `check`, and `dialogue` methods are defined in the type system and used in content but have no player-facing interaction.
+### ~~Active Clue Discovery UI~~ — ✅ FIXED (Phase E1)
+All four discovery methods now work. `exploration` renders atmospheric clickable prompts, `check` performs dice rolls, `dialogue` auto-discovers with speech-bubble card.
 - **Status**: Missing
 - **Severity**: High — core gameplay loop is incomplete
 - **Where it should be**: `src/components/NarrativePanel/NarrativePanel.tsx` (explore/check buttons), `src/components/ChoicePanel/ChoicePanel.tsx` (dialogue side-effect)

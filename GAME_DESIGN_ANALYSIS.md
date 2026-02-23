@@ -11,24 +11,12 @@ Gaslight & Grimoire has a strong architectural foundation — clean engine/conte
 
 ---
 
-## 1. Implement Active Clue Discovery (Exploration, Check, Dialogue)
+## ~~1. Implement Active Clue Discovery (Exploration, Check, Dialogue)~~ — ✅ FIXED
 
 **Category:** Gameplay Mechanics
-**Severity:** High — core gameplay loop is incomplete
+**Severity:** High — ✅ RESOLVED
 
-**Issue:** The `ClueDiscovery` type supports four methods (`automatic`, `exploration`, `check`, `dialogue`), but only `automatic` is implemented. The `NarrativePanel` useEffect only processes `discovery.method === 'automatic'`. The other three methods have no UI trigger anywhere in the codebase. This means players passively receive clues on scene entry rather than actively investigating — which contradicts the core fantasy of being a clever investigator.
-
-**Impact:** Without active discovery, the DISCOVER phase of the gameplay loop is hollow. Players have no agency in finding clues, which removes the satisfaction of thorough investigation and makes the Evidence Board feel disconnected from scene exploration.
-
-**Proposed Solution:**
-- `exploration`: Add an "Investigate" button to `NarrativePanel` that appears when the current scene has undiscovered exploration clues. Clicking it reveals the clue with a brief discovery animation.
-- `check`: Add a faculty-gated "Examine" interaction. The player sees a prompt like "A Perception check might reveal something here" and must pass a faculty check to discover the clue. On failure, the clue remains hidden (but the player knows something is there).
-- `dialogue`: Wire into `ChoicePanel` — when a choice has an `npcEffect` and the scene has dialogue-method clues tied to that NPC, discovering the clue is a side-effect of selecting that choice.
-
-**Files to modify:**
-- `src/components/NarrativePanel/NarrativePanel.tsx` — add exploration/check UI triggers
-- `src/components/ChoicePanel/ChoicePanel.tsx` — wire dialogue discovery into choice selection
-- Content JSON files — ensure existing clues use varied discovery methods
+**Resolution:** All four discovery methods now work. `exploration` renders atmospheric clickable prompts via `SceneCluePrompts` (auto-generated from clue type/title). `check` performs dice rolls via `performCheck` with one-shot-per-scene semantics and narrative failure text. `dialogue` auto-discovers on scene entry with speech-bubble variant `ClueDiscoveryCard` (🗣️ icon, "Gleaned from Conversation" header). No content JSON changes required. New files: `src/engine/cluePrompts.ts`, `src/components/NarrativePanel/SceneCluePrompts.tsx`.
 
 ---
 
@@ -278,7 +266,7 @@ These didn't make the top 10 but are worth noting:
 
 | # | Improvement | Effort | Impact | Priority |
 |---|---|---|---|---|
-| 1 | Active Clue Discovery | Medium | High | P0 |
+| 1 | ~~Active Clue Discovery~~ ✅ | Medium | High | P0 — DONE |
 | 2 | Audio & Visual Assets | High (asset creation) | High | P0 |
 | 3 | Deepen Branching & Content | High (content authoring) | High | P0 |
 | 4 | NPC Dialogue System | High | High | P1 |

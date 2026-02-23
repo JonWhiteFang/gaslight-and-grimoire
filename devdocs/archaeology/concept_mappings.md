@@ -93,9 +93,9 @@
 
 ## 6. Clue Discovery & Evidence System
 
-**Files**: `src/engine/narrativeEngine.ts` → `canDiscoverClue`, `src/store/slices/evidenceSlice.ts`, `src/components/EvidenceBoard/EvidenceBoard.tsx`, `ClueCard.tsx`, `ConnectionThread.tsx`, `DeductionButton.tsx`, `buildDeduction.ts`, `ProgressSummary.tsx`, `src/components/NarrativePanel/NarrativePanel.tsx` (auto-discovery), `src/components/NarrativePanel/ClueDiscoveryCard.tsx` (stub)
+**Files**: `src/engine/narrativeEngine.ts` → `canDiscoverClue`, `src/store/slices/evidenceSlice.ts`, `src/components/EvidenceBoard/EvidenceBoard.tsx`, `ClueCard.tsx`, `ConnectionThread.tsx`, `DeductionButton.tsx`, `buildDeduction.ts`, `ProgressSummary.tsx`, `src/components/NarrativePanel/NarrativePanel.tsx` (auto-discovery + dialogue), `src/components/NarrativePanel/ClueDiscoveryCard.tsx` (standard + dialogue variant), `src/components/NarrativePanel/SceneCluePrompts.tsx` (exploration + check prompts), `src/engine/cluePrompts.ts` (atmospheric prompt generator)
 
-**Coverage**: Partially implemented. Automatic discovery works. Exploration/check/dialogue discovery methods have no UI trigger. ClueDiscoveryCard is a stub. Evidence Board connection + deduction flow is complete.
+**Coverage**: Fully implemented. All four discovery methods work: `automatic` and `dialogue` auto-discover on scene entry, `exploration` renders clickable atmospheric prompts, `check` performs dice rolls. Evidence Board connection + deduction flow is complete.
 
 **Why this shape**: Clues are pre-loaded into the store (with `isRevealed: false`) when a case starts. Discovery flips `isRevealed` to true. This avoids runtime clue creation and keeps the store as the single source of truth. The Evidence Board uses React component state for connections (not the store), which means connections are lost on close/reopen.
 
