@@ -97,8 +97,8 @@ if (arg) {
   dirs = [join(process.cwd(), arg)];
 } else {
   dirs = [];
-  const casesDir = join(process.cwd(), 'content/cases');
-  const sideDir = join(process.cwd(), 'content/side-cases');
+  const casesDir = join(process.cwd(), 'public/content/cases');
+  const sideDir = join(process.cwd(), 'public/content/side-cases');
   if (existsSync(casesDir)) {
     for (const d of readdirSync(casesDir, { withFileTypes: true })) {
       if (d.isDirectory()) dirs.push(join(casesDir, d.name));
