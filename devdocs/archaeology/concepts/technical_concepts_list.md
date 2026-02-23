@@ -81,7 +81,7 @@ Howler.js singleton with lazy-cached `Howl` instances per SFX event (9 events). 
 
 ### Case Progression
 `completeCase` grants +1 faculty bonus from `last-critical-faculty` flag, checks vignette unlock conditions, auto-saves. Vignette registry with faction rep / NPC disposition / flag triggers.
-- **Status**: Fully implemented (engine); no UI for case completion results
+- **Status**: Fully implemented (engine + UI); terminal scenes trigger `CaseCompletion` screen
 - **Files**: `src/engine/caseProgression.ts`
 
 ## Component Architecture

@@ -28,13 +28,25 @@ const ABILITY_FLAGS: Record<string, string> = {
   mesmerist: 'ability-auto-succeed-influence',
 };
 
-function GameContent() {
+function GameContent({ onCompleteCase }: { onCompleteCase: () => void }) {
   const scene = useCurrentScene();
+  const isTerminal = scene && scene.choices.length === 0 && !scene.encounter;
+
   return (
     <main className="flex-1 flex flex-col overflow-hidden">
       <div className="flex-1 overflow-y-auto">
         <NarrativePanel />
-        {scene?.encounter ? (
+        {isTerminal ? (
+          <div className="flex justify-center p-8">
+            <button
+              type="button"
+              onClick={onCompleteCase}
+              className="px-8 py-3 bg-amber-700 hover:bg-amber-600 text-amber-50 font-serif text-lg rounded border border-amber-500 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400"
+            >
+              Case Complete
+            </button>
+          </div>
+        ) : scene?.encounter ? (
           <EncounterPanel
             sceneId={scene.id}
             rounds={scene.encounter.rounds}
@@ -67,6 +79,7 @@ export default function App() {
   const saveGame = useStore((s) => s.saveGame);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [completionResult, setCompletionResult] = useState<CaseCompletionResult | null>(null);
+  const [endingNarrative, setEndingNarrative] = useState<string | null>(null);
   const completeCase = useStore((s) => s.completeCase);
   const currentCase = useStore((s) => s.currentCase);
 
@@ -103,6 +116,10 @@ export default function App() {
 
   const handleCompleteCase = useCallback(() => {
     if (!currentCase) return;
+    const caseData = useStore.getState().caseData;
+    const sceneId = useStore.getState().currentScene;
+    const scene = caseData?.scenes[sceneId];
+    setEndingNarrative(scene?.narrative ?? null);
     const result = completeCase(currentCase);
     setCompletionResult(result);
     setScreen('case-complete');
@@ -152,8 +169,10 @@ export default function App() {
         <CaseCompletion
           facultyBonusGranted={completionResult.facultyBonusGranted}
           vignetteUnlocked={completionResult.vignetteUnlocked}
+          endingNarrative={endingNarrative}
           onContinue={() => {
             setCompletionResult(null);
+            setEndingNarrative(null);
             setScreen('case-selection');
           }}
         />
@@ -199,7 +218,7 @@ export default function App() {
         />
         <AmbientAudio />
 
-        <GameContent />
+        <GameContent onCompleteCase={handleCompleteCase} />
 
         {/* Overlays */}
         {isEvidenceBoardOpen && (

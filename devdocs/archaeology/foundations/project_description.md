@@ -22,7 +22,7 @@ The game auto-saves on scene transitions. Progress persists in the browser's loc
 - **Load game**: The load screen exists and save files can be selected, but loading doesn't restore the case content data, so the game screen is blank after load.
 - **Hint system**: The hint engine tracks board visits and scene dwell time, but no component ever reports these events. Hints appear only via a broken dwell timer.
 - **Audio**: 9 SFX events and an ambient audio system are fully coded, but no audio files exist. The game is silent.
-- **Case completion**: The engine grants faculty bonuses and checks vignette unlocks at case end, but no UI shows these results.
+- **Case completion**: The engine grants faculty bonuses and checks vignette unlocks at case end. The `CaseCompletion` screen displays ending narrative, faculty bonus, and vignette unlock. Triggered by terminal scenes (no choices, no encounter).
 - **Manual save**: The save function exists but no button triggers it.
 
 ## Current Use Cases

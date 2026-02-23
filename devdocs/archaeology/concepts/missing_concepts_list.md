@@ -21,9 +21,8 @@ Created `EncounterPanel` component. Added `encounter` field to `SceneNode`. Auth
 
 ### Case Completion Screen
 `CaseProgression.completeCase()` returns `{ facultyBonusGranted, vignetteUnlocked }` but no UI renders these results. The player has no feedback that a case ended, what bonus they received, or what new content unlocked.
-- **Status**: Missing
-- **Where it should be**: a new screen/overlay in `App.tsx` between case end and title/next-case
-- **Files**: `src/engine/caseProgression.ts` (engine exists), `src/App.tsx` (no completion screen state)
+- **Status**: ✅ FIXED
+- **Resolution**: `GameContent` detects terminal scenes (no choices, no encounter) and renders a "Case Complete" button. `handleCompleteCase` captures the ending narrative and transitions to the `CaseCompletion` screen, which shows the narrative text, faculty bonus, and vignette unlock. A Matter of Shadows terminal scenes now set `amos-case-complete` flag.
 
 ### Clue Discovery Notification
 `ClueDiscoveryCard` is explicitly a stub ("Full implementation in Task 10"). Auto-discovered clues are added to the store but the player gets no visual notification. The component accepts `clue` and `visible` props but `NarrativePanel` never passes them.

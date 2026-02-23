@@ -3,7 +3,7 @@
     {
       "id": "amos-act1-southwark-bridge",
       "act": 1,
-      "narrative": "Southwark Bridge at midnight. The Thames below is black and slow. A Lamplighter contact — a woman who gives her name only as 'Wren' — tells you the courier's last known location was a dosshouse on Tooley Street. She hands you a description and a warning: 'Don't ask what was in the package.'",
+      "narrative": "Southwark Bridge at midnight. The Thames below is black and slow. A Lamplighter contact \u2014 a woman who gives her name only as 'Wren' \u2014 tells you the courier's last known location was a dosshouse on Tooley Street. She hands you a description and a warning: 'Don't ask what was in the package.'",
       "ambientAudio": "ambient-thames-night",
       "cluesAvailable": [
         {
@@ -41,7 +41,7 @@
     {
       "id": "amos-act1-dosshouse",
       "act": 1,
-      "narrative": "The Tooley Street dosshouse is a sagging three-storey building that smells of tallow and damp wool. The night-keeper, a rheumy man named Briggs, remembers the courier — a young woman, red scarf, nervous hands. She took a room two nights ago and left before dawn. Her bed is cold. Under the mattress you find a torn corner of oilskin wrapping, still faintly waxed.",
+      "narrative": "The Tooley Street dosshouse is a sagging three-storey building that smells of tallow and damp wool. The night-keeper, a rheumy man named Briggs, remembers the courier \u2014 a young woman, red scarf, nervous hands. She took a room two nights ago and left before dawn. Her bed is cold. Under the mattress you find a torn corner of oilskin wrapping, still faintly waxed.",
       "ambientAudio": "ambient-southwark-night",
       "cluesAvailable": [
         {
@@ -79,7 +79,7 @@
     {
       "id": "amos-act1-wren-reveals",
       "act": 1,
-      "narrative": "Wren's composure cracks — just for a moment. 'The package was a list,' she says, voice barely above the river noise. 'Names. Lamplighter informants embedded in three factions. If that list reaches the wrong hands, people die.' She looks past you into the dark. 'The courier knew what she was carrying. That's why she ran.'",
+      "narrative": "Wren's composure cracks \u2014 just for a moment. 'The package was a list,' she says, voice barely above the river noise. 'Names. Lamplighter informants embedded in three factions. If that list reaches the wrong hands, people die.' She looks past you into the dark. 'The courier knew what she was carrying. That's why she ran.'",
       "ambientAudio": "ambient-thames-night",
       "cluesAvailable": [
         {
@@ -141,7 +141,7 @@
     {
       "id": "amos-act2-resolution",
       "act": 2,
-      "narrative": "You find the courier — a young woman named Elspeth — sheltering beneath Pickle Herring Stairs, the package still tucked inside her coat. She is frightened but unharmed. The shadows that followed her were cast by a rival faction's watcher, now gone cold at the sight of you. The list is intact. Elspeth presses it into your hands without a word.\n\nYou return it to Wren at a pre-arranged drop. She does not thank you. She does not need to. The Lamplighters remember their debts.",
+      "narrative": "You find the courier \u2014 a young woman named Elspeth \u2014 sheltering beneath Pickle Herring Stairs, the package still tucked inside her coat. She is frightened but unharmed. The shadows that followed her were cast by a rival faction's watcher, now gone cold at the sight of you. The list is intact. Elspeth presses it into your hands without a word.\n\nYou return it to Wren at a pre-arranged drop. She does not thank you. She does not need to. The Lamplighters remember their debts.",
       "ambientAudio": "ambient-thames-night",
       "cluesAvailable": [],
       "onEnter": [
@@ -197,6 +197,11 @@
           "type": "flag",
           "target": "amos-returned-list-intact",
           "value": true
+        },
+        {
+          "type": "flag",
+          "target": "amos-case-complete",
+          "value": true
         }
       ],
       "choices": []
@@ -204,13 +209,18 @@
     {
       "id": "amos-act2-end-leverage",
       "act": 2,
-      "narrative": "You memorise three names before sealing the package. The Lamplighters get their list. You get something harder to quantify — a thread you can pull, if you ever need to. Wren watches you go with eyes that suggest she knows exactly what you did. She says nothing. Neither do you.",
+      "narrative": "You memorise three names before sealing the package. The Lamplighters get their list. You get something harder to quantify \u2014 a thread you can pull, if you ever need to. Wren watches you go with eyes that suggest she knows exactly what you did. She says nothing. Neither do you.",
       "ambientAudio": "ambient-thames-night",
       "cluesAvailable": [],
       "onEnter": [
         {
           "type": "flag",
           "target": "amos-kept-list-copy",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "amos-case-complete",
           "value": true
         }
       ],

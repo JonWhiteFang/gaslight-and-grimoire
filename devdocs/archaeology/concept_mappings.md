@@ -224,7 +224,7 @@
 
 **Files**: `src/engine/caseProgression.ts`, `src/store/slices/narrativeSlice.ts` → `completeCase`
 
-**Coverage**: Fully implemented (engine). No UI for case completion results. No case selection screen.
+**Coverage**: Fully implemented (engine + UI). Case completion triggered by terminal scenes (no choices, no encounter) via `GameContent` → `handleCompleteCase` → `CaseCompletion` screen. Case selection via `content/manifest.json` and `CaseSelection` component.
 
 **Why this shape**: `CaseProgression.completeCase` is called from the narrative slice's `completeCase` action. It grants a faculty bonus from the `last-critical-faculty` flag, checks vignette unlock conditions, sets unlock flags, and auto-saves. The vignette registry is a hardcoded array in `caseProgression.ts`.
 

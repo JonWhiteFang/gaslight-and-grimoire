@@ -46,7 +46,7 @@ Actions defined in slices but never called from any component or engine function
 | `resetAbility` | investigatorSlice | Nobody (only `AbilityButton.test.tsx`) | **Keep.** Ability reset happens inside `loadAndStartCase` via `state.investigator.abilityUsed = false`, but `resetAbility` is the proper action for it. May be needed when case completion is wired. |
 | `removeNpc` | npcSlice | Nobody | **Keep.** Required by Req 8.8 (NPC death/removal). No content currently triggers it, but the action is correct and will be needed for future cases. ⚠️ **Dynamic risk**: Could be called from content `Effect` if a `removeNpc` effect type were added. |
 | `setNpcMemoryFlag` | npcSlice | Nobody | **Keep.** Required by the NPC memory system (Req 8.4). No content currently uses it, but the `memoryFlags` field exists on every NPC. |
-| `completeCase` | narrativeSlice | Nobody (only `caseProgression.test.ts`) | **Keep.** Will be called when case completion UI is added (gap closure 2.5). |
+| `completeCase` | narrativeSlice | `GameContent` → `handleCompleteCase` in App.tsx | **In use.** Called when player clicks "Case Complete" on terminal scenes. |
 
 ---
 

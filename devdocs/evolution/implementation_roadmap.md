@@ -140,7 +140,7 @@ Goal: Implement features that are engine-complete but UI-incomplete, and add mis
 
 ### C5. Case Completion Screen — ✅ DONE
 
-**Resolution**: Created `CaseCompletion` component showing faculty bonus and vignette unlock. Added `'case-complete'` screen state to App.tsx with `handleCompleteCase` callback. Trigger will be wired in Phase D when content supports terminal scenes.
+**Resolution**: Created `CaseCompletion` component showing faculty bonus and vignette unlock. Added `'case-complete'` screen state to App.tsx with `handleCompleteCase` callback. Wired in: `GameContent` detects terminal scenes (no choices, no encounter) and renders a "Case Complete" button that triggers `handleCompleteCase`. `CaseCompletion` also displays the ending narrative text.
 
 ---
 
