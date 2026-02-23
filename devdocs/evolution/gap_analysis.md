@@ -277,13 +277,9 @@ The issues are all incremental:
 
 ---
 
-### 6.8 Dice Math Skews Toward Failure (MEDIUM)
+### ~~6.8 Dice Math Skews Toward Failure~~ — ✅ FIXED
 
-**Gap**: Base faculty 8 → modifier -1. Even archetype primary (score 11) → modifier +0. Against DC 12, success rate is 45% for your best faculty. Partial band is only 10% wide (2 numbers on d20).
-
-**Desired state**: Standard checks at DC 10. Wider partial band (dc-3 instead of dc-2). Archetype trained bonus.
-
-**Impact**: Players feel like they're flipping coins. The 5-tier outcome system collapses to 3 tiers in practice.
+**Resolution**: Partial band widened from DC-2 to DC-3 (15% instead of 10%). Trained bonus (+1) added for archetype primary faculty via `getTrainedBonus`. All content DCs lowered by 2. Encounter reaction check stays at DC 12. Invested primary faculty now succeeds ~80% vs standard checks.
 
 ---
 

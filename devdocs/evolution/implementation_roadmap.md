@@ -331,20 +331,11 @@ Goal: Transform the technically sound but content-thin game into a compelling pl
 
 ---
 
-### E8. Rebalance Dice Math — P2
+### E8. Rebalance Dice Math — ✅ DONE
 
-**What**: Even maxed faculty (score 14, mod +2) only succeeds 55% vs DC 12. Partial band is only 10% wide (2 numbers on d20). Feels like coin-flipping.
+**What**: Even maxed faculty (score 14, mod +2) only succeeded 55% vs DC 12. Partial band was only 10% wide (2 numbers on d20). Felt like coin-flipping.
 
-**Files**: `src/engine/diceEngine.ts` (adjust `resolveCheck` partial threshold, default DC), content JSON (audit `difficulty` values)
-
-**Changes**:
-1. Widen partial band: `total >= dc - 3` (was `dc - 2`).
-2. Lower default DC from 12 to 10 for standard checks.
-3. Consider archetype primary faculty trained bonus (+1).
-
-**Dependencies**: None.
-
-**Risk**: Low code change. Medium balance impact — requires playtesting.
+**Resolution**: Three changes: (1) Partial band widened from `dc - 2` to `dc - 3` in `resolveCheck`. (2) `getTrainedBonus(faculty, archetype)` added — returns +1 when check faculty matches archetype primary (deductionist→reason, occultist→lore, operator→vigor, mesmerist→influence). Wired into `performCheck`, `ChoiceCard`, and `SceneCluePrompts`. (3) All 34 content DC values lowered by 2. Encounter reaction check stays at DC 12. Files changed: `src/engine/diceEngine.ts`, `src/components/ChoicePanel/ChoiceCard.tsx`, `src/components/NarrativePanel/SceneCluePrompts.tsx`, 9 content JSON files, 1 test file.
 
 ---
 

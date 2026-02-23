@@ -112,7 +112,7 @@ All three Phase A blockers are resolved. Remaining broken features (ClueDiscover
 | 6.6 | NPCs have no interactive dialogue — memoryFlags never populated | High | Open |
 | 6.7 | No composure/vitality recovery — death spiral | Medium-High | Open |
 | 6.8 | Evidence Board connections lost on close (React state, not store) | Medium-High | Open |
-| 6.9 | Dice math: 45% success rate for best faculty vs DC 12 | Medium | Open |
+| 6.9 | ~~Dice math: 45% success rate for best faculty vs DC 12~~ | Medium | ✅ Fixed — partial band widened, trained bonus added, DCs lowered |
 | 6.10 | onEnter effects fire silently — no narrative feedback | Medium | Open |
 | 6.11 | sceneHistory tracked but never consumed — no back navigation | Medium | Open |
 | 6.12 | Occultist Veil Sight ability has no mechanical effect | Medium | Open |

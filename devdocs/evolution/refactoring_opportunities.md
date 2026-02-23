@@ -47,17 +47,9 @@
 
 ---
 
-## R8. Widen Dice Partial Band and Lower Default DC
+## ~~R8. Widen Dice Partial Band and Lower Default DC~~ — ✅ DONE
 
-**Status**: Not started (Phase E8)
-
-**What**: Change `resolveCheck` partial threshold from `dc - 2` to `dc - 3`. Lower default DC from 12 to 10. Consider archetype trained bonus.
-
-**Why**: Current math gives 45% success rate for best faculty vs DC 12. Partial band is only 10% wide. The 5-tier outcome system collapses to 3 tiers in practice.
-
-**Files**: `src/engine/diceEngine.ts`, content JSON `difficulty` values
-
-**Effort**: Low (code). Medium (balance testing).
+**Resolution**: Partial band widened (`dc - 3`). Trained bonus (+1 for archetype primary faculty) added via `getTrainedBonus`. All 34 content DCs lowered by 2. Encounter reaction check stays at DC 12.
 
 ---
 

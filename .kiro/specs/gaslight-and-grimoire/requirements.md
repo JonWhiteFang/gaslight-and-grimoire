@@ -14,7 +14,7 @@ Gaslight & Grimoire is a browser-based choose-your-own-adventure game set in Vic
 - **Composure**: Mental/emotional stability meter (0–10); at 0 the Investigator suffers a Breakdown
 - **Vitality**: Physical health meter (0–10); at 0 the Investigator is Incapacitated
 - **Faculty_Check**: A d20 roll plus Faculty_Modifier compared against a Difficulty Class
-- **Difficulty_Class**: A target number (Routine 8, Moderate 12, Hard 16, Formidable 20, Supernatural 24+)
+- **Difficulty_Class**: A target number (Routine 6, Moderate 10, Hard 14, Formidable 18, Supernatural 22+)
 - **Advantage**: Rolling 2d20 and taking the higher result, granted by relevant clues
 - **Disadvantage**: Rolling 2d20 and taking the lower result, applied when injured, stressed, or unprepared
 - **Clue**: A piece of evidence discovered during investigation, categorized as Physical Evidence, Testimony, Occult Fragment, Deduction, or Red Herring

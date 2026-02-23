@@ -11,7 +11,7 @@
           "id": "ms-choice-confront-ashworth-final",
           "text": "Confront Lady Ashworth with what you know — the fraud, the debts, the conspiracy.",
           "faculty": "influence",
-          "difficulty": 14,
+          "difficulty": 12,
           "advantageIf": ["ms-clue-pemberton-debts"],
           "outcomes": {
             "critical": "ms-act3-ending-exposure",
@@ -30,7 +30,7 @@
           "id": "ms-choice-help-vesper-seal",
           "text": "Help Vesper complete the binding — seal whatever was summoned before it grows stronger.",
           "faculty": "lore",
-          "difficulty": 14,
+          "difficulty": 12,
           "advantageIf": ["ms-clue-grey-dawn-sigil"],
           "requiresClue": "ms-clue-vesper-journal",
           "outcomes": {
@@ -45,7 +45,7 @@
           "id": "ms-choice-force-pemberton",
           "text": "Drag Pemberton back to the séance room. He built the mechanism — he can help dismantle it.",
           "faculty": "nerve",
-          "difficulty": 12,
+          "difficulty": 10,
           "advantageIf": ["ms-clue-hidden-mechanism"],
           "outcomes": {
             "critical": "ms-act3-ending-exposure",
@@ -79,7 +79,7 @@
                 "id": "ms-enc-lore-banish",
                 "text": "Recite the Grey Dawn dismissal ward from Vesper's journal.",
                 "faculty": "lore",
-                "difficulty": 14,
+                "difficulty": 12,
                 "advantageIf": ["ms-clue-vesper-journal"],
                 "outcomes": {
                   "critical": "ms-act3-ending-sealed",
@@ -97,7 +97,7 @@
                 "id": "ms-enc-nerve-resist",
                 "text": "Hold your ground. Refuse to yield to the presence's psychic assault.",
                 "faculty": "nerve",
-                "difficulty": 13,
+                "difficulty": 11,
                 "outcomes": {
                   "critical": "ms-act3-ending-compromise",
                   "success": "ms-act3-ending-compromise",
@@ -131,7 +131,7 @@
                 "id": "ms-enc-influence-command",
                 "text": "Command the presence to depart — your will against its hunger.",
                 "faculty": "influence",
-                "difficulty": 15,
+                "difficulty": 13,
                 "outcomes": {
                   "critical": "ms-act3-ending-sealed",
                   "success": "ms-act3-ending-sealed",

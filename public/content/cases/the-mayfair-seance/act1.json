@@ -20,7 +20,7 @@
           "id": "ms-choice-question-ashworth",
           "text": "Engage Lady Ashworth in conversation — learn what she truly expects from tonight.",
           "faculty": "influence",
-          "difficulty": 11,
+          "difficulty": 9,
           "outcomes": {
             "critical": "ms-act1-ashworth-confides",
             "success": "ms-act1-ashworth-guarded",
@@ -33,7 +33,7 @@
           "id": "ms-choice-examine-room",
           "text": "Examine the séance room before the demonstration begins.",
           "faculty": "perception",
-          "difficulty": 12,
+          "difficulty": 10,
           "outcomes": {
             "critical": "ms-act1-room-thorough",
             "success": "ms-act1-room-partial",
@@ -46,7 +46,7 @@
           "id": "ms-choice-study-vesper",
           "text": "Observe Madame Vesper — her manner, her preparations, the symbols on her shawl.",
           "faculty": "lore",
-          "difficulty": 11,
+          "difficulty": 9,
           "outcomes": {
             "critical": "ms-act1-vesper-read",
             "success": "ms-act1-vesper-glimpse",

@@ -19,7 +19,8 @@ User clicks a `ChoiceCard` → `ChoicePanel.handleSelect(choiceId)`.
      b. If disadvantage only: `rollWithDisadvantage()` → rolls 2d20, takes min.
      c. If both or neither: single `rollD20()`.
      d. `calculateModifier(faculties[faculty])` → `floor((score - 10) / 2)`.
-     e. `resolveCheck(natural, modifier, dc)` → nat 20 = critical, nat 1 = fumble, total ≥ dc = success, total ≥ dc-2 = partial, else failure.
+     e. `getTrainedBonus(faculty, archetype)` → +1 if faculty matches archetype primary, 0 otherwise.
+     f. `resolveCheck(natural, modifier, dc)` → nat 20 = critical, nat 1 = fumble, total ≥ dc = success, total ≥ dc-3 = partial, else failure.
    - `nextSceneId = choice.outcomes[result.tier]`.
    - If no faculty check: `nextSceneId = choice.outcomes['success'] ?? choice.outcomes['critical']`.
 5. If `choice.npcEffect` exists: calls `store.adjustDisposition(npcId, delta)` and `store.adjustSuspicion(npcId, delta)`.
@@ -39,7 +40,7 @@ User clicks a `ChoiceCard` → `ChoicePanel.handleSelect(choiceId)`.
 
 - If `choice.outcomes[tier]` is undefined (missing outcome for a tier), `nextSceneId` is undefined. `goToScene(undefined)` would set `currentScene` to undefined, causing `resolveScene` to throw → ErrorBoundary catches.
 - No validation that the target scene exists before navigating. Broken content JSON would crash at render time.
-- `performCheck` has no error handling — if `investigator.faculties[faculty]` is undefined, `calculateModifier(undefined)` returns `NaN`, and `resolveCheck` with NaN would return `'failure'` (NaN < dc-2 is false, but NaN >= dc is also false — it falls through to `'failure'`).
+- `performCheck` has no error handling — if `investigator.faculties[faculty]` is undefined, `calculateModifier(undefined)` returns `NaN`, and `resolveCheck` with NaN would return `'failure'` (NaN < dc-3 is false, but NaN >= dc is also false — it falls through to `'failure'`).
 
 ## 5. Performance Characteristics
 

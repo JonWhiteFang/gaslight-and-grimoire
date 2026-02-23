@@ -314,8 +314,8 @@ describe('ChoiceCard — Faculty tag', () => {
         onSelect={() => {}}
       />,
     );
-    // reason score 14 → modifier +2 → "Proficient"
-    const tag = screen.getByLabelText(/reason check.*\+2.*proficient/i);
+    // reason score 14 → modifier +2, trained bonus +1 → +3 → "Proficient"
+    const tag = screen.getByLabelText(/reason check.*\+3.*proficient/i);
     expect(tag).toBeInTheDocument();
   });
 

@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { canDiscoverClue } from '../../engine/narrativeEngine';
 import { getCluePromptText } from '../../engine/cluePrompts';
-import { performCheck, calculateModifier } from '../../engine/diceEngine';
+import { performCheck, calculateModifier, getTrainedBonus } from '../../engine/diceEngine';
 import type { ClueDiscovery, Clue, GameState, Investigator, Faculty } from '../../types';
 
 type ProficiencyTier = 'strong' | 'moderate' | 'weak';
@@ -102,7 +102,7 @@ export function SceneCluePrompts({
 
         if (d.method === 'check' && d.requiresFaculty) {
           const { faculty, minimum } = d.requiresFaculty;
-          const mod = calculateModifier(investigator.faculties[faculty]);
+          const mod = calculateModifier(investigator.faculties[faculty]) + getTrainedBonus(faculty, investigator.archetype);
           const tier = getProficiencyTier(mod);
           const modStr = mod >= 0 ? `+${mod}` : `${mod}`;
           return (

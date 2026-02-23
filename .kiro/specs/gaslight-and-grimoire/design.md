@@ -162,7 +162,8 @@ sequenceDiagram
 - `rollWithAdvantage(): { roll1: number, roll2: number, result: number }` — 2d20, take higher
 - `rollWithDisadvantage(): { roll1: number, roll2: number, result: number }` — 2d20, take lower
 - `calculateModifier(facultyScore: number): number` — `Math.floor((score - 10) / 2)`
-- `resolveCheck(roll: number, modifier: number, dc: number): OutcomeTier` — Determines outcome tier
+- `getTrainedBonus(faculty: Faculty, archetype: Archetype): number` — +1 if faculty matches archetype primary, 0 otherwise
+- `resolveCheck(roll: number, modifier: number, dc: number): OutcomeTier` — Determines outcome tier (partial band: dc-3)
 - `performCheck(faculty: string, investigator: Investigator, dc: number, hasAdvantage: boolean, hasDisadvantage: boolean): CheckResult` — Full check pipeline
 
 **SaveManager** (persistence module):

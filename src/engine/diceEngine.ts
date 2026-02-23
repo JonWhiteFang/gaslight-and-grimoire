@@ -1,4 +1,4 @@
-import type { Faculty, Investigator, OutcomeTier, Choice } from '../types';
+import type { Archetype, Faculty, Investigator, OutcomeTier, Choice } from '../types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -44,6 +44,20 @@ export function calculateModifier(facultyScore: number): number {
   return Math.floor((facultyScore - 10) / 2);
 }
 
+// ─── Trained Bonus ────────────────────────────────────────────────────────────
+
+const PRIMARY_FACULTY: Record<Archetype, Faculty> = {
+  deductionist: 'reason',
+  occultist: 'lore',
+  operator: 'vigor',
+  mesmerist: 'influence',
+};
+
+/** Returns +1 if the faculty is the archetype's primary, 0 otherwise. */
+export function getTrainedBonus(faculty: Faculty, archetype: Archetype): number {
+  return PRIMARY_FACULTY[archetype] === faculty ? 1 : 0;
+}
+
 // ─── Outcome Resolution ───────────────────────────────────────────────────────
 
 /**
@@ -51,8 +65,8 @@ export function calculateModifier(facultyScore: number): number {
  * - natural 20 → critical
  * - natural 1  → fumble
  * - total >= dc → success
- * - total >= dc - 2 → partial
- * - total < dc - 2 → failure
+ * - total >= dc - 3 → partial
+ * - total < dc - 3 → failure
  */
 export function resolveCheck(roll: number, modifier: number, dc: number): OutcomeTier {
   if (roll === 20) return 'critical';
@@ -60,7 +74,7 @@ export function resolveCheck(roll: number, modifier: number, dc: number): Outcom
 
   const total = roll + modifier;
   if (total >= dc) return 'success';
-  if (total >= dc - 2) return 'partial';
+  if (total >= dc - 3) return 'partial';
   return 'failure';
 }
 
@@ -105,7 +119,7 @@ export function performCheck(
     natural = rollD20();
   }
 
-  const modifier = calculateModifier(investigator.faculties[faculty]);
+  const modifier = calculateModifier(investigator.faculties[faculty]) + getTrainedBonus(faculty, investigator.archetype);
   const total = natural + modifier;
   const tier = resolveCheck(natural, modifier, dc);
 

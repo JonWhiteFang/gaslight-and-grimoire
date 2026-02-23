@@ -11,7 +11,7 @@
           "id": "wc-choice-force-through",
           "text": "Rush him before he can fire — close the distance and end this with your hands.",
           "faculty": "vigor",
-          "difficulty": 14,
+          "difficulty": 12,
           "advantageIf": ["wc-clue-cobblestone-symbol"],
           "outcomes": {
             "critical": "wc-act3-ending-force",
@@ -25,7 +25,7 @@
           "id": "wc-choice-negotiate-out",
           "text": "Talk him down — he is a frightened man, not a true believer. Give him a way out.",
           "faculty": "influence",
-          "difficulty": 14,
+          "difficulty": 12,
           "advantageIf": ["wc-clue-graves-testimony"],
           "outcomes": {
             "critical": "wc-act3-ending-negotiate",
@@ -71,7 +71,7 @@
                 "id": "wc-enc-ward-lore",
                 "text": "Recite the Grey Dawn's dismissal ward — the primer described the counter-sigil.",
                 "faculty": "lore",
-                "difficulty": 13,
+                "difficulty": 11,
                 "advantageIf": ["wc-clue-hermetic-primer"],
                 "outcomes": {
                   "critical": "wc-act3-ending-negotiate",
@@ -89,7 +89,7 @@
                 "id": "wc-enc-nerve-hold",
                 "text": "Stand your ground. Do not look away. Do not flinch.",
                 "faculty": "nerve",
-                "difficulty": 14,
+                "difficulty": 12,
                 "outcomes": {
                   "critical": "wc-act3-ending-force",
                   "success": "wc-act3-ending-force",
@@ -123,7 +123,7 @@
                 "id": "wc-enc-perception-find",
                 "text": "Search for the binding circle's anchor point — there must be a physical focus.",
                 "faculty": "perception",
-                "difficulty": 12,
+                "difficulty": 10,
                 "outcomes": {
                   "critical": "wc-act3-ending-negotiate",
                   "success": "wc-act3-ending-negotiate",

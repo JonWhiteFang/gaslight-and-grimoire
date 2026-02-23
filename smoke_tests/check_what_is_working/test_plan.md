@@ -25,7 +25,7 @@ Validates core engine functions with real data structures (no mocks). These are 
 | # | Case | Existing test file | What it validates |
 |---|---|---|---|
 | 2.1 | Dice rolls are bounded [1,20] | `diceEngine.property.test.ts` | `rollD20()` always returns integer in [1,20] across 1000+ random inputs |
-| 2.2 | Outcome tiers are correct for all roll/DC combinations | `diceEngine.property.test.ts` | nat 20 → critical, nat 1 → fumble, total ≥ DC → success, total ≥ DC-2 → partial, else failure |
+| 2.2 | Outcome tiers are correct for all roll/DC combinations | `diceEngine.property.test.ts` | nat 20 → critical, nat 1 → fumble, total ≥ DC → success, total ≥ DC-3 → partial, else failure |
 | 2.3 | Condition evaluation is pure AND logic | `narrativeEngine.property.test.ts` | Empty conditions → true. Any false condition → false. All true → true |
 | 2.4 | NPC disposition clamped to [-10,+10] | `npcBounds.property.test.ts` | Any delta applied to any starting value stays in bounds |
 | 2.5 | Save migration is idempotent | `saveManager.property.test.ts` | `migrate(migrate(file))` equals `migrate(file)` for any input |

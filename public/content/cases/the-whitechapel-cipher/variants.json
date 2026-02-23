@@ -30,7 +30,7 @@
           "id": "wc-choice-examine-note-variant",
           "text": "Study the cipher note carefully — your familiarity with the Order's symbols gives you an edge.",
           "faculty": "reason",
-          "difficulty": 12,
+          "difficulty": 10,
           "advantageIf": ["wc-clue-hermetic-primer"],
           "outcomes": {
             "critical": "wc-act1-cipher-decoded",
@@ -44,7 +44,7 @@
           "id": "wc-choice-question-graves-variant",
           "text": "Press Inspector Graves for details he hasn't volunteered.",
           "faculty": "influence",
-          "difficulty": 10,
+          "difficulty": 8,
           "outcomes": {
             "critical": "wc-act1-graves-confides",
             "success": "wc-act1-graves-talks",
@@ -57,7 +57,7 @@
           "id": "wc-choice-survey-scene-variant",
           "text": "Survey the wider crime scene before the constables trample the evidence.",
           "faculty": "perception",
-          "difficulty": 10,
+          "difficulty": 8,
           "outcomes": {
             "critical": "wc-act1-scene-full",
             "success": "wc-act1-scene-partial",

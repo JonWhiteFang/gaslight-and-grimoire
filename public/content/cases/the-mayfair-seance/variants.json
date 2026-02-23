@@ -26,7 +26,7 @@
           "id": "ms-choice-question-ashworth-variant",
           "text": "Engage Lady Ashworth — your Grey Dawn connections may loosen her tongue.",
           "faculty": "influence",
-          "difficulty": 11,
+          "difficulty": 9,
           "outcomes": {
             "critical": "ms-act1-ashworth-confides",
             "success": "ms-act1-ashworth-guarded",
@@ -39,7 +39,7 @@
           "id": "ms-choice-examine-room-variant",
           "text": "Examine the séance room — the ward-marks suggest hidden preparations.",
           "faculty": "perception",
-          "difficulty": 12,
+          "difficulty": 10,
           "outcomes": {
             "critical": "ms-act1-room-thorough",
             "success": "ms-act1-room-partial",
@@ -52,7 +52,7 @@
           "id": "ms-choice-study-vesper-variant",
           "text": "Approach Vesper directly — she recognised you. She wants to talk.",
           "faculty": "lore",
-          "difficulty": 11,
+          "difficulty": 9,
           "outcomes": {
             "critical": "ms-act1-vesper-read",
             "success": "ms-act1-vesper-glimpse",

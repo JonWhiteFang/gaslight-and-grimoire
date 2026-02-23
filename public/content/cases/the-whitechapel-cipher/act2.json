@@ -11,7 +11,7 @@
           "id": "wc-choice-visit-printshop",
           "text": "Follow the rational thread — visit the printshop on Dorset Street.",
           "faculty": "reason",
-          "difficulty": 10,
+          "difficulty": 8,
           "advantageIf": ["wc-clue-printshop-type"],
           "outcomes": {
             "critical": "wc-act2-printshop",
@@ -25,7 +25,7 @@
           "id": "wc-choice-confront-vane",
           "text": "Follow the occult thread — confront Professor Vane about the Order's symbols.",
           "faculty": "influence",
-          "difficulty": 12,
+          "difficulty": 10,
           "advantageIf": ["wc-clue-hermetic-primer"],
           "outcomes": {
             "critical": "wc-act2-vane-confrontation",
@@ -54,7 +54,7 @@
           "id": "wc-choice-mott-intimidate",
           "text": "Lean on Mott — he is frightened, and frightened men talk.",
           "faculty": "nerve",
-          "difficulty": 12,
+          "difficulty": 10,
           "outcomes": {
             "critical": "wc-act2-printshop-success",
             "success": "wc-act2-printshop-success",
@@ -72,7 +72,7 @@
           "id": "wc-choice-mott-persuade",
           "text": "Appeal to Mott's self-interest — whoever is using his press is a danger to him too.",
           "faculty": "influence",
-          "difficulty": 14,
+          "difficulty": 12,
           "advantageIf": ["wc-clue-graves-testimony"],
           "outcomes": {
             "critical": "wc-act2-printshop-success",
@@ -150,7 +150,7 @@
           "id": "wc-choice-vane-press",
           "text": "Press Vane directly — his calling card was at the scene.",
           "faculty": "influence",
-          "difficulty": 14,
+          "difficulty": 12,
           "advantageIf": ["wc-clue-red-herring-occultist"],
           "outcomes": {
             "critical": "wc-act2-vane-success",
@@ -169,7 +169,7 @@
           "id": "wc-choice-vane-lore",
           "text": "Appeal to his expertise — ask him to translate the cipher as a scholar.",
           "faculty": "lore",
-          "difficulty": 12,
+          "difficulty": 10,
           "advantageIf": ["wc-clue-cobblestone-symbol"],
           "outcomes": {
             "critical": "wc-act2-vane-success",

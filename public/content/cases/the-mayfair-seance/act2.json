@@ -11,7 +11,7 @@
           "id": "ms-choice-rational-path",
           "text": "This is an elaborate trick. Find the mechanism — someone is pulling strings.",
           "faculty": "reason",
-          "difficulty": 12,
+          "difficulty": 10,
           "advantageIf": ["ms-clue-hidden-mechanism"],
           "outcomes": {
             "critical": "ms-act2-rational-success",
@@ -25,7 +25,7 @@
           "id": "ms-choice-occult-path",
           "text": "The symbols on Vesper's shawl — they are a summoning circle. Something has been called.",
           "faculty": "lore",
-          "difficulty": 13,
+          "difficulty": 11,
           "advantageIf": ["ms-clue-invitation-letter"],
           "outcomes": {
             "critical": "ms-act2-occult-success",
@@ -39,7 +39,7 @@
           "id": "ms-choice-confront-pemberton",
           "text": "Pemberton knows something. His terror is too specific to be surprise.",
           "faculty": "influence",
-          "difficulty": 13,
+          "difficulty": 11,
           "outcomes": {
             "critical": "ms-act2-pemberton-breaks",
             "success": "ms-act2-pemberton-partial",

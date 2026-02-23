@@ -10,7 +10,7 @@
  * Req 16.4: Display a key icon on choices unlocked by a Deduction or Clue.
  */
 import React from 'react';
-import { calculateModifier } from '../../engine/diceEngine';
+import { calculateModifier, getTrainedBonus } from '../../engine/diceEngine';
 import type { Choice, Faculty, Investigator } from '../../types';
 
 // ─── Proficiency helpers ──────────────────────────────────────────────────────
@@ -79,7 +79,7 @@ export function ChoiceCard({
   let facultyTag: React.ReactNode = null;
   if (choice.faculty) {
     const score = investigator.faculties[choice.faculty] ?? 8;
-    const modifier = calculateModifier(score);
+    const modifier = calculateModifier(score) + getTrainedBonus(choice.faculty, investigator.archetype);
     const tier = getProficiencyTier(modifier);
     const modifierStr = modifier >= 0 ? `+${modifier}` : `${modifier}`;
     const label = PROFICIENCY_LABELS[tier];

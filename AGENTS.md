@@ -173,10 +173,11 @@ Rules:
 
 ### Dice (diceEngine.ts)
 - `rollD20()` → [1, 20]
-- Modifier = `floor((facultyScore - 10) / 2)`
-- Outcome: nat 20 → critical, nat 1 → fumble, total ≥ DC → success, total ≥ DC-2 → partial, else failure
+- Modifier = `floor((facultyScore - 10) / 2)` + trained bonus (+1 if faculty matches archetype's primary faculty, 0 otherwise)
+- Outcome: nat 20 → critical, nat 1 → fumble, total ≥ DC → success, total ≥ DC-3 → partial, else failure
 - Advantage: roll 2d20 take highest. Disadvantage: take lowest. Both cancel out.
 - Dynamic difficulty: `choice.dynamicDifficulty` scales DC based on a faculty score threshold.
+- Trained bonus: `getTrainedBonus(faculty, archetype)` returns +1 when the check faculty is the archetype's primary (deductionist→reason, occultist→lore, operator→vigor, mesmerist→influence).
 
 ### Narrative (narrativeEngine.ts)
 - `loadCase` / `loadVignette` — fetch JSON, index by ID into `Record<string, T>`.
@@ -281,7 +282,7 @@ These are documented in detail in `devdocs/evolution/gap_analysis.md`, `smoke_te
 - ~~**Engine ↔ Store circular dependency**~~ — ✅ FIXED. Engine functions now accept an `EngineActions` interface parameter instead of importing `useStore`. `applyOnEnterEffects` moved to `worldSlice.applyEffects` store action. Zero store imports in engine files.
 - **No recovery mechanics** — Composure/Vitality only decrease. `breakdown`/`incapacitation` scenes don't exist in content. Creates death spiral.
 - **Evidence Board connections transient** — Lost on close/reopen (React state, not store). No drag-and-drop. No touch support.
-- **Dice math skews toward failure** — Best faculty succeeds 55% vs DC 12. Partial band only 10% wide.
+- ~~**Dice math skews toward failure**~~ — ✅ FIXED. Partial band widened from DC-2 to DC-3 (15% instead of 10%). Trained bonus (+1) added for archetype primary faculty. All content DCs lowered by 2. Encounter reaction check stays at DC 12.
 - **Silent state changes** — `onEnter` effects fire with no narrative feedback. Players see meters change without explanation.
 - **Occultist Veil Sight inert** — `ability-veil-sight-active` flag is set but never checked anywhere.
 - **`validateCase.mjs` not in CI** — Content validation only runs manually.

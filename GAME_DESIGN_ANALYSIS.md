@@ -167,36 +167,12 @@ An average of ~1.1 choices per scene means most scenes are linear corridors with
 
 ---
 
-## 8. Rebalance Dice Math for Player Agency
+## ~~8. Rebalance Dice Math for Player Agency~~ — ✅ FIXED
 
 **Category:** Gameplay Mechanics / Balancing
-**Severity:** Medium — the math skews toward failure, which feels punishing
+**Severity:** Medium — ✅ RESOLVED
 
-**Issue:** The dice math creates a surprisingly harsh probability curve:
-
-| Faculty Score | Modifier | vs DC 12: Success% | vs DC 12: Partial% | vs DC 12: Failure% |
-|---|---|---|---|---|
-| 8 (base) | -1 | 40% | 10% | 40% |
-| 10 (base+2) | 0 | 45% | 10% | 35% |
-| 11 (archetype primary) | +0 | 45% | 10% | 35% |
-| 14 (archetype +3, +3 allocated) | +2 | 55% | 10% | 25% |
-| 16 (max realistic) | +3 | 60% | 10% | 20% |
-
-Even a heavily invested faculty (score 14, modifier +2) only succeeds 55% of the time against DC 12. The base faculty score of 8 gives a -1 modifier, meaning untrained checks fail 50% of the time (40% failure + 10% fumble). Natural 1 (fumble, 5%) and natural 20 (critical, 5%) add 10% of outcomes that ignore modifiers entirely.
-
-The `partial` band (DC-2 to DC-1) is only 2 numbers wide on the d20, making it a narrow 10% window. Most checks resolve as binary success/failure.
-
-**Impact:** Players who invest in a faculty still feel like they're flipping a coin. The narrow partial band means the 5-tier outcome system (critical/success/partial/failure/fumble) effectively collapses to 3 tiers in practice. Advantage helps (+3.3 average bonus) but requires holding specific clues.
-
-**Proposed Solution:**
-- Widen the partial band: change from `total >= dc - 2` to `total >= dc - 3`. This makes partial outcomes 15% instead of 10%, creating more interesting "mixed success" moments.
-- Lower default DC from 12 to 10 for standard checks. Reserve DC 12+ for hard checks. This shifts the success curve up by ~10% across the board.
-- Add a "trained bonus": if the check's faculty matches the archetype's primary faculty, grant an additional +1 modifier. This makes archetype choice feel more impactful.
-- Consider making the `dynamicDifficulty` system the default rather than the exception, so DCs scale with player investment.
-
-**Files to modify:**
-- `src/engine/diceEngine.ts` — adjust `resolveCheck` partial threshold and default DC
-- Content JSON files — audit and adjust `difficulty` values on choices
+**Resolution:** Three changes applied: (1) Partial band widened from `dc - 2` to `dc - 3`, increasing partial outcomes from 10% to 15%. (2) Trained bonus (+1 modifier) added via `getTrainedBonus(faculty, archetype)` when the check faculty matches the archetype's primary faculty (deductionist→reason, occultist→lore, operator→vigor, mesmerist→influence). Bonus is reflected in `performCheck` return value, `ChoiceCard` proficiency tags, and `SceneCluePrompts` display. (3) All 34 content DC values lowered by 2 (e.g., DC 12→10, DC 14→12). Encounter reaction check stays at DC 12. Net effect: invested primary faculty (score 14, trained) now succeeds ~80% vs standard DC 10 (was 55% vs DC 12).
 
 ---
 
@@ -273,6 +249,6 @@ These didn't make the top 10 but are worth noting:
 | 5 | Recovery Mechanics | Low-Medium | High | P1 |
 | 6 | Persistent Evidence Board | Medium | Medium-High | P1 |
 | 7 | Scene History Navigation | Medium | Medium | P2 |
-| 8 | Rebalance Dice Math | Low | Medium | P2 |
+| 8 | ~~Rebalance Dice Math~~ ✅ | Low | Medium | P2 — DONE |
 | 9 | Consequence Feedback | Medium | Medium | P2 |
 | 10 | Expand Testing | Medium | Medium | P2 |

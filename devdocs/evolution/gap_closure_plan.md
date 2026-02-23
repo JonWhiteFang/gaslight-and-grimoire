@@ -466,17 +466,9 @@ The closest candidate would be `narrativeEngine.ts` (400+ lines, 6 responsibilit
 
 ---
 
-### 5.7 Rebalance Dice Mechanics
+### ~~5.7 Rebalance Dice Mechanics~~ — ✅ DONE
 
-**What**: Widen partial band, lower default DC, consider trained bonus.
-
-**Files**: `src/engine/diceEngine.ts`, content JSON (audit `difficulty` values)
-
-**Dependencies**: None.
-
-**Risk**: Low code change. Requires playtesting for balance.
-
-**Testing**: Run existing `diceEngine.property.test.ts` (update expected ranges). Manual playthrough to verify feel.
+**Resolution**: Partial band widened (`dc - 3`). Trained bonus (+1 for archetype primary) added. All content DCs lowered by 2. Encounter reaction check stays at DC 12.
 
 ---
 

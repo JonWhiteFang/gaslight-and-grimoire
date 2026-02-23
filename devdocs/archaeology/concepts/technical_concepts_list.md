@@ -45,7 +45,7 @@ Components access state via per-slice selector hooks (`useInvestigator`, `useClu
 - **Files**: `src/engine/narrativeEngine.ts` → `resolveScene`, `src/store/index.ts` → `useCurrentScene`
 
 ### Dice Engine
-d20 roll system: `rollD20()`, advantage/disadvantage, modifier calculation (`floor((score-10)/2)`), 5-tier outcome resolution (critical/success/partial/failure/fumble), dynamic difficulty scaling.
+d20 roll system: `rollD20()`, advantage/disadvantage, modifier calculation (`floor((score-10)/2)` + trained bonus), 5-tier outcome resolution (critical/success/partial/failure/fumble), dynamic difficulty scaling.
 - **Status**: Fully implemented
 - **Files**: `src/engine/diceEngine.ts`
 

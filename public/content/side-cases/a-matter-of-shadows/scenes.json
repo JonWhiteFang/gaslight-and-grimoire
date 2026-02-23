@@ -27,7 +27,7 @@
           "id": "amos-choice-press-wren",
           "text": "Press Wren about the package before she disappears.",
           "faculty": "influence",
-          "difficulty": 12,
+          "difficulty": 10,
           "outcomes": {
             "critical": "amos-act1-wren-reveals",
             "success": "amos-act1-wren-hints",
@@ -54,7 +54,7 @@
           "id": "amos-choice-question-briggs",
           "text": "Question Briggs more carefully about who else came asking.",
           "faculty": "perception",
-          "difficulty": 10,
+          "difficulty": 8,
           "outcomes": {
             "critical": "amos-act1-wren-reveals",
             "success": "amos-act1-wren-hints",

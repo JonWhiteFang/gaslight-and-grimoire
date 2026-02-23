@@ -159,7 +159,7 @@ Two functions that do the same thing (build a plain `GameState` from the store).
 Converts `T[]` to `Record<string, T>`. Used only in `loadCase`/`loadVignette`. Not exported. Could be a shared utility if other modules need it.
 
 ### `calculateModifier` (diceEngine.ts)
-`floor((score - 10) / 2)`. Imported by `ChoiceCard` and `FacultyAllocation` for display purposes. Clean shared utility.
+`floor((score - 10) / 2)`. `getTrainedBonus(faculty, archetype)` returns +1 for archetype primary faculty. Imported by `ChoiceCard`, `SceneCluePrompts`, and `FacultyAllocation` for display purposes. Clean shared utility.
 
 ### `fetchJson` (narrativeEngine.ts)
 Prepends `BASE_URL` and fetches JSON. Not exported. `AmbientAudio` duplicates the URL construction logic inline.

@@ -22,8 +22,8 @@
 - Key icon shown on choices unlocked by a clue or deduction (Req 16.4).
 
 ### Dice Mechanics
-- d20 roll with faculty modifier: `floor((score - 10) / 2)`.
-- Outcome tiers: nat 20 → critical, nat 1 → fumble, total ≥ DC → success, total ≥ DC-2 → partial, else failure.
+- d20 roll with faculty modifier: `floor((score - 10) / 2)` + trained bonus (+1 if faculty matches archetype primary).
+- Outcome tiers: nat 20 → critical, nat 1 → fumble, total ≥ DC → success, total ≥ DC-3 → partial, else failure.
 - Advantage: roll 2d20, take highest. Disadvantage: roll 2d20, take lowest. Both cancel out.
 - Dynamic difficulty: DC scales based on a faculty score threshold.
 - Dice roll overlay shows roll, modifier, and total with animation (Req 4.6, 4.7).
