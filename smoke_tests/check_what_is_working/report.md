@@ -94,3 +94,41 @@
 3. ~~**Hint tracking disconnected** (5.2)~~: ✅ Fixed in Phase A3.
 
 All three Phase A blockers are resolved. Remaining broken features (ClueDiscoveryCard stub, Encounter UI) are additive — they don't block existing functionality.
+
+
+---
+
+## Area 6: Game Design Audit (added 2026-02-23)
+
+> Full game design analysis performed. See `GAME_DESIGN_ANALYSIS.md` for detailed findings.
+
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| 6.1 | Only `automatic` clue discovery has UI — `exploration`, `check`, `dialogue` methods unimplemented | High | Open |
+| 6.2 | Zero audio files (9 SFX + ambient coded but silent) | High | Open |
+| 6.3 | Zero visual assets (illustrations, NPC portraits) | High | Open |
+| 6.4 | Avg 1.1–1.3 choices/scene — most scenes are linear corridors | High | Open |
+| 6.5 | Only 6 clues per case — thin for evidence board mechanic | High | Open |
+| 6.6 | NPCs have no interactive dialogue — memoryFlags never populated | High | Open |
+| 6.7 | No composure/vitality recovery — death spiral | Medium-High | Open |
+| 6.8 | Evidence Board connections lost on close (React state, not store) | Medium-High | Open |
+| 6.9 | Dice math: 45% success rate for best faculty vs DC 12 | Medium | Open |
+| 6.10 | onEnter effects fire silently — no narrative feedback | Medium | Open |
+| 6.11 | sceneHistory tracked but never consumed — no back navigation | Medium | Open |
+| 6.12 | Occultist Veil Sight ability has no mechanical effect | Medium | Open |
+| 6.13 | `validateCase.mjs` not in CI pipeline | Medium | Open |
+| 6.14 | No integration tests for choice→navigation→effect pipeline | Medium | Open |
+| 6.15 | No component tests for EncounterPanel or EvidenceBoard | Medium | Open |
+| 6.16 | Faction reputation unbounded (no clamp) | Low | Open |
+| 6.17 | Deduction descriptions are generic (2 hardcoded strings) | Low | Open |
+| 6.18 | No click-to-skip typewriter effect | Low | Open |
+
+### Content Metrics (as of 2026-02-23)
+
+| Case | Scenes | Avg choices/scene | Faculty checks | Dead ends | Clues | NPCs | Variants |
+|---|---|---|---|---|---|---|---|
+| The Whitechapel Cipher | 22 | 1.2 | 11 | 3 | 6 | 3 | 1 |
+| The Mayfair Séance | 25 | 1.1 | 9 | 4 | 6 | 3 | 1 |
+| A Matter of Shadows | 7 | 1.3 | 2 | 2 | 2 | 1 | 0 |
+
+**Summary**: The codebase is technically sound (269/269 tests, 0 type errors, 0 vulnerabilities). The game design gaps are primarily in content depth, missing assets, unimplemented interaction methods, and balance tuning. See Phase E of the implementation roadmap for the execution plan.

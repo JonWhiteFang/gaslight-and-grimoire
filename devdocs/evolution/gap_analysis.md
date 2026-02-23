@@ -203,3 +203,120 @@ The issues are all incremental:
 4. **Mobile performance**: The app targets browsers broadly but has never been tested on mobile. The `html5: false` Howler config may block audio on mobile Safari without user interaction. The Evidence Board's mouse-tracking ghost thread has no touch equivalent.
 
 5. **Save file size at scale**: With 10 manual saves + autosave, each containing clues/NPCs/flags from multiple cases, localStorage's ~5MB limit could be reached. No monitoring or warning exists.
+
+
+---
+
+## 6. Game Design Gaps (identified 2026-02-23)
+
+> These gaps were identified through a full game design audit of the codebase, content, and player experience. Unlike sections 1–5 which focused on engineering correctness, these focus on whether the game is fun, immersive, and replayable. See `GAME_DESIGN_ANALYSIS.md` for the full analysis.
+
+### 6.1 Active Clue Discovery Methods Not Implemented (HIGH)
+
+**Gap**: Only `automatic` clue discovery works. `exploration`, `check`, and `dialogue` methods defined in `ClueDiscovery.method` have no UI trigger. Players passively receive clues on scene entry.
+
+**Desired state**: Players actively investigate scenes — searching desks (exploration), passing faculty checks to notice details (check), and extracting information from NPCs (dialogue).
+
+**Impact**: The DISCOVER phase of the gameplay loop is hollow. No player agency in finding clues.
+
+---
+
+### 6.2 Zero Audio and Visual Assets (HIGH)
+
+**Gap**: The audio system (AudioManager, AmbientAudio, audioSubscription, 9 SFX events) is fully coded but zero `.mp3` files exist. `SceneIllustration` renders from `scene.illustration` but no images exist. NPC portraits are letter-initial placeholders.
+
+**Desired state**: Atmospheric ambient audio per scene, SFX for dice rolls/clue discovery/damage, scene illustrations for key moments, NPC portraits.
+
+**Impact**: A gothic mystery game with no atmosphere. The engineering investment in audio/visual systems is wasted.
+
+---
+
+### 6.3 Thin Content and Low Branching Factor (HIGH)
+
+**Gap**: 2 main cases + 1 vignette. Average 1.1–1.3 choices per scene. Only 6 clues and 3 NPCs per case. Only 1 variant scene per case. 3–4 dead-end scenes per case.
+
+**Desired state**: 2.0–2.5 choices per scene, 10–12 clues per case, 5+ NPCs, 2–3 variants, additional vignettes.
+
+**Impact**: Game feels linear. Evidence Board has too few clues for interesting deduction puzzles. Low replayability.
+
+---
+
+### 6.4 NPCs Are Passive Data (HIGH)
+
+**Gap**: NPCs have disposition, suspicion, memoryFlags, and faction — but no interactive dialogue. `memoryFlags` is never populated in any content. Players can't question, persuade, or confront NPCs directly.
+
+**Desired state**: Dialogue trees gated by disposition/suspicion tiers. Influence/Perception/Reason checks in conversation. memoryFlags tracking what's been discussed.
+
+**Impact**: NPCs feel like background furniture. The disposition/suspicion system is mechanically complete but narratively invisible.
+
+---
+
+### 6.5 No Recovery Mechanics — Death Spiral (MEDIUM-HIGH)
+
+**Gap**: Composure and Vitality only decrease. No rest scenes, recovery items, or counterplay. `breakdown` and `incapacitation` scenes referenced by StatusBar don't exist in any case content.
+
+**Desired state**: Recovery scenes, breakdown/incapacitation as narrative consequences (not hard game-over), optional "Second Wind" mechanic.
+
+**Impact**: One-way ratchet toward failure. Bad early rolls make later encounters nearly impossible.
+
+---
+
+### 6.6 Evidence Board Connections Are Transient (MEDIUM-HIGH)
+
+**Gap**: Connections live in React `useState`, lost on board close/reopen. No drag-and-drop (keyboard-only via Spacebar). No touch support.
+
+**Desired state**: Connections persisted in store. Click-to-connect and drag-and-drop. Touch support.
+
+**Impact**: Players lose work when closing the board. The signature mechanic has unnecessary friction.
+
+---
+
+### 6.7 Scene History Unused (MEDIUM)
+
+**Gap**: `sceneHistory` is tracked on every `goToScene` but never consumed. No back button, no scene replay, no timeline in CaseJournal.
+
+**Desired state**: At minimum, scene timeline in CaseJournal. Ideally, read-only scene review or full back-navigation.
+
+**Impact**: Players who regret a choice or fail a check have no recourse except loading a save.
+
+---
+
+### 6.8 Dice Math Skews Toward Failure (MEDIUM)
+
+**Gap**: Base faculty 8 → modifier -1. Even archetype primary (score 11) → modifier +0. Against DC 12, success rate is 45% for your best faculty. Partial band is only 10% wide (2 numbers on d20).
+
+**Desired state**: Standard checks at DC 10. Wider partial band (dc-3 instead of dc-2). Archetype trained bonus.
+
+**Impact**: Players feel like they're flipping coins. The 5-tier outcome system collapses to 3 tiers in practice.
+
+---
+
+### 6.9 Silent State Changes — No Consequence Feedback (MEDIUM)
+
+**Gap**: `onEnter` effects fire silently. Players see meters drop with no narrative explanation. Dice outcomes show "Failure" but no bridging text.
+
+**Desired state**: Narrative text on effects ("The oppressive atmosphere weighs on your nerves. Composure -2"). Transition text between dice outcome and next scene.
+
+**Impact**: Breaks the connection between story and mechanics.
+
+---
+
+### 6.10 Testing Gaps in Integration and CI (MEDIUM)
+
+**Gap**: No integration tests for choice→navigation→effect pipeline. `validateCase.mjs` not in CI. No component tests for EncounterPanel or EvidenceBoard.
+
+**Desired state**: Content validation in CI. Integration tests. Component tests for all interactive overlays.
+
+**Impact**: Regressions in the choice pipeline or content errors could ship undetected.
+
+---
+
+## Updated Unknowns
+
+6. **Occultist ability (Veil Sight) has no mechanical effect**: The flag `ability-veil-sight-active` is set but never checked in any engine function or content condition. The other three archetype abilities work correctly.
+
+7. **Faction reputation is unbounded**: Disposition [-10,+10], suspicion [0,10], composure/vitality [0,10] are all clamped. Faction reputation has no clamp. Extreme values could break condition checks.
+
+8. **Deduction descriptions are generic**: `buildDeduction` always returns the same two strings regardless of which clues are connected. Content-specific deduction text would make the Evidence Board more rewarding.
+
+9. **No "skip typewriter" interaction**: `SceneText` typewriter effect has no click-to-complete. Players must wait or change settings to `instant`.

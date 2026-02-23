@@ -108,3 +108,70 @@ Settings are saved as part of `GameState`. Loading a save from a different devic
 The audio system is fully coded but no `.mp3` files exist in the repository. The game is silent.
 - **Status**: Missing
 - **Where it should be**: `public/audio/sfx/` (9 files), `public/audio/ambient/` (per-scene tracks)
+
+
+---
+
+## Game Design Gaps (identified 2026-02-23)
+
+> These were identified through a full game design audit. See `GAME_DESIGN_ANALYSIS.md` for detailed analysis with code references and proposed solutions.
+
+### Active Clue Discovery UI
+Only `automatic` clue discovery has a UI trigger. `exploration`, `check`, and `dialogue` methods are defined in the type system and used in content but have no player-facing interaction.
+- **Status**: Missing
+- **Severity**: High — core gameplay loop is incomplete
+- **Where it should be**: `src/components/NarrativePanel/NarrativePanel.tsx` (explore/check buttons), `src/components/ChoicePanel/ChoicePanel.tsx` (dialogue side-effect)
+
+### Audio and Visual Assets
+Zero `.mp3`, `.png`, `.jpg`, `.webp`, or `.svg` asset files exist in the repository. The audio system and illustration system are fully coded but have nothing to render.
+- **Status**: Missing
+- **Severity**: High — game has no atmosphere
+- **Where it should be**: `public/audio/sfx/` (9 files), `public/audio/ambient/` (2–3 loops), `public/images/` (scene illustrations, NPC portraits)
+
+### NPC Dialogue System
+NPCs have disposition, suspicion, memoryFlags, and faction but no interactive dialogue. `memoryFlags` is never populated in any content file. Players cannot question, persuade, or confront NPCs.
+- **Status**: Missing
+- **Severity**: High — NPCs are passive data
+- **Where it should be**: New `DialogueNode` type in `src/types/index.ts`, new `DialoguePanel` component, dialogue evaluation in `src/engine/narrativeEngine.ts`
+
+### Composure/Vitality Recovery
+Both meters only decrease. No rest scenes, recovery items, or counterplay exist. `breakdown` and `incapacitation` scenes referenced by `StatusBar` callbacks don't exist in any case content.
+- **Status**: Missing
+- **Severity**: Medium-High — creates unrecoverable death spiral
+- **Where it should be**: Content JSON (recovery scenes with positive `onEnter` effects, breakdown/incapacitation scenes)
+
+### Persistent Evidence Board Connections
+Connections live in React `useState`, lost on board close/reopen. No drag-and-drop. No touch support.
+- **Status**: Missing
+- **Severity**: Medium-High — signature mechanic has friction
+- **Where it should be**: `src/store/slices/evidenceSlice.ts` (connection state), `src/components/EvidenceBoard/EvidenceBoard.tsx` (click/drag handlers)
+
+### Consequence Feedback / Effect Narration
+`onEnter` effects fire silently. Players see meters change with no narrative explanation. Dice outcomes show tier label but no bridging text.
+- **Status**: Missing
+- **Severity**: Medium — breaks story-mechanics connection
+- **Where it should be**: `src/types/index.ts` (add `narrativeText` to `Effect`), `src/components/NarrativePanel/NarrativePanel.tsx` (render notifications)
+
+### Occultist Veil Sight Ability
+The flag `ability-veil-sight-active` is set when the Occultist activates their ability, but no engine function or content condition ever checks this flag. The ability has no mechanical effect.
+- **Status**: Missing
+- **Severity**: Medium — one of four archetypes has a broken ability
+- **Where it should be**: `src/engine/narrativeEngine.ts` (check flag to reveal hidden occult elements), content JSON (scenes with veil-sight-gated content)
+
+### Faction Reputation Clamping
+Disposition [-10,+10], suspicion [0,10], composure/vitality [0,10] are all clamped. Faction reputation has no clamp and can grow unbounded.
+- **Status**: Missing
+- **Severity**: Low — no current content pushes reputation to extreme values
+- **Where it should be**: `src/store/slices/worldSlice.ts` → `adjustReputation` action
+
+### Content-Specific Deduction Descriptions
+`buildDeduction` always returns one of two generic strings regardless of which clues are connected. No content-specific deduction text exists.
+- **Status**: Missing
+- **Severity**: Low — Evidence Board feels less rewarding
+- **Where it should be**: `src/engine/buildDeduction.ts` (look up deduction text from content), content JSON (deduction description mappings)
+
+### Skip Typewriter Interaction
+`SceneText` typewriter effect has no click-to-complete. Players must wait for full text or change settings to `instant`.
+- **Status**: Missing
+- **Severity**: Low — standard CYOA convention
+- **Where it should be**: `src/components/NarrativePanel/SceneText.tsx` (click handler to set displayed = full text)

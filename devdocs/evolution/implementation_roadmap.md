@@ -224,3 +224,196 @@ Phase D (✅ COMPLETE):
 - Track 2: A2 → D4 (dedup → cleanup)
 - Track 3: A5 → B5 (validation → runtime validation)
 - Track 4: A3, A6, B2, B3, C1, C3, C4, C5 (all independent)
+
+---
+
+## Phase E: Game Design Improvements (Player Experience & Content)
+
+> Added 2026-02-23 from game design analysis (`GAME_DESIGN_ANALYSIS.md`). Phases A–D addressed engineering gaps. Phase E addresses game design, content depth, and player experience gaps identified through a full codebase + content audit.
+
+Goal: Transform the technically sound but content-thin game into a compelling player experience with active investigation, atmospheric immersion, balanced mechanics, and meaningful NPC interaction.
+
+### E1. Implement Active Clue Discovery Methods — P0
+
+**What**: Only `automatic` clue discovery works. `exploration`, `check`, and `dialogue` methods have no UI trigger. Players passively receive clues instead of actively investigating.
+
+**Files**: `src/components/NarrativePanel/NarrativePanel.tsx`, `src/components/ChoicePanel/ChoicePanel.tsx`, content JSON files
+
+**Changes**:
+1. Add "Investigate" button to `NarrativePanel` for `exploration`-method clues in the current scene.
+2. Add faculty-gated "Examine" interaction for `check`-method clues (requires passing a faculty check).
+3. Wire `dialogue`-method clues into `ChoicePanel` — discovering clue as side-effect of NPC-affecting choices.
+
+**Dependencies**: None.
+
+**Risk**: Medium. Requires both code changes and content updates to exercise the new methods.
+
+---
+
+### E2. Add Audio and Visual Assets — P0
+
+**What**: The audio system (Howler.js, AudioManager, audioSubscription, 9 SFX events, per-scene `ambientAudio`) is fully coded but zero audio files exist. `SceneIllustration` renders from `scene.illustration` but no images exist. NPC portraits are letter-initial placeholders.
+
+**Files**: New `public/audio/sfx/` (9 MP3s), new `public/audio/ambient/` (2–3 loops), new `public/images/` (scene illustrations), content JSON `act*.json` (populate `illustration` and `ambientAudio` fields), `src/components/NPCGallery/NPCGallery.tsx` (portrait images)
+
+**Dependencies**: None.
+
+**Risk**: Low (code). High effort (asset creation/sourcing).
+
+---
+
+### E3. Deepen Branching and Content Volume — P0
+
+**What**: Average 1.1–1.3 choices per scene. Only 6 clues and 3 NPCs per case. Only 1 variant scene per case. Thin content undermines replayability and the Evidence Board mechanic.
+
+**Files**: `public/content/cases/*/act*.json`, `public/content/cases/*/clues.json`, `public/content/cases/*/npcs.json`, `public/content/cases/*/variants.json`, new vignette directories
+
+**Changes**:
+1. Increase avg choices/scene to 2.0–2.5 for main cases.
+2. Add 4–6 clues per case (target 10–12 total) with richer `connectsTo` graphs.
+3. Add 2–3 variant scenes per case.
+4. Add 2–3 NPCs per case with faction diversity.
+5. Author 1+ additional vignette.
+
+**Dependencies**: None.
+
+**Risk**: Low (additive content). High effort (content authoring).
+
+---
+
+### E4. Add NPC Dialogue and Interrogation System — P1
+
+**What**: NPCs have rich state (disposition, suspicion, memoryFlags, faction) but no interactive dialogue. `memoryFlags` is never populated in content. Players can't question, persuade, or confront NPCs.
+
+**Files**: `src/types/index.ts` (new `DialogueNode` type), new `src/components/NarrativePanel/DialoguePanel.tsx`, `src/engine/narrativeEngine.ts` (dialogue evaluation), content JSON files
+
+**Dependencies**: E1 (dialogue clue discovery method).
+
+**Risk**: Medium-High. Largest new feature. Requires type additions, new component, engine logic, and content.
+
+---
+
+### E5. Add Composure and Vitality Recovery Mechanics — P1
+
+**What**: Both meters only decrease. No rest scenes, recovery items, or counterplay. `breakdown` and `incapacitation` scenes don't exist in content. Creates unrecoverable death spiral.
+
+**Files**: Content JSON `act*.json` (recovery scenes, breakdown/incapacitation scenes), `src/store/slices/investigatorSlice.ts` (verify positive deltas work)
+
+**Changes**:
+1. Add 1–2 recovery scenes per act with positive composure/vitality `onEnter` effects.
+2. Create `breakdown` and `incapacitation` scenes in each case (narrative consequence, not hard game-over).
+3. Consider "Second Wind" mechanic: free +2 recovery when meter hits ≤2, once per case.
+
+**Dependencies**: None.
+
+**Risk**: Low (primarily content authoring).
+
+---
+
+### E6. Persist Evidence Board Connections in Store — P1
+
+**What**: Connections live in React `useState`, lost on board close/reopen. No drag-and-drop. No touch support.
+
+**Files**: `src/store/slices/evidenceSlice.ts` (add `connections` state), `src/components/EvidenceBoard/EvidenceBoard.tsx` (wire to store, add click/drag handlers), `src/components/EvidenceBoard/ClueCard.tsx` (drag source)
+
+**Dependencies**: None.
+
+**Risk**: Medium. Store schema change + UI interaction changes.
+
+---
+
+### E7. Implement Scene History Navigation — P2
+
+**What**: `sceneHistory` is tracked but never consumed. No back button, no scene replay, no timeline in journal.
+
+**Files**: `src/store/slices/narrativeSlice.ts` (add `goToPreviousScene`), `src/components/HeaderBar/HeaderBar.tsx` (back button), `src/components/CaseJournal/CaseJournal.tsx` (scene timeline)
+
+**Dependencies**: None.
+
+**Risk**: Medium. State rollback (undoing `onEnter` effects) is complex if full undo is desired. Read-only review is simpler.
+
+---
+
+### E8. Rebalance Dice Math — P2
+
+**What**: Even maxed faculty (score 14, mod +2) only succeeds 55% vs DC 12. Partial band is only 10% wide (2 numbers on d20). Feels like coin-flipping.
+
+**Files**: `src/engine/diceEngine.ts` (adjust `resolveCheck` partial threshold, default DC), content JSON (audit `difficulty` values)
+
+**Changes**:
+1. Widen partial band: `total >= dc - 3` (was `dc - 2`).
+2. Lower default DC from 12 to 10 for standard checks.
+3. Consider archetype primary faculty trained bonus (+1).
+
+**Dependencies**: None.
+
+**Risk**: Low code change. Medium balance impact — requires playtesting.
+
+---
+
+### E9. Add Consequence Feedback and Narrative Bridging — P2
+
+**What**: `onEnter` effects fire silently. Players see meters drop with no narrative explanation. Dice outcomes show tier label but no bridging text.
+
+**Files**: `src/types/index.ts` (add `narrativeText` to `Effect`), `src/components/NarrativePanel/NarrativePanel.tsx` (render effect notifications), content JSON (add narrative text to effects)
+
+**Dependencies**: None.
+
+**Risk**: Low. Additive type field + UI rendering.
+
+---
+
+### E10. Expand Testing to Cover Integration Paths — P2
+
+**What**: No integration tests for choice→navigation→effect pipeline. `validateCase.mjs` not in CI. No component tests for EncounterPanel or EvidenceBoard.
+
+**Files**: `.github/workflows/deploy.yml` (add validation step), new `src/engine/__tests__/integration.test.ts`, new `src/components/__tests__/EncounterPanel.test.tsx`, new `src/components/__tests__/EvidenceBoard.test.tsx`
+
+**Dependencies**: None.
+
+**Risk**: Low. Additive tests.
+
+---
+
+**Phase E summary**: 10 items spanning content, mechanics, UX, and testing. Items E1–E3 are P0 (highest impact on player experience). E4–E6 are P1 (significant features). E7–E10 are P2 (polish and robustness).
+
+---
+
+## Updated Dependency Graph
+
+```
+Phase A–D (✅ ALL COMPLETE)
+
+Phase E (Game Design Improvements):
+  E1 (active clue discovery)     — independent
+  E2 (audio/visual assets)       — independent
+  E3 (content depth)             — independent
+  E4 (NPC dialogue)              — depends on E1 (dialogue discovery method)
+  E5 (recovery mechanics)        — independent
+  E6 (persistent evidence board) — independent
+  E7 (scene history)             — independent
+  E8 (dice rebalance)            — independent
+  E9 (consequence feedback)      — independent
+  E10 (testing expansion)        — independent
+```
+
+## Updated Timeline Estimate
+
+| Phase | Items | Effort | Cumulative |
+|---|---|---|---|
+| A: Foundation | 6 | ~1 day | 1 day |
+| B: Core Refactoring | 5 | ~2 days | 3 days |
+| C: Gap Filling | 5 | ~1.5 days | 4.5 days |
+| D: Integration & Polish | 5 | ~2.5 days | 7 days |
+| E: Game Design (P0) | 3 | ~5–8 days | 12–15 days |
+| E: Game Design (P1) | 3 | ~4–6 days | 16–21 days |
+| E: Game Design (P2) | 4 | ~3–4 days | 19–25 days |
+
+**Phase E critical path**: E1 → E4 (active clue discovery enables dialogue system)
+
+**Phase E parallel tracks**:
+- Track 1: E2 (assets — can be done by non-engineers)
+- Track 2: E3 (content authoring — can be done by narrative designers)
+- Track 3: E5, E8 (mechanics — small code changes)
+- Track 4: E6, E7, E9 (UX improvements — independent)
+- Track 5: E10 (testing — independent, can run alongside any other work)

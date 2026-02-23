@@ -380,3 +380,167 @@ The closest candidate would be `narrativeEngine.ts` (400+ lines, 6 responsibilit
 **Critical path**: 1.1 (load game) → 1.3 (abilities) → 2.1 (pure choice result) → 3.1 (encounter UI)
 
 **Parallel work**: All Phase 1 items are independent. Phase 2 items 2.2–2.5 are independent of each other. Phase 3 items 3.1 and 3.3 are independent.
+
+
+---
+
+## Phase 5: Game Design Improvements (from 2026-02-23 audit)
+
+> These items address player experience, content depth, and game balance. Derived from `GAME_DESIGN_ANALYSIS.md`. Unlike Phases 1–4 which fixed engineering gaps, Phase 5 focuses on making the game fun, immersive, and replayable.
+
+### 5.1 Implement Active Clue Discovery (exploration, check, dialogue)
+
+**What**: Add UI triggers for the three non-automatic clue discovery methods.
+
+**Files**: `src/components/NarrativePanel/NarrativePanel.tsx`, `src/components/ChoicePanel/ChoicePanel.tsx`, content JSON
+
+**Changes**:
+1. `NarrativePanel`: Add "Investigate" button when scene has undiscovered `exploration` clues. Clicking reveals the clue.
+2. `NarrativePanel`: Add faculty-gated "Examine" prompt for `check` clues. Player must pass a check to discover.
+3. `ChoicePanel`: Wire `dialogue` clues into NPC-affecting choices as a side-effect.
+
+**Dependencies**: None.
+
+**Risk**: Medium. Code + content changes required.
+
+**Testing**: Navigate to scenes with each discovery method → verify clues are discoverable through the correct interaction.
+
+---
+
+### 5.2 Source and Integrate Audio/Visual Assets
+
+**What**: Add the missing media files that the existing code infrastructure already supports.
+
+**Files**: New `public/audio/sfx/*.mp3` (9 files), new `public/audio/ambient/*.mp3` (2–3 loops), new `public/images/scenes/*.webp`, content JSON (populate `illustration` and `ambientAudio` fields)
+
+**Dependencies**: None.
+
+**Risk**: Low (code already handles these). Effort is in asset creation/sourcing.
+
+**Testing**: Play through scenes → verify SFX fires on dice rolls, clue discovery, damage. Verify ambient audio plays. Verify illustrations render.
+
+---
+
+### 5.3 Expand Content: Branching, Clues, NPCs, Variants
+
+**What**: Increase branching factor, clue count, NPC count, and variant scenes across all cases.
+
+**Files**: All content JSON files under `public/content/`
+
+**Dependencies**: None.
+
+**Risk**: Low (additive). Run `node scripts/validateCase.mjs` after each content change.
+
+**Testing**: Content validation. Manual playthrough of new branches.
+
+---
+
+### 5.4 Add NPC Dialogue System
+
+**What**: Interactive dialogue trees gated by disposition/suspicion. Faculty checks in conversation. memoryFlags tracking.
+
+**Files**: `src/types/index.ts`, new `src/components/NarrativePanel/DialoguePanel.tsx`, `src/engine/narrativeEngine.ts`, content JSON
+
+**Dependencies**: 5.1 (dialogue clue discovery method).
+
+**Risk**: Medium-High. Largest new feature in Phase 5.
+
+**Testing**: Speak with NPC → verify dialogue options change based on disposition. Pass Influence check → verify disposition change. Verify memoryFlags persist across scenes.
+
+---
+
+### 5.5 Add Recovery Mechanics and Breakdown/Incapacitation Scenes
+
+**What**: Recovery scenes with positive composure/vitality effects. Breakdown and incapacitation scenes as narrative consequences.
+
+**Files**: Content JSON `act*.json` (new scenes with positive `onEnter` effects)
+
+**Dependencies**: None.
+
+**Risk**: Low. Primarily content authoring. Verify `adjustComposure`/`adjustVitality` accept positive deltas (they should — clamped to [0,10]).
+
+**Testing**: Navigate to recovery scene → verify meter increases. Reach 0 composure → verify breakdown scene loads (not crash).
+
+---
+
+### 5.6 Persist Evidence Board Connections
+
+**What**: Move connection state from React `useState` to Zustand store. Add click-to-connect.
+
+**Files**: `src/store/slices/evidenceSlice.ts`, `src/components/EvidenceBoard/EvidenceBoard.tsx`, `src/components/EvidenceBoard/ClueCard.tsx`
+
+**Dependencies**: None.
+
+**Risk**: Medium. Store schema change.
+
+**Testing**: Create connections → close board → reopen → verify connections persist. Form deduction → verify connections clear.
+
+---
+
+### 5.7 Rebalance Dice Mechanics
+
+**What**: Widen partial band, lower default DC, consider trained bonus.
+
+**Files**: `src/engine/diceEngine.ts`, content JSON (audit `difficulty` values)
+
+**Dependencies**: None.
+
+**Risk**: Low code change. Requires playtesting for balance.
+
+**Testing**: Run existing `diceEngine.property.test.ts` (update expected ranges). Manual playthrough to verify feel.
+
+---
+
+### 5.8 Add Consequence Feedback
+
+**What**: Narrative text on `Effect` objects. Transition text between dice outcomes and next scene.
+
+**Files**: `src/types/index.ts`, `src/components/NarrativePanel/NarrativePanel.tsx`, content JSON
+
+**Dependencies**: None.
+
+**Risk**: Low. Additive.
+
+**Testing**: Navigate to scene with `onEnter` effects → verify narrative notification appears. Make faculty check → verify bridging text before next scene.
+
+---
+
+### 5.9 Add Content Validation to CI
+
+**What**: Run `node scripts/validateCase.mjs` in `deploy.yml` before build.
+
+**Files**: `.github/workflows/deploy.yml`
+
+**Dependencies**: None.
+
+**Risk**: Trivial.
+
+**Testing**: Push content with a broken reference → verify CI fails.
+
+---
+
+### 5.10 Add Integration and Component Tests
+
+**What**: Integration tests for choice→navigation→effect pipeline. Component tests for EncounterPanel and EvidenceBoard.
+
+**Files**: New test files in `src/engine/__tests__/` and `src/components/__tests__/`
+
+**Dependencies**: None.
+
+**Risk**: Low. Additive.
+
+**Testing**: `npm run test:run` — new tests pass.
+
+---
+
+## Updated Execution Summary
+
+| Phase | Items | Total effort | Prerequisite |
+|---|---|---|---|
+| 1: Quick wins | 7 items | ~1 day | None |
+| 2: Incremental | 5 items | ~2–3 days | Phase 1.1 |
+| 3: Major refactoring | 3 items | ~3–5 days | Phase 2.1, 2.4 |
+| 4: Rewrites | 0 items | — | — |
+| 5: Game design (P0) | 3 items (5.1–5.3) | ~5–8 days | Phases 1–3 complete |
+| 5: Game design (P1) | 3 items (5.4–5.6) | ~4–6 days | 5.1 for 5.4 |
+| 5: Game design (P2) | 4 items (5.7–5.10) | ~3–4 days | None |

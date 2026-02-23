@@ -1,0 +1,290 @@
+# Gaslight & Grimoire — Game Design Analysis
+
+Date: 2026-02-23
+Scope: Full codebase, content, assets, engine, UI/UX, and documentation review
+
+---
+
+## Executive Summary
+
+Gaslight & Grimoire has a strong architectural foundation — clean engine/content separation, well-typed data models, a solid Zustand store, and thorough documentation. The core gameplay loop (discover → connect → act → reflect) is well-designed on paper. However, the game currently suffers from thin content, absent media assets, several unimplemented interaction mechanics, and balance issues that would significantly undermine player engagement. The 10 improvements below are ordered by impact on the player experience.
+
+---
+
+## 1. Implement Active Clue Discovery (Exploration, Check, Dialogue)
+
+**Category:** Gameplay Mechanics
+**Severity:** High — core gameplay loop is incomplete
+
+**Issue:** The `ClueDiscovery` type supports four methods (`automatic`, `exploration`, `check`, `dialogue`), but only `automatic` is implemented. The `NarrativePanel` useEffect only processes `discovery.method === 'automatic'`. The other three methods have no UI trigger anywhere in the codebase. This means players passively receive clues on scene entry rather than actively investigating — which contradicts the core fantasy of being a clever investigator.
+
+**Impact:** Without active discovery, the DISCOVER phase of the gameplay loop is hollow. Players have no agency in finding clues, which removes the satisfaction of thorough investigation and makes the Evidence Board feel disconnected from scene exploration.
+
+**Proposed Solution:**
+- `exploration`: Add an "Investigate" button to `NarrativePanel` that appears when the current scene has undiscovered exploration clues. Clicking it reveals the clue with a brief discovery animation.
+- `check`: Add a faculty-gated "Examine" interaction. The player sees a prompt like "A Perception check might reveal something here" and must pass a faculty check to discover the clue. On failure, the clue remains hidden (but the player knows something is there).
+- `dialogue`: Wire into `ChoicePanel` — when a choice has an `npcEffect` and the scene has dialogue-method clues tied to that NPC, discovering the clue is a side-effect of selecting that choice.
+
+**Files to modify:**
+- `src/components/NarrativePanel/NarrativePanel.tsx` — add exploration/check UI triggers
+- `src/components/ChoicePanel/ChoicePanel.tsx` — wire dialogue discovery into choice selection
+- Content JSON files — ensure existing clues use varied discovery methods
+
+---
+
+## 2. Add Audio and Visual Assets
+
+**Category:** Assets & Immersion
+**Severity:** High — the game is completely silent and text-only
+
+**Issue:** The audio system is fully coded (`AudioManager`, `AmbientAudio`, `audioSubscription.ts`, 9 SFX event types, per-scene `ambientAudio` field on `SceneNode`) but zero audio files exist in the repository. Howler silently swallows the missing file errors. Similarly, `SceneIllustration` renders an `<img>` tag from `scene.illustration`, but no image files exist. NPC portraits are letter-initial placeholders. The game is entirely text on a dark background.
+
+**Impact:** For a gothic mystery game, atmosphere is everything. A silent, illustration-free experience dramatically reduces immersion. The audio infrastructure is wasted engineering without assets to drive it.
+
+**Proposed Solution:**
+- **Audio (minimum viable):** Source or generate 9 SFX files (dice-roll, 5 clue-type sounds, composure-decrease, vitality-decrease, scene-transition) as short MP3s. Add 2–3 ambient loops (gaslit-street, interior-parlour, occult-tension) and reference them in scene JSON via the existing `ambientAudio` field. Place files in `public/audio/sfx/` and `public/audio/ambient/`.
+- **Illustrations (minimum viable):** Generate or commission scene illustrations for key narrative moments (act openers, encounter scenes, case climaxes). Even stylized silhouettes or atmospheric sketches in the gaslight palette would transform the experience. Reference them via the existing `scene.illustration` field.
+- **NPC Portraits:** Replace letter-initial placeholders in `NPCGallery` with character portraits (illustrated or AI-generated in a consistent Victorian style).
+
+**Files to modify:**
+- `public/audio/` — new directory with asset files
+- `public/images/` — new directory with illustrations
+- Content JSON `act*.json` files — populate `illustration` and `ambientAudio` fields
+- `src/components/NPCGallery/NPCGallery.tsx` — update `Portrait` component to use image assets
+
+---
+
+## 3. Deepen Branching and Content Volume
+
+**Category:** Content
+**Severity:** High — replayability is very limited
+
+**Issue:** Quantitative analysis of the content reveals thin branching:
+
+| Metric | Whitechapel Cipher | Mayfair Séance | A Matter of Shadows |
+|---|---|---|---|
+| Scenes | 22 | 25 | 7 |
+| Avg choices/scene | 1.2 | 1.1 | 1.3 |
+| Faculty checks | 11 | 9 | 2 |
+| Dead-end scenes | 3 | 4 | 2 |
+| Clues | 6 | 6 | 2 |
+| NPCs | 3 | 3 | 1 |
+| Variants | 1 | 1 | 0 |
+
+An average of ~1.1 choices per scene means most scenes are linear corridors with a single "continue" option. Only 1 variant scene per case means cross-case state barely affects the narrative. 6 clues per case is thin for an evidence-board mechanic that requires connecting pairs.
+
+**Impact:** Players will experience the game as largely linear on first playthrough and have little reason to replay. The Evidence Board — the game's signature mechanic — has too few clues to create interesting deduction puzzles.
+
+**Proposed Solution:**
+- Increase average choices per scene to 2.0–2.5 for main cases. Every non-terminal scene should offer at least 2 meaningful choices.
+- Add 4–6 more clues per case (target: 10–12 total) with richer `connectsTo` graphs. Include more red herrings to make deduction non-trivial.
+- Add 2–3 variant scenes per case that trigger based on faction reputation, NPC disposition, or cross-case flags.
+- Add 2–3 more NPCs per case with faction diversity. The current cases only have 2 factions represented.
+- Author at least 1 additional vignette with a different unlock condition (e.g., NPC disposition ≥ 7).
+
+**Files to modify:**
+- `public/content/cases/*/act*.json` — expand scene graphs
+- `public/content/cases/*/clues.json` — add clues
+- `public/content/cases/*/npcs.json` — add NPCs
+- `public/content/cases/*/variants.json` — add variant scenes
+- `public/content/side-cases/` — new vignette directories
+
+---
+
+## 4. Add NPC Dialogue and Interrogation Mechanics
+
+**Category:** AI and NPC Behavior
+**Severity:** High — NPCs are passive data, not interactive characters
+
+**Issue:** NPCs have rich state (`disposition`, `suspicion`, `memoryFlags`, `faction`) but no interactive dialogue system. The player never directly talks to an NPC — disposition and suspicion only change as side-effects of scene choices via `npcEffect`. The `NPCGallery` is a read-only list. There's no way to question, persuade, or confront an NPC. The `memoryFlags` field on `NPCState` is never populated in any content file.
+
+**Impact:** NPCs feel like background furniture rather than characters the player engages with. The disposition/suspicion system is mechanically complete but narratively invisible. Players have no reason to care about NPC relationships because they can't directly influence them through conversation.
+
+**Proposed Solution:**
+- Add a `dialogue` field to `SceneNode` containing NPC-specific dialogue trees gated by disposition/suspicion tiers. When a scene has an NPC present, show a "Speak with [NPC]" button that opens a dialogue sub-panel.
+- Dialogue choices should use `Influence` checks (persuasion), `Perception` checks (reading body language), or `Reason` checks (logical confrontation). Outcomes adjust disposition/suspicion and can reveal testimony-type clues.
+- Use `memoryFlags` to track what the player has said to each NPC, enabling callbacks like "You mentioned the cipher earlier..." in later scenes.
+- Make suspicion tiers visible in dialogue — an NPC at `concealing` tier should give evasive answers, while one at `hostile` might refuse to speak entirely.
+
+**Files to modify:**
+- `src/types/index.ts` — add `DialogueNode` type
+- `src/components/NarrativePanel/` — new `DialoguePanel` sub-component
+- `src/engine/narrativeEngine.ts` — dialogue evaluation logic
+- Content JSON files — add dialogue trees to scenes with NPCs
+
+---
+
+## 5. Add Composure and Vitality Recovery Mechanics
+
+**Category:** Gameplay Mechanics / Balancing
+**Severity:** Medium-High — creates an unrecoverable death spiral
+
+**Issue:** Both Composure (0–10) and Vitality (0–10) only decrease. The `adjustComposure` and `adjustVitality` actions clamp to [0, 10], and `onEnter` effects in the content only apply negative deltas. There are no rest scenes, recovery items, or mechanics to restore either meter. The `StatusBar` triggers `goToScene('breakdown')` or `goToScene('incapacitation')` at 0, but neither `breakdown` nor `incapacitation` scenes exist in any case content.
+
+**Impact:** Players face a one-way ratchet toward failure. Supernatural encounters deal dual-axis damage (Composure + Vitality), and failed checks in regular scenes also drain meters. Without recovery, a string of bad rolls early in a case makes later encounters nearly impossible. This is especially punishing because the dice math already skews toward failure (see improvement #8).
+
+**Proposed Solution:**
+- Add `recovery` as a new `Effect` type, or use positive `composure`/`vitality` deltas in `onEnter` effects for "safe haven" scenes (e.g., returning to the investigator's lodgings, a quiet moment of reflection).
+- Add 1–2 recovery scenes per act that the player can choose to visit, trading investigation time for health restoration.
+- Create `breakdown` and `incapacitation` scenes in each case that provide a narrative consequence (lost time, missed clues) rather than a hard game-over.
+- Consider a "Second Wind" mechanic: once per case, when Composure or Vitality hits 2 or below, offer a free recovery of +2 with narrative flavor.
+
+**Files to modify:**
+- Content JSON `act*.json` — add recovery scenes and breakdown/incapacitation scenes
+- `src/store/slices/investigatorSlice.ts` — ensure positive deltas work (they should, since Immer just mutates)
+- `src/components/StatusBar/ComposureMeter.tsx` and `VitalityMeter.tsx` — verify `onBreakdown`/`onIncapacitation` callbacks navigate correctly
+
+---
+
+## 6. Make Evidence Board Connections Persistent and Add Drag-and-Drop
+
+**Category:** UI/UX
+**Severity:** Medium-High — the signature mechanic has friction
+
+**Issue:** Evidence Board connections live in React `useState`, not the Zustand store. Closing and reopening the board loses all connections. This is documented as "by design" but is frustrating for players who may need to switch between the board and the narrative to gather more clues. Additionally, connections are keyboard-only (Spacebar to initiate, Spacebar on target to complete). There's no drag-and-drop, which is the natural interaction for a "corkboard with threads" metaphor. The ghost thread follows the mouse but clicking doesn't complete a connection.
+
+**Impact:** Players lose work when they close the board. The keyboard-only connection flow is unintuitive for a visual corkboard metaphor. Touch/mobile users have no way to create connections at all.
+
+**Proposed Solution:**
+- Move `connections` state into the Zustand store (a new `boardSlice` or extend `evidenceSlice`). Persist connections across board open/close cycles. Clear them only on successful deduction or explicit "clear board" action.
+- Add mouse click-to-connect: clicking a clue card starts a connection, clicking another completes it (mirroring the existing Spacebar flow but with mouse).
+- Add drag-and-drop: dragging from one clue card to another creates a connection thread. Use the existing `ConnectionThread` SVG overlay with the ghost thread already tracking `mousePos`.
+- For touch devices: tap-to-select, tap-target-to-connect (same as click flow).
+
+**Files to modify:**
+- `src/store/slices/evidenceSlice.ts` — add `connections` state and actions
+- `src/components/EvidenceBoard/EvidenceBoard.tsx` — wire to store, add click/drag handlers
+- `src/components/EvidenceBoard/ClueCard.tsx` — add drag source behavior
+
+---
+
+## 7. Implement Scene History Navigation (Back Button)
+
+**Category:** Player Engagement / UX
+**Severity:** Medium — players feel trapped in forward-only progression
+
+**Issue:** `sceneHistory` is tracked in the narrative slice (every `goToScene` call appends to it) but is never used for navigation. There's no "go back" button, no scene replay, and no way to revisit previous scenes. Combined with the lack of recovery mechanics and the randomness of dice checks, a bad outcome on a critical choice is permanent and irreversible.
+
+**Impact:** Players who make a choice they regret (or fail a dice check) have no recourse except loading a save. Since autosave overwrites the single `autosave` slot, they may not even have a recent save to fall back on. This creates anxiety around choices rather than excitement.
+
+**Proposed Solution:**
+- Add a "Review Previous Scene" button to the `HeaderBar` that lets the player re-read the last scene's narrative (read-only, no re-choosing).
+- For a more generous approach: allow navigating back to the previous scene and re-making the choice. This would require reverting the state changes from the forward navigation (undo the `onEnter` effects, un-discover clues, etc.). Store a state snapshot before each choice to enable clean rollback.
+- At minimum, display `sceneHistory` in the `CaseJournal` as a timeline of visited scenes with their narrative excerpts, so players can review their path.
+
+**Files to modify:**
+- `src/components/HeaderBar/HeaderBar.tsx` — add back/review button
+- `src/components/CaseJournal/CaseJournal.tsx` — add scene history timeline
+- `src/store/slices/narrativeSlice.ts` — add `goToPreviousScene` action (if implementing full rollback)
+
+---
+
+## 8. Rebalance Dice Math for Player Agency
+
+**Category:** Gameplay Mechanics / Balancing
+**Severity:** Medium — the math skews toward failure, which feels punishing
+
+**Issue:** The dice math creates a surprisingly harsh probability curve:
+
+| Faculty Score | Modifier | vs DC 12: Success% | vs DC 12: Partial% | vs DC 12: Failure% |
+|---|---|---|---|---|
+| 8 (base) | -1 | 40% | 10% | 40% |
+| 10 (base+2) | 0 | 45% | 10% | 35% |
+| 11 (archetype primary) | +0 | 45% | 10% | 35% |
+| 14 (archetype +3, +3 allocated) | +2 | 55% | 10% | 25% |
+| 16 (max realistic) | +3 | 60% | 10% | 20% |
+
+Even a heavily invested faculty (score 14, modifier +2) only succeeds 55% of the time against DC 12. The base faculty score of 8 gives a -1 modifier, meaning untrained checks fail 50% of the time (40% failure + 10% fumble). Natural 1 (fumble, 5%) and natural 20 (critical, 5%) add 10% of outcomes that ignore modifiers entirely.
+
+The `partial` band (DC-2 to DC-1) is only 2 numbers wide on the d20, making it a narrow 10% window. Most checks resolve as binary success/failure.
+
+**Impact:** Players who invest in a faculty still feel like they're flipping a coin. The narrow partial band means the 5-tier outcome system (critical/success/partial/failure/fumble) effectively collapses to 3 tiers in practice. Advantage helps (+3.3 average bonus) but requires holding specific clues.
+
+**Proposed Solution:**
+- Widen the partial band: change from `total >= dc - 2` to `total >= dc - 3`. This makes partial outcomes 15% instead of 10%, creating more interesting "mixed success" moments.
+- Lower default DC from 12 to 10 for standard checks. Reserve DC 12+ for hard checks. This shifts the success curve up by ~10% across the board.
+- Add a "trained bonus": if the check's faculty matches the archetype's primary faculty, grant an additional +1 modifier. This makes archetype choice feel more impactful.
+- Consider making the `dynamicDifficulty` system the default rather than the exception, so DCs scale with player investment.
+
+**Files to modify:**
+- `src/engine/diceEngine.ts` — adjust `resolveCheck` partial threshold and default DC
+- Content JSON files — audit and adjust `difficulty` values on choices
+
+---
+
+## 9. Add Consequence Feedback and Narrative Bridging
+
+**Category:** Player Engagement / UX
+**Severity:** Medium — state changes happen silently
+
+**Issue:** When `onEnter` effects fire (composure loss, vitality loss, flag changes, reputation shifts), the player sees no narrative explanation. The `applyEffects` store action mutates state, and the `StatusBar` meters update, but there's no text or animation connecting the narrative to the mechanical change. Similarly, when a dice check produces a `partial` or `failure` outcome, the game navigates to the next scene but doesn't explain what went wrong narratively — the `OutcomeBanner` shows "Partial Success" or "Failure" but the scene text is the same regardless.
+
+**Impact:** Players see their Composure drop from 8 to 6 but don't know why. They see "Failure" flash on screen but the narrative doesn't acknowledge it. This breaks the connection between story and mechanics, which is the core promise of the game.
+
+**Proposed Solution:**
+- Add a `narrativeText` field to `Effect` objects. When an effect fires, display a brief inline notification: "The oppressive atmosphere weighs on your nerves. (Composure -2)".
+- In `NarrativePanel`, after applying `onEnter` effects, render a brief effect summary below the scene text with Framer Motion fade-in.
+- For dice outcomes: the current system navigates to different scenes per tier, which is correct. But add a `transitionText` field to `Choice.outcomes` that displays a brief bridging sentence before the next scene loads: "Your hands tremble as you attempt the lock — the mechanism resists your efforts." This gives narrative context to the mechanical result.
+
+**Files to modify:**
+- `src/types/index.ts` — add `narrativeText` to `Effect`, `transitionText` to outcome entries
+- `src/components/NarrativePanel/NarrativePanel.tsx` — render effect notifications
+- Content JSON files — add narrative text to effects and outcome transitions
+
+---
+
+## 10. Expand Testing to Cover Integration Paths and Content Validation
+
+**Category:** Testing & Debugging
+**Severity:** Medium — good unit coverage but gaps in integration and content testing
+
+**Issue:** The test suite (18 test files, 269 passing tests) has strong unit and property-based coverage for engine functions and individual components. However, there are notable gaps:
+- No integration tests for the full choice → dice roll → scene navigation → effect application pipeline.
+- No tests for `EncounterPanel` or `EvidenceBoard` components (only engine-level encounter tests exist).
+- No automated content validation in CI — `validateCase.mjs` exists but isn't run in the `deploy.yml` workflow.
+- No tests for the save/load round-trip through the UI (only `SaveManager` unit tests).
+- The `hintEngine` tests mock `Date.now()` via `_setState` but don't test the actual 5-minute dwell trigger in a realistic scenario.
+- No visual regression testing for the custom gaslight theme.
+
+**Impact:** Regressions in the choice processing pipeline or content authoring errors could ship to production undetected. The lack of integration tests means the seams between engine, store, and components are untested.
+
+**Proposed Solution:**
+- Add `node scripts/validateCase.mjs` as a step in `deploy.yml` before the build step. Fail the build on validation errors.
+- Add integration tests that exercise the full flow: `loadAndStartCase` → `goToScene` → `processChoice` → verify store state → verify component renders the correct scene.
+- Add component tests for `EncounterPanel` and `EvidenceBoard` (at minimum: renders correctly, handles choice selection, handles connection creation).
+- Add a content snapshot test that loads each case and asserts the scene graph is fully connected (no orphan scenes, no broken references) — complementing the runtime `validateContent` check.
+
+**Files to modify:**
+- `.github/workflows/deploy.yml` — add validation step
+- `src/engine/__tests__/` — add integration test file
+- `src/components/__tests__/` — add EncounterPanel and EvidenceBoard tests
+
+---
+
+## Bonus Observations
+
+These didn't make the top 10 but are worth noting:
+
+- **No mobile/touch support:** The Evidence Board uses mouse tracking (`mousemove` events) and keyboard shortcuts. No touch event handlers exist. The game would be difficult to play on tablets or phones.
+- **Faction reputation is unbounded:** Disposition is clamped [-10, +10], suspicion [0, 10], composure/vitality [0, 10], but faction reputation has no clamp. Extreme values could break vignette unlock thresholds or condition checks.
+- **Deduction descriptions are generic:** `buildDeduction` always returns "The threads converge into a clear deduction." or "A connection forms — but something feels off..." regardless of which clues are connected. Content-specific deduction text would make the Evidence Board feel more rewarding.
+- **`Occultist` ability (Veil Sight) has no mechanical effect:** The flag `ability-veil-sight-active` is set but never checked in any engine function or content condition. The other three archetype abilities (auto-succeed Reason/Vigor/Influence) are fully functional.
+- **No "skip typewriter" interaction:** The `SceneText` typewriter effect has no click-to-complete. Players must wait for the full text to render or change their settings to `instant`. A click/tap to instantly reveal remaining text is a standard CYOA convention.
+- **Multiplayer/Co-op:** Not applicable to this single-player narrative game. No changes recommended.
+
+---
+
+## Priority Matrix
+
+| # | Improvement | Effort | Impact | Priority |
+|---|---|---|---|---|
+| 1 | Active Clue Discovery | Medium | High | P0 |
+| 2 | Audio & Visual Assets | High (asset creation) | High | P0 |
+| 3 | Deepen Branching & Content | High (content authoring) | High | P0 |
+| 4 | NPC Dialogue System | High | High | P1 |
+| 5 | Recovery Mechanics | Low-Medium | High | P1 |
+| 6 | Persistent Evidence Board | Medium | Medium-High | P1 |
+| 7 | Scene History Navigation | Medium | Medium | P2 |
+| 8 | Rebalance Dice Math | Low | Medium | P2 |
+| 9 | Consequence Feedback | Medium | Medium | P2 |
+| 10 | Expand Testing | Medium | Medium | P2 |
