@@ -181,7 +181,7 @@ Rules:
 - `loadCase` / `loadVignette` — fetch JSON, index by ID into `Record<string, T>`.
 - `evaluateConditions` — pure AND logic over `Condition[]` against `GameState`.
 - `resolveScene` — returns variant scene if its condition is met, otherwise base scene.
-- `applyOnEnterEffects` — applies `Effect[]` to the store (the one non-pure function).
+- `applyEffects` — store action in `worldSlice` that applies `Effect[]` on scene entry.
 - `processChoice` — performs faculty check (using `resolveDC` for dynamic difficulty), applies NPC effects, navigates to next scene. Checks archetype ability auto-succeed flags (`ability-auto-succeed-reason`, `ability-auto-succeed-vigor`, `ability-auto-succeed-influence`) before rolling — if set, returns `critical` tier without a dice roll.
 - `computeChoiceResult` — pure function extracted from `processChoice`. Computes the choice outcome (ability auto-succeed, dice check, advantage, DC resolution) without store access. Returns `ChoiceResult`. Used by `processChoice` internally; can be called directly for testing or preview.
 - `canDiscoverClue` — pure gate check for `ClueDiscovery` requirements.
@@ -274,14 +274,14 @@ These are documented in detail in `devdocs/evolution/gap_analysis.md` and `smoke
 - None remaining. All features are now wired end-to-end.
 
 ### Medium (architectural debt)
-- **Engine ↔ Store circular dependency** — `narrativeEngine.ts` and `caseProgression.ts` import `useStore`. Store slices import engine modules. Works due to lazy JS module resolution but violates intended layering.
+- ~~**Engine ↔ Store circular dependency**~~ — ✅ FIXED. Engine functions now accept an `EngineActions` interface parameter instead of importing `useStore`. `applyOnEnterEffects` moved to `worldSlice.applyEffects` store action. Zero store imports in engine files.
 
 ## Architectural Warnings
 
 Things to be aware of when making changes:
 
-- **`processChoice` navigates before returning** — It calls `store.goToScene()` internally, then returns `ChoiceResult`. The caller shows the dice overlay after the scene has already changed. Use `computeChoiceResult` for the pure computation without side effects.
-- **`applyOnEnterEffects` is the only impure engine function** — Called from `NarrativePanel` useEffect, not from a store action. It accesses the store via `useStore.getState()`.
+- **`processChoice` navigates before returning** — It calls `actions.goToScene()` internally, then returns `ChoiceResult`. The caller shows the dice overlay after the scene has already changed. Use `computeChoiceResult` for the pure computation without side effects.
+- **`applyEffects` is a store action in `worldSlice`** — Called from `NarrativePanel` useEffect. Replaces the former `applyOnEnterEffects` engine function.
 - **Evidence Board connections live in React state, not the store** — Closing and reopening the board loses all connections. This is by design (connections are transient until deduction).
 - **`adjustDisposition` has a hidden cross-slice call** — After updating NPC disposition, it calls `get().adjustReputation(faction, delta * 0.5)` for faction-aligned NPCs. This coupling is in `src/store/slices/npcSlice.ts`.
 - **Faction reputation is unbounded** — Disposition is clamped [-10,+10], suspicion [0,10], composure/vitality [0,10]. Faction reputation has no clamp.

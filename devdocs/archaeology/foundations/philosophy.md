@@ -8,7 +8,7 @@
 The most consistently enforced boundary in the codebase. Narrative content lives as JSON under `content/`. Game logic lives as TypeScript under `src/engine/`. Content mutates game state exclusively through `Condition` and `Effect` objects — there are zero ad-hoc content handlers. This principle is repeated in comments, enforced by the type system, and validated by `validateCase.mjs`.
 
 ### Engine functions are pure where possible
-The engine layer (`src/engine/`) aspires to pure functions that take `GameState` and return results. `evaluateConditions`, `resolveScene`, `canDiscoverClue`, `resolveCheck`, `calculateModifier`, `resolveDC`, `performCheck`, and `buildDeduction` are all pure. The exceptions — `applyOnEnterEffects`, `processChoice`, `startEncounter`, `processEncounterChoice` — access the store imperatively, and this impurity is acknowledged in comments as a pragmatic tradeoff.
+The engine layer (`src/engine/`) aspires to pure functions that take `GameState` and return results. `evaluateConditions`, `resolveScene`, `canDiscoverClue`, `resolveCheck`, `calculateModifier`, `resolveDC`, `performCheck`, and `buildDeduction` are all pure. The impure functions — `processChoice`, `startEncounter`, `processEncounterChoice` — accept an `EngineActions` parameter instead of importing the store directly. `applyOnEnterEffects` was moved to `worldSlice.applyEffects` store action.
 
 ### State is flat and normalised
 Every collection in the store uses `Record<string, T>` keyed by ID. No nested arrays, no deeply nested objects. This is stated in comments and enforced in every slice. It makes lookups O(1) and Immer patches efficient.

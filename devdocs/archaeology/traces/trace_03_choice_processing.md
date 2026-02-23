@@ -33,7 +33,7 @@ User clicks a `ChoiceCard` → `ChoicePanel.handleSelect(choiceId)`.
 
 - Entirely synchronous. No async, no I/O.
 - `Math.random()` called 1–2 times per check (1 for normal, 2 for advantage/disadvantage).
-- `processChoice` accesses the store imperatively via `useStore.getState()` for NPC effects and `goToScene`.
+- `processChoice` accepts an `EngineActions` parameter for NPC effects and `goToScene` (no longer imports `useStore`).
 
 ## 4. Error Path
 
@@ -56,7 +56,7 @@ User clicks a `ChoiceCard` → `ChoicePanel.handleSelect(choiceId)`.
 
 ## 7. Why This Design
 
-- `processChoice` combines check + NPC effect + navigation in one call so the component doesn't need to orchestrate multiple steps. The tradeoff is that the function is impure (calls store actions).
+- `processChoice` combines check + NPC effect + navigation in one call so the component doesn't need to orchestrate multiple steps. Store actions are passed in via `EngineActions` parameter (no circular dependency).
 - Advantage is determined by clue possession — this is the core "knowledge has mechanical impact" design rule.
 - Dynamic difficulty allows content authors to scale DC based on player build, preventing trivial checks for min-maxed characters.
 

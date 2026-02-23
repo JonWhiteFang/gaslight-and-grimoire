@@ -79,6 +79,7 @@ export const useWorldActions = () =>
   useStore((s) => ({
     setFlag: s.setFlag,
     adjustReputation: s.adjustReputation,
+    applyEffects: s.applyEffects,
   }));
 
 export const useMetaActions = () =>

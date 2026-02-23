@@ -28,7 +28,7 @@ import type {
   VignetteData,
   VignetteMeta,
 } from '../types';
-import { useStore } from '../store';
+import type { EngineActions } from './engineActions';
 import { performCheck, rollD20, resolveDC } from './diceEngine';
 
 // ─── Content Loading ──────────────────────────────────────────────────────────
@@ -282,64 +282,7 @@ export function resolveScene(
   return variant ?? baseScene;
 }
 
-// ─── onEnter Effect Application ───────────────────────────────────────────────
 
-/**
- * Applies onEnter effects from a scene to the Zustand store.
- * Exported separately so it can be called from the narrative slice or a component.
- * Req 2.7
- */
-export function applyOnEnterEffects(effects: Effect[]): void {
-  if (!effects || effects.length === 0) return;
-
-  const store = useStore.getState();
-
-  for (const effect of effects) {
-    switch (effect.type) {
-      case 'composure':
-        if (effect.delta !== undefined) {
-          store.adjustComposure(effect.delta);
-        }
-        break;
-
-      case 'vitality':
-        if (effect.delta !== undefined) {
-          store.adjustVitality(effect.delta);
-        }
-        break;
-
-      case 'flag':
-        if (effect.target !== undefined) {
-          store.setFlag(effect.target, effect.value as boolean ?? true);
-        }
-        break;
-
-      case 'disposition':
-        if (effect.target !== undefined && effect.delta !== undefined) {
-          store.adjustDisposition(effect.target, effect.delta);
-        }
-        break;
-
-      case 'suspicion':
-        if (effect.target !== undefined && effect.delta !== undefined) {
-          store.adjustSuspicion(effect.target, effect.delta);
-        }
-        break;
-
-      case 'reputation':
-        if (effect.target !== undefined && effect.delta !== undefined) {
-          store.adjustReputation(effect.target, effect.delta);
-        }
-        break;
-
-      case 'discoverClue':
-        if (effect.target !== undefined) {
-          store.discoverClue(effect.target);
-        }
-        break;
-    }
-  }
-}
 
 // ─── Clue Discovery Gating ────────────────────────────────────────────────────
 
@@ -421,17 +364,21 @@ export function computeChoiceResult(
 export function processChoice(
   choice: Choice,
   state: GameState,
+  actions: EngineActions,
 ): ChoiceResult {
-  const store = useStore.getState();
   const result = computeChoiceResult(choice, state);
+
+  if (result.tier === 'critical' && choice.faculty) {
+    actions.setFlag('last-critical-faculty', choice.faculty as unknown as boolean);
+  }
 
   if (choice.npcEffect) {
     const { npcId, dispositionDelta, suspicionDelta } = choice.npcEffect;
-    store.adjustDisposition(npcId, dispositionDelta);
-    store.adjustSuspicion(npcId, suspicionDelta);
+    actions.adjustDisposition(npcId, dispositionDelta);
+    actions.adjustSuspicion(npcId, suspicionDelta);
   }
 
-  store.goToScene(result.nextSceneId);
+  actions.goToScene(result.nextSceneId);
   return result;
 }
 
@@ -473,6 +420,7 @@ export function startEncounter(
   rounds: EncounterRound[],
   isSupernatural: boolean,
   state: GameState,
+  actions: EngineActions,
 ): EncounterState {
 
   let reactionCheckPassed: boolean | null = null;
@@ -491,8 +439,7 @@ export function startEncounter(
     if (!reactionCheckPassed) {
       // Reduce Composure by 1 or 2 (Req 9.4)
       const composureDamage = (rollD20() % 2) + 1; // 1 or 2
-      const store = useStore.getState();
-      store.adjustComposure(-composureDamage);
+      actions.adjustComposure(-composureDamage);
 
       // Replace first choice in round 1 with worseAlternative if available (Req 9.4)
       const firstRound = processedRounds[0];
@@ -531,8 +478,8 @@ export function processEncounterChoice(
   choice: Choice,
   encounterState: EncounterState,
   state: GameState,
+  actions: EngineActions,
 ): { encounterState: EncounterState; result: ChoiceResult } {
-  const store = useStore.getState();
 
   const currentRound = encounterState.rounds[encounterState.currentRound];
   const isSupernatural = currentRound?.isSupernatural ?? false;
@@ -574,6 +521,10 @@ export function processEncounterChoice(
     tier = 'success';
   }
 
+  if (tier === 'critical' && choice.faculty) {
+    actions.setFlag('last-critical-faculty', choice.faculty as unknown as boolean);
+  }
+
   // Apply damage effects (Req 9.2, 9.5)
   const isFailure = tier === 'failure' || tier === 'fumble';
   if (isFailure && choice.encounterDamage) {
@@ -581,20 +532,20 @@ export function processEncounterChoice(
 
     if (isSupernatural) {
       // Dual-axis: apply both Composure and Vitality damage (Req 9.5)
-      if (composureDelta !== undefined) store.adjustComposure(composureDelta);
-      if (vitalityDelta !== undefined) store.adjustVitality(vitalityDelta);
+      if (composureDelta !== undefined) actions.adjustComposure(composureDelta);
+      if (vitalityDelta !== undefined) actions.adjustVitality(vitalityDelta);
     } else {
       // Mundane: apply only the relevant damage type
-      if (composureDelta !== undefined) store.adjustComposure(composureDelta);
-      else if (vitalityDelta !== undefined) store.adjustVitality(vitalityDelta);
+      if (composureDelta !== undefined) actions.adjustComposure(composureDelta);
+      else if (vitalityDelta !== undefined) actions.adjustVitality(vitalityDelta);
     }
   }
 
   // Apply NPC effects if present
   if (choice.npcEffect) {
     const { npcId, dispositionDelta, suspicionDelta } = choice.npcEffect;
-    store.adjustDisposition(npcId, dispositionDelta);
-    store.adjustSuspicion(npcId, suspicionDelta);
+    actions.adjustDisposition(npcId, dispositionDelta);
+    actions.adjustSuspicion(npcId, suspicionDelta);
   }
 
   // Advance round counter
@@ -609,7 +560,7 @@ export function processEncounterChoice(
 
   // Navigate to the resolved scene when encounter is complete
   if (isComplete && nextSceneId) {
-    store.goToScene(nextSceneId);
+    actions.goToScene(nextSceneId);
   }
 
   return {

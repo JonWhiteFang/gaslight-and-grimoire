@@ -5,9 +5,8 @@
  */
 
 import type { Faculty, GameState } from '../types';
-import { useStore } from '../store';
+import type { EngineActions } from './engineActions';
 import { SaveManager } from './saveManager';
-import { snapshotGameState } from '../utils/gameState';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -50,13 +49,13 @@ export const CaseProgression = {
    *
    * Req 10.5, 10.6, 10.8
    */
-  completeCase(caseId: string, state: GameState): CaseCompletionResult {
+  completeCase(caseId: string, state: GameState, actions: EngineActions): CaseCompletionResult {
     // 1. Grant faculty bonus from critical success moment (Req 10.6)
     const criticalFaculty = state.flags['last-critical-faculty'] as unknown as Faculty | undefined;
     let facultyBonusGranted: Faculty | null = null;
 
     if (criticalFaculty && isValidFaculty(criticalFaculty)) {
-      CaseProgression.grantFacultyBonus(criticalFaculty);
+      CaseProgression.grantFacultyBonus(criticalFaculty, actions);
       facultyBonusGranted = criticalFaculty;
     }
 
@@ -64,14 +63,8 @@ export const CaseProgression = {
     const vignetteUnlocked = CaseProgression.checkVignetteUnlocks(state);
 
     if (vignetteUnlocked) {
-      const store = useStore.getState();
-      store.setFlag(`vignette-unlocked-${vignetteUnlocked}`, true);
+      actions.setFlag(`vignette-unlocked-${vignetteUnlocked}`, true);
     }
-
-    // 3. Persist state (flags, faction reputation, NPC state are already in the
-    //    store — just auto-save so they survive across sessions). (Req 10.5)
-    const freshState = useStore.getState();
-    SaveManager.save('autosave', snapshotGameState(freshState));
 
     return { facultyBonusGranted, vignetteUnlocked };
   },
@@ -114,11 +107,10 @@ export const CaseProgression = {
    * Grants +1 to the specified Faculty (capped at 20).
    * Req 10.6
    */
-  grantFacultyBonus(faculty: Faculty): void {
-    const store = useStore.getState();
-    const current = store.investigator.faculties[faculty] ?? 0;
+  grantFacultyBonus(faculty: Faculty, actions: EngineActions): void {
+    const current = actions.investigator.faculties[faculty] ?? 0;
     const newValue = Math.min(20, current + 1);
-    store.updateFaculty(faculty, newValue);
+    actions.updateFaculty(faculty, newValue);
   },
 };
 

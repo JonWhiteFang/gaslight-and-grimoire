@@ -36,7 +36,7 @@ export function EncounterPanel({ sceneId, rounds, isSupernatural, onComplete }: 
     initRef.current = true;
 
     const gameState = buildGameState(useStore.getState());
-    const state = startEncounter(sceneId, rounds, isSupernatural, gameState);
+    const state = startEncounter(sceneId, rounds, isSupernatural, gameState, useStore.getState());
     setEncounterState(state);
 
     if (isSupernatural && state.reactionCheckPassed !== null) {
@@ -62,6 +62,7 @@ export function EncounterPanel({ sceneId, rounds, isSupernatural, onComplete }: 
         choice,
         encounterState,
         gameState,
+        useStore.getState(),
       );
 
       if (result.roll !== undefined && result.tier) {

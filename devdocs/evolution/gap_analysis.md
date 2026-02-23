@@ -78,22 +78,9 @@ Ordered by impact on the playable experience.
 
 ## 2. Architecture Changes Required
 
-### 2.1 Break Engine → Store Circular Dependency
+### 2.1 Break Engine → Store Circular Dependency — ✅ FIXED
 
-**Current**: `narrativeEngine.ts` and `caseProgression.ts` import `useStore` from the store. Store slices import from engine modules. This creates a bidirectional dependency.
-
-**Required change**: Engine functions that currently call `useStore.getState()` should instead:
-- Accept state as a parameter (already done for pure functions like `evaluateConditions`)
-- Return effect descriptors that the caller applies to the store
-
-**Incremental path**:
-1. Extract `computeChoiceResult` from `processChoice` — pure function, no store access. Keep `processChoice` as a thin wrapper.
-2. Move `applyOnEnterEffects` to a store action or a component-level helper that calls store actions.
-3. Refactor `CaseProgression.completeCase` to return results without calling store actions directly.
-
-**Risk**: Medium. Each step is independently deployable. The wrapper pattern preserves backward compatibility.
-
-**Blocked by**: Nothing. Can start immediately.
+**Resolution**: All impure engine functions (`processChoice`, `processEncounterChoice`, `startEncounter`, `CaseProgression.completeCase`, `grantFacultyBonus`) now accept an `EngineActions` interface parameter instead of importing `useStore`. `applyOnEnterEffects` moved to `worldSlice.applyEffects` store action. Zero store imports remain in engine files. `last-critical-faculty` flag is now set on critical rolls in both `processChoice` and `processEncounterChoice`.
 
 ---
 

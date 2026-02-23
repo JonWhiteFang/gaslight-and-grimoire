@@ -10,24 +10,26 @@ import type { Choice, EncounterRound, GameState, Investigator } from '../../type
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
-// Mock the store so we can capture side-effect calls
+// Mock actions passed to engine functions
 const mockAdjustComposure = vi.fn();
 const mockAdjustVitality = vi.fn();
 const mockGoToScene = vi.fn();
 const mockAdjustDisposition = vi.fn();
 const mockAdjustSuspicion = vi.fn();
+const mockSetFlag = vi.fn();
 
-vi.mock('../../store', () => ({
-  useStore: {
-    getState: () => ({
-      adjustComposure: mockAdjustComposure,
-      adjustVitality: mockAdjustVitality,
-      goToScene: mockGoToScene,
-      adjustDisposition: mockAdjustDisposition,
-      adjustSuspicion: mockAdjustSuspicion,
-    }),
-  },
-}));
+const mockActions = {
+  adjustComposure: mockAdjustComposure,
+  adjustVitality: mockAdjustVitality,
+  goToScene: mockGoToScene,
+  adjustDisposition: mockAdjustDisposition,
+  adjustSuspicion: mockAdjustSuspicion,
+  setFlag: mockSetFlag,
+  adjustReputation: vi.fn(),
+  discoverClue: vi.fn(),
+  updateFaculty: vi.fn(),
+  investigator: { name: '', archetype: 'deductionist' as const, faculties: { reason: 10, perception: 10, nerve: 10, vigor: 10, influence: 10, lore: 10 }, composure: 10, vitality: 10, abilityUsed: false },
+} as any;
 
 // Mock diceEngine so we can control roll outcomes
 const mockPerformCheck = vi.fn();
@@ -133,7 +135,7 @@ describe('startEncounter — Reaction_Check', () => {
     const state = makeGameState();
     const rounds = [makeRound([makeChoice()], true)];
 
-    startEncounter('enc-1', rounds, true, state);
+    startEncounter('enc-1', rounds, true, state, mockActions);
 
     expect(mockAdjustComposure).toHaveBeenCalledWith(-1);
   });
@@ -146,7 +148,7 @@ describe('startEncounter — Reaction_Check', () => {
     const state = makeGameState();
     const rounds = [makeRound([makeChoice()], true)];
 
-    startEncounter('enc-1', rounds, true, state);
+    startEncounter('enc-1', rounds, true, state, mockActions);
 
     expect(mockAdjustComposure).toHaveBeenCalledWith(-2);
   });
@@ -157,7 +159,7 @@ describe('startEncounter — Reaction_Check', () => {
     const state = makeGameState();
     const rounds = [makeRound([makeChoice()], true)];
 
-    startEncounter('enc-1', rounds, true, state);
+    startEncounter('enc-1', rounds, true, state, mockActions);
 
     expect(mockAdjustComposure).not.toHaveBeenCalled();
   });
@@ -166,7 +168,7 @@ describe('startEncounter — Reaction_Check', () => {
     const state = makeGameState();
     const rounds = [makeRound([makeChoice()], false)];
 
-    startEncounter('enc-1', rounds, false, state);
+    startEncounter('enc-1', rounds, false, state, mockActions);
 
     expect(mockPerformCheck).not.toHaveBeenCalled();
     expect(mockAdjustComposure).not.toHaveBeenCalled();
@@ -181,7 +183,7 @@ describe('startEncounter — Reaction_Check', () => {
     const state = makeGameState();
     const rounds = [makeRound([originalChoice], true)];
 
-    const encounterState = startEncounter('enc-1', rounds, true, state);
+    const encounterState = startEncounter('enc-1', rounds, true, state, mockActions);
 
     expect(encounterState.rounds[0].choices[0].id).toBe('worse-choice');
   });
@@ -193,7 +195,7 @@ describe('startEncounter — Reaction_Check', () => {
     const state = makeGameState();
     const rounds = [makeRound([makeChoice()], true)];
 
-    const encounterState = startEncounter('enc-1', rounds, true, state);
+    const encounterState = startEncounter('enc-1', rounds, true, state, mockActions);
 
     expect(encounterState.reactionCheckPassed).toBe(false);
   });
@@ -204,7 +206,7 @@ describe('startEncounter — Reaction_Check', () => {
     const state = makeGameState();
     const rounds = [makeRound([makeChoice()], true)];
 
-    const encounterState = startEncounter('enc-1', rounds, true, state);
+    const encounterState = startEncounter('enc-1', rounds, true, state, mockActions);
 
     expect(encounterState.reactionCheckPassed).toBe(true);
   });
@@ -213,7 +215,7 @@ describe('startEncounter — Reaction_Check', () => {
     const state = makeGameState();
     const rounds = [makeRound([makeChoice()], false)];
 
-    const encounterState = startEncounter('enc-1', rounds, false, state);
+    const encounterState = startEncounter('enc-1', rounds, false, state, mockActions);
 
     expect(encounterState.reactionCheckPassed).toBeNull();
   });
@@ -238,7 +240,7 @@ describe('processEncounterChoice — dual-axis damage', () => {
     };
     const state = makeGameState();
 
-    processEncounterChoice(choice, encounterState, state);
+    processEncounterChoice(choice, encounterState, state, mockActions);
 
     expect(mockAdjustComposure).toHaveBeenCalledWith(-2);
     expect(mockAdjustVitality).toHaveBeenCalledWith(-1);
@@ -260,7 +262,7 @@ describe('processEncounterChoice — dual-axis damage', () => {
     };
     const state = makeGameState();
 
-    processEncounterChoice(choice, encounterState, state);
+    processEncounterChoice(choice, encounterState, state, mockActions);
 
     expect(mockAdjustComposure).toHaveBeenCalledWith(-2);
     expect(mockAdjustVitality).not.toHaveBeenCalled();
@@ -282,7 +284,7 @@ describe('processEncounterChoice — dual-axis damage', () => {
     };
     const state = makeGameState();
 
-    processEncounterChoice(choice, encounterState, state);
+    processEncounterChoice(choice, encounterState, state, mockActions);
 
     expect(mockAdjustComposure).not.toHaveBeenCalled();
     expect(mockAdjustVitality).not.toHaveBeenCalled();
@@ -302,7 +304,7 @@ describe('processEncounterChoice — dual-axis damage', () => {
     };
     const state = makeGameState();
 
-    const { encounterState: updated } = processEncounterChoice(choice, encounterState, state);
+    const { encounterState: updated } = processEncounterChoice(choice, encounterState, state, mockActions);
 
     expect(updated.currentRound).toBe(1);
     expect(updated.isComplete).toBe(false);
@@ -322,7 +324,7 @@ describe('processEncounterChoice — dual-axis damage', () => {
     };
     const state = makeGameState();
 
-    const { encounterState: updated } = processEncounterChoice(choice, encounterState, state);
+    const { encounterState: updated } = processEncounterChoice(choice, encounterState, state, mockActions);
 
     expect(updated.isComplete).toBe(true);
   });
@@ -481,7 +483,7 @@ describe('startEncounter — state initialisation', () => {
     const state = makeGameState();
     const rounds = [makeRound([makeChoice()], false)];
 
-    const encounterState = startEncounter('enc-test', rounds, false, state);
+    const encounterState = startEncounter('enc-test', rounds, false, state, mockActions);
 
     expect(encounterState.id).toBe('enc-test');
     expect(encounterState.currentRound).toBe(0);

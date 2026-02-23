@@ -140,6 +140,8 @@ export const createNarrativeSlice: StateCreator<
    * Req 10.5, 10.6, 10.8
    */
   completeCase: (caseId) => {
-    return CaseProgression.completeCase(caseId, snapshotGameState(get()));
+    const result = CaseProgression.completeCase(caseId, snapshotGameState(get()), get());
+    get().autoSave();
+    return result;
   },
 });

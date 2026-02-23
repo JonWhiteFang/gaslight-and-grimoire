@@ -27,7 +27,7 @@ Content is fetched at runtime via `fetch()` from the Vite-served public director
 ┌──────────────────────────────────────────────────────────────────┐
 │                    ENGINE (src/engine/)                           │
 │  narrativeEngine  — loadCase, evaluateConditions, resolveScene,  │
-│                     applyOnEnterEffects, processChoice,          │
+│                     processChoice, computeChoiceResult,          │
 │                     startEncounter, processEncounterChoice        │
 │  diceEngine       — rollD20, performCheck, resolveDC             │
 │  caseProgression  — completeCase, checkVignetteUnlocks           │

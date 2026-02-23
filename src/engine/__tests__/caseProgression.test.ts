@@ -150,7 +150,7 @@ describe('completeCase — faculty bonus from last-critical-faculty flag', () =>
       flags: state.flags,
     }));
 
-    const result = CaseProgression.completeCase('the-whitechapel-cipher', state);
+    const result = CaseProgression.completeCase('the-whitechapel-cipher', state, useStore.getState());
 
     expect(result.facultyBonusGranted).toBe(faculty);
     expect(useStore.getState().investigator.faculties[faculty]).toBe(initialScore + 1);
@@ -185,7 +185,7 @@ describe('completeCase — faculty bonus from last-critical-faculty flag', () =>
       flags: state.flags,
     }));
 
-    const result = CaseProgression.completeCase('the-whitechapel-cipher', state);
+    const result = CaseProgression.completeCase('the-whitechapel-cipher', state, useStore.getState());
 
     expect(result.facultyBonusGranted).toBe(faculty);
     expect(useStore.getState().investigator.faculties[faculty]).toBe(initialScore + 1);
@@ -194,7 +194,7 @@ describe('completeCase — faculty bonus from last-critical-faculty flag', () =>
   it('returns facultyBonusGranted: null when no last-critical-faculty flag is set', () => {
     const state = makeState({ flags: {} });
 
-    const result = CaseProgression.completeCase('the-whitechapel-cipher', state);
+    const result = CaseProgression.completeCase('the-whitechapel-cipher', state, useStore.getState());
 
     expect(result.facultyBonusGranted).toBeNull();
   });
@@ -204,7 +204,7 @@ describe('completeCase — faculty bonus from last-critical-faculty flag', () =>
       flags: { 'last-critical-faculty': 'notafaculty' as unknown as boolean },
     });
 
-    const result = CaseProgression.completeCase('the-whitechapel-cipher', state);
+    const result = CaseProgression.completeCase('the-whitechapel-cipher', state, useStore.getState());
 
     expect(result.facultyBonusGranted).toBeNull();
   });
@@ -280,7 +280,7 @@ describe('checkVignetteUnlocks — a-matter-of-shadows', () => {
       factionReputation: { Lamplighters: 3 },
     }));
 
-    CaseProgression.completeCase('the-whitechapel-cipher', state);
+    CaseProgression.completeCase('the-whitechapel-cipher', state, useStore.getState());
 
     expect(useStore.getState().flags['vignette-unlocked-a-matter-of-shadows']).toBe(true);
   });
@@ -295,7 +295,7 @@ describe('grantFacultyBonus — cap at 20', () => {
       investigator: { ...s.investigator, faculties: { ...s.investigator.faculties, nerve: 15 } },
     }));
 
-    CaseProgression.grantFacultyBonus('nerve');
+    CaseProgression.grantFacultyBonus('nerve', useStore.getState());
 
     expect(useStore.getState().investigator.faculties['nerve']).toBe(16);
   });
@@ -306,7 +306,7 @@ describe('grantFacultyBonus — cap at 20', () => {
       investigator: { ...s.investigator, faculties: { ...s.investigator.faculties, lore: 20 } },
     }));
 
-    CaseProgression.grantFacultyBonus('lore');
+    CaseProgression.grantFacultyBonus('lore', useStore.getState());
 
     expect(useStore.getState().investigator.faculties['lore']).toBe(20);
   });
@@ -317,7 +317,7 @@ describe('grantFacultyBonus — cap at 20', () => {
       investigator: { ...s.investigator, faculties: { ...s.investigator.faculties, vigor: 19 } },
     }));
 
-    CaseProgression.grantFacultyBonus('vigor');
+    CaseProgression.grantFacultyBonus('vigor', useStore.getState());
 
     expect(useStore.getState().investigator.faculties['vigor']).toBe(20);
   });
@@ -331,7 +331,7 @@ describe('grantFacultyBonus — cap at 20', () => {
       },
     }));
 
-    CaseProgression.grantFacultyBonus('reason');
+    CaseProgression.grantFacultyBonus('reason', useStore.getState());
 
     const faculties = useStore.getState().investigator.faculties;
     expect(faculties.reason).toBe(13);

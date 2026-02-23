@@ -9,7 +9,7 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { useStore, useCurrentScene, buildGameState } from '../../store';
-import { applyOnEnterEffects, canDiscoverClue } from '../../engine/narrativeEngine';
+import { canDiscoverClue } from '../../engine/narrativeEngine';
 import { trackActivity } from '../../engine/hintEngine';
 import { SceneText } from './SceneText';
 import { SceneIllustration } from './SceneIllustration';
@@ -25,6 +25,7 @@ export function NarrativePanel() {
   const lastCheckResult = useStore((s) => s.lastCheckResult);
   const setCheckResult = useStore((s) => s.setCheckResult);
   const discoverClue = useStore((s) => s.discoverClue);
+  const applyEffects = useStore((s) => s.applyEffects);
 
   const scene = useCurrentScene();
   const prevSceneRef = useRef('');
@@ -55,7 +56,7 @@ export function NarrativePanel() {
     trackActivity({ type: 'sceneChange' });
 
     if (scene.onEnter && scene.onEnter.length > 0) {
-      applyOnEnterEffects(scene.onEnter);
+      applyEffects(scene.onEnter);
     }
 
     // Auto-discover clues with method 'automatic'
@@ -76,7 +77,7 @@ export function NarrativePanel() {
       const timer = setTimeout(() => setClueCardVisible(false), 4000);
       return () => clearTimeout(timer);
     }
-  }, [currentSceneId, scene, discoverClue]);
+  }, [currentSceneId, scene, discoverClue, applyEffects]);
 
   function handleBannerDismiss() {
     setBannerVisible(false);

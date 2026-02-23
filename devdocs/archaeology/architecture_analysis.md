@@ -25,7 +25,9 @@ No router. Transitions are imperative `setScreen()` calls. The `'loading'` state
 `narrativeSlice.goToScene(sceneId)` → push to `sceneHistory`, set `currentScene`, play SFX, autosave. React re-renders → `useCurrentScene()` resolves scene (with variant check) → `NarrativePanel` applies onEnter effects and auto-discovers clues.
 
 ### 5. Choice processing
-`ChoicePanel.handleSelect` → `narrativeEngine.processChoice(choice, gameState)` → `diceEngine.performCheck` → store mutations (NPC effects, navigation) → `ChoiceResult` returned → dice overlay shown.
+`ChoicePanel.handleSelect` → `narrativeEngine.processChoice(choice, gameState, actions)` → `diceEngine.performCheck` → actions (NPC effects, navigation) → `ChoiceResult` returned → dice overlay shown.
+
+> **Update (2026-02-23)**: Engine functions now accept an `EngineActions` parameter instead of importing `useStore`. `applyOnEnterEffects` replaced by `worldSlice.applyEffects` store action.
 
 ### 6. Save/Load
 - Save: `metaSlice.autoSave()` called from `goToScene` or `ChoicePanel` → `SaveManager.save('autosave', state)` → localStorage.

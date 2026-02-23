@@ -71,8 +71,9 @@ export function ChoicePanel({ choices, onChoiceSelected }: ChoicePanelProps) {
       const choice = choices.find((c) => c.id === choiceId);
       if (!choice) return;
 
-      const currentState = buildGameState(useStore.getState());
-      const result = processChoice(choice, currentState);
+      const store = useStore.getState();
+      const currentState = buildGameState(store);
+      const result = processChoice(choice, currentState, store);
 
       // Show dice roll overlay for faculty checks
       if (result.roll !== undefined && result.tier) {
@@ -85,7 +86,6 @@ export function ChoicePanel({ choices, onChoiceSelected }: ChoicePanelProps) {
       }
 
       // Auto-save on choice if configured
-      const store = useStore.getState();
       if (store.settings.autoSaveFrequency === 'choice') {
         store.autoSave();
       }
