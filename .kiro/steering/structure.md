@@ -10,6 +10,7 @@ All narrative content lives under `/content` as JSON. Game logic lives under `/s
 
 ```
 /content
+  manifest.json     # CaseManifest: lists all cases and vignettes with id, title, synopsis, type, triggerCondition
   /cases/[case-name]/
     meta.json       # CaseMeta: id, title, synopsis, acts, firstScene, facultyDistribution
     act1.json       # SceneNode[] for Act I
@@ -34,6 +35,7 @@ All narrative content lives under `/content` as JSON. Game logic lives under `/s
       ├── <TitleScreen />
       ├── <LoadGameScreen />        # Save list with delete buttons
       ├── <CharacterCreation />     # Archetype selection + faculty point allocation
+      ├── <CaseSelection />         # Case browser: main cases + unlocked vignettes
       └── <GameScreen>
           ├── <HeaderBar />         # Ability button, hint button, overlay toggles
           ├── <AmbientAudio />      # Non-rendering: ambient track from scene.ambientAudio
@@ -58,7 +60,7 @@ src/store/
   types.ts          # GameStore = intersection of all slice types
   slices/
     investigatorSlice.ts   # investigator: Investigator; initInvestigator, updateFaculty, adjustComposure, adjustVitality, useAbility
-    narrativeSlice.ts      # currentScene, currentCase, sceneHistory, caseData; goToScene, loadAndStartCase
+    narrativeSlice.ts      # currentScene, currentCase, sceneHistory, caseData; goToScene, loadAndStartCase, loadAndStartVignette
     evidenceSlice.ts       # clues: Record<string,Clue>; deductions: Record<string,Deduction>; discoverClue, updateClueStatus, addDeduction
     npcSlice.ts            # npcs: Record<string,NPCState>; adjustDisposition, adjustSuspicion, setNpcMemoryFlag, removeNpc
     worldSlice.ts          # flags: Record<string,boolean>; factionReputation: Record<string,number>; setFlag, adjustReputation
@@ -79,6 +81,7 @@ All types are defined in `src/types/index.ts`. Key interfaces:
 - `NPCState` — `disposition` (−10 to +10), `suspicion` (0–10), `memoryFlags: Record<string, boolean>`
 - `GameState` — full serialisable state used for save/load; matches the combined store shape
 - `SaveFile` — wraps `GameState` with `version` and `timestamp` for migration support
+- `CaseManifestEntry` — `id`, `title`, `synopsis`, `type: 'case' | 'vignette'`, optional `triggerCondition`
 
 Core enumerations: `Faculty` (`reason | perception | nerve | vigor | influence | lore`), `Archetype` (`deductionist | occultist | operator | mesmerist`), `OutcomeTier` (`critical | success | partial | failure | fumble`), `ClueStatus` (`new | examined | connected | deduced | contested | spent`).
 

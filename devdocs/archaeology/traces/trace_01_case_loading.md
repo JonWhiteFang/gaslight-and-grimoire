@@ -6,6 +6,8 @@
 
 ```
 App.handleStartCase → setScreen('loading') → loadAndStartCase('the-whitechapel-cipher') → setScreen('game')
+
+> **Update (2026-02-23)**: This flow has changed. `handleSelectCase(id, type)` replaces `handleStartCase`. The case ID comes from the `CaseSelection` screen (backed by `content/manifest.json`), not a hardcoded value. Vignettes use `loadAndStartVignette` instead of `loadAndStartCase`.
 ```
 
 ## 2. Execution Path

@@ -1,0 +1,67 @@
+{
+  "variants": [
+    {
+      "id": "ms-act1-invitation-variant-grey-dawn-rep",
+      "act": 1,
+      "variantOf": "ms-act1-invitation",
+      "variantCondition": {
+        "type": "factionReputation",
+        "target": "Hermetic Order of the Grey Dawn",
+        "value": 2
+      },
+      "narrative": "The carriage draws up before a Mayfair townhouse ablaze with gaslight. You recognise the symbols etched into the door frame — Grey Dawn ward-marks, barely visible beneath the paint. Someone in this house has dealings with the Order, and your reputation precedes you. The butler's eyes widen slightly when he sees you. 'You are expected,' he says, with an emphasis that suggests more than Lady Ashworth's invitation. In the drawing room, Madame Vesper looks up as you enter — and for a moment, her mask of serene detachment slips into something like relief.",
+      "ambientAudio": "ambient-mayfair-evening",
+      "cluesAvailable": [
+        {
+          "clueId": "ms-clue-invitation-letter",
+          "method": "automatic"
+        },
+        {
+          "clueId": "ms-clue-red-herring-servant",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "ms-choice-question-ashworth-variant",
+          "text": "Engage Lady Ashworth — your Grey Dawn connections may loosen her tongue.",
+          "faculty": "influence",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "ms-act1-ashworth-confides",
+            "success": "ms-act1-ashworth-guarded",
+            "partial": "ms-act1-ashworth-guarded",
+            "failure": "ms-act1-ashworth-deflects",
+            "fumble": "ms-act1-ashworth-deflects"
+          }
+        },
+        {
+          "id": "ms-choice-examine-room-variant",
+          "text": "Examine the séance room — the ward-marks suggest hidden preparations.",
+          "faculty": "perception",
+          "difficulty": 12,
+          "outcomes": {
+            "critical": "ms-act1-room-thorough",
+            "success": "ms-act1-room-partial",
+            "partial": "ms-act1-room-partial",
+            "failure": "ms-act1-room-nothing",
+            "fumble": "ms-act1-room-nothing"
+          }
+        },
+        {
+          "id": "ms-choice-study-vesper-variant",
+          "text": "Approach Vesper directly — she recognised you. She wants to talk.",
+          "faculty": "lore",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "ms-act1-vesper-read",
+            "success": "ms-act1-vesper-glimpse",
+            "partial": "ms-act1-vesper-glimpse",
+            "failure": "ms-act1-vesper-nothing",
+            "fumble": "ms-act1-vesper-nothing"
+          }
+        }
+      ]
+    }
+  ]
+}

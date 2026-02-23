@@ -1,0 +1,15 @@
+{
+  "id": "the-mayfair-seance",
+  "title": "The Mayfair Séance",
+  "synopsis": "A society séance at Lady Ashworth's Mayfair townhouse turns deadly when the veil between worlds proves thinner than anyone expected.",
+  "acts": 3,
+  "firstScene": "ms-act1-invitation",
+  "facultyDistribution": {
+    "influence": 4,
+    "nerve": 3,
+    "lore": 3,
+    "perception": 3,
+    "reason": 2,
+    "vigor": 1
+  }
+}

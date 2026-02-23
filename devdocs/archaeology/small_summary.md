@@ -64,7 +64,7 @@ The engine layer and UI shell are fully built and tested:
 
 - **Content is thin** — Only 1 main case ("The Whitechapel Cipher", 3 acts) and 1 side case ("A Matter of Shadows"). The engine supports arbitrary cases but the content pipeline has only produced two.
 - **ClueDiscoveryCard** — Comment in NarrativePanel says "stub, fully implemented in Task 10". The component exists but may not be feature-complete.
-- **No case selection UI** — `loadAndStartCase` is hardcoded to `'the-whitechapel-cipher'` in App.tsx. There's no screen to browse/select available cases.
+- **No case selection UI** — ✅ FIXED: `CaseSelection` component added. Flow is now Character Creation → Case Selection → Play. Cases listed via `content/manifest.json`. Hardcoded case ID removed from App.tsx.
 - **No case completion screen** — `completeCase` exists in the store and engine but no UI renders the results (faculty bonus granted, vignette unlocked).
 - **Encounter UI** — The encounter engine is fully implemented (startEncounter, processEncounterChoice, getEncounterChoices) but encounters flow through the generic choice/narrative panels rather than a dedicated encounter UI.
 - **Ambient audio** — The `AmbientAudio` component exists and reads `scene.ambientAudio`, but no audio asset files are present in the repo (the `/audio/sfx/` paths are referenced but the files aren't committed).

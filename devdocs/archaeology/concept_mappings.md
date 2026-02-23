@@ -267,6 +267,6 @@
 
 **Edge cases that shaped design**:
 - `loadError` state is captured but never rendered — the user is silently returned to the title screen on load failure.
-- Case ID is hardcoded to `'the-whitechapel-cipher'` — no case selection. Irrelevant with one case but blocks multi-case play.
+- Case ID is hardcoded to `'the-whitechapel-cipher'` — ✅ FIXED: `CaseSelection` component and `content/manifest.json` now support multi-case selection.
 - The `'loading'` screen state is transient — shown only during `loadAndStartCase`. If the fetch hangs, the user is stuck on a pulsing "Loading case…" with no timeout or cancel.
 - `handleActivateAbility` sets a world flag (e.g., `ability-auto-succeed-reason`) but no engine code reads these flags to auto-succeed checks. The ability activation is wired to the UI but not to the dice engine.

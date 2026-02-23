@@ -14,10 +14,11 @@ import { StatusBar } from './components/StatusBar';
 import { ChoicePanel } from './components/ChoicePanel';
 import { EncounterPanel } from './components/EncounterPanel';
 import { CaseCompletion } from './components/CaseCompletion';
+import { CaseSelection } from './components/CaseSelection';
 import { useStore, useCurrentScene, buildGameState } from './store';
 import type { CaseCompletionResult } from './engine/caseProgression';
 
-type Screen = 'title' | 'character-creation' | 'game' | 'load-game' | 'loading' | 'case-complete';
+type Screen = 'title' | 'character-creation' | 'case-selection' | 'game' | 'load-game' | 'loading' | 'case-complete';
 
 // Maps each archetype to the world flag it sets when its ability is activated
 const ABILITY_FLAGS: Record<string, string> = {
@@ -62,6 +63,7 @@ export default function App() {
   const setFlag = useStore((s) => s.setFlag);
   const loadGame = useStore((s) => s.loadGame);
   const loadAndStartCase = useStore((s) => s.loadAndStartCase);
+  const loadAndStartVignette = useStore((s) => s.loadAndStartVignette);
   const saveGame = useStore((s) => s.saveGame);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [completionResult, setCompletionResult] = useState<CaseCompletionResult | null>(null);
@@ -83,17 +85,21 @@ export default function App() {
     [loadGame],
   );
 
-  const handleStartCase = useCallback(async () => {
+  const handleSelectCase = useCallback(async (id: string, type: 'case' | 'vignette') => {
     setScreen('loading');
     setLoadError(null);
     try {
-      await loadAndStartCase('the-whitechapel-cipher');
+      if (type === 'vignette') {
+        await loadAndStartVignette(id);
+      } else {
+        await loadAndStartCase(id);
+      }
       setScreen('game');
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : 'Failed to load case');
-      setScreen('title');
+      setScreen('case-selection');
     }
-  }, [loadAndStartCase]);
+  }, [loadAndStartCase, loadAndStartVignette]);
 
   const handleCompleteCase = useCallback(() => {
     if (!currentCase) return;
@@ -148,7 +154,7 @@ export default function App() {
           vignetteUnlocked={completionResult.vignetteUnlocked}
           onContinue={() => {
             setCompletionResult(null);
-            setScreen('title');
+            setScreen('case-selection');
           }}
         />
       </AccessibilityProvider>
@@ -158,7 +164,24 @@ export default function App() {
   if (screen === 'character-creation') {
     return (
       <AccessibilityProvider>
-        <CharacterCreation onComplete={handleStartCase} />
+        <CharacterCreation onComplete={() => setScreen('case-selection')} />
+      </AccessibilityProvider>
+    );
+  }
+
+  if (screen === 'case-selection') {
+    return (
+      <AccessibilityProvider>
+        <CaseSelection
+          onSelectCase={handleSelectCase}
+          onBack={() => setScreen('title')}
+        />
+        {loadError && (
+          <div role="alert" className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-red-900/90 border border-red-700 rounded px-4 py-3 text-sm text-red-200 flex items-start gap-2 z-50">
+            <p className="flex-1">{loadError}</p>
+            <button type="button" aria-label="Dismiss error" onClick={() => setLoadError(null)} className="shrink-0 text-red-400 hover:text-red-200">✕</button>
+          </div>
+        )}
       </AccessibilityProvider>
     );
   }

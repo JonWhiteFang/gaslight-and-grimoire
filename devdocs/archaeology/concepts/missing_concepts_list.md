@@ -77,8 +77,8 @@ Added `firstScene` to `CaseMeta`/`VignetteMeta`. Both existing cases have it set
 
 ### Case Selection UI
 Case ID is hardcoded to `'the-whitechapel-cipher'` in `App.tsx`. No screen to browse or select available cases. Irrelevant with one case but blocks multi-case play.
-- **Status**: Missing
-- **Where it should be**: a new screen between title and character creation, or after case completion
+- **Status**: ✅ FIXED
+- **Resolution**: Created `CaseSelection` component, `content/manifest.json`, and `loadAndStartVignette` store action. Flow: Character Creation → Case Selection → Play. Main cases always shown; vignettes gated by `vignette-unlocked-{id}` flags.
 
 ### Error Display on Load Failure
 `App.handleStartCase` catches load errors and sets `loadError` state, but no UI renders it. The player is silently returned to the title screen.

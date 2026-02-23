@@ -265,6 +265,20 @@ export interface ValidationResult {
   errors: string[];
 }
 
+// ─── Content Manifest ─────────────────────────────────────────────────────────
+
+export interface CaseManifestEntry {
+  id: string;
+  title: string;
+  synopsis: string;
+  type: 'case' | 'vignette';
+  triggerCondition?: Condition;
+}
+
+export interface CaseManifest {
+  cases: CaseManifestEntry[];
+}
+
 export interface ChoiceResult {
   nextSceneId: string;
   roll?: number;

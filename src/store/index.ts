@@ -57,6 +57,7 @@ export const useNarrativeActions = () =>
   useStore((s) => ({
     goToScene: s.goToScene,
     loadAndStartCase: s.loadAndStartCase,
+    loadAndStartVignette: s.loadAndStartVignette,
   }));
 
 export const useEvidenceActions = () =>

@@ -1,0 +1,72 @@
+{
+  "clues": [
+    {
+      "id": "ms-clue-invitation-letter",
+      "type": "physical",
+      "title": "The Invitation",
+      "description": "A cream-coloured card on heavy stock, embossed with Lady Ashworth's crest. The ink is violet — an unusual choice. On the reverse, in a different hand, someone has written a sequence of numbers: 3-7-13.",
+      "sceneSource": "ms-act1-invitation",
+      "connectsTo": ["ms-clue-hidden-mechanism", "ms-clue-vesper-journal"],
+      "tags": ["paper", "ashworth", "numbers", "séance"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "ms-clue-hidden-mechanism",
+      "type": "physical",
+      "title": "The Hidden Mechanism",
+      "description": "Beneath the séance table, a system of wires and levers connects to the gas lamps and a concealed bellows. Someone has gone to considerable trouble to manufacture supernatural effects.",
+      "sceneSource": "ms-act1-examine-room",
+      "connectsTo": ["ms-clue-invitation-letter", "ms-clue-pemberton-debts"],
+      "tags": ["mechanism", "fraud", "séance-room"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "ms-clue-vesper-journal",
+      "type": "occult",
+      "title": "Vesper's Private Journal",
+      "description": "A leather-bound journal in Madame Vesper's hand. Most entries are theatrical notes — cues for cold reading, audience management. But the final pages shift tone entirely: frantic sketches of sigils, a repeated phrase in bastardised Latin, and the words 'It answered. God help me, it answered.'",
+      "sceneSource": "ms-act2-vesper-quarters",
+      "connectsTo": ["ms-clue-invitation-letter", "ms-clue-grey-dawn-sigil"],
+      "grantsFaculty": "lore",
+      "tags": ["journal", "occult", "vesper", "grey-dawn"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "ms-clue-pemberton-debts",
+      "type": "testimony",
+      "title": "Pemberton's Gambling Debts",
+      "description": "Lord Pemberton owes eleven thousand pounds to a Limehouse syndicate. Lady Ashworth's late husband held the markers. If the séance 'proves' the spirit world is real, Ashworth's spiritualist foundation inherits the estate — and Pemberton's debts are called in.",
+      "sceneSource": "ms-act2-rational-path",
+      "connectsTo": ["ms-clue-hidden-mechanism"],
+      "tags": ["testimony", "pemberton", "money", "motive"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "ms-clue-grey-dawn-sigil",
+      "type": "occult",
+      "title": "The Grey Dawn Sigil",
+      "description": "Carved into the underside of the séance table — invisible unless you know to look. A binding circle from the Hermetic Order of the Grey Dawn, designed to anchor a summoned presence to a physical location. It is not decorative. It is functional.",
+      "sceneSource": "ms-act2-occult-path",
+      "connectsTo": ["ms-clue-vesper-journal"],
+      "grantsFaculty": "lore",
+      "tags": ["sigil", "occult", "grey-dawn", "binding"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "ms-clue-red-herring-servant",
+      "type": "redHerring",
+      "title": "The Dismissed Servant",
+      "description": "A footman named Harker was dismissed from Lady Ashworth's service three days ago for theft. He was seen loitering near the house this evening. Suspicious — but Harker was in a Bow Street holding cell at the time of the séance.",
+      "sceneSource": "ms-act1-invitation",
+      "connectsTo": [],
+      "tags": ["servant", "harker", "misdirection"],
+      "status": "new",
+      "isRevealed": false
+    }
+  ]
+}

@@ -19,6 +19,8 @@ No router. Transitions are imperative `setScreen()` calls. The `'loading'` state
 ### 3. Game content loading
 `App.handleStartCase` → `store.loadAndStartCase('the-whitechapel-cipher')` → `narrativeEngine.loadCase(caseId)` → 7 parallel `fetch()` calls → store populated → `goToScene(firstSceneId)`.
 
+> **Update (2026-02-23)**: The hardcoded case ID has been replaced. `App.handleSelectCase(id, type)` now dispatches to `loadAndStartCase` or `loadAndStartVignette` based on the player's selection from the `CaseSelection` screen. Cases are listed via `content/manifest.json`.
+
 ### 4. Scene-to-scene navigation
 `narrativeSlice.goToScene(sceneId)` → push to `sceneHistory`, set `currentScene`, play SFX, autosave. React re-renders → `useCurrentScene()` resolves scene (with variant check) → `NarrativePanel` applies onEnter effects and auto-discovers clues.
 

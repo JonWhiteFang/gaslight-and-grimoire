@@ -1,0 +1,27 @@
+{
+  "cases": [
+    {
+      "id": "the-whitechapel-cipher",
+      "title": "The Whitechapel Cipher",
+      "synopsis": "A series of coded messages left at murder scenes in Whitechapel points to a conspiracy that reaches from the rookeries to the halls of power.",
+      "type": "case"
+    },
+    {
+      "id": "the-mayfair-seance",
+      "title": "The Mayfair Séance",
+      "synopsis": "A society séance at Lady Ashworth's Mayfair townhouse turns deadly when the veil between worlds proves thinner than anyone expected.",
+      "type": "case"
+    },
+    {
+      "id": "a-matter-of-shadows",
+      "title": "A Matter of Shadows",
+      "synopsis": "A Lamplighter courier has gone missing in Southwark with a package that was never meant to exist.",
+      "type": "vignette",
+      "triggerCondition": {
+        "type": "factionReputation",
+        "target": "Lamplighters",
+        "value": 2
+      }
+    }
+  ]
+}

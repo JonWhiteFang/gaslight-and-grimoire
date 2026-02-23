@@ -9,6 +9,7 @@
 
 import type {
   CaseData,
+  CaseManifest,
   CaseMeta,
   Choice,
   ChoiceResult,
@@ -31,6 +32,13 @@ import { useStore } from '../store';
 import { performCheck, rollD20, resolveDC } from './diceEngine';
 
 // ─── Content Loading ──────────────────────────────────────────────────────────
+
+/**
+ * Fetches the content manifest listing all available cases and vignettes.
+ */
+export async function fetchManifest(): Promise<CaseManifest> {
+  return fetchJson<CaseManifest>('/content/manifest.json');
+}
 
 /**
  * Loads all JSON files for a case and assembles a CaseData object.

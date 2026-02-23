@@ -36,7 +36,7 @@ inclusion: always
 | Slice | Key state | Key actions |
 |---|---|---|
 | `investigatorSlice` | `investigator` | `initInvestigator`, `updateFaculty`, `adjustComposure`, `adjustVitality`, `useAbility`, `resetAbility` |
-| `narrativeSlice` | `currentScene`, `currentCase`, `sceneHistory`, `caseData` | `goToScene`, `loadAndStartCase` |
+| `narrativeSlice` | `currentScene`, `currentCase`, `sceneHistory`, `caseData` | `goToScene`, `loadAndStartCase`, `loadAndStartVignette` |
 | `evidenceSlice` | `clues`, `deductions` | `discoverClue`, `updateClueStatus`, `addDeduction` |
 | `npcSlice` | `npcs` | `adjustDisposition`, `adjustSuspicion`, `setNpcMemoryFlag`, `removeNpc` |
 | `worldSlice` | `flags`, `factionReputation` | `setFlag`, `adjustReputation` |

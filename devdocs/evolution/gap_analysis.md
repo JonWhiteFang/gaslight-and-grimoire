@@ -207,9 +207,9 @@ The issues are all incremental:
 
 ## Unknowns
 
-1. **Content volume**: The engine supports arbitrary cases but only one exists. The architecture's scalability claims (normalized state, flat maps, variant system) are untested at scale. Adding 3–5 more cases would be the real stress test.
+1. **Content volume**: ✅ ADDRESSED — Two main cases now exist (The Whitechapel Cipher, The Mayfair Séance) plus one side case. Case Selection UI and `content/manifest.json` support arbitrary cases. `loadAndStartVignette` wires vignettes into the store.
 
-2. **Encounter content**: The encounter engine exists but no case content uses encounter-type scenes. It's unclear whether the current case JSON structure can express encounters or if the content schema needs extension.
+2. **Encounter content**: ✅ ADDRESSED — Both main cases now include encounter-type scenes in act3.json. The encounter engine is exercised by real content.
 
 3. **Cross-case persistence**: The vignette unlock system and variant scene system are implemented but untestable with only one main case. The `loadAndStartCase` function doesn't clear old clues/NPCs before loading new ones — starting a second case would merge state from both.
 

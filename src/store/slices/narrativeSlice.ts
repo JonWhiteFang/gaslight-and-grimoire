@@ -2,7 +2,7 @@ import type { StateCreator } from 'zustand';
 import type { GameStore } from '../types';
 import type { CaseData, OutcomeTier } from '../../types';
 import { CaseProgression, type CaseCompletionResult } from '../../engine/caseProgression';
-import { loadCase, validateContent } from '../../engine/narrativeEngine';
+import { loadCase, loadVignette, validateContent } from '../../engine/narrativeEngine';
 import { snapshotGameState } from '../../utils/gameState';
 
 export interface CheckResult {
@@ -21,6 +21,7 @@ export interface NarrativeSlice {
   goToScene: (sceneId: string) => void;
   setCheckResult: (result: CheckResult | null) => void;
   loadAndStartCase: (caseId: string) => Promise<void>;
+  loadAndStartVignette: (vignetteId: string) => Promise<void>;
   completeCase: (caseId: string) => CaseCompletionResult;
 }
 
@@ -92,6 +93,45 @@ export const createNarrativeSlice: StateCreator<
     });
 
     // Navigate to first scene (triggers scene-transition SFX via goToScene)
+    get().goToScene(firstSceneId);
+  },
+
+  /**
+   * Loads vignette JSON, populates clues/NPCs, and navigates to the first scene.
+   */
+  loadAndStartVignette: async (vignetteId) => {
+    const data = await loadVignette(vignetteId);
+    const asCaseData = { ...data, meta: { ...data.meta, acts: 2, facultyDistribution: {} }, variants: [] };
+    const validation = validateContent(asCaseData);
+    if (!validation.valid) {
+      throw new Error('[NarrativeEngine] Content validation failed:\n' + validation.errors.join('\n'));
+    }
+    const firstSceneId = data.meta.firstScene ?? (() => {
+      console.warn('[NarrativeEngine] No firstScene in meta.json, using Object.keys fallback');
+      return Object.keys(data.scenes)[0];
+    })();
+
+    set((state) => {
+      state.caseData = asCaseData;
+      state.currentCase = data.meta.id;
+      state.sceneHistory = [];
+      state.investigator.abilityUsed = false;
+      delete state.flags['ability-auto-succeed-reason'];
+      delete state.flags['ability-auto-succeed-vigor'];
+      delete state.flags['ability-auto-succeed-influence'];
+      delete state.flags['ability-veil-sight-active'];
+      state.clues = {};
+      state.npcs = {};
+      state.deductions = {};
+      state.lastCheckResult = null;
+      for (const [id, clue] of Object.entries(data.clues)) {
+        state.clues[id] = clue;
+      }
+      for (const [id, npc] of Object.entries(data.npcs)) {
+        state.npcs[id] = npc;
+      }
+    });
+
     get().goToScene(firstSceneId);
   },
 
