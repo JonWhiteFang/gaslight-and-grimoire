@@ -126,11 +126,8 @@ Zero `.mp3`, `.png`, `.jpg`, `.webp`, or `.svg` asset files exist in the reposit
 - **Severity**: High — game has no atmosphere
 - **Where it should be**: `public/audio/sfx/` (9 files), `public/audio/ambient/` (2–3 loops), `public/images/` (scene illustrations, NPC portraits)
 
-### NPC Dialogue System
-NPCs have disposition, suspicion, memoryFlags, and faction but no interactive dialogue. `memoryFlags` is never populated in any content file. Players cannot question, persuade, or confront NPCs.
-- **Status**: Missing
-- **Severity**: High — NPCs are passive data
-- **Where it should be**: New `DialogueNode` type in `src/types/index.ts`, new `DialoguePanel` component, dialogue evaluation in `src/engine/narrativeEngine.ts`
+### ~~NPC Dialogue System~~ — ✅ FIXED
+Disposition/suspicion/memoryFlag-gated dialogue choices added to existing scenes using the existing Choice/Condition architecture. New `npcMemoryFlag` condition type and `setMemoryFlag` effect type. 8 new dialogue scenes across both cases. `memoryFlags` now populated on key NPC interactions. New files: `src/engine/__tests__/npcMemoryFlag.test.ts`.
 
 ### ~~Composure/Vitality Recovery~~ — ✅ FIXED
 Shared `breakdown` and `incapacitation` scenes injected into all cases via `injectSharedScenes`. Case-specific variants for both cases. Recovery effects (+1 composure/vitality) added to 6 scenes at natural rest points.

@@ -27,7 +27,7 @@ export function generateEffectMessage(
 ): string | null {
   const { type, target, delta, description } = effect;
 
-  if (type === 'flag' || type === 'discoverClue') return null;
+  if (type === 'flag' || type === 'discoverClue' || type === 'setMemoryFlag') return null;
   if (delta === undefined) return null;
 
   const suffix = mechanicalSuffix(

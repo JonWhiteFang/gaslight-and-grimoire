@@ -106,7 +106,8 @@ export interface Condition {
     | 'archetypeIs'
     | 'npcDisposition'
     | 'npcSuspicion'
-    | 'factionReputation';
+    | 'factionReputation'
+    | 'npcMemoryFlag';
   target: string;
   value?: number | boolean | string | NpcSuspicionTier;
 }
@@ -119,7 +120,8 @@ export interface Effect {
     | 'disposition'
     | 'suspicion'
     | 'reputation'
-    | 'discoverClue';
+    | 'discoverClue'
+    | 'setMemoryFlag';
   target?: string;
   delta?: number;
   value?: boolean | string;

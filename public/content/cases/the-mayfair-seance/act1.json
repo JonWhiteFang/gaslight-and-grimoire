@@ -74,6 +74,26 @@
                                     "failure": "ms-act2-the-seance",
                                     "fumble": "ms-act2-the-seance"
                               }
+                        },
+                        {
+                              "id": "ms-choice-ashworth-gerald",
+                              "text": "Tell me about Gerald's final days. What did he believe he had found?",
+                              "faculty": "influence",
+                              "difficulty": 10,
+                              "conditions": [
+                                    {
+                                          "type": "npcDisposition",
+                                          "target": "npc-ashworth",
+                                          "value": 5
+                                    }
+                              ],
+                              "outcomes": {
+                                    "critical": "ms-act1-ashworth-gerald-secret",
+                                    "success": "ms-act1-ashworth-gerald-secret",
+                                    "partial": "ms-act1-ashworth-deflects-gerald",
+                                    "failure": "ms-act1-ashworth-deflects-gerald",
+                                    "fumble": "ms-act1-ashworth-deflects-gerald"
+                              }
                         }
                   ],
                   "onEnter": [
@@ -87,6 +107,11 @@
                               "type": "composure",
                               "delta": 1,
                               "description": "Lady Ashworth's trust steadies your resolve"
+                        },
+                        {
+                              "type": "setMemoryFlag",
+                              "target": "npc-ashworth",
+                              "value": "confided-about-will"
                         }
                   ]
             },
@@ -282,6 +307,57 @@
                               "delta": -1
                         }
                   ]
+            },
+            {
+                  "id": "ms-act1-ashworth-gerald-secret",
+                  "act": 1,
+                  "narrative": "Lady Ashworth's eyes glisten. 'Gerald believed he had made contact. Not through Vesper \u2014 before her. He had a private medium, a woman named Elara Thorne, who vanished six months before his death. Gerald told me \u2014 ' she pauses, steadying herself \u2014 'he told me that Elara had shown him something beyond the veil. Something that frightened him. He changed his will the next day.' She grips your hand. 'Find out what Elara showed him. That is the key to all of this.'",
+                  "cluesAvailable": [],
+                  "choices": [
+                        {
+                              "id": "ms-choice-gerald-secret-proceed",
+                              "text": "Elara Thorne. A name worth pursuing. The s\u00e9ance awaits.",
+                              "outcomes": {
+                                    "critical": "ms-act2-the-seance",
+                                    "success": "ms-act2-the-seance",
+                                    "partial": "ms-act2-the-seance",
+                                    "failure": "ms-act2-the-seance",
+                                    "fumble": "ms-act2-the-seance"
+                              }
+                        }
+                  ],
+                  "onEnter": [
+                        {
+                              "type": "setMemoryFlag",
+                              "target": "npc-ashworth",
+                              "value": "knows-gerald-secret"
+                        },
+                        {
+                              "type": "composure",
+                              "delta": -1,
+                              "description": "The depth of Ashworth's grief unsettles you"
+                        }
+                  ]
+            },
+            {
+                  "id": "ms-act1-ashworth-deflects-gerald",
+                  "act": 1,
+                  "narrative": "Lady Ashworth's expression closes like a door. 'Gerald's final days are not a subject I discuss with strangers. Perhaps, in time, if you prove yourself a friend to this household.' The rebuff is gentle but absolute. She has more to tell \u2014 but not yet.",
+                  "cluesAvailable": [],
+                  "choices": [
+                        {
+                              "id": "ms-choice-deflects-gerald-proceed",
+                              "text": "Ashworth is not ready. The s\u00e9ance will reveal more.",
+                              "outcomes": {
+                                    "critical": "ms-act2-the-seance",
+                                    "success": "ms-act2-the-seance",
+                                    "partial": "ms-act2-the-seance",
+                                    "failure": "ms-act2-the-seance",
+                                    "fumble": "ms-act2-the-seance"
+                              }
+                        }
+                  ],
+                  "onEnter": []
             }
       ]
 }

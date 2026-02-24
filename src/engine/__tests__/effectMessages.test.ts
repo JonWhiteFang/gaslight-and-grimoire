@@ -98,3 +98,9 @@ describe('generateEffectMessages', () => {
     expect(msgs[1]).toContain('Inspector Graves');
   });
 });
+
+describe('generateEffectMessage — setMemoryFlag', () => {
+  it('returns null for setMemoryFlag effects', () => {
+    expect(generateEffectMessage({ type: 'setMemoryFlag', target: 'npc-graves', value: 'told-secret' }, npcs)).toBeNull();
+  });
+});

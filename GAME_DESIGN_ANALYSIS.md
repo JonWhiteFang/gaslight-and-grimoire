@@ -79,26 +79,12 @@ An average of ~1.1 choices per scene means most scenes are linear corridors with
 
 ---
 
-## 4. Add NPC Dialogue and Interrogation Mechanics
+## ~~4. Add NPC Dialogue and Interrogation Mechanics~~ — ✅ COMPLETE
 
 **Category:** AI and NPC Behavior
-**Severity:** High — NPCs are passive data, not interactive characters
+**Severity:** High — NPCs were passive data, not interactive characters
 
-**Issue:** NPCs have rich state (`disposition`, `suspicion`, `memoryFlags`, `faction`) but no interactive dialogue system. The player never directly talks to an NPC — disposition and suspicion only change as side-effects of scene choices via `npcEffect`. The `NPCGallery` is a read-only list. There's no way to question, persuade, or confront an NPC. The `memoryFlags` field on `NPCState` is never populated in any content file.
-
-**Impact:** NPCs feel like background furniture rather than characters the player engages with. The disposition/suspicion system is mechanically complete but narratively invisible. Players have no reason to care about NPC relationships because they can't directly influence them through conversation.
-
-**Proposed Solution:**
-- Add a `dialogue` field to `SceneNode` containing NPC-specific dialogue trees gated by disposition/suspicion tiers. When a scene has an NPC present, show a "Speak with [NPC]" button that opens a dialogue sub-panel.
-- Dialogue choices should use `Influence` checks (persuasion), `Perception` checks (reading body language), or `Reason` checks (logical confrontation). Outcomes adjust disposition/suspicion and can reveal testimony-type clues.
-- Use `memoryFlags` to track what the player has said to each NPC, enabling callbacks like "You mentioned the cipher earlier..." in later scenes.
-- Make suspicion tiers visible in dialogue — an NPC at `concealing` tier should give evasive answers, while one at `hostile` might refuse to speak entirely.
-
-**Files to modify:**
-- `src/types/index.ts` — add `DialogueNode` type
-- `src/components/NarrativePanel/` — new `DialoguePanel` sub-component
-- `src/engine/narrativeEngine.ts` — dialogue evaluation logic
-- Content JSON files — add dialogue trees to scenes with NPCs
+**Resolution:** Rather than adding a separate `DialogueNode` type and `DialoguePanel` component, NPC dialogue was implemented using the existing scene/choice architecture. New `npcMemoryFlag` condition type gates choices on NPC-specific memory (e.g. "only show this option if Graves told you about the Yard"). New `setMemoryFlag` effect type sets NPC memory flags from `onEnter` effects. 8 new dialogue scenes added across both cases: Graves reveals Deputy Commissioner Harland (disposition ≥ 4 gate), Mott recognises the cipher typeface (clue gate), Vane cornered by cross-NPC evidence (Mott's `shown-cipher` memoryFlag gate), Ashworth reveals Gerald's secret and Elara Thorne (disposition ≥ 5 gate), Vesper reveals the full truth (Ashworth's `knows-gerald-secret` memoryFlag gate). `memoryFlags` now populated on key NPC interactions. Files changed: `src/types/index.ts`, `src/engine/narrativeEngine.ts`, `src/store/slices/worldSlice.ts`, `src/engine/effectMessages.ts`, content JSON, `src/engine/__tests__/npcMemoryFlag.test.ts`.
 
 ---
 
@@ -220,7 +206,7 @@ These didn't make the top 10 but are worth noting:
 | 1 | ~~Active Clue Discovery~~ ✅ | Medium | High | P0 — DONE |
 | 2 | Audio & Visual Assets | High (asset creation) | High | P0 |
 | 3 | Deepen Branching & Content | High (content authoring) | High | P0 |
-| 4 | NPC Dialogue System | High | High | P1 |
+| 4 | ~~NPC Dialogue System~~ ✅ | High | High | P1 — DONE |
 | 5 | ~~Recovery Mechanics~~ ✅ | Low-Medium | High | P1 — DONE |
 | 6 | ~~Persistent Evidence Board~~ ✅ | Medium | Medium-High | P1 — DONE |
 | 7 | Scene History Navigation | Medium | Medium | P2 |

@@ -260,6 +260,12 @@ function evaluateCondition(condition: Condition, state: GameState): boolean {
       return rep >= (value as number);
     }
 
+    case 'npcMemoryFlag': {
+      const mnpc = state.npcs[target];
+      if (!mnpc) return false;
+      return !!mnpc.memoryFlags[value as string];
+    }
+
     default:
       return false;
   }

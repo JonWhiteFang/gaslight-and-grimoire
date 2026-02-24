@@ -56,6 +56,10 @@ export const createWorldSlice: StateCreator<
         case 'discoverClue':
           if (effect.target !== undefined) store.discoverClue(effect.target);
           break;
+        case 'setMemoryFlag':
+          if (effect.target !== undefined && effect.value !== undefined)
+            store.setNpcMemoryFlag(effect.target, effect.value as string, true);
+          break;
       }
     }
   },

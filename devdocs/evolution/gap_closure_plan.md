@@ -424,17 +424,11 @@ The closest candidate would be `narrativeEngine.ts` (400+ lines, 6 responsibilit
 
 ---
 
-### 5.4 Add NPC Dialogue System
+### ~~5.4 Add NPC Dialogue System~~ — ✅ COMPLETE
 
-**What**: Interactive dialogue trees gated by disposition/suspicion. Faculty checks in conversation. memoryFlags tracking.
+**Resolution**: Added `npcMemoryFlag` condition type and `setMemoryFlag` effect type. Disposition/suspicion/memoryFlag-gated dialogue choices added to existing scenes using the existing Choice/Condition architecture — no new component types needed. 8 new dialogue scenes across both cases. `memoryFlags` populated on key NPC interactions.
 
-**Files**: `src/types/index.ts`, new `src/components/NarrativePanel/DialoguePanel.tsx`, `src/engine/narrativeEngine.ts`, content JSON
-
-**Dependencies**: 5.1 ✅ (dialogue clue discovery method — complete).
-
-**Risk**: Medium-High. Largest new feature in Phase 5.
-
-**Testing**: Speak with NPC → verify dialogue options change based on disposition. Pass Influence check → verify disposition change. Verify memoryFlags persist across scenes.
+**New files**: `src/engine/__tests__/npcMemoryFlag.test.ts`
 
 ---
 

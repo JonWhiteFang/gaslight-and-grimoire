@@ -1,202 +1,304 @@
 {
-  "scenes": [
-    {
-      "id": "ms-act3-the-reckoning",
-      "act": 3,
-      "narrative": "The guests have fled. The townhouse is silent save for the ticking of a mantel clock and a low, persistent hum from the séance room. Lady Ashworth sits in the hallway, her composure finally broken. Madame Vesper is in the séance room, kneeling beside the table, whispering. Lord Pemberton is in the study, pouring himself a very large brandy. The manifestation has faded, but the air still carries that prickling charge — the sense that something is present, watching, waiting. You have pieces of the truth. Now you must decide how to end this.",
-      "ambientAudio": "ambient-mayfair-night",
-      "cluesAvailable": [],
-      "choices": [
-        {
-          "id": "ms-choice-confront-ashworth-final",
-          "text": "Confront Lady Ashworth with what you know — the fraud, the debts, the conspiracy.",
-          "faculty": "influence",
-          "difficulty": 12,
-          "advantageIf": ["ms-clue-pemberton-debts"],
-          "outcomes": {
-            "critical": "ms-act3-ending-exposure",
-            "success": "ms-act3-ending-exposure",
-            "partial": "ms-act3-ending-compromise",
-            "failure": "ms-act3-ending-compromise",
-            "fumble": "ms-act3-ending-compromise"
-          },
-          "npcEffect": {
-            "npcId": "npc-ashworth",
-            "dispositionDelta": -2,
-            "suspicionDelta": 0
-          }
-        },
-        {
-          "id": "ms-choice-help-vesper-seal",
-          "text": "Help Vesper complete the binding — seal whatever was summoned before it grows stronger.",
-          "faculty": "lore",
-          "difficulty": 12,
-          "advantageIf": ["ms-clue-grey-dawn-sigil"],
-          "requiresClue": "ms-clue-vesper-journal",
-          "outcomes": {
-            "critical": "ms-act3-ending-sealed",
-            "success": "ms-act3-ending-sealed",
-            "partial": "ms-act3-ending-sealed",
-            "failure": "ms-act3-seance-encounter",
-            "fumble": "ms-act3-seance-encounter"
-          }
-        },
-        {
-          "id": "ms-choice-force-pemberton",
-          "text": "Drag Pemberton back to the séance room. He built the mechanism — he can help dismantle it.",
-          "faculty": "nerve",
-          "difficulty": 10,
-          "advantageIf": ["ms-clue-hidden-mechanism"],
-          "outcomes": {
-            "critical": "ms-act3-ending-exposure",
-            "success": "ms-act3-ending-exposure",
-            "partial": "ms-act3-ending-compromise",
-            "failure": "ms-act3-ending-compromise",
-            "fumble": "ms-act3-seance-encounter"
-          }
-        }
-      ],
-      "onEnter": []
-    },
-    {
-      "id": "ms-act3-seance-encounter",
-      "act": 3,
-      "narrative": "The binding fails. The sigils on the table flare with cold grey light, and the temperature plummets. The presence that was summoned during the séance manifests fully — not a ghost, not a spirit, but something older and less comprehensible. It fills the room like smoke, pressing against your mind with a weight that has nothing to do with the physical world. Vesper screams. The gas lamps explode. In the sudden darkness, you must face what has been called.",
-      "ambientAudio": "ambient-cellar",
-      "cluesAvailable": [],
-      "choices": [],
-      "onEnter": [
-        { "type": "composure", "delta": -2 }
-      ],
-      "encounter": {
-        "isSupernatural": true,
-        "rounds": [
-          {
-            "roundNumber": 1,
-            "isSupernatural": true,
-            "choices": [
-              {
-                "id": "ms-enc-lore-banish",
-                "text": "Recite the Grey Dawn dismissal ward from Vesper's journal.",
-                "faculty": "lore",
-                "difficulty": 12,
-                "advantageIf": ["ms-clue-vesper-journal"],
-                "outcomes": {
-                  "critical": "ms-act3-ending-sealed",
-                  "success": "ms-act3-ending-sealed",
-                  "partial": "ms-act3-ending-sealed",
-                  "failure": "ms-act3-ending-sealed",
-                  "fumble": "ms-act3-ending-sealed"
-                },
-                "encounterDamage": {
-                  "composureDelta": -2,
-                  "vitalityDelta": -1
-                }
-              },
-              {
-                "id": "ms-enc-nerve-resist",
-                "text": "Hold your ground. Refuse to yield to the presence's psychic assault.",
-                "faculty": "nerve",
-                "difficulty": 11,
-                "outcomes": {
-                  "critical": "ms-act3-ending-compromise",
-                  "success": "ms-act3-ending-compromise",
-                  "partial": "ms-act3-ending-compromise",
-                  "failure": "ms-act3-ending-compromise",
-                  "fumble": "ms-act3-ending-compromise"
-                },
-                "encounterDamage": {
-                  "composureDelta": -3
-                }
-              },
-              {
-                "id": "ms-enc-escape-r1",
-                "text": "Flee the séance room. Some battles cannot be won.",
-                "isEscapePath": true,
-                "outcomes": {
-                  "critical": "ms-act3-ending-compromise",
-                  "success": "ms-act3-ending-compromise",
-                  "partial": "ms-act3-ending-compromise",
-                  "failure": "ms-act3-ending-compromise",
-                  "fumble": "ms-act3-ending-compromise"
-                }
-              }
-            ]
-          },
-          {
-            "roundNumber": 2,
-            "isSupernatural": true,
-            "choices": [
-              {
-                "id": "ms-enc-influence-command",
-                "text": "Command the presence to depart — your will against its hunger.",
-                "faculty": "influence",
-                "difficulty": 13,
-                "outcomes": {
-                  "critical": "ms-act3-ending-sealed",
-                  "success": "ms-act3-ending-sealed",
-                  "partial": "ms-act3-ending-compromise",
-                  "failure": "ms-act3-ending-compromise",
-                  "fumble": "ms-act3-ending-compromise"
-                },
-                "encounterDamage": {
-                  "composureDelta": -2,
-                  "vitalityDelta": -1
-                }
-              },
-              {
-                "id": "ms-enc-escape-r2",
-                "text": "Retreat. The presence is too strong.",
-                "isEscapePath": true,
-                "outcomes": {
-                  "critical": "ms-act3-ending-compromise",
-                  "success": "ms-act3-ending-compromise",
-                  "partial": "ms-act3-ending-compromise",
-                  "failure": "ms-act3-ending-compromise",
-                  "fumble": "ms-act3-ending-compromise"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "ms-act3-ending-exposure",
-      "act": 3,
-      "narrative": "The truth comes out in the cold light of the hallway. Lady Ashworth and Lord Pemberton conspired to fake the séance — she to save her estate, he to protect his gambling debts. But Madame Vesper, hired as a theatrical prop, turned out to be the genuine article. She used real Grey Dawn protocols, and something answered. The fraud and the supernatural collided, and a woman is dead — one of the guests, found in the garden, her heart stopped by terror or by something worse. You lay out the evidence for Inspector Graves when he arrives. Ashworth weeps. Pemberton is led away in handcuffs. Vesper sits in silence, staring at her hands. The Rationalists' Circle will have questions. The Grey Dawn will have more.",
-      "cluesAvailable": [],
-      "choices": [],
-      "onEnter": [
-        { "type": "flag", "target": "ms-case-complete", "value": true },
-        { "type": "flag", "target": "ms-ashworth-exposed", "value": true },
-        { "type": "reputation", "target": "Rationalists Circle", "delta": 2 },
-        { "type": "reputation", "target": "Hermetic Order of the Grey Dawn", "delta": -1 }
+      "scenes": [
+            {
+                  "id": "ms-act3-the-reckoning",
+                  "act": 3,
+                  "narrative": "The guests have fled. The townhouse is silent save for the ticking of a mantel clock and a low, persistent hum from the s\u00e9ance room. Lady Ashworth sits in the hallway, her composure finally broken. Madame Vesper is in the s\u00e9ance room, kneeling beside the table, whispering. Lord Pemberton is in the study, pouring himself a very large brandy. The manifestation has faded, but the air still carries that prickling charge \u2014 the sense that something is present, watching, waiting. You have pieces of the truth. Now you must decide how to end this.",
+                  "ambientAudio": "ambient-mayfair-night",
+                  "cluesAvailable": [],
+                  "choices": [
+                        {
+                              "id": "ms-choice-confront-ashworth-final",
+                              "text": "Confront Lady Ashworth with what you know \u2014 the fraud, the debts, the conspiracy.",
+                              "faculty": "influence",
+                              "difficulty": 12,
+                              "advantageIf": [
+                                    "ms-clue-pemberton-debts"
+                              ],
+                              "outcomes": {
+                                    "critical": "ms-act3-ending-exposure",
+                                    "success": "ms-act3-ending-exposure",
+                                    "partial": "ms-act3-ending-compromise",
+                                    "failure": "ms-act3-ending-compromise",
+                                    "fumble": "ms-act3-ending-compromise"
+                              },
+                              "npcEffect": {
+                                    "npcId": "npc-ashworth",
+                                    "dispositionDelta": -2,
+                                    "suspicionDelta": 0
+                              }
+                        },
+                        {
+                              "id": "ms-choice-help-vesper-seal",
+                              "text": "Help Vesper complete the binding \u2014 seal whatever was summoned before it grows stronger.",
+                              "faculty": "lore",
+                              "difficulty": 12,
+                              "advantageIf": [
+                                    "ms-clue-grey-dawn-sigil"
+                              ],
+                              "requiresClue": "ms-clue-vesper-journal",
+                              "outcomes": {
+                                    "critical": "ms-act3-ending-sealed",
+                                    "success": "ms-act3-ending-sealed",
+                                    "partial": "ms-act3-ending-sealed",
+                                    "failure": "ms-act3-seance-encounter",
+                                    "fumble": "ms-act3-seance-encounter"
+                              }
+                        },
+                        {
+                              "id": "ms-choice-force-pemberton",
+                              "text": "Drag Pemberton back to the s\u00e9ance room. He built the mechanism \u2014 he can help dismantle it.",
+                              "faculty": "nerve",
+                              "difficulty": 10,
+                              "advantageIf": [
+                                    "ms-clue-hidden-mechanism"
+                              ],
+                              "outcomes": {
+                                    "critical": "ms-act3-ending-exposure",
+                                    "success": "ms-act3-ending-exposure",
+                                    "partial": "ms-act3-ending-compromise",
+                                    "failure": "ms-act3-ending-compromise",
+                                    "fumble": "ms-act3-seance-encounter"
+                              }
+                        },
+                        {
+                              "id": "ms-choice-reckoning-gerald",
+                              "text": "Lady Ashworth told me about Elara Thorne. This entity \u2014 is it what Gerald found?",
+                              "faculty": "lore",
+                              "difficulty": 10,
+                              "conditions": [
+                                    {
+                                          "type": "npcMemoryFlag",
+                                          "target": "npc-ashworth",
+                                          "value": "knows-gerald-secret"
+                                    }
+                              ],
+                              "outcomes": {
+                                    "critical": "ms-act3-gerald-revelation",
+                                    "success": "ms-act3-gerald-revelation",
+                                    "partial": "ms-act3-the-reckoning",
+                                    "failure": "ms-act3-the-reckoning",
+                                    "fumble": "ms-act3-the-reckoning"
+                              }
+                        }
+                  ],
+                  "onEnter": []
+            },
+            {
+                  "id": "ms-act3-seance-encounter",
+                  "act": 3,
+                  "narrative": "The binding fails. The sigils on the table flare with cold grey light, and the temperature plummets. The presence that was summoned during the s\u00e9ance manifests fully \u2014 not a ghost, not a spirit, but something older and less comprehensible. It fills the room like smoke, pressing against your mind with a weight that has nothing to do with the physical world. Vesper screams. The gas lamps explode. In the sudden darkness, you must face what has been called.",
+                  "ambientAudio": "ambient-cellar",
+                  "cluesAvailable": [],
+                  "choices": [],
+                  "onEnter": [
+                        {
+                              "type": "composure",
+                              "delta": -2
+                        }
+                  ],
+                  "encounter": {
+                        "isSupernatural": true,
+                        "rounds": [
+                              {
+                                    "roundNumber": 1,
+                                    "isSupernatural": true,
+                                    "choices": [
+                                          {
+                                                "id": "ms-enc-lore-banish",
+                                                "text": "Recite the Grey Dawn dismissal ward from Vesper's journal.",
+                                                "faculty": "lore",
+                                                "difficulty": 12,
+                                                "advantageIf": [
+                                                      "ms-clue-vesper-journal"
+                                                ],
+                                                "outcomes": {
+                                                      "critical": "ms-act3-ending-sealed",
+                                                      "success": "ms-act3-ending-sealed",
+                                                      "partial": "ms-act3-ending-sealed",
+                                                      "failure": "ms-act3-ending-sealed",
+                                                      "fumble": "ms-act3-ending-sealed"
+                                                },
+                                                "encounterDamage": {
+                                                      "composureDelta": -2,
+                                                      "vitalityDelta": -1
+                                                }
+                                          },
+                                          {
+                                                "id": "ms-enc-nerve-resist",
+                                                "text": "Hold your ground. Refuse to yield to the presence's psychic assault.",
+                                                "faculty": "nerve",
+                                                "difficulty": 11,
+                                                "outcomes": {
+                                                      "critical": "ms-act3-ending-compromise",
+                                                      "success": "ms-act3-ending-compromise",
+                                                      "partial": "ms-act3-ending-compromise",
+                                                      "failure": "ms-act3-ending-compromise",
+                                                      "fumble": "ms-act3-ending-compromise"
+                                                },
+                                                "encounterDamage": {
+                                                      "composureDelta": -3
+                                                }
+                                          },
+                                          {
+                                                "id": "ms-enc-escape-r1",
+                                                "text": "Flee the s\u00e9ance room. Some battles cannot be won.",
+                                                "isEscapePath": true,
+                                                "outcomes": {
+                                                      "critical": "ms-act3-ending-compromise",
+                                                      "success": "ms-act3-ending-compromise",
+                                                      "partial": "ms-act3-ending-compromise",
+                                                      "failure": "ms-act3-ending-compromise",
+                                                      "fumble": "ms-act3-ending-compromise"
+                                                }
+                                          }
+                                    ]
+                              },
+                              {
+                                    "roundNumber": 2,
+                                    "isSupernatural": true,
+                                    "choices": [
+                                          {
+                                                "id": "ms-enc-influence-command",
+                                                "text": "Command the presence to depart \u2014 your will against its hunger.",
+                                                "faculty": "influence",
+                                                "difficulty": 13,
+                                                "outcomes": {
+                                                      "critical": "ms-act3-ending-sealed",
+                                                      "success": "ms-act3-ending-sealed",
+                                                      "partial": "ms-act3-ending-compromise",
+                                                      "failure": "ms-act3-ending-compromise",
+                                                      "fumble": "ms-act3-ending-compromise"
+                                                },
+                                                "encounterDamage": {
+                                                      "composureDelta": -2,
+                                                      "vitalityDelta": -1
+                                                }
+                                          },
+                                          {
+                                                "id": "ms-enc-escape-r2",
+                                                "text": "Retreat. The presence is too strong.",
+                                                "isEscapePath": true,
+                                                "outcomes": {
+                                                      "critical": "ms-act3-ending-compromise",
+                                                      "success": "ms-act3-ending-compromise",
+                                                      "partial": "ms-act3-ending-compromise",
+                                                      "failure": "ms-act3-ending-compromise",
+                                                      "fumble": "ms-act3-ending-compromise"
+                                                }
+                                          }
+                                    ]
+                              }
+                        ]
+                  }
+            },
+            {
+                  "id": "ms-act3-ending-exposure",
+                  "act": 3,
+                  "narrative": "The truth comes out in the cold light of the hallway. Lady Ashworth and Lord Pemberton conspired to fake the s\u00e9ance \u2014 she to save her estate, he to protect his gambling debts. But Madame Vesper, hired as a theatrical prop, turned out to be the genuine article. She used real Grey Dawn protocols, and something answered. The fraud and the supernatural collided, and a woman is dead \u2014 one of the guests, found in the garden, her heart stopped by terror or by something worse. You lay out the evidence for Inspector Graves when he arrives. Ashworth weeps. Pemberton is led away in handcuffs. Vesper sits in silence, staring at her hands. The Rationalists' Circle will have questions. The Grey Dawn will have more.",
+                  "cluesAvailable": [],
+                  "choices": [],
+                  "onEnter": [
+                        {
+                              "type": "flag",
+                              "target": "ms-case-complete",
+                              "value": true
+                        },
+                        {
+                              "type": "flag",
+                              "target": "ms-ashworth-exposed",
+                              "value": true
+                        },
+                        {
+                              "type": "reputation",
+                              "target": "Rationalists Circle",
+                              "delta": 2
+                        },
+                        {
+                              "type": "reputation",
+                              "target": "Hermetic Order of the Grey Dawn",
+                              "delta": -1
+                        }
+                  ]
+            },
+            {
+                  "id": "ms-act3-ending-sealed",
+                  "act": 3,
+                  "narrative": "The dismissal ward takes hold. The Grey Dawn sigils flare once \u2014 brilliant, blinding white \u2014 and the presence recoils. The temperature rises. The pressure lifts. Vesper slumps against the table, exhausted but alive. The binding circle beneath the table cracks down its centre, spent. Whatever was summoned has been sent back, though the seal is imperfect \u2014 it may not hold forever. In the aftermath, you help Vesper to her feet. 'Thank you,' she says. 'I was a fool to attempt this without a full circle.' Lady Ashworth's fraud is a secondary matter now. The Grey Dawn will want to know what happened here. So will you.",
+                  "cluesAvailable": [],
+                  "choices": [],
+                  "onEnter": [
+                        {
+                              "type": "flag",
+                              "target": "ms-case-complete",
+                              "value": true
+                        },
+                        {
+                              "type": "flag",
+                              "target": "ms-presence-sealed",
+                              "value": true
+                        },
+                        {
+                              "type": "disposition",
+                              "target": "npc-vesper",
+                              "delta": 3
+                        },
+                        {
+                              "type": "reputation",
+                              "target": "Hermetic Order of the Grey Dawn",
+                              "delta": 2
+                        }
+                  ]
+            },
+            {
+                  "id": "ms-act3-ending-compromise",
+                  "act": 3,
+                  "narrative": "The evening ends in uneasy compromise. The presence fades on its own \u2014 or perhaps it simply withdraws, sated or bored. The guests are gone. The townhouse is cold and silent. Lady Ashworth's fraud remains unexposed, though you carry the knowledge of it. Pemberton's debts remain unpaid. Vesper disappears into the London night, her journal clutched to her chest. No one is arrested. No one is saved. The s\u00e9ance room door is locked, and Lady Ashworth asks you, very politely, to leave. The case is closed, but nothing is resolved. The presence may return. The fraud may continue. And you are left with the uncomfortable certainty that in London, the rational and the supernatural are not opposites \u2014 they are collaborators.",
+                  "cluesAvailable": [],
+                  "choices": [],
+                  "onEnter": [
+                        {
+                              "type": "flag",
+                              "target": "ms-case-complete",
+                              "value": true
+                        },
+                        {
+                              "type": "composure",
+                              "delta": -1
+                        }
+                  ]
+            },
+            {
+                  "id": "ms-act3-gerald-revelation",
+                  "act": 3,
+                  "narrative": "The name strikes Vesper like a physical blow. 'Elara Thorne. Yes. She was the first to make contact \u2014 the real contact, not the theatre I perform for drawing rooms. Gerald Ashworth funded her research, and she opened a door that should have stayed closed.' Vesper's voice drops to a whisper. 'The entity that answered tonight is the same one Elara summoned. It has been waiting, anchored to this house by the binding circle Gerald had carved beneath the foundations. Elara did not vanish \u2014 she was taken. And if we do not close this door tonight, it will take others.'",
+                  "cluesAvailable": [],
+                  "choices": [
+                        {
+                              "id": "ms-choice-gerald-revelation-proceed",
+                              "text": "The full picture emerges. Now \u2014 how do we close the door?",
+                              "outcomes": {
+                                    "critical": "ms-act3-seance-encounter",
+                                    "success": "ms-act3-seance-encounter",
+                                    "partial": "ms-act3-seance-encounter",
+                                    "failure": "ms-act3-seance-encounter",
+                                    "fumble": "ms-act3-seance-encounter"
+                              }
+                        }
+                  ],
+                  "onEnter": [
+                        {
+                              "type": "setMemoryFlag",
+                              "target": "npc-vesper",
+                              "value": "revealed-elara-truth"
+                        },
+                        {
+                              "type": "disposition",
+                              "target": "npc-vesper",
+                              "delta": 2,
+                              "description": "Vesper is grateful someone finally understands"
+                        }
+                  ]
+            }
       ]
-    },
-    {
-      "id": "ms-act3-ending-sealed",
-      "act": 3,
-      "narrative": "The dismissal ward takes hold. The Grey Dawn sigils flare once — brilliant, blinding white — and the presence recoils. The temperature rises. The pressure lifts. Vesper slumps against the table, exhausted but alive. The binding circle beneath the table cracks down its centre, spent. Whatever was summoned has been sent back, though the seal is imperfect — it may not hold forever. In the aftermath, you help Vesper to her feet. 'Thank you,' she says. 'I was a fool to attempt this without a full circle.' Lady Ashworth's fraud is a secondary matter now. The Grey Dawn will want to know what happened here. So will you.",
-      "cluesAvailable": [],
-      "choices": [],
-      "onEnter": [
-        { "type": "flag", "target": "ms-case-complete", "value": true },
-        { "type": "flag", "target": "ms-presence-sealed", "value": true },
-        { "type": "disposition", "target": "npc-vesper", "delta": 3 },
-        { "type": "reputation", "target": "Hermetic Order of the Grey Dawn", "delta": 2 }
-      ]
-    },
-    {
-      "id": "ms-act3-ending-compromise",
-      "act": 3,
-      "narrative": "The evening ends in uneasy compromise. The presence fades on its own — or perhaps it simply withdraws, sated or bored. The guests are gone. The townhouse is cold and silent. Lady Ashworth's fraud remains unexposed, though you carry the knowledge of it. Pemberton's debts remain unpaid. Vesper disappears into the London night, her journal clutched to her chest. No one is arrested. No one is saved. The séance room door is locked, and Lady Ashworth asks you, very politely, to leave. The case is closed, but nothing is resolved. The presence may return. The fraud may continue. And you are left with the uncomfortable certainty that in London, the rational and the supernatural are not opposites — they are collaborators.",
-      "cluesAvailable": [],
-      "choices": [],
-      "onEnter": [
-        { "type": "flag", "target": "ms-case-complete", "value": true },
-        { "type": "composure", "delta": -1 }
-      ]
-    }
-  ]
 }

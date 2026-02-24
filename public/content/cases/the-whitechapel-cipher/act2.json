@@ -92,6 +92,20 @@
                                     "dispositionDelta": 1,
                                     "suspicionDelta": -1
                               }
+                        },
+                        {
+                              "id": "wc-choice-show-mott-cipher",
+                              "text": "Show Mott the cipher note \u2014 watch his reaction carefully.",
+                              "faculty": "perception",
+                              "difficulty": 9,
+                              "requiresClue": "wc-clue-cipher-note",
+                              "outcomes": {
+                                    "critical": "wc-act2-mott-recognises",
+                                    "success": "wc-act2-mott-recognises",
+                                    "partial": "wc-act2-mott-deflects",
+                                    "failure": "wc-act2-mott-deflects",
+                                    "fumble": "wc-act2-mott-deflects"
+                              }
                         }
                   ],
                   "onEnter": []
@@ -124,6 +138,11 @@
                               "type": "vitality",
                               "delta": 1,
                               "description": "Mott offers you a cup of strong tea \u2014 you drink gratefully"
+                        },
+                        {
+                              "type": "setMemoryFlag",
+                              "target": "npc-printer",
+                              "value": "cooperated"
                         }
                   ]
             },
@@ -205,6 +224,26 @@
                                     "dispositionDelta": 1,
                                     "suspicionDelta": 0
                               }
+                        },
+                        {
+                              "id": "wc-choice-vane-mott-evidence",
+                              "text": "Confront Vane with what Mott revealed about the typeface.",
+                              "faculty": "influence",
+                              "difficulty": 10,
+                              "conditions": [
+                                    {
+                                          "type": "npcMemoryFlag",
+                                          "target": "npc-printer",
+                                          "value": "shown-cipher"
+                                    }
+                              ],
+                              "outcomes": {
+                                    "critical": "wc-act2-vane-cornered",
+                                    "success": "wc-act2-vane-cornered",
+                                    "partial": "wc-act2-vane-confrontation",
+                                    "failure": "wc-act2-vane-confrontation",
+                                    "fumble": "wc-act2-vane-confrontation"
+                              }
                         }
                   ],
                   "onEnter": []
@@ -262,6 +301,106 @@
                         {
                               "type": "composure",
                               "delta": -1
+                        }
+                  ]
+            },
+            {
+                  "id": "wc-act2-mott-recognises",
+                  "act": 2,
+                  "narrative": "Mott's stained fingers freeze over the cipher note. His eyes widen \u2014 then narrow. 'Where did you get this?' he whispers. 'This typeface \u2014 I set it myself. Three months ago. A private commission, paid in gold sovereigns. The client wore gloves and spoke through a scarf.' He swallows hard. 'I kept a proof copy. I always keep proof copies.' He reaches beneath the counter and produces a sheet \u2014 the same symbols, but with a margin note in a different hand. An address in Bloomsbury.",
+                  "cluesAvailable": [
+                        {
+                              "clueId": "wc-clue-printshop-type",
+                              "method": "automatic"
+                        }
+                  ],
+                  "choices": [
+                        {
+                              "id": "wc-choice-mott-recognises-proceed",
+                              "text": "The proof copy changes everything. Follow the Bloomsbury address.",
+                              "outcomes": {
+                                    "critical": "wc-act2-vane-confrontation",
+                                    "success": "wc-act2-vane-confrontation",
+                                    "partial": "wc-act2-vane-confrontation",
+                                    "failure": "wc-act2-vane-confrontation",
+                                    "fumble": "wc-act2-vane-confrontation"
+                              }
+                        }
+                  ],
+                  "onEnter": [
+                        {
+                              "type": "setMemoryFlag",
+                              "target": "npc-printer",
+                              "value": "shown-cipher"
+                        },
+                        {
+                              "type": "disposition",
+                              "target": "npc-printer",
+                              "delta": 1,
+                              "description": "Mott respects your directness"
+                        }
+                  ]
+            },
+            {
+                  "id": "wc-act2-mott-deflects",
+                  "act": 2,
+                  "narrative": "Mott glances at the cipher note and shrugs with practised indifference. 'Symbols. Could be anything. I print what people pay me to print.' But his fingers drum the counter a fraction too quickly, and he will not meet your eyes. He knows more than he is saying \u2014 but he is not ready to say it.",
+                  "cluesAvailable": [],
+                  "choices": [
+                        {
+                              "id": "wc-choice-mott-deflects-proceed",
+                              "text": "Mott is hiding something. You will need leverage \u2014 or patience.",
+                              "outcomes": {
+                                    "critical": "wc-act2-vane-confrontation",
+                                    "success": "wc-act2-vane-confrontation",
+                                    "partial": "wc-act2-vane-confrontation",
+                                    "failure": "wc-act2-vane-confrontation",
+                                    "fumble": "wc-act2-vane-confrontation"
+                              }
+                        }
+                  ],
+                  "onEnter": [
+                        {
+                              "type": "suspicion",
+                              "target": "npc-printer",
+                              "delta": 1
+                        }
+                  ]
+            },
+            {
+                  "id": "wc-act2-vane-cornered",
+                  "act": 2,
+                  "narrative": "Vane's composure shatters. 'Mott told you about the typeface? That fool.' He sinks into his chair, suddenly looking every one of his years. 'Yes. I commissioned the cipher notes. But not for the reasons you think. The Order has been infiltrated \u2014 someone is using our symbols to communicate, and I was trying to trace them. The murders are not our doing. They are a message to us.' He meets your eyes with desperate sincerity. 'Someone is hunting the Grey Dawn, Inspector. And they are using our own language to do it.'",
+                  "cluesAvailable": [],
+                  "choices": [
+                        {
+                              "id": "wc-choice-vane-cornered-proceed",
+                              "text": "Vane's story changes the shape of the conspiracy entirely.",
+                              "outcomes": {
+                                    "critical": "wc-act3-the-reckoning",
+                                    "success": "wc-act3-the-reckoning",
+                                    "partial": "wc-act3-the-reckoning",
+                                    "failure": "wc-act3-the-reckoning",
+                                    "fumble": "wc-act3-the-reckoning"
+                              }
+                        }
+                  ],
+                  "onEnter": [
+                        {
+                              "type": "setMemoryFlag",
+                              "target": "npc-vane",
+                              "value": "confessed-infiltration"
+                        },
+                        {
+                              "type": "disposition",
+                              "target": "npc-vane",
+                              "delta": 3,
+                              "description": "Vane has placed his trust \u2014 and his Order's secrets \u2014 in your hands"
+                        },
+                        {
+                              "type": "reputation",
+                              "target": "Hermetic Order of the Grey Dawn",
+                              "delta": 1
                         }
                   ]
             }

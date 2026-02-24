@@ -237,13 +237,9 @@ The issues are all incremental:
 
 ---
 
-### 6.4 NPCs Are Passive Data (HIGH)
+### ~~6.4 NPCs Are Passive Data~~ — ✅ FIXED
 
-**Gap**: NPCs have disposition, suspicion, memoryFlags, and faction — but no interactive dialogue. `memoryFlags` is never populated in any content. Players can't question, persuade, or confront NPCs directly.
-
-**Desired state**: Dialogue trees gated by disposition/suspicion tiers. Influence/Perception/Reason checks in conversation. memoryFlags tracking what's been discussed.
-
-**Impact**: NPCs feel like background furniture. The disposition/suspicion system is mechanically complete but narratively invisible.
+**Resolution**: Added `npcMemoryFlag` condition type and `setMemoryFlag` effect type. Disposition/suspicion/memoryFlag-gated dialogue choices added to existing scenes across both cases. 8 new dialogue scenes: Graves reveals Harland (disposition-gated), Mott recognises cipher (clue-gated), Vane cornered (cross-NPC memory-gated), Ashworth reveals Gerald's secret (disposition-gated), Vesper reveals Elara truth (memory-gated). `memoryFlags` now populated on key NPC interactions.
 
 ---
 

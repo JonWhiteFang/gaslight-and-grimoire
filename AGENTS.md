@@ -46,7 +46,7 @@ Comprehensive archaeology and evolution docs live under `devdocs/`. **Read these
 ### Cleanup & Smoke Tests
 - `devdocs/archaeology/cleanup_inventory.md` — What's safe to remove vs what looks dead but must be kept
 - `devdocs/archaeology/5_things_or_not.md` — Top 5 improvements with exact code locations and first steps
-- `smoke_tests/check_what_is_working/report.md` — Baseline: 288/288 tests pass, 0 type errors, 3 broken features identified
+- `smoke_tests/check_what_is_working/report.md` — Baseline: 292/292 tests pass, 0 type errors, 3 broken features identified
 
 ## Architecture
 
@@ -168,8 +168,8 @@ Rules:
 - `ClueStatus`: `new | examined | connected | deduced | contested | spent`
 - `ClueType`: `physical | testimony | occult | deduction | redHerring`
 - `NpcSuspicionTier`: `normal (0-2) | evasive (3-5) | concealing (6-8) | hostile (9-10)`
-- `Condition` — gates scene access and choices (types: `hasClue`, `hasDeduction`, `hasFlag`, `facultyMin`, `archetypeIs`, `npcDisposition`, `npcSuspicion`, `factionReputation`)
-- `Effect` — mutates game state on scene entry (types: `composure`, `vitality`, `flag`, `disposition`, `suspicion`, `reputation`, `discoverClue`)
+- `Condition` — gates scene access and choices (types: `hasClue`, `hasDeduction`, `hasFlag`, `facultyMin`, `archetypeIs`, `npcDisposition`, `npcSuspicion`, `factionReputation`, `npcMemoryFlag`)
+- `Effect` — mutates game state on scene entry (types: `composure`, `vitality`, `flag`, `disposition`, `suspicion`, `reputation`, `discoverClue`, `setMemoryFlag`)
 - `SceneNode` — atomic narrative unit with `choices`, `cluesAvailable`, `conditions`, `onEnter` effects, optional `variantOf`/`variantCondition`, optional `encounter`
 - `Choice` — may have `faculty`/`difficulty` for checks, `advantageIf` clue refs, `outcomes` per tier, `npcEffect`, encounter extensions (`worseAlternative`, `isEscapePath`, `encounterDamage`)
 
@@ -280,7 +280,7 @@ These are documented in detail in `devdocs/evolution/gap_analysis.md`, `smoke_te
 - ~~**Active clue discovery unimplemented**~~ — ✅ FIXED. All four discovery methods now work: `automatic` and `dialogue` auto-discover on scene entry (dialogue shows speech-bubble variant card), `exploration` renders atmospheric clickable prompts, `check` performs a dice roll via `performCheck`. New files: `src/engine/cluePrompts.ts`, `src/components/NarrativePanel/SceneCluePrompts.tsx`.
 - **Zero audio/visual assets** — Audio system and illustration system are fully coded but no `.mp3` or image files exist. Game is silent with no illustrations.
 - **Thin content** — Avg 1.1–1.3 choices/scene, only 6 clues and 3 NPCs per case, 1 variant per case. Low replayability.
-- **NPCs have no dialogue system** — Disposition/suspicion/memoryFlags exist but no interactive dialogue. `memoryFlags` never populated in content.
+- ~~**NPCs have no dialogue system**~~ — ✅ FIXED. Disposition/suspicion/memoryFlag-gated dialogue choices added to existing scenes. New `npcMemoryFlag` condition type and `setMemoryFlag` effect type. 8 new dialogue scenes across both cases. `memoryFlags` now populated on key NPC interactions.
 
 ### Medium (game design — mechanics and UX)
 - ~~**Engine ↔ Store circular dependency**~~ — ✅ FIXED. Engine functions now accept an `EngineActions` interface parameter instead of importing `useStore`. `applyOnEnterEffects` moved to `worldSlice.applyEffects` store action. Zero store imports in engine files.
@@ -318,4 +318,4 @@ See `devdocs/evolution/implementation_roadmap.md` for the full phased plan. Summ
 - **Phase B (Core Refactoring)**: ✅ COMPLETE — Extracted pure computeChoiceResult, moved buildDeduction to engine, audio subscription, consolidated CheckResult types, runtime content validation with tier completeness
 - **Phase C (Gap Filling)**: ✅ COMPLETE — ClueDiscoveryCard, save button, faction display, error display, case completion screen
 - **Phase D (Integration)**: ✅ COMPLETE — Encounter UI, stale state cleanup, remove dead code
-- **Phase E (Game Design)**: 🟡 IN PROGRESS — ~~Active clue discovery~~ ✅, ~~consequence feedback~~ ✅, ~~Veil Sight~~ ✅, ~~recovery mechanics~~ ✅, ~~persistent evidence board~~ ✅, ~~faction clamping~~ ✅, ~~CI validation~~ ✅, audio/visual assets, content depth, NPC dialogue, scene history, testing expansion. See `GAME_DESIGN_ANALYSIS.md` for full analysis.
+- **Phase E (Game Design)**: 🟡 IN PROGRESS — ~~Active clue discovery~~ ✅, ~~consequence feedback~~ ✅, ~~Veil Sight~~ ✅, ~~recovery mechanics~~ ✅, ~~persistent evidence board~~ ✅, ~~faction clamping~~ ✅, ~~CI validation~~ ✅, ~~NPC dialogue~~ ✅, audio/visual assets, content depth, scene history, testing expansion. See `GAME_DESIGN_ANALYSIS.md` for full analysis.

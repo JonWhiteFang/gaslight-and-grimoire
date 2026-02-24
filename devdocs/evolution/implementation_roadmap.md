@@ -278,15 +278,11 @@ Goal: Transform the technically sound but content-thin game into a compelling pl
 
 ---
 
-### E4. Add NPC Dialogue and Interrogation System — P1
+### ~~E4. Add NPC Dialogue and Interrogation System~~ — ✅ COMPLETE
 
-**What**: NPCs have rich state (disposition, suspicion, memoryFlags, faction) but no interactive dialogue. `memoryFlags` is never populated in content. Players can't question, persuade, or confront NPCs.
+**What**: NPCs had rich state but no interactive dialogue. `memoryFlags` was never populated.
 
-**Files**: `src/types/index.ts` (new `DialogueNode` type), new `src/components/NarrativePanel/DialoguePanel.tsx`, `src/engine/narrativeEngine.ts` (dialogue evaluation), content JSON files
-
-**Dependencies**: E1 ✅ (dialogue clue discovery method — complete).
-
-**Risk**: Medium-High. Largest new feature. Requires type additions, new component, engine logic, and content.
+**Resolution**: Added `npcMemoryFlag` condition type (checks `npcs[target].memoryFlags[value]`) and `setMemoryFlag` effect type (calls `setNpcMemoryFlag`). Disposition/suspicion/memoryFlag-gated dialogue choices added to existing scenes — no new component types needed. 8 new dialogue scenes across both cases: Graves reveals Harland, Mott recognises cipher, Vane cornered by cross-NPC evidence, Ashworth reveals Gerald's secret, Vesper reveals Elara truth. `memoryFlags` populated on key NPC interactions. Files changed: `src/types/index.ts`, `src/engine/narrativeEngine.ts`, `src/store/slices/worldSlice.ts`, `src/engine/effectMessages.ts`, content JSON, 2 new test files.
 
 ---
 
@@ -359,7 +355,7 @@ Phase E (Game Design Improvements):
   E1 (active clue discovery)     — ✅ COMPLETE
   E2 (audio/visual assets)       — independent
   E3 (content depth)             — independent
-  E4 (NPC dialogue)              — depends on E1 ✅ (dialogue discovery method)
+  E4 (NPC dialogue)              — ✅ COMPLETE
   E5 (recovery mechanics)        — ✅ COMPLETE
   E6 (persistent evidence board) — ✅ COMPLETE
   E7 (scene history)             — independent

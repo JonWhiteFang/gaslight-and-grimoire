@@ -167,6 +167,26 @@
                                     "failure": "wc-act2-the-web",
                                     "fumble": "wc-act2-the-web"
                               }
+                        },
+                        {
+                              "id": "wc-choice-confides-press-deeper",
+                              "text": "The Deputy Commissioner \u2014 who is he? What does he want buried?",
+                              "faculty": "influence",
+                              "difficulty": 10,
+                              "conditions": [
+                                    {
+                                          "type": "npcDisposition",
+                                          "target": "npc-graves",
+                                          "value": 4
+                                    }
+                              ],
+                              "outcomes": {
+                                    "critical": "wc-act1-graves-reveals",
+                                    "success": "wc-act1-graves-reveals",
+                                    "partial": "wc-act1-graves-hesitates",
+                                    "failure": "wc-act2-the-web",
+                                    "fumble": "wc-act2-the-web"
+                              }
                         }
                   ],
                   "onEnter": [
@@ -180,6 +200,11 @@
                               "type": "composure",
                               "delta": 1,
                               "description": "An ally in the Yard \u2014 you are not alone in this"
+                        },
+                        {
+                              "type": "setMemoryFlag",
+                              "target": "npc-graves",
+                              "value": "confided-about-yard"
                         }
                   ]
             },
@@ -345,6 +370,58 @@
                               "delta": -1
                         }
                   ]
+            },
+            {
+                  "id": "wc-act1-graves-reveals",
+                  "act": 1,
+                  "narrative": "Graves glances over his shoulder, then leans closer. 'Deputy Commissioner Harland. He came up through the Lodge \u2014 the Rationalists Circle, the respectable face of it. But there are whispers he has connections to the Grey Dawn as well. Playing both sides.' He grips your arm. 'If Harland buried the first cipher, it means someone at the top of the Yard knows what these symbols mean. And they want it kept quiet.' The implications settle over you like fog.",
+                  "cluesAvailable": [],
+                  "choices": [
+                        {
+                              "id": "wc-choice-reveals-proceed",
+                              "text": "Harland. The name is a thread worth pulling.",
+                              "outcomes": {
+                                    "critical": "wc-act2-the-web",
+                                    "success": "wc-act2-the-web",
+                                    "partial": "wc-act2-the-web",
+                                    "failure": "wc-act2-the-web",
+                                    "fumble": "wc-act2-the-web"
+                              }
+                        }
+                  ],
+                  "onEnter": [
+                        {
+                              "type": "setMemoryFlag",
+                              "target": "npc-graves",
+                              "value": "told-about-commissioner"
+                        },
+                        {
+                              "type": "disposition",
+                              "target": "npc-graves",
+                              "delta": 1,
+                              "description": "Graves has placed his career in your hands"
+                        }
+                  ]
+            },
+            {
+                  "id": "wc-act1-graves-hesitates",
+                  "act": 1,
+                  "narrative": "Graves's jaw tightens. 'I have said too much already. The name \u2014 no. Not here, not now. Perhaps when I know I can trust you further.' He steps back, composing himself. The moment of vulnerability has passed, but the door is not entirely closed.",
+                  "cluesAvailable": [],
+                  "choices": [
+                        {
+                              "id": "wc-choice-hesitates-proceed",
+                              "text": "Graves needs more time. Press on with what you have.",
+                              "outcomes": {
+                                    "critical": "wc-act2-the-web",
+                                    "success": "wc-act2-the-web",
+                                    "partial": "wc-act2-the-web",
+                                    "failure": "wc-act2-the-web",
+                                    "fumble": "wc-act2-the-web"
+                              }
+                        }
+                  ],
+                  "onEnter": []
             }
       ]
 }
