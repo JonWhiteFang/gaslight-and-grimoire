@@ -57,13 +57,17 @@ function JournalSection({
 
 export interface CaseJournalProps {
   onClose: () => void;
+  onReviewScene?: (sceneId: string) => void;
 }
 
-export function CaseJournal({ onClose }: CaseJournalProps) {
+export function CaseJournal({ onClose, onReviewScene }: CaseJournalProps) {
   const clues = useStore((s) => s.clues);
   const flags = useStore((s) => s.flags);
   const deductions = useStore((s) => s.deductions);
   const factionReputation = useStore((s) => s.factionReputation);
+  const sceneHistory = useStore((s) => s.sceneHistory);
+  const currentScene = useStore((s) => s.currentScene);
+  const caseData = useStore((s) => s.caseData);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -80,6 +84,10 @@ export function CaseJournal({ onClose }: CaseJournalProps) {
   const storyFlags = Object.entries(flags)
     .filter(([key, value]) => value && isStoryFlag(key))
     .map(([key]) => key);
+
+  // Build timeline: history + current scene
+  const timelineIds = [...sceneHistory, currentScene].filter(Boolean);
+  const scenes = caseData?.scenes ?? {};
 
   return (
     <div
@@ -104,6 +112,40 @@ export function CaseJournal({ onClose }: CaseJournalProps) {
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-5 font-serif text-stone-200">
+
+          {/* Investigation Timeline */}
+          <JournalSection title="Investigation Timeline" empty={timelineIds.length === 0}>
+            <ol className="space-y-2" aria-label="Scene history">
+              {timelineIds.map((id, i) => {
+                const scene = scenes[id];
+                if (!scene) return null;
+                const isCurrent = id === currentScene;
+                const excerpt = scene.narrative.length > 100
+                  ? scene.narrative.slice(0, 100) + '…'
+                  : scene.narrative;
+                return (
+                  <li key={`${id}-${i}`}>
+                    <button
+                      type="button"
+                      onClick={() => { onReviewScene?.(id); onClose(); }}
+                      disabled={isCurrent || !onReviewScene}
+                      className={[
+                        'w-full text-left pl-4 py-2 border-l-2 text-sm transition-colors rounded-r',
+                        isCurrent
+                          ? 'border-amber-400 text-amber-200 bg-amber-900/20'
+                          : 'border-stone-600 text-stone-400 hover:text-stone-200 hover:border-amber-600 hover:bg-stone-800/40 cursor-pointer',
+                      ].join(' ')}
+                      aria-label={isCurrent ? 'Current scene' : `Review scene: ${excerpt.slice(0, 40)}`}
+                    >
+                      <span className="italic">{excerpt}</span>
+                      {isCurrent && <span className="text-xs text-amber-400 ml-2 not-italic">(current)</span>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          </JournalSection>
+
           <JournalSection title="Clues Gathered" empty={revealedClues.length === 0}>
             <ul className="space-y-2">
               {revealedClues.map((clue) => (

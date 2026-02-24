@@ -255,13 +255,9 @@ The issues are all incremental:
 
 ---
 
-### 6.7 Scene History Unused (MEDIUM)
+### ~~6.7 Scene History Unused~~ — ✅ FIXED
 
-**Gap**: `sceneHistory` is tracked on every `goToScene` but never consumed. No back button, no scene replay, no timeline in CaseJournal.
-
-**Desired state**: At minimum, scene timeline in CaseJournal. Ideally, read-only scene review or full back-navigation.
-
-**Impact**: Players who regret a choice or fail a check have no recourse except loading a save.
+**Resolution**: Investigation Timeline added to CaseJournal showing chronological scene history with truncated narrative excerpts. Back button in HeaderBar enables read-only scene review. No effects fired during review.
 
 ---
 
@@ -277,13 +273,9 @@ The issues are all incremental:
 
 ---
 
-### 6.10 Testing Gaps in Integration and CI (MEDIUM)
+### ~~6.10 Testing Gaps in Integration and CI~~ — ✅ FIXED
 
-**Gap**: No integration tests for choice→navigation→effect pipeline. ~~`validateCase.mjs` not in CI.~~ No component tests for EncounterPanel or EvidenceBoard.
-
-**Desired state**: Content validation in CI. Integration tests. Component tests for all interactive overlays.
-
-**Impact**: Regressions in the choice pipeline or content errors could ship undetected.
+**Resolution**: Integration test (7 tests) covers processChoice pipeline and condition gating. EncounterPanel tests (3 tests) and EvidenceBoard tests (4 tests) cover the two most complex untested components. `validateCase.mjs` added to CI.
 
 ---
 

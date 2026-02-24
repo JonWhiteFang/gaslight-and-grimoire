@@ -46,7 +46,7 @@ Comprehensive archaeology and evolution docs live under `devdocs/`. **Read these
 ### Cleanup & Smoke Tests
 - `devdocs/archaeology/cleanup_inventory.md` — What's safe to remove vs what looks dead but must be kept
 - `devdocs/archaeology/5_things_or_not.md` — Top 5 improvements with exact code locations and first steps
-- `smoke_tests/check_what_is_working/report.md` — Baseline: 292/292 tests pass, 0 type errors, 3 broken features identified
+- `smoke_tests/check_what_is_working/report.md` — Baseline: 306/306 tests pass, 0 type errors, 3 broken features identified
 
 ## Architecture
 
@@ -295,7 +295,7 @@ These are documented in detail in `devdocs/evolution/gap_analysis.md`, `smoke_te
 - ~~**Faction reputation unbounded**~~ — ✅ FIXED. Clamped to [-10, +10] in `adjustReputation`.
 - **Generic deduction descriptions** — `buildDeduction` returns same 2 strings regardless of clues.
 - **No click-to-skip typewriter** — Must wait for full text or change settings.
-- **`sceneHistory` unused** — Tracked but no back navigation or journal timeline.
+- ~~**`sceneHistory` unused**~~ — ✅ FIXED. Investigation Timeline in CaseJournal shows chronological scene history. Back button in HeaderBar enables read-only scene review.
 
 ## Architectural Warnings
 
@@ -318,4 +318,4 @@ See `devdocs/evolution/implementation_roadmap.md` for the full phased plan. Summ
 - **Phase B (Core Refactoring)**: ✅ COMPLETE — Extracted pure computeChoiceResult, moved buildDeduction to engine, audio subscription, consolidated CheckResult types, runtime content validation with tier completeness
 - **Phase C (Gap Filling)**: ✅ COMPLETE — ClueDiscoveryCard, save button, faction display, error display, case completion screen
 - **Phase D (Integration)**: ✅ COMPLETE — Encounter UI, stale state cleanup, remove dead code
-- **Phase E (Game Design)**: 🟡 IN PROGRESS — ~~Active clue discovery~~ ✅, ~~consequence feedback~~ ✅, ~~Veil Sight~~ ✅, ~~recovery mechanics~~ ✅, ~~persistent evidence board~~ ✅, ~~faction clamping~~ ✅, ~~CI validation~~ ✅, ~~NPC dialogue~~ ✅, audio/visual assets, content depth, scene history, testing expansion. See `GAME_DESIGN_ANALYSIS.md` for full analysis.
+- **Phase E (Game Design)**: 🟡 IN PROGRESS — ~~Active clue discovery~~ ✅, ~~consequence feedback~~ ✅, ~~Veil Sight~~ ✅, ~~recovery mechanics~~ ✅, ~~persistent evidence board~~ ✅, ~~faction clamping~~ ✅, ~~CI validation~~ ✅, ~~NPC dialogue~~ ✅, ~~scene history~~ ✅, ~~testing expansion~~ ✅, audio/visual assets, content depth. See `GAME_DESIGN_ANALYSIS.md` for full analysis.

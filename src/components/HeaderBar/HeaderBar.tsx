@@ -15,6 +15,8 @@ export interface HeaderBarProps {
   onActivateAbility: () => void;
   onOpenSettings: () => void;
   onSaveGame: () => void;
+  onReviewPrevious?: () => void;
+  canGoBack?: boolean;
 }
 
 export function HeaderBar({
@@ -24,6 +26,8 @@ export function HeaderBar({
   onActivateAbility,
   onOpenSettings,
   onSaveGame,
+  onReviewPrevious,
+  canGoBack = false,
 }: HeaderBarProps) {
   const currentCase = useStore((s) => s.currentCase);
   const clues = useStore((s) => s.clues);
@@ -51,6 +55,21 @@ export function HeaderBar({
 
       {/* Action buttons */}
       <nav aria-label="Game overlays" className="flex items-center gap-2">
+
+        {/* Review Previous Scene */}
+        <button
+          type="button"
+          aria-label="Review previous scene"
+          onClick={onReviewPrevious}
+          disabled={!canGoBack}
+          className={
+            `w-11 h-11 flex items-center justify-center rounded-lg text-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+              canGoBack ? "text-amber-300 hover:text-white hover:bg-stone-800 cursor-pointer" : "text-stone-600 cursor-default"
+            }`
+          }
+        >
+          ◀
+        </button>
 
         {/* Archetype Ability */}
         <AbilityButton

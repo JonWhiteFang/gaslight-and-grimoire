@@ -119,24 +119,12 @@ An average of ~1.1 choices per scene means most scenes are linear corridors with
 
 ---
 
-## 7. Implement Scene History Navigation (Back Button)
+## ~~7. Implement Scene History Navigation (Back Button)~~ — ✅ COMPLETE
 
 **Category:** Player Engagement / UX
-**Severity:** Medium — players feel trapped in forward-only progression
+**Severity:** Medium — players felt trapped in forward-only progression
 
-**Issue:** `sceneHistory` is tracked in the narrative slice (every `goToScene` call appends to it) but is never used for navigation. There's no "go back" button, no scene replay, and no way to revisit previous scenes. Combined with the lack of recovery mechanics and the randomness of dice checks, a bad outcome on a critical choice is permanent and irreversible.
-
-**Impact:** Players who make a choice they regret (or fail a dice check) have no recourse except loading a save. Since autosave overwrites the single `autosave` slot, they may not even have a recent save to fall back on. This creates anxiety around choices rather than excitement.
-
-**Proposed Solution:**
-- Add a "Review Previous Scene" button to the `HeaderBar` that lets the player re-read the last scene's narrative (read-only, no re-choosing).
-- For a more generous approach: allow navigating back to the previous scene and re-making the choice. This would require reverting the state changes from the forward navigation (undo the `onEnter` effects, un-discover clues, etc.). Store a state snapshot before each choice to enable clean rollback.
-- At minimum, display `sceneHistory` in the `CaseJournal` as a timeline of visited scenes with their narrative excerpts, so players can review their path.
-
-**Files to modify:**
-- `src/components/HeaderBar/HeaderBar.tsx` — add back/review button
-- `src/components/CaseJournal/CaseJournal.tsx` — add scene history timeline
-- `src/store/slices/narrativeSlice.ts` — add `goToPreviousScene` action (if implementing full rollback)
+**Resolution:** Investigation Timeline added to CaseJournal showing chronological scene history with truncated narrative excerpts (~100 chars). Each entry is clickable to trigger read-only scene review. Back button (◀) added to HeaderBar, disabled when history is empty. `GameContent` renders read-only `SceneText` + "Return to present" button when reviewing — no effects fired, no choices shown, no store mutations. Files changed: `src/components/CaseJournal/CaseJournal.tsx`, `src/components/HeaderBar/HeaderBar.tsx`, `src/App.tsx`.
 
 ---
 
@@ -209,7 +197,7 @@ These didn't make the top 10 but are worth noting:
 | 4 | ~~NPC Dialogue System~~ ✅ | High | High | P1 — DONE |
 | 5 | ~~Recovery Mechanics~~ ✅ | Low-Medium | High | P1 — DONE |
 | 6 | ~~Persistent Evidence Board~~ ✅ | Medium | Medium-High | P1 — DONE |
-| 7 | Scene History Navigation | Medium | Medium | P2 |
+| 7 | ~~Scene History Navigation~~ ✅ | Medium | Medium | P2 — DONE |
 | 8 | ~~Rebalance Dice Math~~ ✅ | Low | Medium | P2 — DONE |
 | 9 | ~~Consequence Feedback~~ ✅ | Medium | Medium | P2 — DONE |
-| 10 | Expand Testing | Medium | Medium | P2 |
+| 10 | ~~Expand Testing~~ ✅ | Medium | Medium | P2 — DONE |

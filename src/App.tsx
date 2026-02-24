@@ -9,7 +9,7 @@ import { SettingsPanel } from './components/SettingsPanel/SettingsPanel';
 import { AmbientAudio } from './components/AmbientAudio/AmbientAudio';
 import { TitleScreen } from './components/TitleScreen/TitleScreen';
 import { LoadGameScreen } from './components/TitleScreen/LoadGameScreen';
-import { NarrativePanel } from './components/NarrativePanel';
+import { NarrativePanel, SceneText } from './components/NarrativePanel';
 import { StatusBar } from './components/StatusBar';
 import { ChoicePanel } from './components/ChoicePanel';
 import { EncounterPanel } from './components/EncounterPanel';
@@ -28,9 +28,36 @@ const ABILITY_FLAGS: Record<string, string> = {
   mesmerist: 'ability-auto-succeed-influence',
 };
 
-function GameContent({ onCompleteCase }: { onCompleteCase: () => void }) {
+function GameContent({ onCompleteCase, reviewSceneId, onDismissReview }: { onCompleteCase: () => void; reviewSceneId: string | null; onDismissReview: () => void }) {
   const scene = useCurrentScene();
+  const caseData = useStore((s) => s.caseData);
+  const reducedMotion = useStore((s) => s.settings.reducedMotion);
   const isTerminal = scene && scene.choices.length === 0 && !scene.encounter;
+
+  // Read-only review mode
+  if (reviewSceneId && caseData?.scenes[reviewSceneId]) {
+    const reviewScene = caseData.scenes[reviewSceneId];
+    return (
+      <main className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto">
+          <section className="flex flex-col gap-4 p-4 max-w-2xl mx-auto">
+            <div className="flex items-center gap-2 text-xs text-stone-500 uppercase tracking-wide">
+              <span>📖 Reviewing previous scene</span>
+            </div>
+            <SceneText text={reviewScene.narrative} textSpeed="instant" reducedMotion={reducedMotion} />
+            <button
+              type="button"
+              onClick={onDismissReview}
+              className="self-center px-6 py-2 bg-amber-800 hover:bg-amber-700 text-amber-100 font-serif rounded border border-amber-600 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400"
+            >
+              Return to present
+            </button>
+          </section>
+        </div>
+        <StatusBar />
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 flex flex-col overflow-hidden">
@@ -62,12 +89,14 @@ function GameContent({ onCompleteCase }: { onCompleteCase: () => void }) {
   );
 }
 
+
 export default function App() {
   const [screen, setScreen] = useState<Screen>('title');
   const [isEvidenceBoardOpen, setIsEvidenceBoardOpen] = useState(false);
   const [isJournalOpen, setIsJournalOpen] = useState(false);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [reviewSceneId, setReviewSceneId] = useState<string | null>(null);
 
   const archetype = useStore((s) => s.investigator.archetype);
   const abilityUsed = useStore((s) => s.investigator.abilityUsed);
@@ -215,17 +244,22 @@ export default function App() {
           onActivateAbility={handleActivateAbility}
           onOpenSettings={() => setIsSettingsOpen(true)}
           onSaveGame={saveGame}
+          onReviewPrevious={() => {
+            const history = useStore.getState().sceneHistory;
+            if (history.length > 0) setReviewSceneId(history[history.length - 1]);
+          }}
+          canGoBack={useStore.getState().sceneHistory.length > 0}
         />
         <AmbientAudio />
 
-        <GameContent onCompleteCase={handleCompleteCase} />
+        <GameContent onCompleteCase={handleCompleteCase} reviewSceneId={reviewSceneId} onDismissReview={() => setReviewSceneId(null)} />
 
         {/* Overlays */}
         {isEvidenceBoardOpen && (
           <EvidenceBoard onClose={() => setIsEvidenceBoardOpen(false)} />
         )}
         {isJournalOpen && (
-          <CaseJournal onClose={() => setIsJournalOpen(false)} />
+          <CaseJournal onClose={() => setIsJournalOpen(false)} onReviewScene={(id) => setReviewSceneId(id)} />
         )}
         {isGalleryOpen && (
           <NPCGallery onClose={() => setIsGalleryOpen(false)} />

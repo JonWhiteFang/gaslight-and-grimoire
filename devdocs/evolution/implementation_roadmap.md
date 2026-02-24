@@ -302,15 +302,11 @@ Goal: Transform the technically sound but content-thin game into a compelling pl
 
 ---
 
-### E7. Implement Scene History Navigation — P2
+### ~~E7. Implement Scene History Navigation~~ — ✅ COMPLETE
 
-**What**: `sceneHistory` is tracked but never consumed. No back button, no scene replay, no timeline in journal.
+**What**: `sceneHistory` was tracked but never consumed.
 
-**Files**: `src/store/slices/narrativeSlice.ts` (add `goToPreviousScene`), `src/components/HeaderBar/HeaderBar.tsx` (back button), `src/components/CaseJournal/CaseJournal.tsx` (scene timeline)
-
-**Dependencies**: None.
-
-**Risk**: Medium. State rollback (undoing `onEnter` effects) is complex if full undo is desired. Read-only review is simpler.
+**Resolution**: Investigation Timeline added to CaseJournal showing chronological scene history with truncated narrative excerpts. Clickable entries trigger read-only scene review. Back button added to HeaderBar (disabled when history empty). `GameContent` renders read-only `SceneText` + "Return to present" button when reviewing — no effects fired, no choices shown. Files changed: `src/components/CaseJournal/CaseJournal.tsx`, `src/components/HeaderBar/HeaderBar.tsx`, `src/App.tsx`.
 
 ---
 
@@ -330,15 +326,11 @@ Goal: Transform the technically sound but content-thin game into a compelling pl
 
 ---
 
-### E10. Expand Testing to Cover Integration Paths — P2
+### ~~E10. Expand Testing to Cover Integration Paths~~ — ✅ COMPLETE
 
-**What**: No integration tests for choice→navigation→effect pipeline. ~~`validateCase.mjs` not in CI.~~ No component tests for EncounterPanel or EvidenceBoard.
+**What**: No integration tests for choice→navigation→effect pipeline. No component tests for EncounterPanel or EvidenceBoard.
 
-**Files**: `.github/workflows/deploy.yml` (add validation step), new `src/engine/__tests__/integration.test.ts`, new `src/components/__tests__/EncounterPanel.test.tsx`, new `src/components/__tests__/EvidenceBoard.test.tsx`
-
-**Dependencies**: None.
-
-**Risk**: Low. Additive tests.
+**Resolution**: Integration test (`integration.test.ts`, 7 tests) covers processChoice pipeline, critical flag, non-check choice, condition gating (hasClue, npcDisposition, AND logic). EncounterPanel tests (3 tests) cover round indicator, choices, supernatural reaction message. EvidenceBoard tests (4 tests) cover revealed clues, empty state, Escape closes, dialog role. `validateCase.mjs` added to CI in earlier commit. New files: `src/engine/__tests__/integration.test.ts`, `src/components/__tests__/EncounterPanel.test.tsx`, `src/components/__tests__/EvidenceBoard.test.tsx`.
 
 ---
 
@@ -358,10 +350,10 @@ Phase E (Game Design Improvements):
   E4 (NPC dialogue)              — ✅ COMPLETE
   E5 (recovery mechanics)        — ✅ COMPLETE
   E6 (persistent evidence board) — ✅ COMPLETE
-  E7 (scene history)             — independent
+  E7 (scene history)             — ✅ COMPLETE
   E8 (dice rebalance)            — independent
   E9 (consequence feedback)      — ✅ COMPLETE
-  E10 (testing expansion)        — independent
+  E10 (testing expansion)        — ✅ COMPLETE
 ```
 
 ## Updated Timeline Estimate
