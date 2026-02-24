@@ -1,0 +1,10 @@
+{
+  "id": "incapacitation",
+  "act": 0,
+  "narrative": "Your body fails you. The accumulated injuries — the bruises, the cuts, the bone-deep exhaustion — finally exact their toll. Your legs give way. The cobblestones rise to meet you, cold and unyielding. Somewhere above, voices call out, but they are distant, muffled, as though heard through water. London carries on around your fallen form, indifferent as always. When consciousness returns, it will be in an unfamiliar bed, with unfamiliar faces, and the certain knowledge that you have been pulled from the brink.",
+  "cluesAvailable": [],
+  "choices": [],
+  "onEnter": [
+    { "type": "flag", "target": "incapacitated", "value": true }
+  ]
+}

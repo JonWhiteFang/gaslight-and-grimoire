@@ -438,17 +438,11 @@ The closest candidate would be `narrativeEngine.ts` (400+ lines, 6 responsibilit
 
 ---
 
-### 5.5 Add Recovery Mechanics and Breakdown/Incapacitation Scenes
+### ~~5.5 Add Recovery Mechanics and Breakdown/Incapacitation Scenes~~ — ✅ COMPLETE
 
-**What**: Recovery scenes with positive composure/vitality effects. Breakdown and incapacitation scenes as narrative consequences.
+**Resolution**: Shared `breakdown` and `incapacitation` scenes created in `public/content/shared/` and injected into all cases via `injectSharedScenes` in `loadCase`/`loadVignette`. Case-specific variants added to both cases. Recovery effects (+1 composure/vitality) added to 6 scenes. Veil Sight also fixed in same pass: grants Lore advantage + variant scenes.
 
-**Files**: Content JSON `act*.json` (new scenes with positive `onEnter` effects)
-
-**Dependencies**: None.
-
-**Risk**: Low. Primarily content authoring. Verify `adjustComposure`/`adjustVitality` accept positive deltas (they should — clamped to [0,10]).
-
-**Testing**: Navigate to recovery scene → verify meter increases. Reach 0 composure → verify breakdown scene loads (not crash).
+**New files**: `public/content/shared/breakdown.json`, `public/content/shared/incapacitation.json`, `src/engine/__tests__/veilSight.test.ts`
 
 ---
 

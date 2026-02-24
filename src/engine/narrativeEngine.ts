@@ -40,6 +40,16 @@ export async function fetchManifest(): Promise<CaseManifest> {
   return fetchJson<CaseManifest>('/content/manifest.json');
 }
 
+
+/** Loads shared scenes (breakdown, incapacitation) and injects them into a scenes record. */
+async function injectSharedScenes(scenes: Record<string, SceneNode>): Promise<Record<string, SceneNode>> {
+  const [breakdown, incapacitation] = await Promise.all([
+    fetchJson<SceneNode>("/content/shared/breakdown.json"),
+    fetchJson<SceneNode>("/content/shared/incapacitation.json"),
+  ]);
+  return { ...scenes, [breakdown.id]: breakdown, [incapacitation.id]: incapacitation };
+}
+
 /**
  * Loads all JSON files for a case and assembles a CaseData object.
  * Req 17.1
@@ -59,7 +69,7 @@ export async function loadCase(caseId: string): Promise<CaseData> {
     ]);
 
   const allScenes = [...act1.scenes, ...act2.scenes, ...act3.scenes];
-  const scenes = indexById(allScenes);
+  const scenes = await injectSharedScenes(indexById(allScenes));
   const clues = indexById(cluesFile.clues);
   const npcs = indexById(npcsFile.npcs);
 
@@ -80,7 +90,7 @@ export async function loadVignette(vignetteId: string): Promise<VignetteData> {
     fetchJson<{ npcs: NPCState[] }>(`${base}/npcs.json`),
   ]);
 
-  const scenes = indexById(scenesFile.scenes);
+  const scenes = await injectSharedScenes(indexById(scenesFile.scenes));
   const clues = indexById(cluesFile.clues);
   const npcs = indexById(npcsFile.npcs);
 
@@ -338,8 +348,11 @@ export function computeChoiceResult(
     }
 
     const dc = resolveDC(choice, state.investigator);
-    const hasAdvantage =
+    const clueAdvantage =
       choice.advantageIf?.some((clueId) => state.clues[clueId]?.isRevealed) ?? false;
+    const veilSightAdvantage =
+      choice.faculty === 'lore' && !!state.flags['ability-veil-sight-active'];
+    const hasAdvantage = clueAdvantage || veilSightAdvantage;
     const result = performCheck(choice.faculty, state.investigator, dc, hasAdvantage, false);
     return {
       nextSceneId: choice.outcomes[result.tier],
@@ -495,7 +508,9 @@ export function processEncounterChoice(
   const hasStandardAdvantage =
     choice.advantageIf?.some((clueId) => state.clues[clueId]?.isRevealed) ?? false;
 
-  const hasAdvantage = hasOccultAdvantage || hasStandardAdvantage;
+  const veilSightAdvantage =
+    choice.faculty === 'lore' && !!state.flags['ability-veil-sight-active'];
+  const hasAdvantage = hasOccultAdvantage || hasStandardAdvantage || veilSightAdvantage;
 
   let nextSceneId: string;
   let roll: number | undefined;

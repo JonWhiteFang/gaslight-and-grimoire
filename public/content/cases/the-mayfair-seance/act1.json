@@ -1,257 +1,287 @@
 {
-  "scenes": [
-    {
-      "id": "ms-act1-invitation",
-      "act": 1,
-      "narrative": "The carriage draws up before a Mayfair townhouse ablaze with gaslight. Lady Ashworth's invitation was specific: 'A demonstration of the spirit world, conducted under scientific conditions.' The door is opened by a pale butler who leads you through a hallway hung with black crepe into a drawing room where a dozen guests mill in uneasy anticipation. Lady Ashworth herself — tall, composed, dressed in mourning violet — greets you with the measured warmth of someone who has rehearsed the evening carefully. At the far end of the room, a woman in dark silk sits motionless beside a round table draped in black velvet. Madame Vesper. The medium.",
-      "ambientAudio": "ambient-mayfair-evening",
-      "cluesAvailable": [
-        {
-          "clueId": "ms-clue-invitation-letter",
-          "method": "automatic"
-        },
-        {
-          "clueId": "ms-clue-red-herring-servant",
-          "method": "exploration"
-        }
-      ],
-      "choices": [
-        {
-          "id": "ms-choice-question-ashworth",
-          "text": "Engage Lady Ashworth in conversation — learn what she truly expects from tonight.",
-          "faculty": "influence",
-          "difficulty": 9,
-          "outcomes": {
-            "critical": "ms-act1-ashworth-confides",
-            "success": "ms-act1-ashworth-guarded",
-            "partial": "ms-act1-ashworth-guarded",
-            "failure": "ms-act1-ashworth-deflects",
-            "fumble": "ms-act1-ashworth-deflects"
-          }
-        },
-        {
-          "id": "ms-choice-examine-room",
-          "text": "Examine the séance room before the demonstration begins.",
-          "faculty": "perception",
-          "difficulty": 10,
-          "outcomes": {
-            "critical": "ms-act1-room-thorough",
-            "success": "ms-act1-room-partial",
-            "partial": "ms-act1-room-partial",
-            "failure": "ms-act1-room-nothing",
-            "fumble": "ms-act1-room-nothing"
-          }
-        },
-        {
-          "id": "ms-choice-study-vesper",
-          "text": "Observe Madame Vesper — her manner, her preparations, the symbols on her shawl.",
-          "faculty": "lore",
-          "difficulty": 9,
-          "outcomes": {
-            "critical": "ms-act1-vesper-read",
-            "success": "ms-act1-vesper-glimpse",
-            "partial": "ms-act1-vesper-glimpse",
-            "failure": "ms-act1-vesper-nothing",
-            "fumble": "ms-act1-vesper-nothing"
-          }
-        }
-      ],
-      "onEnter": []
-    },
-    {
-      "id": "ms-act1-ashworth-confides",
-      "act": 1,
-      "narrative": "Lady Ashworth's composure cracks, just slightly, when you mention her late husband. 'Gerald believed,' she says, her voice dropping. 'He believed utterly. He left everything — the house, the foundation, the investments — contingent on proof. Proof that the spirit world is real.' She meets your eyes. 'Madame Vesper is my last chance. If tonight fails, the estate passes to the creditors, and Gerald's life's work dies with it.' There is desperation beneath the poise. She needs this séance to succeed — but does she need it enough to ensure it does?",
-      "cluesAvailable": [],
-      "choices": [
-        {
-          "id": "ms-choice-confides-proceed",
-          "text": "Lady Ashworth has revealed her motive. The séance is about to begin.",
-          "outcomes": {
-            "critical": "ms-act2-the-seance",
-            "success": "ms-act2-the-seance",
-            "partial": "ms-act2-the-seance",
-            "failure": "ms-act2-the-seance",
-            "fumble": "ms-act2-the-seance"
-          }
-        }
-      ],
-      "onEnter": [
-        { "type": "disposition", "target": "npc-ashworth", "delta": 2, "description": "Lady Ashworth warms to your sincerity" }
+      "scenes": [
+            {
+                  "id": "ms-act1-invitation",
+                  "act": 1,
+                  "narrative": "The carriage draws up before a Mayfair townhouse ablaze with gaslight. Lady Ashworth's invitation was specific: 'A demonstration of the spirit world, conducted under scientific conditions.' The door is opened by a pale butler who leads you through a hallway hung with black crepe into a drawing room where a dozen guests mill in uneasy anticipation. Lady Ashworth herself \u2014 tall, composed, dressed in mourning violet \u2014 greets you with the measured warmth of someone who has rehearsed the evening carefully. At the far end of the room, a woman in dark silk sits motionless beside a round table draped in black velvet. Madame Vesper. The medium.",
+                  "ambientAudio": "ambient-mayfair-evening",
+                  "cluesAvailable": [
+                        {
+                              "clueId": "ms-clue-invitation-letter",
+                              "method": "automatic"
+                        },
+                        {
+                              "clueId": "ms-clue-red-herring-servant",
+                              "method": "exploration"
+                        }
+                  ],
+                  "choices": [
+                        {
+                              "id": "ms-choice-question-ashworth",
+                              "text": "Engage Lady Ashworth in conversation \u2014 learn what she truly expects from tonight.",
+                              "faculty": "influence",
+                              "difficulty": 9,
+                              "outcomes": {
+                                    "critical": "ms-act1-ashworth-confides",
+                                    "success": "ms-act1-ashworth-guarded",
+                                    "partial": "ms-act1-ashworth-guarded",
+                                    "failure": "ms-act1-ashworth-deflects",
+                                    "fumble": "ms-act1-ashworth-deflects"
+                              }
+                        },
+                        {
+                              "id": "ms-choice-examine-room",
+                              "text": "Examine the s\u00e9ance room before the demonstration begins.",
+                              "faculty": "perception",
+                              "difficulty": 10,
+                              "outcomes": {
+                                    "critical": "ms-act1-room-thorough",
+                                    "success": "ms-act1-room-partial",
+                                    "partial": "ms-act1-room-partial",
+                                    "failure": "ms-act1-room-nothing",
+                                    "fumble": "ms-act1-room-nothing"
+                              }
+                        },
+                        {
+                              "id": "ms-choice-study-vesper",
+                              "text": "Observe Madame Vesper \u2014 her manner, her preparations, the symbols on her shawl.",
+                              "faculty": "lore",
+                              "difficulty": 9,
+                              "outcomes": {
+                                    "critical": "ms-act1-vesper-read",
+                                    "success": "ms-act1-vesper-glimpse",
+                                    "partial": "ms-act1-vesper-glimpse",
+                                    "failure": "ms-act1-vesper-nothing",
+                                    "fumble": "ms-act1-vesper-nothing"
+                              }
+                        }
+                  ],
+                  "onEnter": []
+            },
+            {
+                  "id": "ms-act1-ashworth-confides",
+                  "act": 1,
+                  "narrative": "Lady Ashworth's composure cracks, just slightly, when you mention her late husband. 'Gerald believed,' she says, her voice dropping. 'He believed utterly. He left everything \u2014 the house, the foundation, the investments \u2014 contingent on proof. Proof that the spirit world is real.' She meets your eyes. 'Madame Vesper is my last chance. If tonight fails, the estate passes to the creditors, and Gerald's life's work dies with it.' There is desperation beneath the poise. She needs this s\u00e9ance to succeed \u2014 but does she need it enough to ensure it does?",
+                  "cluesAvailable": [],
+                  "choices": [
+                        {
+                              "id": "ms-choice-confides-proceed",
+                              "text": "Lady Ashworth has revealed her motive. The s\u00e9ance is about to begin.",
+                              "outcomes": {
+                                    "critical": "ms-act2-the-seance",
+                                    "success": "ms-act2-the-seance",
+                                    "partial": "ms-act2-the-seance",
+                                    "failure": "ms-act2-the-seance",
+                                    "fumble": "ms-act2-the-seance"
+                              }
+                        }
+                  ],
+                  "onEnter": [
+                        {
+                              "type": "disposition",
+                              "target": "npc-ashworth",
+                              "delta": 2,
+                              "description": "Lady Ashworth warms to your sincerity"
+                        },
+                        {
+                              "type": "composure",
+                              "delta": 1,
+                              "description": "Lady Ashworth's trust steadies your resolve"
+                        }
+                  ]
+            },
+            {
+                  "id": "ms-act1-ashworth-guarded",
+                  "act": 1,
+                  "narrative": "Lady Ashworth is gracious but careful. She speaks of her late husband's interest in spiritualism, of the foundation he established, of Madame Vesper's 'remarkable reputation.' She does not mention money, or the estate, or the conditions of the will. But her eyes flick to Lord Pemberton across the room \u2014 a glance that carries the weight of unspoken calculation.",
+                  "cluesAvailable": [],
+                  "choices": [
+                        {
+                              "id": "ms-choice-guarded-proceed",
+                              "text": "Ashworth is holding back. The s\u00e9ance will reveal more.",
+                              "outcomes": {
+                                    "critical": "ms-act2-the-seance",
+                                    "success": "ms-act2-the-seance",
+                                    "partial": "ms-act2-the-seance",
+                                    "failure": "ms-act2-the-seance",
+                                    "fumble": "ms-act2-the-seance"
+                              }
+                        }
+                  ],
+                  "onEnter": []
+            },
+            {
+                  "id": "ms-act1-ashworth-deflects",
+                  "act": 1,
+                  "narrative": "Lady Ashworth deflects your questions with the practised ease of a society hostess. 'You must speak with Madame Vesper,' she says, steering you toward the refreshments. 'She is the expert in these matters. I am merely the hostess.' The dismissal is polite but absolute. Whatever Lady Ashworth knows about tonight's proceedings, she has no intention of sharing it with you \u2014 not yet.",
+                  "cluesAvailable": [],
+                  "choices": [
+                        {
+                              "id": "ms-choice-deflects-proceed",
+                              "text": "Ashworth will not be drawn out. Wait for the s\u00e9ance.",
+                              "outcomes": {
+                                    "critical": "ms-act2-the-seance",
+                                    "success": "ms-act2-the-seance",
+                                    "partial": "ms-act2-the-seance",
+                                    "failure": "ms-act2-the-seance",
+                                    "fumble": "ms-act2-the-seance"
+                              }
+                        }
+                  ],
+                  "onEnter": [
+                        {
+                              "type": "suspicion",
+                              "target": "npc-ashworth",
+                              "delta": 1
+                        }
+                  ]
+            },
+            {
+                  "id": "ms-act1-room-thorough",
+                  "act": 1,
+                  "narrative": "You move through the s\u00e9ance room with deliberate care while the other guests are occupied with sherry. The table is heavy oak, draped in black velvet. Beneath the drape, your fingers find wires \u2014 thin copper, running from the table legs to a concealed panel in the wainscoting. A bellows mechanism, connected to the gas lamps. Someone has built an elaborate system for manufacturing supernatural effects: flickering lights, cold drafts, perhaps even sounds. This s\u00e9ance is rigged. The question is by whom, and whether Madame Vesper knows.",
+                  "cluesAvailable": [
+                        {
+                              "clueId": "ms-clue-hidden-mechanism",
+                              "method": "exploration"
+                        }
+                  ],
+                  "choices": [
+                        {
+                              "id": "ms-choice-room-thorough-proceed",
+                              "text": "The mechanism is damning. But the s\u00e9ance is about to begin.",
+                              "outcomes": {
+                                    "critical": "ms-act2-the-seance",
+                                    "success": "ms-act2-the-seance",
+                                    "partial": "ms-act2-the-seance",
+                                    "failure": "ms-act2-the-seance",
+                                    "fumble": "ms-act2-the-seance"
+                              }
+                        }
+                  ],
+                  "onEnter": [
+                        {
+                              "type": "composure",
+                              "delta": 1,
+                              "description": "The mechanism confirms your suspicions \u2014 the rational world holds"
+                        }
+                  ]
+            },
+            {
+                  "id": "ms-act1-room-partial",
+                  "act": 1,
+                  "narrative": "The s\u00e9ance room is arranged with theatrical precision \u2014 black velvet, low gaslight, a faint smell of incense. You notice the table is unusually heavy for its size, and the gas lamps are fitted with an unfamiliar valve mechanism. Something about the room feels staged, but you cannot identify the specific artifice before Lady Ashworth calls the guests to take their seats.",
+                  "cluesAvailable": [],
+                  "choices": [
+                        {
+                              "id": "ms-choice-room-partial-proceed",
+                              "text": "Something is off about this room. Watch carefully during the s\u00e9ance.",
+                              "outcomes": {
+                                    "critical": "ms-act2-the-seance",
+                                    "success": "ms-act2-the-seance",
+                                    "partial": "ms-act2-the-seance",
+                                    "failure": "ms-act2-the-seance",
+                                    "fumble": "ms-act2-the-seance"
+                              }
+                        }
+                  ],
+                  "onEnter": []
+            },
+            {
+                  "id": "ms-act1-room-nothing",
+                  "act": 1,
+                  "narrative": "The s\u00e9ance room reveals nothing to your cursory inspection. Black velvet, gaslight, incense \u2014 the standard trappings of a spiritualist demonstration. If there is artifice here, it is well concealed. Lady Ashworth calls the guests to their seats before you can look further.",
+                  "cluesAvailable": [],
+                  "choices": [
+                        {
+                              "id": "ms-choice-room-nothing-proceed",
+                              "text": "Nothing obvious. Take your seat for the s\u00e9ance.",
+                              "outcomes": {
+                                    "critical": "ms-act2-the-seance",
+                                    "success": "ms-act2-the-seance",
+                                    "partial": "ms-act2-the-seance",
+                                    "failure": "ms-act2-the-seance",
+                                    "fumble": "ms-act2-the-seance"
+                              }
+                        }
+                  ],
+                  "onEnter": [
+                        {
+                              "type": "composure",
+                              "delta": -1
+                        }
+                  ]
+            },
+            {
+                  "id": "ms-act1-vesper-read",
+                  "act": 1,
+                  "narrative": "Madame Vesper's shawl is embroidered with symbols you recognise \u2014 Grey Dawn sigils, but arranged in an unusual configuration. This is not the standard theatrical occultism of a parlour medium. These are working symbols: a summoning circle rendered in silk thread. Vesper catches you looking and her eyes narrow. For a moment, the mask of the serene medium slips, and you see something beneath it \u2014 not fraud, but fear. She knows what those symbols mean. And she is afraid of what she has agreed to do tonight.",
+                  "cluesAvailable": [],
+                  "choices": [
+                        {
+                              "id": "ms-choice-vesper-read-proceed",
+                              "text": "Vesper is more than a charlatan. This changes everything.",
+                              "outcomes": {
+                                    "critical": "ms-act2-the-seance",
+                                    "success": "ms-act2-the-seance",
+                                    "partial": "ms-act2-the-seance",
+                                    "failure": "ms-act2-the-seance",
+                                    "fumble": "ms-act2-the-seance"
+                              }
+                        }
+                  ],
+                  "onEnter": [
+                        {
+                              "type": "suspicion",
+                              "target": "npc-vesper",
+                              "delta": 1
+                        }
+                  ]
+            },
+            {
+                  "id": "ms-act1-vesper-glimpse",
+                  "act": 1,
+                  "narrative": "Madame Vesper sits with the stillness of someone accustomed to being watched. Her shawl bears embroidered symbols \u2014 you recognise fragments of Grey Dawn iconography, though the arrangement is unfamiliar. She is either a genuine practitioner or an exceptionally well-researched fraud. Her hands, you notice, are trembling slightly.",
+                  "cluesAvailable": [],
+                  "choices": [
+                        {
+                              "id": "ms-choice-vesper-glimpse-proceed",
+                              "text": "Vesper bears watching. Take your seat for the s\u00e9ance.",
+                              "outcomes": {
+                                    "critical": "ms-act2-the-seance",
+                                    "success": "ms-act2-the-seance",
+                                    "partial": "ms-act2-the-seance",
+                                    "failure": "ms-act2-the-seance",
+                                    "fumble": "ms-act2-the-seance"
+                              }
+                        }
+                  ],
+                  "onEnter": []
+            },
+            {
+                  "id": "ms-act1-vesper-nothing",
+                  "act": 1,
+                  "narrative": "Madame Vesper is a study in composure \u2014 dark silk, pale hands, an expression of serene detachment. If she is a fraud, she is a convincing one. If she is genuine, she gives nothing away. The symbols on her shawl might be occult or merely decorative; you cannot tell from this distance. Lady Ashworth calls the guests to their seats.",
+                  "cluesAvailable": [],
+                  "choices": [
+                        {
+                              "id": "ms-choice-vesper-nothing-proceed",
+                              "text": "Vesper reveals nothing. The s\u00e9ance will have to speak for itself.",
+                              "outcomes": {
+                                    "critical": "ms-act2-the-seance",
+                                    "success": "ms-act2-the-seance",
+                                    "partial": "ms-act2-the-seance",
+                                    "failure": "ms-act2-the-seance",
+                                    "fumble": "ms-act2-the-seance"
+                              }
+                        }
+                  ],
+                  "onEnter": [
+                        {
+                              "type": "composure",
+                              "delta": -1
+                        }
+                  ]
+            }
       ]
-    },
-    {
-      "id": "ms-act1-ashworth-guarded",
-      "act": 1,
-      "narrative": "Lady Ashworth is gracious but careful. She speaks of her late husband's interest in spiritualism, of the foundation he established, of Madame Vesper's 'remarkable reputation.' She does not mention money, or the estate, or the conditions of the will. But her eyes flick to Lord Pemberton across the room — a glance that carries the weight of unspoken calculation.",
-      "cluesAvailable": [],
-      "choices": [
-        {
-          "id": "ms-choice-guarded-proceed",
-          "text": "Ashworth is holding back. The séance will reveal more.",
-          "outcomes": {
-            "critical": "ms-act2-the-seance",
-            "success": "ms-act2-the-seance",
-            "partial": "ms-act2-the-seance",
-            "failure": "ms-act2-the-seance",
-            "fumble": "ms-act2-the-seance"
-          }
-        }
-      ],
-      "onEnter": []
-    },
-    {
-      "id": "ms-act1-ashworth-deflects",
-      "act": 1,
-      "narrative": "Lady Ashworth deflects your questions with the practised ease of a society hostess. 'You must speak with Madame Vesper,' she says, steering you toward the refreshments. 'She is the expert in these matters. I am merely the hostess.' The dismissal is polite but absolute. Whatever Lady Ashworth knows about tonight's proceedings, she has no intention of sharing it with you — not yet.",
-      "cluesAvailable": [],
-      "choices": [
-        {
-          "id": "ms-choice-deflects-proceed",
-          "text": "Ashworth will not be drawn out. Wait for the séance.",
-          "outcomes": {
-            "critical": "ms-act2-the-seance",
-            "success": "ms-act2-the-seance",
-            "partial": "ms-act2-the-seance",
-            "failure": "ms-act2-the-seance",
-            "fumble": "ms-act2-the-seance"
-          }
-        }
-      ],
-      "onEnter": [
-        { "type": "suspicion", "target": "npc-ashworth", "delta": 1 }
-      ]
-    },
-    {
-      "id": "ms-act1-room-thorough",
-      "act": 1,
-      "narrative": "You move through the séance room with deliberate care while the other guests are occupied with sherry. The table is heavy oak, draped in black velvet. Beneath the drape, your fingers find wires — thin copper, running from the table legs to a concealed panel in the wainscoting. A bellows mechanism, connected to the gas lamps. Someone has built an elaborate system for manufacturing supernatural effects: flickering lights, cold drafts, perhaps even sounds. This séance is rigged. The question is by whom, and whether Madame Vesper knows.",
-      "cluesAvailable": [
-        {
-          "clueId": "ms-clue-hidden-mechanism",
-          "method": "exploration"
-        }
-      ],
-      "choices": [
-        {
-          "id": "ms-choice-room-thorough-proceed",
-          "text": "The mechanism is damning. But the séance is about to begin.",
-          "outcomes": {
-            "critical": "ms-act2-the-seance",
-            "success": "ms-act2-the-seance",
-            "partial": "ms-act2-the-seance",
-            "failure": "ms-act2-the-seance",
-            "fumble": "ms-act2-the-seance"
-          }
-        }
-      ],
-      "onEnter": []
-    },
-    {
-      "id": "ms-act1-room-partial",
-      "act": 1,
-      "narrative": "The séance room is arranged with theatrical precision — black velvet, low gaslight, a faint smell of incense. You notice the table is unusually heavy for its size, and the gas lamps are fitted with an unfamiliar valve mechanism. Something about the room feels staged, but you cannot identify the specific artifice before Lady Ashworth calls the guests to take their seats.",
-      "cluesAvailable": [],
-      "choices": [
-        {
-          "id": "ms-choice-room-partial-proceed",
-          "text": "Something is off about this room. Watch carefully during the séance.",
-          "outcomes": {
-            "critical": "ms-act2-the-seance",
-            "success": "ms-act2-the-seance",
-            "partial": "ms-act2-the-seance",
-            "failure": "ms-act2-the-seance",
-            "fumble": "ms-act2-the-seance"
-          }
-        }
-      ],
-      "onEnter": []
-    },
-    {
-      "id": "ms-act1-room-nothing",
-      "act": 1,
-      "narrative": "The séance room reveals nothing to your cursory inspection. Black velvet, gaslight, incense — the standard trappings of a spiritualist demonstration. If there is artifice here, it is well concealed. Lady Ashworth calls the guests to their seats before you can look further.",
-      "cluesAvailable": [],
-      "choices": [
-        {
-          "id": "ms-choice-room-nothing-proceed",
-          "text": "Nothing obvious. Take your seat for the séance.",
-          "outcomes": {
-            "critical": "ms-act2-the-seance",
-            "success": "ms-act2-the-seance",
-            "partial": "ms-act2-the-seance",
-            "failure": "ms-act2-the-seance",
-            "fumble": "ms-act2-the-seance"
-          }
-        }
-      ],
-      "onEnter": [
-        { "type": "composure", "delta": -1 }
-      ]
-    },
-    {
-      "id": "ms-act1-vesper-read",
-      "act": 1,
-      "narrative": "Madame Vesper's shawl is embroidered with symbols you recognise — Grey Dawn sigils, but arranged in an unusual configuration. This is not the standard theatrical occultism of a parlour medium. These are working symbols: a summoning circle rendered in silk thread. Vesper catches you looking and her eyes narrow. For a moment, the mask of the serene medium slips, and you see something beneath it — not fraud, but fear. She knows what those symbols mean. And she is afraid of what she has agreed to do tonight.",
-      "cluesAvailable": [],
-      "choices": [
-        {
-          "id": "ms-choice-vesper-read-proceed",
-          "text": "Vesper is more than a charlatan. This changes everything.",
-          "outcomes": {
-            "critical": "ms-act2-the-seance",
-            "success": "ms-act2-the-seance",
-            "partial": "ms-act2-the-seance",
-            "failure": "ms-act2-the-seance",
-            "fumble": "ms-act2-the-seance"
-          }
-        }
-      ],
-      "onEnter": [
-        { "type": "suspicion", "target": "npc-vesper", "delta": 1 }
-      ]
-    },
-    {
-      "id": "ms-act1-vesper-glimpse",
-      "act": 1,
-      "narrative": "Madame Vesper sits with the stillness of someone accustomed to being watched. Her shawl bears embroidered symbols — you recognise fragments of Grey Dawn iconography, though the arrangement is unfamiliar. She is either a genuine practitioner or an exceptionally well-researched fraud. Her hands, you notice, are trembling slightly.",
-      "cluesAvailable": [],
-      "choices": [
-        {
-          "id": "ms-choice-vesper-glimpse-proceed",
-          "text": "Vesper bears watching. Take your seat for the séance.",
-          "outcomes": {
-            "critical": "ms-act2-the-seance",
-            "success": "ms-act2-the-seance",
-            "partial": "ms-act2-the-seance",
-            "failure": "ms-act2-the-seance",
-            "fumble": "ms-act2-the-seance"
-          }
-        }
-      ],
-      "onEnter": []
-    },
-    {
-      "id": "ms-act1-vesper-nothing",
-      "act": 1,
-      "narrative": "Madame Vesper is a study in composure — dark silk, pale hands, an expression of serene detachment. If she is a fraud, she is a convincing one. If she is genuine, she gives nothing away. The symbols on her shawl might be occult or merely decorative; you cannot tell from this distance. Lady Ashworth calls the guests to their seats.",
-      "cluesAvailable": [],
-      "choices": [
-        {
-          "id": "ms-choice-vesper-nothing-proceed",
-          "text": "Vesper reveals nothing. The séance will have to speak for itself.",
-          "outcomes": {
-            "critical": "ms-act2-the-seance",
-            "success": "ms-act2-the-seance",
-            "partial": "ms-act2-the-seance",
-            "failure": "ms-act2-the-seance",
-            "fumble": "ms-act2-the-seance"
-          }
-        }
-      ],
-      "onEnter": [
-        { "type": "composure", "delta": -1 }
-      ]
-    }
-  ]
 }

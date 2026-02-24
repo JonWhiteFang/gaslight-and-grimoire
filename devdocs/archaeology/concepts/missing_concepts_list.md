@@ -132,11 +132,8 @@ NPCs have disposition, suspicion, memoryFlags, and faction but no interactive di
 - **Severity**: High — NPCs are passive data
 - **Where it should be**: New `DialogueNode` type in `src/types/index.ts`, new `DialoguePanel` component, dialogue evaluation in `src/engine/narrativeEngine.ts`
 
-### Composure/Vitality Recovery
-Both meters only decrease. No rest scenes, recovery items, or counterplay exist. `breakdown` and `incapacitation` scenes referenced by `StatusBar` callbacks don't exist in any case content.
-- **Status**: Missing
-- **Severity**: Medium-High — creates unrecoverable death spiral
-- **Where it should be**: Content JSON (recovery scenes with positive `onEnter` effects, breakdown/incapacitation scenes)
+### ~~Composure/Vitality Recovery~~ — ✅ FIXED
+Shared `breakdown` and `incapacitation` scenes injected into all cases via `injectSharedScenes`. Case-specific variants for both cases. Recovery effects (+1 composure/vitality) added to 6 scenes at natural rest points.
 
 ### Persistent Evidence Board Connections
 Connections live in React `useState`, lost on board close/reopen. No drag-and-drop. No touch support.
@@ -147,11 +144,8 @@ Connections live in React `useState`, lost on board close/reopen. No drag-and-dr
 ### ~~Consequence Feedback / Effect Narration~~ — ✅ FIXED
 `EffectFeedback` component renders inline atmospheric messages with mechanical annotations (e.g. "A chill settles over you (Composure −1)") when `onEnter` effects fire. Optional `description` field on `Effect` supports content-authored text with auto-generated fallback. New files: `src/engine/effectMessages.ts`, `src/components/NarrativePanel/EffectFeedback.tsx`.
 
-### Occultist Veil Sight Ability
-The flag `ability-veil-sight-active` is set when the Occultist activates their ability, but no engine function or content condition ever checks this flag. The ability has no mechanical effect.
-- **Status**: Missing
-- **Severity**: Medium — one of four archetypes has a broken ability
-- **Where it should be**: `src/engine/narrativeEngine.ts` (check flag to reveal hidden occult elements), content JSON (scenes with veil-sight-gated content)
+### ~~Occultist Veil Sight Ability~~ — ✅ FIXED
+Veil Sight now grants advantage on all Lore checks while active (`computeChoiceResult` and `processEncounterChoice`). Variant scenes added to both cases revealing occult content when `ability-veil-sight-active` flag is set. New files: `src/engine/__tests__/veilSight.test.ts`.
 
 ### Faction Reputation Clamping
 Disposition [-10,+10], suspicion [0,10], composure/vitality [0,10] are all clamped. Faction reputation has no clamp and can grow unbounded.

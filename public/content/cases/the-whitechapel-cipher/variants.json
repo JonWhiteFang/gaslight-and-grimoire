@@ -9,7 +9,7 @@
         "target": "Hermetic Order of the Grey Dawn",
         "value": 3
       },
-      "narrative": "The hansom cab deposits you at the edge of Whitechapel. Inspector Graves meets you at the cordon — but so does a hooded figure who melts back into the fog the moment you step down. Someone in the Order knows you are here. 'Third one this month,' Graves says, handing you the cipher note. His eyes flick to where the figure stood. The symbols on the note are familiar to you now — you have seen their like in Order correspondence. That knowledge may prove useful.",
+      "narrative": "The hansom cab deposits you at the edge of Whitechapel. Inspector Graves meets you at the cordon \u2014 but so does a hooded figure who melts back into the fog the moment you step down. Someone in the Order knows you are here. 'Third one this month,' Graves says, handing you the cipher note. His eyes flick to where the figure stood. The symbols on the note are familiar to you now \u2014 you have seen their like in Order correspondence. That knowledge may prove useful.",
       "ambientAudio": "ambient-whitechapel-night",
       "cluesAvailable": [
         {
@@ -28,10 +28,12 @@
       "choices": [
         {
           "id": "wc-choice-examine-note-variant",
-          "text": "Study the cipher note carefully — your familiarity with the Order's symbols gives you an edge.",
+          "text": "Study the cipher note carefully \u2014 your familiarity with the Order's symbols gives you an edge.",
           "faculty": "reason",
           "difficulty": 10,
-          "advantageIf": ["wc-clue-hermetic-primer"],
+          "advantageIf": [
+            "wc-clue-hermetic-primer"
+          ],
           "outcomes": {
             "critical": "wc-act1-cipher-decoded",
             "success": "wc-act1-cipher-partial",
@@ -65,6 +67,98 @@
             "failure": "wc-act1-scene-nothing",
             "fumble": "wc-act1-scene-nothing"
           }
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-the-web-variant-veil-sight",
+      "act": 2,
+      "variantOf": "wc-act2-the-web",
+      "variantCondition": {
+        "type": "hasFlag",
+        "target": "ability-veil-sight-active"
+      },
+      "narrative": "The threads converge \u2014 and through the Veil, you perceive more than the rational eye allows. The cipher is not merely a code: the symbols carry a residue of intent, a faint occult charge that lingers like perfume. Someone has been using the Grey Dawn's sigils not just as a cipher key but as a channel. The murders are not the message \u2014 they are the ritual. Each killing site forms a point on a larger pattern, and the pattern is incomplete. Two paths present themselves: the printshop on Dorset Street, where the typeface may betray the note's origin, and Professor Vane's townhouse, where your heightened perception may reveal what ordinary investigation cannot.",
+      "ambientAudio": "ambient-london-day",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-hermetic-primer",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-visit-printshop-veil",
+          "text": "Follow the rational thread \u2014 visit the printshop on Dorset Street.",
+          "faculty": "reason",
+          "difficulty": 8,
+          "advantageIf": [
+            "wc-clue-printshop-type"
+          ],
+          "outcomes": {
+            "critical": "wc-act2-printshop",
+            "success": "wc-act2-printshop",
+            "partial": "wc-act2-printshop",
+            "failure": "wc-act2-printshop",
+            "fumble": "wc-act2-printshop"
+          }
+        },
+        {
+          "id": "wc-choice-confront-vane-veil",
+          "text": "Confront Professor Vane \u2014 the Veil reveals the occult residue on his correspondence.",
+          "faculty": "lore",
+          "difficulty": 9,
+          "advantageIf": [
+            "wc-clue-hermetic-primer"
+          ],
+          "outcomes": {
+            "critical": "wc-act2-vane-confrontation",
+            "success": "wc-act2-vane-confrontation",
+            "partial": "wc-act2-vane-confrontation",
+            "failure": "wc-act2-vane-confrontation",
+            "fumble": "wc-act2-vane-confrontation"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-breakdown",
+      "act": 0,
+      "variantOf": "breakdown",
+      "variantCondition": {
+        "type": "hasFlag",
+        "target": "breakdown-occurred",
+        "value": false
+      },
+      "narrative": "The Whitechapel fog closes in like a living thing. The cipher symbols swim before your eyes \u2014 on the walls, on the cobblestones, carved into the very air. You cannot tell what is real and what is the product of a mind pushed past its limits. You find yourself pressed against a damp brick wall, breathing in shallow gasps, the taste of copper on your tongue. The case has broken something in you. Not permanently, perhaps. But for now, the investigation must wait.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "breakdown-occurred",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "wc-incapacitation",
+      "act": 0,
+      "variantOf": "incapacitation",
+      "variantCondition": {
+        "type": "hasFlag",
+        "target": "incapacitated",
+        "value": false
+      },
+      "narrative": "You collapse in the alley behind the printshop. The cobblestones are slick with rain and something darker. Your body has absorbed too much \u2014 the blows, the falls, the relentless pace of the investigation through Whitechapel's unforgiving streets. A costermongering woman finds you and calls for help. You are carried to a surgeon's rooms on Commercial Street, where the damage is assessed with grim efficiency. You will recover. But not tonight.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "incapacitated",
+          "value": true
         }
       ]
     }

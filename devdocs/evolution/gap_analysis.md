@@ -247,13 +247,9 @@ The issues are all incremental:
 
 ---
 
-### 6.5 No Recovery Mechanics — Death Spiral (MEDIUM-HIGH)
+### ~~6.5 No Recovery Mechanics — Death Spiral~~ — ✅ FIXED
 
-**Gap**: Composure and Vitality only decrease. No rest scenes, recovery items, or counterplay. `breakdown` and `incapacitation` scenes referenced by StatusBar don't exist in any case content.
-
-**Desired state**: Recovery scenes, breakdown/incapacitation as narrative consequences (not hard game-over), optional "Second Wind" mechanic.
-
-**Impact**: One-way ratchet toward failure. Bad early rolls make later encounters nearly impossible.
+**Resolution**: Shared `breakdown` and `incapacitation` scenes created in `public/content/shared/` and injected into all cases via `injectSharedScenes` in `loadCase`/`loadVignette`. Case-specific variants added to Whitechapel Cipher and Mayfair Séance with atmospheric narrative. Recovery effects (+1 composure/vitality) added to 6 scenes across both cases at natural rest points (cipher decoded, ally gained, successful investigation).
 
 ---
 
@@ -301,7 +297,7 @@ The issues are all incremental:
 
 ## Updated Unknowns
 
-6. **Occultist ability (Veil Sight) has no mechanical effect**: The flag `ability-veil-sight-active` is set but never checked in any engine function or content condition. The other three archetype abilities work correctly.
+6. ~~**Occultist ability (Veil Sight) has no mechanical effect**~~: ✅ FIXED. Veil Sight now grants advantage on all Lore checks while active. Variant scenes added to both cases revealing occult content when flag is set.
 
 7. **Faction reputation is unbounded**: Disposition [-10,+10], suspicion [0,10], composure/vitality [0,10] are all clamped. Faction reputation has no clamp. Extreme values could break condition checks.
 

@@ -13,9 +13,9 @@
 | 1.2 | Vite production build | ✅ PASS | `npm run build` — exit 0. `dist/index.html` (0.51 KB), JS (375.39 KB), CSS (26.77 KB). 453 modules transformed in 1.79s |
 | 1.3 | Dependency audit | ✅ PASS | `npm audit` — "found 0 vulnerabilities" |
 | 1.4 | Content JSON validation | ✅ PASS | `node scripts/validateCase.mjs` — "✓ cases/the-whitechapel-cipher — 22 scenes, 6 clues", "✓ side-cases/a-matter-of-shadows — 7 scenes, 2 clues", "All 2 case(s) validated successfully." |
-| 1.5 | All existing tests | ✅ PASS | `npm run test:run` — 19 files, 284 tests, 0 failures |
+| 1.5 | All existing tests | ✅ PASS | `npm run test:run` — 20 files, 288 tests, 0 failures |
 
-**Summary**: The codebase is in a clean state. TypeScript compiles without errors under strict mode. The production build succeeds. No dependency vulnerabilities. All content validates. All 284 tests pass.
+**Summary**: The codebase is in a clean state. TypeScript compiles without errors under strict mode. The production build succeeds. No dependency vulnerabilities. All content validates. All 288 tests pass.
 
 ---
 
@@ -110,12 +110,12 @@ All three Phase A blockers are resolved. Remaining broken features (ClueDiscover
 | 6.4 | Avg 1.1–1.3 choices/scene — most scenes are linear corridors | High | Open |
 | 6.5 | Only 6 clues per case — thin for evidence board mechanic | High | Open |
 | 6.6 | NPCs have no interactive dialogue — memoryFlags never populated | High | Open |
-| 6.7 | No composure/vitality recovery — death spiral | Medium-High | Open |
+| 6.7 | ~~No composure/vitality recovery — death spiral~~ | Medium-High | ✅ FIXED (Phase E5) — Shared breakdown/incapacitation scenes + recovery effects in 6 scenes |
 | 6.8 | Evidence Board connections lost on close (React state, not store) | Medium-High | Open |
 | 6.9 | ~~Dice math: 45% success rate for best faculty vs DC 12~~ | Medium | ✅ Fixed — partial band widened, trained bonus added, DCs lowered |
 | 6.10 | ~~onEnter effects fire silently — no narrative feedback~~ | Medium | ✅ FIXED (Phase E9) — `EffectFeedback` renders inline messages with mechanical annotations |
 | 6.11 | sceneHistory tracked but never consumed — no back navigation | Medium | Open |
-| 6.12 | Occultist Veil Sight ability has no mechanical effect | Medium | Open |
+| 6.12 | ~~Occultist Veil Sight ability has no mechanical effect~~ | Medium | ✅ FIXED — Lore advantage + variant scenes in both cases |
 | 6.13 | `validateCase.mjs` not in CI pipeline | Medium | Open |
 | 6.14 | No integration tests for choice→navigation→effect pipeline | Medium | Open |
 | 6.15 | No component tests for EncounterPanel or EvidenceBoard | Medium | Open |

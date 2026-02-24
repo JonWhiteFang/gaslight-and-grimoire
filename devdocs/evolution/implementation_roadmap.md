@@ -290,20 +290,11 @@ Goal: Transform the technically sound but content-thin game into a compelling pl
 
 ---
 
-### E5. Add Composure and Vitality Recovery Mechanics — P1
+### ~~E5. Add Composure and Vitality Recovery Mechanics~~ — ✅ COMPLETE
 
-**What**: Both meters only decrease. No rest scenes, recovery items, or counterplay. `breakdown` and `incapacitation` scenes don't exist in content. Creates unrecoverable death spiral.
+**What**: Both meters only decreased. No rest scenes, recovery items, or counterplay. `breakdown` and `incapacitation` scenes didn't exist in content.
 
-**Files**: Content JSON `act*.json` (recovery scenes, breakdown/incapacitation scenes), `src/store/slices/investigatorSlice.ts` (verify positive deltas work)
-
-**Changes**:
-1. Add 1–2 recovery scenes per act with positive composure/vitality `onEnter` effects.
-2. Create `breakdown` and `incapacitation` scenes in each case (narrative consequence, not hard game-over).
-3. Consider "Second Wind" mechanic: free +2 recovery when meter hits ≤2, once per case.
-
-**Dependencies**: None.
-
-**Risk**: Low (primarily content authoring).
+**Resolution**: Shared `breakdown` and `incapacitation` scenes created in `public/content/shared/` and injected into all cases via `injectSharedScenes` in `loadCase`/`loadVignette`. Case-specific variants added to Whitechapel Cipher (fog/cipher hallucination, alley collapse) and Mayfair Séance (séance room overwhelm, supernatural assault). Recovery effects (+1 composure/vitality) added to 6 scenes across both cases at natural rest points. Veil Sight also fixed: grants Lore advantage + variant scenes with occult content. Files changed: `src/engine/narrativeEngine.ts`, content JSON (act files, variants, shared scenes), `src/engine/__tests__/veilSight.test.ts`.
 
 ---
 
@@ -373,7 +364,7 @@ Phase E (Game Design Improvements):
   E2 (audio/visual assets)       — independent
   E3 (content depth)             — independent
   E4 (NPC dialogue)              — depends on E1 ✅ (dialogue discovery method)
-  E5 (recovery mechanics)        — independent
+  E5 (recovery mechanics)        — ✅ COMPLETE
   E6 (persistent evidence board) — independent
   E7 (scene history)             — independent
   E8 (dice rebalance)            — independent

@@ -11,6 +11,9 @@ All narrative content lives under `/content` as JSON. Game logic lives under `/s
 ```
 /content
   manifest.json     # CaseManifest: lists all cases and vignettes with id, title, synopsis, type, triggerCondition
+  /shared/
+    breakdown.json    # Shared breakdown scene (composure=0), injected into all cases by loadCase/loadVignette
+    incapacitation.json # Shared incapacitation scene (vitality=0), injected into all cases
   /cases/[case-name]/
     meta.json       # CaseMeta: id, title, synopsis, acts, firstScene, facultyDistribution
     act1.json       # SceneNode[] for Act I

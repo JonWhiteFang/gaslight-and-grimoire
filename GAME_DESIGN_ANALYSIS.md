@@ -102,25 +102,12 @@ An average of ~1.1 choices per scene means most scenes are linear corridors with
 
 ---
 
-## 5. Add Composure and Vitality Recovery Mechanics
+## ~~5. Add Composure and Vitality Recovery Mechanics~~ — ✅ COMPLETE
 
 **Category:** Gameplay Mechanics / Balancing
-**Severity:** Medium-High — creates an unrecoverable death spiral
+**Severity:** Medium-High — created an unrecoverable death spiral
 
-**Issue:** Both Composure (0–10) and Vitality (0–10) only decrease. The `adjustComposure` and `adjustVitality` actions clamp to [0, 10], and `onEnter` effects in the content only apply negative deltas. There are no rest scenes, recovery items, or mechanics to restore either meter. The `StatusBar` triggers `goToScene('breakdown')` or `goToScene('incapacitation')` at 0, but neither `breakdown` nor `incapacitation` scenes exist in any case content.
-
-**Impact:** Players face a one-way ratchet toward failure. Supernatural encounters deal dual-axis damage (Composure + Vitality), and failed checks in regular scenes also drain meters. Without recovery, a string of bad rolls early in a case makes later encounters nearly impossible. This is especially punishing because the dice math already skews toward failure (see improvement #8).
-
-**Proposed Solution:**
-- Add `recovery` as a new `Effect` type, or use positive `composure`/`vitality` deltas in `onEnter` effects for "safe haven" scenes (e.g., returning to the investigator's lodgings, a quiet moment of reflection).
-- Add 1–2 recovery scenes per act that the player can choose to visit, trading investigation time for health restoration.
-- Create `breakdown` and `incapacitation` scenes in each case that provide a narrative consequence (lost time, missed clues) rather than a hard game-over.
-- Consider a "Second Wind" mechanic: once per case, when Composure or Vitality hits 2 or below, offer a free recovery of +2 with narrative flavor.
-
-**Files to modify:**
-- Content JSON `act*.json` — add recovery scenes and breakdown/incapacitation scenes
-- `src/store/slices/investigatorSlice.ts` — ensure positive deltas work (they should, since Immer just mutates)
-- `src/components/StatusBar/ComposureMeter.tsx` and `VitalityMeter.tsx` — verify `onBreakdown`/`onIncapacitation` callbacks navigate correctly
+**Resolution:** Shared `breakdown` and `incapacitation` scenes created in `public/content/shared/` and injected into all cases via `injectSharedScenes` in `loadCase`/`loadVignette`. Case-specific variants added to Whitechapel Cipher (fog/cipher hallucination breakdown, alley collapse incapacitation) and Mayfair Séance (séance room overwhelm breakdown, supernatural assault incapacitation). Recovery effects (+1 composure/vitality) added to 6 scenes across both cases at natural rest points: cipher decoded, Graves confides, printshop success (Whitechapel); Ashworth confides, room thorough, rational success (Mayfair). Occultist Veil Sight also fixed in same pass: grants Lore advantage + variant scenes with occult content in both cases. Files changed: `src/engine/narrativeEngine.ts`, content JSON, `src/engine/__tests__/veilSight.test.ts`.
 
 ---
 
@@ -220,7 +207,7 @@ These didn't make the top 10 but are worth noting:
 - **No mobile/touch support:** The Evidence Board uses mouse tracking (`mousemove` events) and keyboard shortcuts. No touch event handlers exist. The game would be difficult to play on tablets or phones.
 - **Faction reputation is unbounded:** Disposition is clamped [-10, +10], suspicion [0, 10], composure/vitality [0, 10], but faction reputation has no clamp. Extreme values could break vignette unlock thresholds or condition checks.
 - **Deduction descriptions are generic:** `buildDeduction` always returns "The threads converge into a clear deduction." or "A connection forms — but something feels off..." regardless of which clues are connected. Content-specific deduction text would make the Evidence Board feel more rewarding.
-- **`Occultist` ability (Veil Sight) has no mechanical effect:** The flag `ability-veil-sight-active` is set but never checked in any engine function or content condition. The other three archetype abilities (auto-succeed Reason/Vigor/Influence) are fully functional.
+- ~~**`Occultist` ability (Veil Sight) has no mechanical effect:**~~ ✅ FIXED. Veil Sight now grants advantage on all Lore checks while active. Variant scenes added to both cases revealing occult content when flag is set.
 - **No "skip typewriter" interaction:** The `SceneText` typewriter effect has no click-to-complete. Players must wait for the full text to render or change their settings to `instant`. A click/tap to instantly reveal remaining text is a standard CYOA convention.
 - **Multiplayer/Co-op:** Not applicable to this single-player narrative game. No changes recommended.
 
@@ -234,7 +221,7 @@ These didn't make the top 10 but are worth noting:
 | 2 | Audio & Visual Assets | High (asset creation) | High | P0 |
 | 3 | Deepen Branching & Content | High (content authoring) | High | P0 |
 | 4 | NPC Dialogue System | High | High | P1 |
-| 5 | Recovery Mechanics | Low-Medium | High | P1 |
+| 5 | ~~Recovery Mechanics~~ ✅ | Low-Medium | High | P1 — DONE |
 | 6 | Persistent Evidence Board | Medium | Medium-High | P1 |
 | 7 | Scene History Navigation | Medium | Medium | P2 |
 | 8 | ~~Rebalance Dice Math~~ ✅ | Low | Medium | P2 — DONE |

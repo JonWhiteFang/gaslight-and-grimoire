@@ -46,7 +46,7 @@ Comprehensive archaeology and evolution docs live under `devdocs/`. **Read these
 ### Cleanup & Smoke Tests
 - `devdocs/archaeology/cleanup_inventory.md` — What's safe to remove vs what looks dead but must be kept
 - `devdocs/archaeology/5_things_or_not.md` — Top 5 improvements with exact code locations and first steps
-- `smoke_tests/check_what_is_working/report.md` — Baseline: 284/284 tests pass, 0 type errors, 3 broken features identified
+- `smoke_tests/check_what_is_working/report.md` — Baseline: 288/288 tests pass, 0 type errors, 3 broken features identified
 
 ## Architecture
 
@@ -86,6 +86,9 @@ Components live in `src/components/[Name]/` with `index.ts` barrel exports. Stat
 ```
 content/
   manifest.json                 # CaseManifest: lists all cases and vignettes with metadata
+  shared/
+    breakdown.json              # Shared breakdown scene (composure=0), injected into all cases
+    incapacitation.json         # Shared incapacitation scene (vitality=0), injected into all cases
   cases/[case-name]/          # Main cases (3-act structure)
     meta.json                 # CaseMeta: id, title, synopsis, acts, firstScene, facultyDistribution
     act1.json, act2.json, act3.json  # SceneNode[] per act
@@ -281,11 +284,11 @@ These are documented in detail in `devdocs/evolution/gap_analysis.md`, `smoke_te
 
 ### Medium (game design — mechanics and UX)
 - ~~**Engine ↔ Store circular dependency**~~ — ✅ FIXED. Engine functions now accept an `EngineActions` interface parameter instead of importing `useStore`. `applyOnEnterEffects` moved to `worldSlice.applyEffects` store action. Zero store imports in engine files.
-- **No recovery mechanics** — Composure/Vitality only decrease. `breakdown`/`incapacitation` scenes don't exist in content. Creates death spiral.
+- ~~**No recovery mechanics**~~ — ✅ FIXED. Shared `breakdown`/`incapacitation` scenes injected into all cases via `injectSharedScenes` in `loadCase`/`loadVignette`. Case-specific variants for Whitechapel Cipher and Mayfair Séance. Recovery effects (+1 composure/vitality) added to 6 scenes across both cases.
 - **Evidence Board connections transient** — Lost on close/reopen (React state, not store). No drag-and-drop. No touch support.
 - ~~**Dice math skews toward failure**~~ — ✅ FIXED. Partial band widened from DC-2 to DC-3 (15% instead of 10%). Trained bonus (+1) added for archetype primary faculty. All content DCs lowered by 2. Encounter reaction check stays at DC 12.
 - **Silent state changes** — ~~`onEnter` effects fire with no narrative feedback. Players see meters change without explanation.~~ ✅ FIXED. `EffectFeedback` component renders inline atmospheric messages with mechanical annotations (e.g. "A chill settles over you (Composure −1)"). Optional `description` field on `Effect` supports content-authored text with auto-generated fallback. New files: `src/engine/effectMessages.ts`, `src/components/NarrativePanel/EffectFeedback.tsx`.
-- **Occultist Veil Sight inert** — `ability-veil-sight-active` flag is set but never checked anywhere.
+- ~~**Occultist Veil Sight inert**~~ — ✅ FIXED. Veil Sight now grants advantage on all Lore checks while active. Variant scenes added to both cases revealing occult content when flag is set. New files: `src/engine/__tests__/veilSight.test.ts`.
 - **`validateCase.mjs` not in CI** — Content validation only runs manually.
 
 ### Low (polish)
@@ -315,4 +318,4 @@ See `devdocs/evolution/implementation_roadmap.md` for the full phased plan. Summ
 - **Phase B (Core Refactoring)**: ✅ COMPLETE — Extracted pure computeChoiceResult, moved buildDeduction to engine, audio subscription, consolidated CheckResult types, runtime content validation with tier completeness
 - **Phase C (Gap Filling)**: ✅ COMPLETE — ClueDiscoveryCard, save button, faction display, error display, case completion screen
 - **Phase D (Integration)**: ✅ COMPLETE — Encounter UI, stale state cleanup, remove dead code
-- **Phase E (Game Design)**: 🟡 IN PROGRESS — ~~Active clue discovery~~ ✅, ~~consequence feedback~~ ✅, audio/visual assets, content depth, NPC dialogue, recovery mechanics, persistent evidence board, scene history, dice rebalance, testing expansion. See `GAME_DESIGN_ANALYSIS.md` for full analysis.
+- **Phase E (Game Design)**: 🟡 IN PROGRESS — ~~Active clue discovery~~ ✅, ~~consequence feedback~~ ✅, ~~Veil Sight~~ ✅, ~~recovery mechanics~~ ✅, audio/visual assets, content depth, NPC dialogue, persistent evidence board, scene history, testing expansion. See `GAME_DESIGN_ANALYSIS.md` for full analysis.

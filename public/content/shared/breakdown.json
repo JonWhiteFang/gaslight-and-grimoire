@@ -1,0 +1,10 @@
+{
+  "id": "breakdown",
+  "act": 0,
+  "narrative": "The weight of it all crashes down upon you. Your hands tremble. Your vision narrows to a tunnel of gaslight and shadow. The rational mind that has carried you this far buckles under the accumulated horror, the sleepless nights, the things you have seen that no person should see. You sink into the nearest chair — or perhaps the ground — and for a long moment, the world is very far away. When it returns, it returns changed. You are diminished. But you are not yet defeated.",
+  "cluesAvailable": [],
+  "choices": [],
+  "onEnter": [
+    { "type": "flag", "target": "breakdown-occurred", "value": true }
+  ]
+}
