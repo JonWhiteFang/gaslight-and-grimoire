@@ -144,14 +144,8 @@ Veil Sight now grants advantage on all Lore checks while active (`computeChoiceR
 ### ~~Faction Reputation Clamping~~ — ✅ FIXED
 Clamped to [-10, +10] in `adjustReputation`. All numeric state is now bounded.
 
-### Content-Specific Deduction Descriptions
-`buildDeduction` always returns one of two generic strings regardless of which clues are connected. No content-specific deduction text exists.
-- **Status**: Missing
-- **Severity**: Low — Evidence Board feels less rewarding
-- **Where it should be**: `src/engine/buildDeduction.ts` (look up deduction text from content), content JSON (deduction description mappings)
+### ~~Content-Specific Deduction Descriptions~~ — ✅ FIXED
+`buildDeduction` now generates descriptions from connected clue titles (e.g. "Connection: Cipher Note ↔ Witness Account"). Red herrings prefixed with "Questionable connection".
 
-### Skip Typewriter Interaction
-`SceneText` typewriter effect has no click-to-complete. Players must wait for full text or change settings to `instant`.
-- **Status**: Missing
-- **Severity**: Low — standard CYOA convention
-- **Where it should be**: `src/components/NarrativePanel/SceneText.tsx` (click handler to set displayed = full text)
+### ~~Skip Typewriter Interaction~~ — ✅ FIXED
+Click/tap on scene text during typewriter animation skips to full reveal. `cursor-pointer` shown while animating. Calls `onComplete` on skip.

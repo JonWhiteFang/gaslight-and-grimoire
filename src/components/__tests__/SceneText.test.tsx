@@ -149,3 +149,29 @@ describe('SceneText — typewriter mode', () => {
     expect(screen.getByText(SAMPLE_TEXT)).toBeInTheDocument();
   });
 });
+
+// ─── Click-to-skip ───────────────────────────────────────────────────────────
+
+describe('SceneText — click to skip', () => {
+  beforeEach(() => { vi.useFakeTimers(); });
+  afterEach(() => { vi.useRealTimers(); });
+
+  it('clicking during animation reveals full text immediately', () => {
+    render(<SceneText text={SAMPLE_TEXT} textSpeed="typewriter" />);
+    // Advance partially
+    act(() => { vi.advanceTimersByTime(60); });
+    const el = screen.getByLabelText('Scene narrative');
+    expect(el.textContent).not.toBe(SAMPLE_TEXT);
+    // Click to skip
+    act(() => { el.click(); });
+    expect(el.textContent).toBe(SAMPLE_TEXT);
+  });
+
+  it('calls onComplete when skipped', () => {
+    const onComplete = vi.fn();
+    render(<SceneText text={SAMPLE_TEXT} textSpeed="typewriter" onComplete={onComplete} />);
+    act(() => { vi.advanceTimersByTime(60); });
+    act(() => { screen.getByLabelText('Scene narrative').click(); });
+    expect(onComplete).toHaveBeenCalled();
+  });
+});

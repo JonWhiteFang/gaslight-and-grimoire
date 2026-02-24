@@ -1,42 +1,44 @@
 /**
  * SceneText — displays narrative text with a typewriter effect.
+ * Click/tap to skip to full text.
  *
- * Req 2.2: When a Scene_Node is loaded, the NarrativePanel SHALL display the
- *          scene's narrative text with a typewriter effect.
- * Req 2.3: While reduced motion mode is enabled, the NarrativePanel SHALL
- *          display all text instantly without the typewriter effect.
+ * Req 2.2, 2.3
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 
-/** Speed presets: [charsPerTick, tickMs] */
 const SPEED_CONFIG = {
   typewriter: { chars: 2, ms: 30 },
   fast: { chars: 6, ms: 15 },
 } as const;
 
 export interface SceneTextProps {
-  /** The full narrative text to display */
   text: string;
-  /** Controls text reveal speed. 'instant' shows all text immediately. */
   textSpeed?: 'typewriter' | 'fast' | 'instant';
-  /** When true, renders all text instantly (accessibility: reduced motion) */
   reducedMotion?: boolean;
-  /** Called when the full text has been revealed */
   onComplete?: () => void;
 }
 
 export function SceneText({ text, textSpeed = 'typewriter', reducedMotion = false, onComplete }: SceneTextProps) {
   const [displayed, setDisplayed] = useState('');
+  const [animating, setAnimating] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const textRef = useRef(text);
   const onCompleteRef = useRef(onComplete);
 
-  // Keep callback ref current without re-triggering the effect
-  useEffect(() => {
-    onCompleteRef.current = onComplete;
-  });
+  useEffect(() => { onCompleteRef.current = onComplete; });
+  useEffect(() => { textRef.current = text; }, [text]);
+
+  const skipToEnd = useCallback(() => {
+    if (intervalRef.current !== null) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    setDisplayed(textRef.current);
+    setAnimating(false);
+    onCompleteRef.current?.();
+  }, []);
 
   useEffect(() => {
-    // Clear any running interval when text or mode changes
     if (intervalRef.current !== null) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -44,12 +46,13 @@ export function SceneText({ text, textSpeed = 'typewriter', reducedMotion = fals
 
     if (!text) {
       setDisplayed('');
+      setAnimating(false);
       return;
     }
 
     if (reducedMotion || textSpeed === 'instant') {
-      // Instant render — no animation
       setDisplayed(text);
+      setAnimating(false);
       onCompleteRef.current?.();
       return;
     }
@@ -57,6 +60,7 @@ export function SceneText({ text, textSpeed = 'typewriter', reducedMotion = fals
     const { chars, ms } = SPEED_CONFIG[textSpeed] ?? SPEED_CONFIG.typewriter;
     let index = 0;
     setDisplayed('');
+    setAnimating(true);
 
     intervalRef.current = setInterval(() => {
       index += chars;
@@ -66,6 +70,7 @@ export function SceneText({ text, textSpeed = 'typewriter', reducedMotion = fals
           clearInterval(intervalRef.current);
           intervalRef.current = null;
         }
+        setAnimating(false);
         onCompleteRef.current?.();
       } else {
         setDisplayed(text.slice(0, index));
@@ -82,9 +87,11 @@ export function SceneText({ text, textSpeed = 'typewriter', reducedMotion = fals
 
   return (
     <p
-      className="text-gaslight-fog font-serif leading-relaxed whitespace-pre-wrap"
+      className={`text-gaslight-fog font-serif leading-relaxed whitespace-pre-wrap ${animating ? 'cursor-pointer' : ''}`}
       aria-live="polite"
       aria-label="Scene narrative"
+      onClick={animating ? skipToEnd : undefined}
+      role={animating ? 'button' : undefined}
     >
       {displayed}
     </p>

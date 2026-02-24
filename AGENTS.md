@@ -46,7 +46,7 @@ Comprehensive archaeology and evolution docs live under `devdocs/`. **Read these
 ### Cleanup & Smoke Tests
 - `devdocs/archaeology/cleanup_inventory.md` — What's safe to remove vs what looks dead but must be kept
 - `devdocs/archaeology/5_things_or_not.md` — Top 5 improvements with exact code locations and first steps
-- `smoke_tests/check_what_is_working/report.md` — Baseline: 306/306 tests pass, 0 type errors, 3 broken features identified
+- `smoke_tests/check_what_is_working/report.md` — Baseline: 310/310 tests pass, 0 type errors, 3 broken features identified
 
 ## Architecture
 
@@ -293,8 +293,8 @@ These are documented in detail in `devdocs/evolution/gap_analysis.md`, `smoke_te
 
 ### Low (polish)
 - ~~**Faction reputation unbounded**~~ — ✅ FIXED. Clamped to [-10, +10] in `adjustReputation`.
-- **Generic deduction descriptions** — `buildDeduction` returns same 2 strings regardless of clues.
-- **No click-to-skip typewriter** — Must wait for full text or change settings.
+- ~~**Generic deduction descriptions**~~ — ✅ FIXED. `buildDeduction` now generates descriptions from clue titles (e.g. "Connection: Cipher Note ↔ Witness Account").
+- ~~**No click-to-skip typewriter**~~ — ✅ FIXED. Click/tap on scene text skips to full reveal during typewriter animation.
 - ~~**`sceneHistory` unused**~~ — ✅ FIXED. Investigation Timeline in CaseJournal shows chronological scene history. Back button in HeaderBar enables read-only scene review.
 
 ## Architectural Warnings

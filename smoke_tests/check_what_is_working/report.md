@@ -13,9 +13,9 @@
 | 1.2 | Vite production build | ✅ PASS | `npm run build` — exit 0. `dist/index.html` (0.51 KB), JS (375.39 KB), CSS (26.77 KB). 453 modules transformed in 1.79s |
 | 1.3 | Dependency audit | ✅ PASS | `npm audit` — "found 0 vulnerabilities" |
 | 1.4 | Content JSON validation | ✅ PASS | `node scripts/validateCase.mjs` — "✓ cases/the-whitechapel-cipher — 22 scenes, 6 clues", "✓ side-cases/a-matter-of-shadows — 7 scenes, 2 clues", "All 2 case(s) validated successfully." |
-| 1.5 | All existing tests | ✅ PASS | `npm run test:run` — 24 files, 306 tests, 0 failures |
+| 1.5 | All existing tests | ✅ PASS | `npm run test:run` — 24 files, 310 tests, 0 failures |
 
-**Summary**: The codebase is in a clean state. TypeScript compiles without errors under strict mode. The production build succeeds. No dependency vulnerabilities. All content validates. All 306 tests pass.
+**Summary**: The codebase is in a clean state. TypeScript compiles without errors under strict mode. The production build succeeds. No dependency vulnerabilities. All content validates. All 310 tests pass.
 
 ---
 
@@ -120,8 +120,8 @@ All three Phase A blockers are resolved. Remaining broken features (ClueDiscover
 | 6.14 | ~~No integration tests for choice→navigation→effect pipeline~~ | Medium | ✅ FIXED (Phase E10) — 7 integration tests |
 | 6.15 | ~~No component tests for EncounterPanel or EvidenceBoard~~ | Medium | ✅ FIXED (Phase E10) — 3 + 4 component tests |
 | 6.16 | ~~Faction reputation unbounded (no clamp)~~ | Low | ✅ FIXED — Clamped to [-10, +10] |
-| 6.17 | Deduction descriptions are generic (2 hardcoded strings) | Low | Open |
-| 6.18 | No click-to-skip typewriter effect | Low | Open |
+| 6.17 | ~~Deduction descriptions are generic (2 hardcoded strings)~~ | Low | ✅ FIXED — Generated from clue titles |
+| 6.18 | ~~No click-to-skip typewriter effect~~ | Low | ✅ FIXED — Click/tap skips to full text |
 
 ### Content Metrics (as of 2026-02-23)
 

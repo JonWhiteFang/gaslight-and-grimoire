@@ -124,3 +124,35 @@ describe('Property 8 — Deduction with any Red Herring clue always sets isRedHe
     );
   });
 });
+
+describe('Deduction descriptions contain clue titles', () => {
+  it('description includes each clue title', () => {
+    fc.assert(
+      fc.property(
+        fc.array(arbNonRedHerringClue, { minLength: 2, maxLength: 4 }),
+        (clueList) => {
+          const clueMap: Record<string, Clue> = {};
+          for (const clue of clueList) { clueMap[clue.id] = clue; }
+          const deduction = buildDeduction(clueList.map((c) => c.id), clueMap);
+          return clueList.every((c) => deduction.description.includes(c.title));
+        },
+      ),
+      { numRuns: 200 },
+    );
+  });
+
+  it('red herring description starts with "Questionable"', () => {
+    fc.assert(
+      fc.property(
+        arbRedHerringClue,
+        arbNonRedHerringClue,
+        (rh, normal) => {
+          const clueMap: Record<string, Clue> = { [rh.id]: rh, [normal.id]: normal };
+          const deduction = buildDeduction([rh.id, normal.id], clueMap);
+          return deduction.description.startsWith('Questionable');
+        },
+      ),
+      { numRuns: 200 },
+    );
+  });
+});

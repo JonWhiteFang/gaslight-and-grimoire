@@ -285,6 +285,6 @@ The issues are all incremental:
 
 7. ~~**Faction reputation is unbounded**~~: ✅ FIXED. Clamped to [-10, +10] in `adjustReputation`.
 
-8. **Deduction descriptions are generic**: `buildDeduction` always returns the same two strings regardless of which clues are connected. Content-specific deduction text would make the Evidence Board more rewarding.
+8. ~~**Deduction descriptions are generic**~~: ✅ FIXED. `buildDeduction` now generates descriptions from clue titles.
 
-9. **No "skip typewriter" interaction**: `SceneText` typewriter effect has no click-to-complete. Players must wait or change settings to `instant`.
+9. ~~**No "skip typewriter" interaction**~~: ✅ FIXED. Click/tap on scene text skips to full reveal.
