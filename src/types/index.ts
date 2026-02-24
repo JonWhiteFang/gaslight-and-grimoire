@@ -123,6 +123,8 @@ export interface Effect {
   target?: string;
   delta?: number;
   value?: boolean | string;
+  /** Optional authored narrative text shown as feedback when this effect fires. */
+  description?: string;
 }
 
 export interface ClueDiscovery {

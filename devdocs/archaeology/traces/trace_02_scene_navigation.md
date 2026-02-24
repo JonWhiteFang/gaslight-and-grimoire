@@ -29,14 +29,14 @@
 
 - No async work — scene navigation is synchronous after the initial case load.
 - `resolveScene` iterates `caseData.variants` array on every render of `useCurrentScene()`. Not cached.
-- `applyOnEnterEffects` is called from a `useEffect` — runs after render, so the first frame shows the scene before effects are applied.
+- `applyEffects` is called from a `useEffect` — runs after render, so the first frame shows the scene before effects are applied. Effect feedback messages are generated via `generateEffectMessages` and rendered inline by `EffectFeedback` component.
 - `SceneText` typewriter uses `setInterval` with cleanup on unmount/text change.
 
 ## 4. Error Path
 
 - `resolveScene` throws if `sceneId` is not found in `caseData.scenes`. This would crash the component tree; caught by `ErrorBoundary`.
 - If `caseData` is null (e.g., after loading a save without re-fetching case data), `useCurrentScene()` returns null. `GameContent` renders `ChoicePanel` with empty choices. No error shown.
-- `applyOnEnterEffects` silently skips effects with missing `target` or `delta` fields.
+- `applyEffects` silently skips effects with missing `target` or `delta` fields. Feedback messages are generated only for effects with defined `delta` (flag/discoverClue return null).
 
 ## 5. Performance Characteristics
 

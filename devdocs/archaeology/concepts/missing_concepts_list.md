@@ -144,11 +144,8 @@ Connections live in React `useState`, lost on board close/reopen. No drag-and-dr
 - **Severity**: Medium-High — signature mechanic has friction
 - **Where it should be**: `src/store/slices/evidenceSlice.ts` (connection state), `src/components/EvidenceBoard/EvidenceBoard.tsx` (click/drag handlers)
 
-### Consequence Feedback / Effect Narration
-`onEnter` effects fire silently. Players see meters change with no narrative explanation. Dice outcomes show tier label but no bridging text.
-- **Status**: Missing
-- **Severity**: Medium — breaks story-mechanics connection
-- **Where it should be**: `src/types/index.ts` (add `narrativeText` to `Effect`), `src/components/NarrativePanel/NarrativePanel.tsx` (render notifications)
+### ~~Consequence Feedback / Effect Narration~~ — ✅ FIXED
+`EffectFeedback` component renders inline atmospheric messages with mechanical annotations (e.g. "A chill settles over you (Composure −1)") when `onEnter` effects fire. Optional `description` field on `Effect` supports content-authored text with auto-generated fallback. New files: `src/engine/effectMessages.ts`, `src/components/NarrativePanel/EffectFeedback.tsx`.
 
 ### Occultist Veil Sight Ability
 The flag `ability-veil-sight-active` is set when the Occultist activates their ability, but no engine function or content condition ever checks this flag. The ability has no mechanical effect.

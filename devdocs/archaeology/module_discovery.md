@@ -105,7 +105,7 @@ This works at runtime because JS modules resolve lazily, but it means:
 ### Tight coupling: Components → Engine (direct)
 
 9 component files import directly from engine modules:
-- `NarrativePanel` → `narrativeEngine` (applyOnEnterEffects, canDiscoverClue)
+- `NarrativePanel` → `narrativeEngine` (canDiscoverClue), `effectMessages` (generateEffectMessages)
 - `ChoicePanel` → `narrativeEngine` (evaluateConditions, processChoice)
 - `ChoiceCard` → `diceEngine` (calculateModifier)
 - `FacultyAllocation` → `diceEngine` (calculateModifier)
@@ -181,10 +181,10 @@ Prepends `BASE_URL` and fetches JSON. Not exported. `AmbientAudio` duplicates th
 
 **Files**: `src/store/slices/investigatorSlice.ts` (lines 45, 55), `src/store/slices/narrativeSlice.ts` (lines 40, 52), `src/store/slices/evidenceSlice.ts` (line 20)
 
-### 4. Components call `applyOnEnterEffects` directly
-`NarrativePanel` calls `applyOnEnterEffects` (an engine function that mutates the store) from a `useEffect`. This bypasses the store action pattern — the component is directly triggering store mutations through the engine layer instead of dispatching a store action.
+### 4. ~~Components call `applyOnEnterEffects` directly~~ — ✅ FIXED
+`NarrativePanel` now calls `applyEffects` (a store action on `worldSlice`) instead of the former engine function. Effect feedback is generated via the pure `generateEffectMessages` function and rendered inline by `EffectFeedback` component.
 
-**File**: `src/components/NarrativePanel/NarrativePanel.tsx` (line ~50)
+**File**: `src/components/NarrativePanel/NarrativePanel.tsx`, `src/store/slices/worldSlice.ts`
 
 ### 5. Components access `SaveManager` directly
 `TitleScreen` and `LoadGameScreen` import `SaveManager` directly to call `listSaves()` and `deleteSave()`. These should be store actions (on `metaSlice`) to maintain the component → store → engine layering.

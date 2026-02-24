@@ -128,7 +128,7 @@
         }
       ],
       "onEnter": [
-        { "type": "composure", "delta": -1 }
+        { "type": "composure", "delta": -1, "description": "The cipher's impenetrability gnaws at your confidence" }
       ]
     },
     {
@@ -155,7 +155,7 @@
         }
       ],
       "onEnter": [
-        { "type": "disposition", "target": "npc-graves", "delta": 2 }
+        { "type": "disposition", "target": "npc-graves", "delta": 2, "description": "Graves trusts you with a dangerous secret" }
       ]
     },
     {
@@ -219,9 +219,9 @@
         }
       ],
       "onEnter": [
-        { "type": "disposition", "target": "npc-graves", "delta": -2 },
-        { "type": "suspicion", "target": "npc-graves", "delta": 2 },
-        { "type": "composure", "delta": -1 }
+        { "type": "disposition", "target": "npc-graves", "delta": -2, "description": "Graves's expression hardens — you have overstepped" },
+        { "type": "suspicion", "target": "npc-graves", "delta": 2, "description": "The Inspector will be watching you closely now" },
+        { "type": "composure", "delta": -1, "description": "The public rebuke stings more than you expected" }
       ]
     },
     {

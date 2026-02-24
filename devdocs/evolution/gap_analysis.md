@@ -283,13 +283,9 @@ The issues are all incremental:
 
 ---
 
-### 6.9 Silent State Changes — No Consequence Feedback (MEDIUM)
+### ~~6.9 Silent State Changes — No Consequence Feedback~~ — ✅ FIXED
 
-**Gap**: `onEnter` effects fire silently. Players see meters drop with no narrative explanation. Dice outcomes show "Failure" but no bridging text.
-
-**Desired state**: Narrative text on effects ("The oppressive atmosphere weighs on your nerves. Composure -2"). Transition text between dice outcome and next scene.
-
-**Impact**: Breaks the connection between story and mechanics.
+**Resolution**: `EffectFeedback` component renders inline atmospheric messages with mechanical annotations below scene text when `onEnter` effects fire. Optional `description` field on `Effect` supports content-authored text; auto-generated fallback covers all effect types. NPC names resolved from store. New files: `src/engine/effectMessages.ts`, `src/components/NarrativePanel/EffectFeedback.tsx`.
 
 ---
 

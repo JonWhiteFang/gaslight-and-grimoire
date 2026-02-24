@@ -17,6 +17,8 @@ import { DiceRollOverlay } from './DiceRollOverlay';
 import { OutcomeBanner } from './OutcomeBanner';
 import { ClueDiscoveryCard } from './ClueDiscoveryCard';
 import { SceneCluePrompts } from './SceneCluePrompts';
+import { EffectFeedback } from './EffectFeedback';
+import { generateEffectMessages } from '../../engine/effectMessages';
 import type { Clue } from '../../types';
 
 export function NarrativePanel() {
@@ -28,10 +30,14 @@ export function NarrativePanel() {
   const discoverClue = useStore((s) => s.discoverClue);
   const applyEffects = useStore((s) => s.applyEffects);
   const clues = useStore((s) => s.clues);
+  const npcs = useStore((s) => s.npcs);
   const investigator = useStore((s) => s.investigator);
 
   const scene = useCurrentScene();
   const prevSceneRef = useRef('');
+
+  // Effect feedback state
+  const [effectMessages, setEffectMessages] = useState<string[]>([]);
 
   // Clue discovery card state
   const [discoveredClue, setDiscoveredClue] = useState<Clue | null>(null);
@@ -61,6 +67,9 @@ export function NarrativePanel() {
 
     if (scene.onEnter && scene.onEnter.length > 0) {
       applyEffects(scene.onEnter);
+      setEffectMessages(generateEffectMessages(scene.onEnter, npcs));
+    } else {
+      setEffectMessages([]);
     }
 
     const gameState = buildGameState(useStore.getState());
@@ -83,7 +92,7 @@ export function NarrativePanel() {
       const timer = setTimeout(() => setClueCardVisible(false), 4000);
       return () => clearTimeout(timer);
     }
-  }, [currentSceneId, scene, discoverClue, applyEffects]);
+  }, [currentSceneId, scene, discoverClue, applyEffects, npcs]);
 
   function handleBannerDismiss() {
     setBannerVisible(false);
@@ -140,6 +149,9 @@ export function NarrativePanel() {
         textSpeed={textSpeed}
         reducedMotion={reducedMotion}
       />
+
+      {/* Effect feedback (onEnter consequences) */}
+      <EffectFeedback messages={effectMessages} reducedMotion={reducedMotion} />
 
       {/* Active clue discovery prompts (exploration + check) */}
       {scene && (

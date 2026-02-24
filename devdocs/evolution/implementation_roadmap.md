@@ -339,15 +339,11 @@ Goal: Transform the technically sound but content-thin game into a compelling pl
 
 ---
 
-### E9. Add Consequence Feedback and Narrative Bridging — P2
+### ~~E9. Add Consequence Feedback and Narrative Bridging~~ — ✅ COMPLETE
 
-**What**: `onEnter` effects fire silently. Players see meters drop with no narrative explanation. Dice outcomes show tier label but no bridging text.
+**What**: `onEnter` effects fired silently. Players saw meters drop with no narrative explanation.
 
-**Files**: `src/types/index.ts` (add `narrativeText` to `Effect`), `src/components/NarrativePanel/NarrativePanel.tsx` (render effect notifications), content JSON (add narrative text to effects)
-
-**Dependencies**: None.
-
-**Risk**: Low. Additive type field + UI rendering.
+**Resolution**: Added optional `description` field to `Effect` type. Pure `generateEffectMessage` function in `src/engine/effectMessages.ts` produces atmospheric text with mechanical annotation (e.g. "A chill settles over you (Composure −1)"). `EffectFeedback` component renders inline stacked messages in `NarrativePanel` between scene text and choices. Auto-dismisses after 6 seconds. Respects `reducedMotion`. Content-authored descriptions added to 4 scenes. Files changed: `src/types/index.ts`, `src/engine/effectMessages.ts`, `src/components/NarrativePanel/EffectFeedback.tsx`, `src/components/NarrativePanel/NarrativePanel.tsx`, `src/components/NarrativePanel/index.ts`, 2 content JSON files, 1 test file.
 
 ---
 
@@ -381,7 +377,7 @@ Phase E (Game Design Improvements):
   E6 (persistent evidence board) — independent
   E7 (scene history)             — independent
   E8 (dice rebalance)            — independent
-  E9 (consequence feedback)      — independent
+  E9 (consequence feedback)      — ✅ COMPLETE
   E10 (testing expansion)        — independent
 ```
 

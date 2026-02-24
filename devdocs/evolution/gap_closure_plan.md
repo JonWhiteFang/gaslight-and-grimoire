@@ -472,17 +472,11 @@ The closest candidate would be `narrativeEngine.ts` (400+ lines, 6 responsibilit
 
 ---
 
-### 5.8 Add Consequence Feedback
+### ~~5.8 Add Consequence Feedback~~ — ✅ COMPLETE
 
-**What**: Narrative text on `Effect` objects. Transition text between dice outcomes and next scene.
+**Resolution**: Added optional `description` field to `Effect` type. Pure `generateEffectMessage` function in `src/engine/effectMessages.ts` produces atmospheric text with mechanical annotation for each effect type (composure, vitality, disposition, suspicion, reputation). `EffectFeedback` component renders inline stacked messages in `NarrativePanel` between scene text and choices. Auto-dismisses after 6 seconds. Respects `reducedMotion`. Content-authored descriptions added to 4 scenes across Whitechapel Cipher and Mayfair Séance.
 
-**Files**: `src/types/index.ts`, `src/components/NarrativePanel/NarrativePanel.tsx`, content JSON
-
-**Dependencies**: None.
-
-**Risk**: Low. Additive.
-
-**Testing**: Navigate to scene with `onEnter` effects → verify narrative notification appears. Make faculty check → verify bridging text before next scene.
+**New files**: `src/engine/effectMessages.ts`, `src/components/NarrativePanel/EffectFeedback.tsx`, `src/engine/__tests__/effectMessages.test.ts`
 
 ---
 

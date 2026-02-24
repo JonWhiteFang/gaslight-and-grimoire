@@ -97,6 +97,7 @@ src/engine/
   saveManager.ts        # localStorage persistence; versioned migrations; multi-save support
   audioManager.ts       # Howler.js ambient/SFX management
   cluePrompts.ts        # Atmospheric prompt text generator for exploration/check clue discovery
+  effectMessages.ts     # Pure effect-to-feedback-message generator (atmospheric + mechanical annotation)
 ```
 
 Engine functions are pure where possible. Side effects (store mutations) are applied by calling store actions, not by engines directly mutating state. SFX is triggered via a store subscription in `src/store/audioSubscription.ts`, not from slice actions.

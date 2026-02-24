@@ -77,7 +77,7 @@
         }
       ],
       "onEnter": [
-        { "type": "disposition", "target": "npc-ashworth", "delta": 2 }
+        { "type": "disposition", "target": "npc-ashworth", "delta": 2, "description": "Lady Ashworth warms to your sincerity" }
       ]
     },
     {

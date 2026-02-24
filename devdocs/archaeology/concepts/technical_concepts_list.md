@@ -35,9 +35,9 @@ Components access state via per-slice selector hooks (`useInvestigator`, `useClu
 - **Files**: `src/engine/narrativeEngine.ts` → `evaluateConditions`, `evaluateCondition`
 
 ### Effect Application
-`applyOnEnterEffects(effects)` — applies `Effect[]` to the store on scene entry (7 types: composure, vitality, flag, disposition, suspicion, reputation, discoverClue). The only engine function that directly mutates the store.
-- **Status**: Fully implemented
-- **Files**: `src/engine/narrativeEngine.ts` → `applyOnEnterEffects`
+`applyEffects(effects)` — store action in `worldSlice` that applies `Effect[]` on scene entry (7 types: composure, vitality, flag, disposition, suspicion, reputation, discoverClue). `generateEffectMessages` produces atmospheric feedback text with mechanical annotations, rendered inline by `EffectFeedback` component. Optional `description` field on `Effect` supports content-authored text.
+- **Status**: Fully implemented (including player-facing feedback)
+- **Files**: `src/store/slices/worldSlice.ts` → `applyEffects`, `src/engine/effectMessages.ts` → `generateEffectMessage`/`generateEffectMessages`, `src/components/NarrativePanel/EffectFeedback.tsx`
 
 ### Scene Resolution with Variants
 `resolveScene(sceneId, state, caseData)` — returns a variant scene if its `variantCondition` is met, otherwise the base scene. Checked on every render via `useCurrentScene()`.

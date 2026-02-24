@@ -48,7 +48,7 @@ All game types live here. No type is defined elsewhere except slice-local interf
 | `SceneNode` | id, act, narrative, choices, cluesAvailable, conditions, onEnter, variantOf | narrativeEngine, NarrativePanel, ChoicePanel |
 | `Choice` | id, text, faculty, difficulty, outcomes, advantageIf, npcEffect, encounter extensions | narrativeEngine, ChoicePanel, ChoiceCard |
 | `Condition` | type (8 variants), target, value | narrativeEngine.evaluateConditions |
-| `Effect` | type (7 variants), target, delta, value | narrativeEngine.applyOnEnterEffects |
+| `Effect` | type (7 variants), target, delta, value, description | worldSlice.applyEffects, effectMessages.ts |
 | `GameState` | 10 fields — full serialisable snapshot | buildGameState, snapshotGameState, SaveManager |
 | `GameSettings` | fontSize, highContrast, reducedMotion, textSpeed, hintsEnabled, autoSaveFrequency, audioVolume | metaSlice, AccessibilityProvider, SettingsPanel |
 | `SaveFile` | version, timestamp, state: GameState | SaveManager |

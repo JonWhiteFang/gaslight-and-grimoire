@@ -76,18 +76,21 @@
 
 ## 5. Narrative Engine — onEnter Effects
 
-**Files**: `src/engine/narrativeEngine.ts` → `applyOnEnterEffects`, `src/components/NarrativePanel/NarrativePanel.tsx` (caller)
+**Files**: `src/store/slices/worldSlice.ts` → `applyEffects`, `src/components/NarrativePanel/NarrativePanel.tsx` (caller), `src/engine/effectMessages.ts` → `generateEffectMessages` (feedback text), `src/components/NarrativePanel/EffectFeedback.tsx` (inline display)
 
-**Coverage**: Fully implemented
+**Coverage**: Fully implemented, including player-facing feedback
 
-**Why this shape**: `applyOnEnterEffects` is the one engine function that directly mutates the store. It's called from `NarrativePanel`'s `useEffect` on scene change. This keeps the store action layer thin — effects are defined in content JSON and applied generically.
+**Why this shape**: `applyEffects` is a store action in `worldSlice` that dispatches to other slice actions per effect type. Called from `NarrativePanel`'s `useEffect` on scene change. After applying effects, `generateEffectMessages` produces atmospheric text with mechanical annotations (e.g. "A chill settles over you (Composure −1)") rendered inline by `EffectFeedback`. Optional `description` field on `Effect` supports content-authored text with auto-generated fallback.
 
-**Alternatives likely considered**: Making it a store action (e.g., `narrativeSlice.applyEffects`) — would be cleaner architecturally but would require the slice to understand all 7 effect types. Having `goToScene` apply effects automatically — rejected because `goToScene` doesn't have access to the resolved scene (it only knows the scene ID).
+> **Update (2026-02-23)**: `applyOnEnterEffects` moved from engine to `worldSlice.applyEffects` store action.
+> **Update (2026-02-24)**: Effect feedback added via `effectMessages.ts` + `EffectFeedback.tsx`. Optional `description` field added to `Effect` type.
 
 **Edge cases that shaped design**:
-- Effects with missing `target` or `delta` are silently skipped (defensive coding).
+- Effects with missing `target` or `delta` are silently skipped (defensive coding). Feedback returns null for these.
+- `flag` and `discoverClue` effects produce no feedback (invisible state / already has own `ClueDiscoveryCard` UI).
 - `discoverClue` effect type allows content to grant clues on scene entry without a discovery check.
 - `NarrativePanel` uses a `prevSceneRef` to prevent double-processing in React StrictMode.
+- NPC names resolved from store `npcs` record for disposition/suspicion messages; falls back to raw target ID.
 
 ---
 

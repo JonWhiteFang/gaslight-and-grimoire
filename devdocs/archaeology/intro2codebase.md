@@ -62,7 +62,7 @@ Content is fetched at runtime via `fetch()` from the Vite-served public director
 5. `processChoice` calls `store.goToScene(nextSceneId)`.
 6. `goToScene` (narrative slice) pushes to `sceneHistory`, sets `currentScene`, plays SFX, and triggers autosave if configured.
 7. `NarrativePanel` re-renders via `useCurrentScene()`, which calls `resolveScene` to check for variant overrides.
-8. `NarrativePanel` applies `onEnter` effects and auto-discovers clues.
+8. `NarrativePanel` applies `onEnter` effects and renders inline feedback messages via `EffectFeedback`, then auto-discovers clues.
 
 ### No event bus, no reducers
 
@@ -74,7 +74,7 @@ There is no pub/sub event bus. State mutations go through Zustand store actions 
 |---|---|---|
 | `SceneNode` | Atomic narrative unit — text, choices, clues, conditions, effects | `src/types/index.ts`, content JSON |
 | `Condition` | Gate for scene access / choice visibility (8 types, AND logic) | `src/types/index.ts`, evaluated in `narrativeEngine.ts` |
-| `Effect` | State mutation triggered on scene entry (7 types) | `src/types/index.ts`, applied in `narrativeEngine.ts` |
+| `Effect` | State mutation triggered on scene entry (7 types), with optional `description` for feedback | `src/types/index.ts`, applied in `worldSlice.applyEffects`, feedback via `effectMessages.ts` |
 | `Choice` | Player action — may have faculty check, NPC effect, encounter damage | `src/types/index.ts` |
 | `OutcomeTier` | Result of a d20 check: critical/success/partial/failure/fumble | `src/types/index.ts`, resolved in `diceEngine.ts` |
 | `GameState` | Full serialisable snapshot of all game state | `src/types/index.ts`, built by `buildGameState()` |

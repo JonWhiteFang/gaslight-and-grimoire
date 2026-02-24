@@ -176,24 +176,12 @@ An average of ~1.1 choices per scene means most scenes are linear corridors with
 
 ---
 
-## 9. Add Consequence Feedback and Narrative Bridging
+## ~~9. Add Consequence Feedback and Narrative Bridging~~ — ✅ COMPLETE
 
 **Category:** Player Engagement / UX
-**Severity:** Medium — state changes happen silently
+**Severity:** Medium — state changes happened silently
 
-**Issue:** When `onEnter` effects fire (composure loss, vitality loss, flag changes, reputation shifts), the player sees no narrative explanation. The `applyEffects` store action mutates state, and the `StatusBar` meters update, but there's no text or animation connecting the narrative to the mechanical change. Similarly, when a dice check produces a `partial` or `failure` outcome, the game navigates to the next scene but doesn't explain what went wrong narratively — the `OutcomeBanner` shows "Partial Success" or "Failure" but the scene text is the same regardless.
-
-**Impact:** Players see their Composure drop from 8 to 6 but don't know why. They see "Failure" flash on screen but the narrative doesn't acknowledge it. This breaks the connection between story and mechanics, which is the core promise of the game.
-
-**Proposed Solution:**
-- Add a `narrativeText` field to `Effect` objects. When an effect fires, display a brief inline notification: "The oppressive atmosphere weighs on your nerves. (Composure -2)".
-- In `NarrativePanel`, after applying `onEnter` effects, render a brief effect summary below the scene text with Framer Motion fade-in.
-- For dice outcomes: the current system navigates to different scenes per tier, which is correct. But add a `transitionText` field to `Choice.outcomes` that displays a brief bridging sentence before the next scene loads: "Your hands tremble as you attempt the lock — the mechanism resists your efforts." This gives narrative context to the mechanical result.
-
-**Files to modify:**
-- `src/types/index.ts` — add `narrativeText` to `Effect`, `transitionText` to outcome entries
-- `src/components/NarrativePanel/NarrativePanel.tsx` — render effect notifications
-- Content JSON files — add narrative text to effects and outcome transitions
+**Resolution:** Added optional `description` field to `Effect` type. Pure `generateEffectMessage` function in `src/engine/effectMessages.ts` produces atmospheric text with mechanical annotation (e.g. "A chill settles over you (Composure −1)") for composure, vitality, disposition, suspicion, and reputation effects. Returns null for flag/discoverClue (invisible state / already has own UI). `EffectFeedback` component renders inline stacked messages in `NarrativePanel` between scene text and choices with Framer Motion staggered fade-in, `aria-live="polite"`, auto-dismiss after 6 seconds, respects `reducedMotion`. Content-authored `description` fields added to 4 scenes across Whitechapel Cipher and Mayfair Séance. New files: `src/engine/effectMessages.ts`, `src/components/NarrativePanel/EffectFeedback.tsx`, `src/engine/__tests__/effectMessages.test.ts`.
 
 ---
 
@@ -250,5 +238,5 @@ These didn't make the top 10 but are worth noting:
 | 6 | Persistent Evidence Board | Medium | Medium-High | P1 |
 | 7 | Scene History Navigation | Medium | Medium | P2 |
 | 8 | ~~Rebalance Dice Math~~ ✅ | Low | Medium | P2 — DONE |
-| 9 | Consequence Feedback | Medium | Medium | P2 |
+| 9 | ~~Consequence Feedback~~ ✅ | Medium | Medium | P2 — DONE |
 | 10 | Expand Testing | Medium | Medium | P2 |

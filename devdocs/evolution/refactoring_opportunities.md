@@ -67,17 +67,11 @@
 
 ---
 
-## R10. Add Narrative Text to Effect Objects
+## ~~R10. Add Narrative Text to Effect Objects~~ — ✅ COMPLETE
 
-**Status**: Not started (Phase E9)
+**Status**: Done (Phase E9)
 
-**What**: Add optional `narrativeText` field to `Effect` type. Render inline notifications when effects fire.
-
-**Why**: `onEnter` effects fire silently. Players see meters change with no narrative explanation, breaking the story-mechanics connection.
-
-**Files**: `src/types/index.ts`, `src/components/NarrativePanel/NarrativePanel.tsx`, content JSON
-
-**Effort**: Low.
+**Resolution**: Added optional `description` field to `Effect` type. Pure `generateEffectMessage` function produces atmospheric text with mechanical annotation. `EffectFeedback` component renders inline stacked messages. New files: `src/engine/effectMessages.ts`, `src/components/NarrativePanel/EffectFeedback.tsx`, `src/engine/__tests__/effectMessages.test.ts`.
 
 ---
 
