@@ -205,7 +205,7 @@ An average of ~1.1 choices per scene means most scenes are linear corridors with
 These didn't make the top 10 but are worth noting:
 
 - **No mobile/touch support:** The Evidence Board uses mouse tracking (`mousemove` events) and keyboard shortcuts. No touch event handlers exist. The game would be difficult to play on tablets or phones.
-- **Faction reputation is unbounded:** Disposition is clamped [-10, +10], suspicion [0, 10], composure/vitality [0, 10], but faction reputation has no clamp. Extreme values could break vignette unlock thresholds or condition checks.
+- ~~**Faction reputation is unbounded:**~~ ✅ FIXED. Clamped to [-10, +10] in `adjustReputation`. All numeric state is now bounded.
 - **Deduction descriptions are generic:** `buildDeduction` always returns "The threads converge into a clear deduction." or "A connection forms — but something feels off..." regardless of which clues are connected. Content-specific deduction text would make the Evidence Board feel more rewarding.
 - ~~**`Occultist` ability (Veil Sight) has no mechanical effect:**~~ ✅ FIXED. Veil Sight now grants advantage on all Lore checks while active. Variant scenes added to both cases revealing occult content when flag is set.
 - **No "skip typewriter" interaction:** The `SceneText` typewriter effect has no click-to-complete. Players must wait for the full text to render or change their settings to `instant`. A click/tap to instantly reveal remaining text is a standard CYOA convention.
@@ -222,7 +222,7 @@ These didn't make the top 10 but are worth noting:
 | 3 | Deepen Branching & Content | High (content authoring) | High | P0 |
 | 4 | NPC Dialogue System | High | High | P1 |
 | 5 | ~~Recovery Mechanics~~ ✅ | Low-Medium | High | P1 — DONE |
-| 6 | Persistent Evidence Board | Medium | Medium-High | P1 |
+| 6 | ~~Persistent Evidence Board~~ ✅ | Medium | Medium-High | P1 — DONE |
 | 7 | Scene History Navigation | Medium | Medium | P2 |
 | 8 | ~~Rebalance Dice Math~~ ✅ | Low | Medium | P2 — DONE |
 | 9 | ~~Consequence Feedback~~ ✅ | Medium | Medium | P2 — DONE |

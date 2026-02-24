@@ -27,7 +27,7 @@ export const createWorldSlice: StateCreator<
   adjustReputation: (faction, delta) =>
     set((state) => {
       const current = state.factionReputation[faction] ?? 0;
-      state.factionReputation[faction] = current + delta;
+      state.factionReputation[faction] = Math.max(-10, Math.min(10, current + delta));
     }),
 
   applyEffects: (effects) => {

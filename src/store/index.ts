@@ -35,6 +35,7 @@ export const useNarrative = () =>
   }));
 export const useClues = () => useStore((s) => s.clues);
 export const useDeductions = () => useStore((s) => s.deductions);
+export const useConnections = () => useStore((s) => s.connections);
 export const useNpcs = () => useStore((s) => s.npcs);
 export const useFlags = () => useStore((s) => s.flags);
 export const useFactionReputation = () => useStore((s) => s.factionReputation);
@@ -65,6 +66,8 @@ export const useEvidenceActions = () =>
     discoverClue: s.discoverClue,
     updateClueStatus: s.updateClueStatus,
     addDeduction: s.addDeduction,
+    addConnection: s.addConnection,
+    clearConnections: s.clearConnections,
   }));
 
 export const useNpcActions = () =>

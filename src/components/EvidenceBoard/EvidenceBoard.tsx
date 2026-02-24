@@ -1,18 +1,10 @@
 /**
  * EvidenceBoard — full-screen corkboard overlay.
  *
- * Req 7.1: Accessible at any time during gameplay as a full-screen overlay.
- * Req 7.2: Displays all collected clues as draggable cards.
- * Req 7.3: Each clue card shows its status visually.
- * Req 7.4: Drag a Connection_Thread from one Clue card to another.
- * Req 7.5: Brighten clues sharing at least one tag with the source clue.
- * Req 7.6: "Attempt Deduction" button when ≥2 clues are connected.
- * Req 7.7: On success, lock clues and add Deduction to store.
- * Req 7.8: On failure, animate thread slack.
- * Req 12.5: Tab between clue cards; Spacebar to connect; Escape closes.
+ * Req 7.1–7.8, 12.5
  */
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { useClues, useDeductions, useStore } from '../../store';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useClues, useDeductions, useConnections, useStore } from '../../store';
 import { trackActivity } from '../../engine/hintEngine';
 import { ClueCard } from './ClueCard';
 import { ProgressSummary } from './ProgressSummary';
@@ -36,13 +28,16 @@ function getCentre(el: HTMLElement, container: HTMLElement): ThreadPoint {
 export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
   const clues = useClues();
   const deductions = useDeductions();
+  const storeConnections = useConnections();
   const updateClueStatus = useStore((s) => s.updateClueStatus);
+  const addConnection = useStore((s) => s.addConnection);
+  const clearConnections = useStore((s) => s.clearConnections);
 
-  // ── Connection state ──────────────────────────────────────────────────────
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
-  const [connections, setConnections] = useState<Connection[]>([]);
   const [slackConnections, setSlackConnections] = useState<Connection[]>([]);
   const [mousePos, setMousePos] = useState<ThreadPoint | null>(null);
+  // Trigger re-computation of thread positions
+  const [pointsVersion, setPointsVersion] = useState(0);
 
   const boardRef = useRef<HTMLDivElement>(null);
 
@@ -55,12 +50,42 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
   const clueCount = revealedClues.length;
   const deductionCount = Object.keys(deductions).length;
 
-  // IDs of clues that are part of at least one active connection
+  // Compute DOM-positioned connections from store ID pairs
+  const connections: Connection[] = useMemo(() => {
+    if (!boardRef.current) return [];
+    // pointsVersion is used to trigger recomputation
+    void pointsVersion;
+    return storeConnections.map((c) => {
+      const fromEl = boardRef.current!.querySelector<HTMLElement>(`[data-clue-id="${c.fromId}"]`);
+      const toEl = boardRef.current!.querySelector<HTMLElement>(`[data-clue-id="${c.toId}"]`);
+      const fromPoint = fromEl ? getCentre(fromEl, boardRef.current!) : { x: 0, y: 0 };
+      const toPoint = toEl ? getCentre(toEl, boardRef.current!) : { x: 0, y: 0 };
+      return { fromId: c.fromId, toId: c.toId, fromPoint, toPoint, state: 'active' as const };
+    });
+  }, [storeConnections, pointsVersion]);
+
   const connectedIds = Array.from(
-    new Set(connections.flatMap((c) => [c.fromId, c.toId])),
+    new Set(storeConnections.flatMap((c) => [c.fromId, c.toId])),
   );
 
-  // ── Keyboard: Escape closes ───────────────────────────────────────────────
+  // Recompute points after initial render and on scroll/resize
+  useEffect(() => {
+    setPointsVersion((v) => v + 1);
+  }, [storeConnections.length]);
+
+  useEffect(() => {
+    const board = boardRef.current;
+    if (!board) return;
+    function recompute() { setPointsVersion((v) => v + 1); }
+    board.addEventListener('scroll', recompute);
+    window.addEventListener('resize', recompute);
+    return () => {
+      board.removeEventListener('scroll', recompute);
+      window.removeEventListener('resize', recompute);
+    };
+  }, []);
+
+  // Keyboard: Escape closes
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
@@ -75,7 +100,7 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose, connectingFrom]);
 
-  // ── Mouse tracking for ghost thread ──────────────────────────────────────
+  // Mouse tracking for ghost thread
   useEffect(() => {
     if (!connectingFrom) {
       setMousePos(null);
@@ -90,57 +115,27 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [connectingFrom]);
 
-  // ── Spacebar connection logic ─────────────────────────────────────────────
+  // Spacebar connection logic
   const handleInitiateConnection = useCallback(
     (clueId: string) => {
       if (!connectingFrom) {
-        // Start connecting from this clue
         setConnectingFrom(clueId);
         return;
       }
-
       if (connectingFrom === clueId) {
-        // Cancel
         setConnectingFrom(null);
         return;
       }
-
-      // Complete the connection
-      const fromEl = boardRef.current?.querySelector<HTMLElement>(
-        `[data-clue-id="${connectingFrom}"]`,
-      );
-      const toEl = boardRef.current?.querySelector<HTMLElement>(
-        `[data-clue-id="${clueId}"]`,
-      );
-
-      if (fromEl && toEl && boardRef.current) {
-        const fromPoint = getCentre(fromEl, boardRef.current);
-        const toPoint = getCentre(toEl, boardRef.current);
-
-        // Avoid duplicate connections
-        const alreadyExists = connections.some(
-          (c) =>
-            (c.fromId === connectingFrom && c.toId === clueId) ||
-            (c.fromId === clueId && c.toId === connectingFrom),
-        );
-
-        if (!alreadyExists) {
-          setConnections((prev) => [
-            ...prev,
-            { fromId: connectingFrom, toId: clueId, fromPoint, toPoint, state: 'active' },
-          ]);
-          updateClueStatus(connectingFrom, 'connected');
-          updateClueStatus(clueId, 'connected');
-          trackActivity({ type: 'connectionAttempt' });
-        }
-      }
-
+      addConnection(connectingFrom, clueId);
+      updateClueStatus(connectingFrom, 'connected');
+      updateClueStatus(clueId, 'connected');
+      trackActivity({ type: 'connectionAttempt' });
       setConnectingFrom(null);
     },
-    [connectingFrom, connections, updateClueStatus],
+    [connectingFrom, addConnection, updateClueStatus],
   );
 
-  // ── Ghost thread source point ─────────────────────────────────────────────
+  // Ghost thread source point
   const ghostFrom = connectingFrom
     ? (() => {
         const el = boardRef.current?.querySelector<HTMLElement>(
@@ -150,7 +145,7 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
       })()
     : undefined;
 
-  // ── Tag-based brightening helper ────────────────────────────────────────────
+  // Tag-based brightening
   function shouldBrighten(clueId: string): boolean {
     if (!connectingFrom || connectingFrom === clueId) return false;
     const src = clues[connectingFrom];
@@ -159,44 +154,16 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
     return !!target && src.tags.some((t) => target.tags.includes(t));
   }
 
-  // ── Recompute thread positions on scroll/resize ───────────────────────────
-  useEffect(() => {
-    const board = boardRef.current;
-    if (!board || connections.length === 0) return;
-
-    function recompute() {
-      setConnections((prev) =>
-        prev.map((conn) => {
-          const fromEl = board!.querySelector<HTMLElement>(`[data-clue-id="${conn.fromId}"]`);
-          const toEl = board!.querySelector<HTMLElement>(`[data-clue-id="${conn.toId}"]`);
-          if (fromEl && toEl) {
-            return { ...conn, fromPoint: getCentre(fromEl, board!), toPoint: getCentre(toEl, board!) };
-          }
-          return conn;
-        }),
-      );
-    }
-
-    board.addEventListener('scroll', recompute);
-    window.addEventListener('resize', recompute);
-    return () => {
-      board.removeEventListener('scroll', recompute);
-      window.removeEventListener('resize', recompute);
-    };
-  }, [connections.length]);
-
-  // ── Deduction result handler ──────────────────────────────────────────────
+  // Deduction result handler
   function handleDeductionResult(result: 'success' | 'failure') {
     if (result === 'failure') {
-      // Animate threads as slack, then clear them after animation
       setSlackConnections(
         connections.map((c) => ({ ...c, state: 'slack' as const })),
       );
-      setConnections([]);
+      clearConnections();
       setTimeout(() => setSlackConnections([]), 1400);
     } else {
-      // On success, keep threads but mark them (they'll show as deduced via clue status)
-      setConnections([]);
+      clearConnections();
     }
   }
 
@@ -207,9 +174,7 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
       aria-label="Evidence Board"
       className="fixed inset-0 z-50 flex flex-col bg-black/80 backdrop-blur-sm"
     >
-      {/* Corkboard surface */}
       <div className="flex flex-col flex-1 overflow-hidden bg-amber-950/90 relative">
-
         {/* Header bar */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-amber-900/60 bg-amber-950/95">
           <div className="flex items-center gap-6">
@@ -218,33 +183,23 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
             </h2>
             <ProgressSummary clueCount={clueCount} deductionCount={deductionCount} />
           </div>
-
           <div className="flex items-center gap-4">
-            {/* Deduction button — visible when ≥2 clues are connected */}
             <DeductionButton
               connectedClueIds={connectedIds}
               onResult={handleDeductionResult}
             />
-
-            {/* Close button */}
             <button
               type="button"
               aria-label="Close Evidence Board"
               onClick={onClose}
-              className="
-                text-amber-300 hover:text-white
-                text-2xl font-bold leading-none
-                w-11 h-11 flex items-center justify-center
-                rounded-lg hover:bg-amber-800/60
-                transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white
-              "
+              className="text-amber-300 hover:text-white text-2xl font-bold leading-none w-11 h-11 flex items-center justify-center rounded-lg hover:bg-amber-800/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               ×
             </button>
           </div>
         </div>
 
-        {/* Corkboard area — position:relative so SVG overlay aligns correctly */}
+        {/* Corkboard area */}
         <div
           ref={boardRef}
           className="flex-1 overflow-auto p-6 relative"
@@ -254,23 +209,17 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
               'repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(120,80,20,0.15) 39px,rgba(120,80,20,0.15) 40px)',
           }}
         >
-          {/* SVG thread overlay */}
           <ConnectionThread
             connections={[...connections, ...slackConnections]}
             ghostFrom={ghostFrom}
             ghostTo={mousePos ?? undefined}
           />
-
           {revealedClues.length === 0 ? (
             <p className="text-amber-700 text-center mt-20 text-lg italic">
               No clues discovered yet. Investigate scenes to gather evidence.
             </p>
           ) : (
-            <div
-              className="flex flex-wrap gap-6 relative z-10"
-              role="list"
-              aria-label="Clue cards"
-            >
+            <div className="flex flex-wrap gap-6 relative z-10" role="list" aria-label="Clue cards">
               {revealedClues.map((clue) => (
                 <div key={clue.id} role="listitem">
                   <ClueCard
@@ -285,7 +234,6 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
           )}
         </div>
 
-        {/* Connection mode hint */}
         {connectingFrom && (
           <div
             role="status"

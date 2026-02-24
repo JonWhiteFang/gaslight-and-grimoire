@@ -43,7 +43,7 @@ Parallel path for suspicion:
 ## 6. Observable Effects
 
 - `npcs[npcId].disposition` changes (clamped).
-- `factionReputation[faction]` changes by `delta * 0.5` (unclamped).
+- `factionReputation[faction]` changes by `delta * 0.5` (clamped to [-10, +10]).
 - No SFX triggered by disposition or reputation changes.
 - No UI notification — the NPC Gallery shows updated disposition labels on next open, but there's no toast or indicator.
 - Downstream: faction reputation changes can trigger vignette unlocks at case completion (`CaseProgression.checkVignetteUnlocks`).

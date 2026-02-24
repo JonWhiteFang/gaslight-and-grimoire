@@ -111,15 +111,15 @@ All three Phase A blockers are resolved. Remaining broken features (ClueDiscover
 | 6.5 | Only 6 clues per case — thin for evidence board mechanic | High | Open |
 | 6.6 | NPCs have no interactive dialogue — memoryFlags never populated | High | Open |
 | 6.7 | ~~No composure/vitality recovery — death spiral~~ | Medium-High | ✅ FIXED (Phase E5) — Shared breakdown/incapacitation scenes + recovery effects in 6 scenes |
-| 6.8 | Evidence Board connections lost on close (React state, not store) | Medium-High | Open |
+| 6.8 | ~~Evidence Board connections lost on close (React state, not store)~~ | Medium-High | ✅ FIXED (Phase E6) — Connections persist in `evidenceSlice` store |
 | 6.9 | ~~Dice math: 45% success rate for best faculty vs DC 12~~ | Medium | ✅ Fixed — partial band widened, trained bonus added, DCs lowered |
 | 6.10 | ~~onEnter effects fire silently — no narrative feedback~~ | Medium | ✅ FIXED (Phase E9) — `EffectFeedback` renders inline messages with mechanical annotations |
 | 6.11 | sceneHistory tracked but never consumed — no back navigation | Medium | Open |
 | 6.12 | ~~Occultist Veil Sight ability has no mechanical effect~~ | Medium | ✅ FIXED — Lore advantage + variant scenes in both cases |
-| 6.13 | `validateCase.mjs` not in CI pipeline | Medium | Open |
+| 6.13 | ~~`validateCase.mjs` not in CI pipeline~~ | Medium | ✅ FIXED — Added to `deploy.yml` |
 | 6.14 | No integration tests for choice→navigation→effect pipeline | Medium | Open |
 | 6.15 | No component tests for EncounterPanel or EvidenceBoard | Medium | Open |
-| 6.16 | Faction reputation unbounded (no clamp) | Low | Open |
+| 6.16 | ~~Faction reputation unbounded (no clamp)~~ | Low | ✅ FIXED — Clamped to [-10, +10] |
 | 6.17 | Deduction descriptions are generic (2 hardcoded strings) | Low | Open |
 | 6.18 | No click-to-skip typewriter effect | Low | Open |
 

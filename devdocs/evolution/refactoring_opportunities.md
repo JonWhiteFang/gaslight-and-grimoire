@@ -53,17 +53,11 @@
 
 ---
 
-## R9. Persist Evidence Board Connections in Store
+## ~~R9. Persist Evidence Board Connections in Store~~ — ✅ COMPLETE
 
-**Status**: Not started (Phase E6)
+**Status**: Done (Phase E6)
 
-**What**: Move `connections` from React `useState` in `EvidenceBoard` to `evidenceSlice` in the Zustand store. Connections survive board close/reopen.
-
-**Why**: Players lose work when closing the board. The signature mechanic has unnecessary friction. Also enables save/load of board state.
-
-**Files**: `src/store/slices/evidenceSlice.ts`, `src/components/EvidenceBoard/EvidenceBoard.tsx`
-
-**Effort**: Medium.
+**Resolution**: Added `connections: ClueConnection[]` to `evidenceSlice`. `EvidenceBoard` reads from store; DOM points recomputed via `useMemo`. Connections cleared on case/vignette load and on deduction.
 
 ---
 

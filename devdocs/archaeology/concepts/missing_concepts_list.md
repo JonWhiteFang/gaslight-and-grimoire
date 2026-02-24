@@ -135,11 +135,8 @@ NPCs have disposition, suspicion, memoryFlags, and faction but no interactive di
 ### ~~Composure/Vitality Recovery~~ — ✅ FIXED
 Shared `breakdown` and `incapacitation` scenes injected into all cases via `injectSharedScenes`. Case-specific variants for both cases. Recovery effects (+1 composure/vitality) added to 6 scenes at natural rest points.
 
-### Persistent Evidence Board Connections
-Connections live in React `useState`, lost on board close/reopen. No drag-and-drop. No touch support.
-- **Status**: Missing
-- **Severity**: Medium-High — signature mechanic has friction
-- **Where it should be**: `src/store/slices/evidenceSlice.ts` (connection state), `src/components/EvidenceBoard/EvidenceBoard.tsx` (click/drag handlers)
+### ~~Persistent Evidence Board Connections~~ — ✅ FIXED
+Connections now persist in `evidenceSlice` store as ID pairs. DOM points recomputed on render/scroll/resize. Cleared on case/vignette load and on deduction.
 
 ### ~~Consequence Feedback / Effect Narration~~ — ✅ FIXED
 `EffectFeedback` component renders inline atmospheric messages with mechanical annotations (e.g. "A chill settles over you (Composure −1)") when `onEnter` effects fire. Optional `description` field on `Effect` supports content-authored text with auto-generated fallback. New files: `src/engine/effectMessages.ts`, `src/components/NarrativePanel/EffectFeedback.tsx`.
@@ -147,11 +144,8 @@ Connections live in React `useState`, lost on board close/reopen. No drag-and-dr
 ### ~~Occultist Veil Sight Ability~~ — ✅ FIXED
 Veil Sight now grants advantage on all Lore checks while active (`computeChoiceResult` and `processEncounterChoice`). Variant scenes added to both cases revealing occult content when `ability-veil-sight-active` flag is set. New files: `src/engine/__tests__/veilSight.test.ts`.
 
-### Faction Reputation Clamping
-Disposition [-10,+10], suspicion [0,10], composure/vitality [0,10] are all clamped. Faction reputation has no clamp and can grow unbounded.
-- **Status**: Missing
-- **Severity**: Low — no current content pushes reputation to extreme values
-- **Where it should be**: `src/store/slices/worldSlice.ts` → `adjustReputation` action
+### ~~Faction Reputation Clamping~~ — ✅ FIXED
+Clamped to [-10, +10] in `adjustReputation`. All numeric state is now bounded.
 
 ### Content-Specific Deduction Descriptions
 `buildDeduction` always returns one of two generic strings regardless of which clues are connected. No content-specific deduction text exists.

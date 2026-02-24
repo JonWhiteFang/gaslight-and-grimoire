@@ -253,13 +253,9 @@ The issues are all incremental:
 
 ---
 
-### 6.6 Evidence Board Connections Are Transient (MEDIUM-HIGH)
+### ~~6.6 Evidence Board Connections Are Transient~~ — ✅ FIXED
 
-**Gap**: Connections live in React `useState`, lost on board close/reopen. No drag-and-drop (keyboard-only via Spacebar). No touch support.
-
-**Desired state**: Connections persisted in store. Click-to-connect and drag-and-drop. Touch support.
-
-**Impact**: Players lose work when closing the board. The signature mechanic has unnecessary friction.
+**Resolution**: Connections now persist in `evidenceSlice` store as ID pairs. DOM points recomputed on render/scroll/resize. Cleared on case/vignette load and on deduction (success or failure).
 
 ---
 
@@ -287,7 +283,7 @@ The issues are all incremental:
 
 ### 6.10 Testing Gaps in Integration and CI (MEDIUM)
 
-**Gap**: No integration tests for choice→navigation→effect pipeline. `validateCase.mjs` not in CI. No component tests for EncounterPanel or EvidenceBoard.
+**Gap**: No integration tests for choice→navigation→effect pipeline. ~~`validateCase.mjs` not in CI.~~ No component tests for EncounterPanel or EvidenceBoard.
 
 **Desired state**: Content validation in CI. Integration tests. Component tests for all interactive overlays.
 
@@ -299,7 +295,7 @@ The issues are all incremental:
 
 6. ~~**Occultist ability (Veil Sight) has no mechanical effect**~~: ✅ FIXED. Veil Sight now grants advantage on all Lore checks while active. Variant scenes added to both cases revealing occult content when flag is set.
 
-7. **Faction reputation is unbounded**: Disposition [-10,+10], suspicion [0,10], composure/vitality [0,10] are all clamped. Faction reputation has no clamp. Extreme values could break condition checks.
+7. ~~**Faction reputation is unbounded**~~: ✅ FIXED. Clamped to [-10, +10] in `adjustReputation`.
 
 8. **Deduction descriptions are generic**: `buildDeduction` always returns the same two strings regardless of which clues are connected. Content-specific deduction text would make the Evidence Board more rewarding.
 

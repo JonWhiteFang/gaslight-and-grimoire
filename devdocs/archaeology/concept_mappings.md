@@ -123,7 +123,7 @@
 **Alternatives likely considered**: Explicit reputation effects in content JSON (rejected — too error-prone, easy to forget). A middleware or subscription for propagation (rejected — the cross-slice `get()` call is simpler). Configurable propagation multiplier per faction (not done — 0.5 is hardcoded).
 
 **Edge cases that shaped design**:
-- Disposition clamped to [-10, +10]. Suspicion clamped to [0, 10]. Faction reputation is unbounded — no clamping.
+- Disposition clamped to [-10, +10]. Suspicion clamped to [0, 10]. Faction reputation clamped to [-10, +10]. All numeric state is bounded.
 - `removeNpc` sets `isAlive = false` and `isAccessible = false` but doesn't delete the NPC from the store. This preserves the NPC's data for cross-case reference.
 - NPCGallery filters by `isAccessible` — removed NPCs don't appear but their data persists.
 - Suspicion tier labels in NPCGallery use different names than the type system: "Wary" (gallery) vs "concealing" (type). The gallery uses narrative-friendly labels.

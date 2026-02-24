@@ -298,15 +298,11 @@ Goal: Transform the technically sound but content-thin game into a compelling pl
 
 ---
 
-### E6. Persist Evidence Board Connections in Store — P1
+### ~~E6. Persist Evidence Board Connections in Store~~ — ✅ COMPLETE
 
-**What**: Connections live in React `useState`, lost on board close/reopen. No drag-and-drop. No touch support.
+**What**: Connections lived in React `useState`, lost on board close/reopen.
 
-**Files**: `src/store/slices/evidenceSlice.ts` (add `connections` state), `src/components/EvidenceBoard/EvidenceBoard.tsx` (wire to store, add click/drag handlers), `src/components/EvidenceBoard/ClueCard.tsx` (drag source)
-
-**Dependencies**: None.
-
-**Risk**: Medium. Store schema change + UI interaction changes.
+**Resolution**: Added `connections: ClueConnection[]` to `evidenceSlice` with `addConnection` (dedup) and `clearConnections` actions. `EvidenceBoard` reads from store; DOM points recomputed via `useMemo` + version counter on scroll/resize. Connections cleared on case/vignette load and on deduction. Files changed: `src/store/slices/evidenceSlice.ts`, `src/store/index.ts`, `src/store/slices/narrativeSlice.ts`, `src/components/EvidenceBoard/EvidenceBoard.tsx`.
 
 ---
 
@@ -340,7 +336,7 @@ Goal: Transform the technically sound but content-thin game into a compelling pl
 
 ### E10. Expand Testing to Cover Integration Paths — P2
 
-**What**: No integration tests for choice→navigation→effect pipeline. `validateCase.mjs` not in CI. No component tests for EncounterPanel or EvidenceBoard.
+**What**: No integration tests for choice→navigation→effect pipeline. ~~`validateCase.mjs` not in CI.~~ No component tests for EncounterPanel or EvidenceBoard.
 
 **Files**: `.github/workflows/deploy.yml` (add validation step), new `src/engine/__tests__/integration.test.ts`, new `src/components/__tests__/EncounterPanel.test.tsx`, new `src/components/__tests__/EvidenceBoard.test.tsx`
 
@@ -365,7 +361,7 @@ Phase E (Game Design Improvements):
   E3 (content depth)             — independent
   E4 (NPC dialogue)              — depends on E1 ✅ (dialogue discovery method)
   E5 (recovery mechanics)        — ✅ COMPLETE
-  E6 (persistent evidence board) — independent
+  E6 (persistent evidence board) — ✅ COMPLETE
   E7 (scene history)             — independent
   E8 (dice rebalance)            — independent
   E9 (consequence feedback)      — ✅ COMPLETE

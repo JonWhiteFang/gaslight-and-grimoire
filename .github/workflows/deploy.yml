@@ -27,6 +27,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Validate case content
+        run: node scripts/validateCase.mjs
+
       - name: Audit dependencies
         run: npm audit --audit-level=high
 

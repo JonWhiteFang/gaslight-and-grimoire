@@ -81,6 +81,7 @@ export const createNarrativeSlice: StateCreator<
       state.clues = {};
       state.npcs = {};
       state.deductions = {};
+      state.connections = [];
       state.lastCheckResult = null;
 
       // Populate clues and NPCs from loaded case data
@@ -123,6 +124,7 @@ export const createNarrativeSlice: StateCreator<
       state.clues = {};
       state.npcs = {};
       state.deductions = {};
+      state.connections = [];
       state.lastCheckResult = null;
       for (const [id, clue] of Object.entries(data.clues)) {
         state.clues[id] = clue;

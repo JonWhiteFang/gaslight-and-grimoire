@@ -285,14 +285,14 @@ These are documented in detail in `devdocs/evolution/gap_analysis.md`, `smoke_te
 ### Medium (game design — mechanics and UX)
 - ~~**Engine ↔ Store circular dependency**~~ — ✅ FIXED. Engine functions now accept an `EngineActions` interface parameter instead of importing `useStore`. `applyOnEnterEffects` moved to `worldSlice.applyEffects` store action. Zero store imports in engine files.
 - ~~**No recovery mechanics**~~ — ✅ FIXED. Shared `breakdown`/`incapacitation` scenes injected into all cases via `injectSharedScenes` in `loadCase`/`loadVignette`. Case-specific variants for Whitechapel Cipher and Mayfair Séance. Recovery effects (+1 composure/vitality) added to 6 scenes across both cases.
-- **Evidence Board connections transient** — Lost on close/reopen (React state, not store). No drag-and-drop. No touch support.
+- ~~**Evidence Board connections transient**~~ — ✅ FIXED. Connections now persist in `evidenceSlice` store (ID pairs only). DOM points recomputed on render/scroll/resize. Cleared on case load and deduction.
 - ~~**Dice math skews toward failure**~~ — ✅ FIXED. Partial band widened from DC-2 to DC-3 (15% instead of 10%). Trained bonus (+1) added for archetype primary faculty. All content DCs lowered by 2. Encounter reaction check stays at DC 12.
 - **Silent state changes** — ~~`onEnter` effects fire with no narrative feedback. Players see meters change without explanation.~~ ✅ FIXED. `EffectFeedback` component renders inline atmospheric messages with mechanical annotations (e.g. "A chill settles over you (Composure −1)"). Optional `description` field on `Effect` supports content-authored text with auto-generated fallback. New files: `src/engine/effectMessages.ts`, `src/components/NarrativePanel/EffectFeedback.tsx`.
 - ~~**Occultist Veil Sight inert**~~ — ✅ FIXED. Veil Sight now grants advantage on all Lore checks while active. Variant scenes added to both cases revealing occult content when flag is set. New files: `src/engine/__tests__/veilSight.test.ts`.
-- **`validateCase.mjs` not in CI** — Content validation only runs manually.
+- ~~**`validateCase.mjs` not in CI**~~ — ✅ FIXED. Added to `deploy.yml` as a step after `npm ci`, before audit and build.
 
 ### Low (polish)
-- **Faction reputation unbounded** — No clamp unlike all other numeric state.
+- ~~**Faction reputation unbounded**~~ — ✅ FIXED. Clamped to [-10, +10] in `adjustReputation`.
 - **Generic deduction descriptions** — `buildDeduction` returns same 2 strings regardless of clues.
 - **No click-to-skip typewriter** — Must wait for full text or change settings.
 - **`sceneHistory` unused** — Tracked but no back navigation or journal timeline.
@@ -303,9 +303,9 @@ Things to be aware of when making changes:
 
 - **`processChoice` navigates before returning** — It calls `actions.goToScene()` internally, then returns `ChoiceResult`. The caller shows the dice overlay after the scene has already changed. Use `computeChoiceResult` for the pure computation without side effects.
 - **`applyEffects` is a store action in `worldSlice`** — Called from `NarrativePanel` useEffect. Replaces the former `applyOnEnterEffects` engine function.
-- **Evidence Board connections live in React state, not the store** — Closing and reopening the board loses all connections. This is by design (connections are transient until deduction).
+- **Evidence Board connections persist in store** — `evidenceSlice.connections` holds ID pairs. DOM points are recomputed on render. Connections cleared on case/vignette load and on deduction (success or failure).
 - **`adjustDisposition` has a hidden cross-slice call** — After updating NPC disposition, it calls `get().adjustReputation(faction, delta * 0.5)` for faction-aligned NPCs. This coupling is in `src/store/slices/npcSlice.ts`.
-- **Faction reputation is unbounded** — Disposition is clamped [-10,+10], suspicion [0,10], composure/vitality [0,10]. Faction reputation has no clamp.
+- **Faction reputation is clamped** — Disposition [-10,+10], suspicion [0,10], composure/vitality [0,10], faction reputation [-10,+10]. All numeric state is now bounded.
 - **`Object.keys(data.scenes)[0]` is the fallback for first scene** — In `loadAndStartCase`. Used only when `meta.json` lacks a `firstScene` field. Both existing cases now have `firstScene` set explicitly.
 - **No audio files in repo** — The audio system is fully coded but silent. Howler silently handles missing files. SFX is triggered via a store subscription in `src/store/audioSubscription.ts` (initialized in `main.tsx`), not from slice actions.
 - **`Date.now()` and `Math.random()` used directly** — In `diceEngine.rollD20()`, `hintEngine`, `saveManager`, `metaSlice.saveGame`, `buildDeduction`. Not injectable. Tests work around this.
@@ -318,4 +318,4 @@ See `devdocs/evolution/implementation_roadmap.md` for the full phased plan. Summ
 - **Phase B (Core Refactoring)**: ✅ COMPLETE — Extracted pure computeChoiceResult, moved buildDeduction to engine, audio subscription, consolidated CheckResult types, runtime content validation with tier completeness
 - **Phase C (Gap Filling)**: ✅ COMPLETE — ClueDiscoveryCard, save button, faction display, error display, case completion screen
 - **Phase D (Integration)**: ✅ COMPLETE — Encounter UI, stale state cleanup, remove dead code
-- **Phase E (Game Design)**: 🟡 IN PROGRESS — ~~Active clue discovery~~ ✅, ~~consequence feedback~~ ✅, ~~Veil Sight~~ ✅, ~~recovery mechanics~~ ✅, audio/visual assets, content depth, NPC dialogue, persistent evidence board, scene history, testing expansion. See `GAME_DESIGN_ANALYSIS.md` for full analysis.
+- **Phase E (Game Design)**: 🟡 IN PROGRESS — ~~Active clue discovery~~ ✅, ~~consequence feedback~~ ✅, ~~Veil Sight~~ ✅, ~~recovery mechanics~~ ✅, ~~persistent evidence board~~ ✅, ~~faction clamping~~ ✅, ~~CI validation~~ ✅, audio/visual assets, content depth, NPC dialogue, scene history, testing expansion. See `GAME_DESIGN_ANALYSIS.md` for full analysis.

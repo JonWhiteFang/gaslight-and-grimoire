@@ -446,17 +446,9 @@ The closest candidate would be `narrativeEngine.ts` (400+ lines, 6 responsibilit
 
 ---
 
-### 5.6 Persist Evidence Board Connections
+### ~~5.6 Persist Evidence Board Connections~~ — ✅ COMPLETE
 
-**What**: Move connection state from React `useState` to Zustand store. Add click-to-connect.
-
-**Files**: `src/store/slices/evidenceSlice.ts`, `src/components/EvidenceBoard/EvidenceBoard.tsx`, `src/components/EvidenceBoard/ClueCard.tsx`
-
-**Dependencies**: None.
-
-**Risk**: Medium. Store schema change.
-
-**Testing**: Create connections → close board → reopen → verify connections persist. Form deduction → verify connections clear.
+**Resolution**: Added `connections: ClueConnection[]` to `evidenceSlice` with `addConnection` (dedup) and `clearConnections` actions. `EvidenceBoard` reads from store; DOM points recomputed on render. Connections cleared on case/vignette load and on deduction.
 
 ---
 
