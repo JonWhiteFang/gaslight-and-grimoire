@@ -1,14 +1,7 @@
 {
   "npcs": [
-    {
-      "id": "npc-wren",
-      "name": "Wren",
-      "faction": "Lamplighters",
-      "disposition": 3,
-      "suspicion": 0,
-      "memoryFlags": {},
-      "isAlive": true,
-      "isAccessible": true
-    }
+    { "id": "npc-wren", "name": "Wren", "faction": "Lamplighters", "disposition": 3, "suspicion": 0, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "npc-amos-court-watcher", "name": "Finch (Court)", "faction": "Court of Smoke", "disposition": -1, "suspicion": 3, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "npc-elspeth", "name": "Elspeth", "faction": "Lamplighters", "disposition": 0, "suspicion": 0, "memoryFlags": {}, "isAlive": true, "isAccessible": true }
   ]
 }

@@ -13,6 +13,12 @@
       "type": "case"
     },
     {
+      "id": "the-lamplighters-wake",
+      "title": "The Lamplighter's Wake",
+      "synopsis": "A Lamplighter agent is found dead in a locked room in Whitechapel. Scotland Yard calls it suicide. The Lamplighters suspect otherwise — and the trail leads to the Gasworks, where the Court of Smoke is trafficking in things that should not exist.",
+      "type": "case"
+    },
+    {
       "id": "a-matter-of-shadows",
       "title": "A Matter of Shadows",
       "synopsis": "A Lamplighter courier has gone missing in Southwark with a package that was never meant to exist.",
@@ -21,6 +27,38 @@
         "type": "factionReputation",
         "target": "Lamplighters",
         "value": 2
+      }
+    },
+    {
+      "id": "the-rationalists-dilemma",
+      "title": "The Rationalist's Dilemma",
+      "synopsis": "A Rationalist scientist's experiment has produced results that defy explanation. The Circle wants it debunked — or buried.",
+      "type": "vignette",
+      "triggerCondition": {
+        "type": "factionReputation",
+        "target": "Rationalists Circle",
+        "value": 2
+      }
+    },
+    {
+      "id": "the-debt-of-smoke",
+      "title": "The Debt of Smoke",
+      "synopsis": "A Court of Smoke contact comes to you with a personal problem — someone in the Court is trying to kill them, and the reason involves a stolen artifact.",
+      "type": "vignette",
+      "triggerCondition": {
+        "type": "npcDisposition",
+        "target": "npc-sable",
+        "value": 7
+      }
+    },
+    {
+      "id": "the-unfinished-case",
+      "title": "The Unfinished Case",
+      "synopsis": "A loose thread from the Whitechapel Cipher surfaces in a pawnshop, and the trail leads to an unresolved murder that predates the events of the first case.",
+      "type": "vignette",
+      "triggerCondition": {
+        "type": "hasFlag",
+        "target": "wc-case-complete"
       }
     }
   ]

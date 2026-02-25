@@ -1,0 +1,11 @@
+{
+  "id": "the-debt-of-smoke",
+  "title": "The Debt of Smoke",
+  "synopsis": "A Court of Smoke contact comes to you with a personal problem — someone in the Court is trying to kill them, and the reason involves a stolen artifact that is more dangerous than anyone realizes.",
+  "firstScene": "dos-act1-midnight-meeting",
+  "triggerCondition": {
+    "type": "npcDisposition",
+    "target": "npc-sable",
+    "value": 7
+  }
+}

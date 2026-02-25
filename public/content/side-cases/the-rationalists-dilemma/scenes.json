@@ -1,0 +1,413 @@
+{
+  "scenes": [
+    {
+      "id": "rd-act1-laboratory",
+      "act": 1,
+      "narrative": "Dr Hargrove's laboratory occupies the top floor of a converted warehouse near King's Cross — a space cluttered with electromagnetic apparatus, coils of copper wire, and instruments whose purpose you cannot immediately identify. Hargrove himself is a thin, intense man in his forties, with the distracted manner of someone who has not slept in days. 'The Circle sent you,' he says, without looking up from his instruments. 'They want me to stop. But I cannot stop. Not now. Not when I am this close.' The apparatus at the centre of the room hums with a low, persistent vibration that you feel in your teeth. Something about it is wrong — not mechanically, but fundamentally. The air around it shimmers.",
+      "ambientAudio": "ambient-study",
+      "cluesAvailable": [
+        {
+          "clueId": "rd-clue-experiment-log",
+          "method": "automatic"
+        },
+        {
+          "clueId": "rd-clue-anomalous-readings",
+          "method": "exploration"
+        },
+        {
+          "clueId": "rd-clue-red-herring-rival",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "rd-choice-examine-apparatus",
+          "text": "Examine the apparatus. What is Hargrove measuring?",
+          "faculty": "reason",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "rd-act1-apparatus-understood",
+            "success": "rd-act1-apparatus-understood",
+            "partial": "rd-act1-apparatus-partial",
+            "failure": "rd-act1-apparatus-partial",
+            "fumble": "rd-act1-apparatus-partial"
+          }
+        },
+        {
+          "id": "rd-choice-question-hargrove",
+          "text": "Dr Hargrove, what have you found? What is the Circle afraid of?",
+          "faculty": "influence",
+          "difficulty": 9,
+          "outcomes": {
+            "critical": "rd-act1-hargrove-confides",
+            "success": "rd-act1-hargrove-confides",
+            "partial": "rd-act1-hargrove-guarded",
+            "failure": "rd-act1-hargrove-guarded",
+            "fumble": "rd-act1-hargrove-guarded"
+          }
+        },
+        {
+          "id": "rd-choice-search-lab",
+          "text": "Search the laboratory. Hargrove may be hiding something the Circle does not know about.",
+          "faculty": "perception",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "rd-act1-hidden-study",
+            "success": "rd-act1-hidden-study",
+            "partial": "rd-act1-apparatus-partial",
+            "failure": "rd-act1-apparatus-partial",
+            "fumble": "rd-act1-apparatus-partial"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "rd-act1-apparatus-understood",
+      "act": 1,
+      "narrative": "The apparatus is an electromagnetic resonance detector of extraordinary sensitivity — far beyond anything commercially available. Hargrove has built it himself, calibrating it to detect frequencies at the extreme edge of the measurable spectrum. And it is detecting something. The readings are unmistakable: a signal, regular and patterned, originating from no identifiable source. The frequency corresponds to nothing in the known electromagnetic spectrum. It is, by any rational measure, impossible. And yet the instruments do not lie.",
+      "cluesAvailable": [
+        {
+          "clueId": "rd-clue-anomalous-readings",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "rd-choice-apparatus-hargrove",
+          "text": "These readings are impossible. What does Hargrove think they mean?",
+          "outcomes": {
+            "critical": "rd-act1-hargrove-confides",
+            "success": "rd-act1-hargrove-confides",
+            "partial": "rd-act1-hargrove-confides",
+            "failure": "rd-act1-hargrove-confides",
+            "fumble": "rd-act1-hargrove-confides"
+          }
+        },
+        {
+          "id": "rd-choice-apparatus-circle",
+          "text": "Take the readings to the Circle. Let them explain this.",
+          "outcomes": {
+            "critical": "rd-act2-circle-meeting",
+            "success": "rd-act2-circle-meeting",
+            "partial": "rd-act2-circle-meeting",
+            "failure": "rd-act2-circle-meeting",
+            "fumble": "rd-act2-circle-meeting"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1,
+          "description": "The impossible readings challenge everything you thought you knew"
+        }
+      ]
+    },
+    {
+      "id": "rd-act1-apparatus-partial",
+      "act": 1,
+      "narrative": "The apparatus is complex — beyond your immediate understanding. You can see that it measures electromagnetic frequencies, and that the readings are unusual, but the significance eludes you. Hargrove watches you examine his instruments with the anxious pride of a parent watching a stranger handle their child.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "rd-choice-apparatus-partial-hargrove",
+          "text": "Ask Hargrove to explain what the apparatus has found.",
+          "outcomes": {
+            "critical": "rd-act1-hargrove-confides",
+            "success": "rd-act1-hargrove-confides",
+            "partial": "rd-act1-hargrove-confides",
+            "failure": "rd-act1-hargrove-confides",
+            "fumble": "rd-act1-hargrove-confides"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "rd-act1-hargrove-confides",
+      "act": 1,
+      "narrative": "Hargrove's composure breaks. 'I have detected the Veil,' he says. 'The boundary between the rational world and whatever lies beyond it. It is not metaphysical — it is physical. It has an electromagnetic signature. It can be measured, mapped, and — theoretically — manipulated.' He pulls a chart from the wall. 'The signals I am detecting correspond precisely to Grey Dawn descriptions of Veil activity. Their occult theory and my scientific measurements agree. The Veil is real, it is thinning, and I can prove it.' He meets your eyes. 'The Circle wants me to destroy this evidence. They would rather the world remain ignorant than admit that the supernatural has a scientific basis.'",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "rd-choice-hargrove-circle",
+          "text": "Take this to the Circle. They need to see the evidence.",
+          "outcomes": {
+            "critical": "rd-act2-circle-meeting",
+            "success": "rd-act2-circle-meeting",
+            "partial": "rd-act2-circle-meeting",
+            "failure": "rd-act2-circle-meeting",
+            "fumble": "rd-act2-circle-meeting"
+          }
+        },
+        {
+          "id": "rd-choice-hargrove-search",
+          "text": "The Grey Dawn connection — has Hargrove been in contact with the Order?",
+          "faculty": "perception",
+          "difficulty": 9,
+          "outcomes": {
+            "critical": "rd-act1-hidden-study",
+            "success": "rd-act1-hidden-study",
+            "partial": "rd-act2-circle-meeting",
+            "failure": "rd-act2-circle-meeting",
+            "fumble": "rd-act2-circle-meeting"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "disposition",
+          "target": "npc-hargrove",
+          "delta": 2,
+          "description": "Hargrove is relieved to share his burden"
+        },
+        {
+          "type": "setMemoryFlag",
+          "target": "npc-hargrove",
+          "value": "confided-discovery"
+        }
+      ]
+    },
+    {
+      "id": "rd-act1-hargrove-guarded",
+      "act": 1,
+      "narrative": "Hargrove shakes his head. 'I cannot discuss my findings with someone sent by the Circle to shut me down. Examine the evidence yourself. Draw your own conclusions. Then decide whose side you are on.' He returns to his instruments, dismissing you with the focused intensity of a man who has chosen his work over his career.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "rd-choice-hargrove-guarded-search",
+          "text": "Search the laboratory while Hargrove is distracted.",
+          "faculty": "perception",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "rd-act1-hidden-study",
+            "success": "rd-act1-hidden-study",
+            "partial": "rd-act2-circle-meeting",
+            "failure": "rd-act2-circle-meeting",
+            "fumble": "rd-act2-circle-meeting"
+          }
+        },
+        {
+          "id": "rd-choice-hargrove-guarded-circle",
+          "text": "Report to the Circle. Let them decide.",
+          "outcomes": {
+            "critical": "rd-act2-circle-meeting",
+            "success": "rd-act2-circle-meeting",
+            "partial": "rd-act2-circle-meeting",
+            "failure": "rd-act2-circle-meeting",
+            "fumble": "rd-act2-circle-meeting"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "rd-act1-hidden-study",
+      "act": 1,
+      "narrative": "Behind a false panel in Hargrove's workbench — concealed with the care of a man who knows he is being watched — you find a Grey Dawn treatise. 'The Electromagnetic Properties of the Veil: A Synthesis of Rational and Occult Methodologies.' The text is annotated in Hargrove's hand, cross-referencing his own measurements with Grey Dawn theory. The correlations are striking. Hargrove has not merely detected the Veil — he has begun to map it, using a framework that bridges science and the occult. The implications are staggering. And dangerous.",
+      "cluesAvailable": [
+        {
+          "clueId": "rd-clue-grey-dawn-text",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "rd-choice-hidden-study-circle",
+          "text": "The Grey Dawn text changes everything. Take it to the Circle.",
+          "outcomes": {
+            "critical": "rd-act2-circle-meeting",
+            "success": "rd-act2-circle-meeting",
+            "partial": "rd-act2-circle-meeting",
+            "failure": "rd-act2-circle-meeting",
+            "fumble": "rd-act2-circle-meeting"
+          }
+        },
+        {
+          "id": "rd-choice-hidden-study-confront",
+          "text": "Confront Hargrove. He has been working with the Grey Dawn.",
+          "faculty": "influence",
+          "difficulty": 9,
+          "outcomes": {
+            "critical": "rd-act1-hargrove-confides",
+            "success": "rd-act1-hargrove-confides",
+            "partial": "rd-act2-circle-meeting",
+            "failure": "rd-act2-circle-meeting",
+            "fumble": "rd-act2-circle-meeting"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "rd-found-grey-dawn-text",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "rd-act2-circle-meeting",
+      "act": 2,
+      "narrative": "Director Ashby receives you in the Rationalists Circle's Bloomsbury headquarters — a room of polished mahogany and scientific instruments displayed like trophies. Ashby is a silver-haired man with the unshakeable confidence of someone who has never encountered a problem that reason could not solve. 'Hargrove's results,' he says, 'are an embarrassment. Electromagnetic detection of the supernatural? It is pseudoscience dressed in laboratory equipment.' He slides a document across the desk. 'The Circle's position is clear: Hargrove's experiments are to be terminated and his notes destroyed. We cannot allow this to undermine decades of rational advocacy.'",
+      "cluesAvailable": [
+        {
+          "clueId": "rd-clue-circle-orders",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "rd-choice-circle-comply",
+          "text": "The Circle is right. Hargrove's work is dangerous. Help suppress it.",
+          "outcomes": {
+            "critical": "rd-act2-ending-suppressed",
+            "success": "rd-act2-ending-suppressed",
+            "partial": "rd-act2-ending-suppressed",
+            "failure": "rd-act2-ending-suppressed",
+            "fumble": "rd-act2-ending-suppressed"
+          }
+        },
+        {
+          "id": "rd-choice-circle-defy",
+          "text": "The evidence is real, Director. Suppressing it does not make it false.",
+          "faculty": "nerve",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "rd-act2-ending-published",
+            "success": "rd-act2-ending-published",
+            "partial": "rd-act2-ending-compromise",
+            "failure": "rd-act2-ending-compromise",
+            "fumble": "rd-act2-ending-suppressed"
+          }
+        },
+        {
+          "id": "rd-choice-circle-compromise",
+          "text": "There is a middle path. Hargrove's work continues under Circle oversight — controlled, not destroyed.",
+          "faculty": "influence",
+          "difficulty": 12,
+          "advantageIf": [
+            "rd-clue-grey-dawn-text"
+          ],
+          "outcomes": {
+            "critical": "rd-act2-ending-compromise",
+            "success": "rd-act2-ending-compromise",
+            "partial": "rd-act2-ending-suppressed",
+            "failure": "rd-act2-ending-suppressed",
+            "fumble": "rd-act2-ending-suppressed"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "rd-act2-ending-suppressed",
+      "act": 2,
+      "narrative": "Hargrove's apparatus is dismantled. His notes are confiscated. The Grey Dawn text is burned. Director Ashby shakes your hand with the satisfaction of a man who has protected the rational order. Hargrove watches from the doorway of his empty laboratory, his expression not angry but hollow — the look of a man who has seen the truth and been told it does not exist. The Rationalists Circle's reputation is preserved. The Veil continues to thin, unmeasured and unmapped. And somewhere in the electromagnetic spectrum, the signals continue — patient, patterned, and waiting for someone else to listen.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "rd-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "rd-evidence-suppressed",
+          "value": true
+        },
+        {
+          "type": "reputation",
+          "target": "Rationalists Circle",
+          "delta": 2
+        },
+        {
+          "type": "reputation",
+          "target": "Hermetic Order of the Grey Dawn",
+          "delta": -1
+        },
+        {
+          "type": "disposition",
+          "target": "npc-hargrove",
+          "delta": -3,
+          "description": "Hargrove will never forgive you for destroying his life's work"
+        }
+      ]
+    },
+    {
+      "id": "rd-act2-ending-published",
+      "act": 2,
+      "narrative": "Hargrove's findings are published — not through the Circle, which disowns him, but through an independent scientific journal. The paper causes a sensation. The Rationalists Circle denounces it as fraud. The Grey Dawn celebrates it as vindication. The public is divided. But the data is in the open now, and it cannot be unpublished. Hargrove is expelled from the Circle but gains something more valuable: the attention of every faction in London that takes the Veil seriously. The Lamplighters offer him protection. The Grey Dawn offers him resources. And the signals from beyond the spectrum continue, now documented and undeniable.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "rd-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "rd-evidence-published",
+          "value": true
+        },
+        {
+          "type": "reputation",
+          "target": "Rationalists Circle",
+          "delta": -2
+        },
+        {
+          "type": "reputation",
+          "target": "Hermetic Order of the Grey Dawn",
+          "delta": 2
+        },
+        {
+          "type": "reputation",
+          "target": "Lamplighters",
+          "delta": 1
+        },
+        {
+          "type": "disposition",
+          "target": "npc-hargrove",
+          "delta": 3,
+          "description": "Hargrove considers you the bravest person he has ever met"
+        }
+      ]
+    },
+    {
+      "id": "rd-act2-ending-compromise",
+      "act": 2,
+      "narrative": "The compromise is elegant, if fragile. Hargrove's research continues under Circle oversight — classified, controlled, and officially nonexistent. A small team of Rationalist scientists is assigned to replicate his results under laboratory conditions. The Grey Dawn text is sealed in the Circle's archives, accessible only to senior members. Director Ashby is not happy, but he recognises the pragmatism: better to control the research than to drive it underground. Hargrove accepts the terms with the weary gratitude of a man who expected worse. The Veil's electromagnetic signature is now a classified secret shared between the Circle and one very determined scientist. It is not truth. It is not suppression. It is London's favourite compromise: a secret everyone agrees to keep.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "rd-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "rd-evidence-classified",
+          "value": true
+        },
+        {
+          "type": "reputation",
+          "target": "Rationalists Circle",
+          "delta": 1
+        },
+        {
+          "type": "disposition",
+          "target": "npc-hargrove",
+          "delta": 1
+        },
+        {
+          "type": "disposition",
+          "target": "npc-circle-director",
+          "delta": 1
+        }
+      ]
+    }
+  ]
+}

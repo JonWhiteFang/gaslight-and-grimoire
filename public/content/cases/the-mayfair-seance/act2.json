@@ -1,339 +1,742 @@
 {
-      "scenes": [
+  "scenes": [
+    {
+      "id": "ms-act2-the-seance",
+      "act": 2,
+      "narrative": "The gas lamps dim. Twelve guests sit around the black-draped table, hands linked. Madame Vesper begins to speak — low, rhythmic, in a language that is not quite Latin. The temperature drops. The flames gutter. And then something happens that no mechanism can explain: the table rises six inches off the floor, and a voice that is not Vesper's speaks from the darkness. 'Who calls?' it says. 'Who dares?' Lord Pemberton's face has gone white. Lady Ashworth is gripping the table edge. And Madame Vesper — Madame Vesper is weeping silently, her lips still moving in that not-quite-Latin chant. Something has gone very wrong.",
+      "ambientAudio": "ambient-seance",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "ms-choice-rational-path",
+          "text": "This is an elaborate trick. Find the mechanism — someone is pulling strings.",
+          "faculty": "reason",
+          "difficulty": 10,
+          "advantageIf": [
+            "ms-clue-hidden-mechanism"
+          ],
+          "outcomes": {
+            "critical": "ms-act2-rational-success",
+            "success": "ms-act2-rational-partial",
+            "partial": "ms-act2-rational-partial",
+            "failure": "ms-act2-rational-fail",
+            "fumble": "ms-act2-rational-fail"
+          }
+        },
+        {
+          "id": "ms-choice-occult-path",
+          "text": "The symbols on Vesper's shawl — they are a summoning circle. Something has been called.",
+          "faculty": "lore",
+          "difficulty": 11,
+          "advantageIf": [
+            "ms-clue-invitation-letter"
+          ],
+          "outcomes": {
+            "critical": "ms-act2-occult-success",
+            "success": "ms-act2-occult-partial",
+            "partial": "ms-act2-occult-partial",
+            "failure": "ms-act2-occult-fail",
+            "fumble": "ms-act2-occult-fail"
+          }
+        },
+        {
+          "id": "ms-choice-confront-pemberton",
+          "text": "Pemberton knows something. His terror is too specific to be surprise.",
+          "faculty": "influence",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "ms-act2-pemberton-breaks",
+            "success": "ms-act2-pemberton-partial",
+            "partial": "ms-act2-pemberton-partial",
+            "failure": "ms-act2-pemberton-stonewalls",
+            "fumble": "ms-act2-pemberton-stonewalls"
+          }
+        },
+        {
+          "id": "ms-choice-investigate-servants",
+          "text": "The servants saw the deliveries. Question them below stairs.",
+          "faculty": "influence",
+          "difficulty": 9,
+          "outcomes": {
+            "critical": "ms-act2-servants-quarters",
+            "success": "ms-act2-servants-quarters",
+            "partial": "ms-act2-guest-interviews",
+            "failure": "ms-act2-guest-interviews",
+            "fumble": "ms-act2-guest-interviews"
+          }
+        },
+        {
+          "id": "ms-choice-search-panel",
+          "text": "Use Mrs Cole's key to open the hidden panel in the séance room.",
+          "conditions": [
             {
-                  "id": "ms-act2-the-seance",
-                  "act": 2,
-                  "narrative": "The gas lamps dim. Twelve guests sit around the black-draped table, hands linked. Madame Vesper begins to speak \u2014 low, rhythmic, in a language that is not quite Latin. The temperature drops. The flames gutter. And then something happens that no mechanism can explain: the table rises six inches off the floor, and a voice that is not Vesper's speaks from the darkness. 'Who calls?' it says. 'Who dares?' Lord Pemberton's face has gone white. Lady Ashworth is gripping the table edge. And Madame Vesper \u2014 Madame Vesper is weeping silently, her lips still moving in that not-quite-Latin chant. Something has gone very wrong.",
-                  "ambientAudio": "ambient-seance",
-                  "cluesAvailable": [],
-                  "choices": [
-                        {
-                              "id": "ms-choice-rational-path",
-                              "text": "This is an elaborate trick. Find the mechanism \u2014 someone is pulling strings.",
-                              "faculty": "reason",
-                              "difficulty": 10,
-                              "advantageIf": [
-                                    "ms-clue-hidden-mechanism"
-                              ],
-                              "outcomes": {
-                                    "critical": "ms-act2-rational-success",
-                                    "success": "ms-act2-rational-partial",
-                                    "partial": "ms-act2-rational-partial",
-                                    "failure": "ms-act2-rational-fail",
-                                    "fumble": "ms-act2-rational-fail"
-                              }
-                        },
-                        {
-                              "id": "ms-choice-occult-path",
-                              "text": "The symbols on Vesper's shawl \u2014 they are a summoning circle. Something has been called.",
-                              "faculty": "lore",
-                              "difficulty": 11,
-                              "advantageIf": [
-                                    "ms-clue-invitation-letter"
-                              ],
-                              "outcomes": {
-                                    "critical": "ms-act2-occult-success",
-                                    "success": "ms-act2-occult-partial",
-                                    "partial": "ms-act2-occult-partial",
-                                    "failure": "ms-act2-occult-fail",
-                                    "fumble": "ms-act2-occult-fail"
-                              }
-                        },
-                        {
-                              "id": "ms-choice-confront-pemberton",
-                              "text": "Pemberton knows something. His terror is too specific to be surprise.",
-                              "faculty": "influence",
-                              "difficulty": 11,
-                              "outcomes": {
-                                    "critical": "ms-act2-pemberton-breaks",
-                                    "success": "ms-act2-pemberton-partial",
-                                    "partial": "ms-act2-pemberton-partial",
-                                    "failure": "ms-act2-pemberton-stonewalls",
-                                    "fumble": "ms-act2-pemberton-stonewalls"
-                              }
-                        }
-                  ],
-                  "onEnter": [
-                        {
-                              "type": "composure",
-                              "delta": -1
-                        }
-                  ]
-            },
-            {
-                  "id": "ms-act2-rational-success",
-                  "act": 2,
-                  "narrative": "You break the circle and drop beneath the table. The wires are there \u2014 but they are slack. The bellows mechanism is disconnected. Whatever lifted the table, it was not the hidden apparatus. And yet the apparatus exists, which means someone planned to fake this s\u00e9ance. You trace the wires to a concealed panel and find a control lever \u2014 recently oiled, recently used. Beside it, a monogrammed handkerchief: 'P.' Lord Pemberton. He built the mechanism. But something else provided the performance.",
-                  "cluesAvailable": [
-                        {
-                              "clueId": "ms-clue-hidden-mechanism",
-                              "method": "exploration"
-                        },
-                        {
-                              "clueId": "ms-clue-pemberton-debts",
-                              "method": "check",
-                              "requiresFaculty": {
-                                    "faculty": "reason",
-                                    "minimum": 12
-                              }
-                        }
-                  ],
-                  "choices": [
-                        {
-                              "id": "ms-choice-rational-success-proceed",
-                              "text": "Pemberton rigged the s\u00e9ance \u2014 but something real intervened. Confront him.",
-                              "outcomes": {
-                                    "critical": "ms-act3-the-reckoning",
-                                    "success": "ms-act3-the-reckoning",
-                                    "partial": "ms-act3-the-reckoning",
-                                    "failure": "ms-act3-the-reckoning",
-                                    "fumble": "ms-act3-the-reckoning"
-                              }
-                        }
-                  ],
-                  "onEnter": [
-                        {
-                              "type": "suspicion",
-                              "target": "npc-pemberton",
-                              "delta": 3
-                        },
-                        {
-                              "type": "vitality",
-                              "delta": 1,
-                              "description": "Adrenaline courses through you \u2014 the truth is within reach"
-                        }
-                  ]
-            },
-            {
-                  "id": "ms-act2-rational-partial",
-                  "act": 2,
-                  "narrative": "You find the wires beneath the table \u2014 copper, recently installed. But they are slack, disconnected from whatever mechanism they once served. The s\u00e9ance effects were not produced by this apparatus. Someone built a fraud, but something else delivered the real thing. The guests are in disarray. Lord Pemberton is edging toward the door.",
-                  "cluesAvailable": [
-                        {
-                              "clueId": "ms-clue-hidden-mechanism",
-                              "method": "exploration"
-                        }
-                  ],
-                  "choices": [
-                        {
-                              "id": "ms-choice-rational-partial-proceed",
-                              "text": "The mechanism is a dead end. But Pemberton is running.",
-                              "outcomes": {
-                                    "critical": "ms-act3-the-reckoning",
-                                    "success": "ms-act3-the-reckoning",
-                                    "partial": "ms-act3-the-reckoning",
-                                    "failure": "ms-act3-the-reckoning",
-                                    "fumble": "ms-act3-the-reckoning"
-                              }
-                        }
-                  ],
-                  "onEnter": []
-            },
-            {
-                  "id": "ms-act2-rational-fail",
-                  "act": 2,
-                  "narrative": "You break the circle and search for the mechanism, but in the darkness and confusion you find nothing. The table settles back to the floor. The voice fades. The gas lamps flare back to full brightness, and you are left on your knees beneath a table surrounded by terrified guests, with no evidence and no explanation. Lord Pemberton is the first to recover. 'Hysteria,' he announces. 'Mass hysteria. Nothing more.'",
-                  "cluesAvailable": [],
-                  "choices": [
-                        {
-                              "id": "ms-choice-rational-fail-proceed",
-                              "text": "You found nothing. But the evening is not over.",
-                              "outcomes": {
-                                    "critical": "ms-act3-the-reckoning",
-                                    "success": "ms-act3-the-reckoning",
-                                    "partial": "ms-act3-the-reckoning",
-                                    "failure": "ms-act3-the-reckoning",
-                                    "fumble": "ms-act3-the-reckoning"
-                              }
-                        }
-                  ],
-                  "onEnter": [
-                        {
-                              "type": "composure",
-                              "delta": -1
-                        }
-                  ]
-            },
-            {
-                  "id": "ms-act2-occult-success",
-                  "act": 2,
-                  "narrative": "You recognise the chant \u2014 a Grey Dawn invocation, but altered. Vesper has modified the standard summoning protocol, removing the containment clauses. She called something without building a cage for it. You push through the panicking guests to reach her. 'The binding,' you say. 'Where is the binding circle?' Vesper's eyes focus on you with desperate clarity. 'Under the table,' she whispers. 'I carved it myself. But the numbers \u2014 the numbers on the invitation \u2014 someone changed them. The resonance is wrong.' She presses her journal into your hands.",
-                  "cluesAvailable": [
-                        {
-                              "clueId": "ms-clue-vesper-journal",
-                              "method": "dialogue"
-                        },
-                        {
-                              "clueId": "ms-clue-grey-dawn-sigil",
-                              "method": "automatic"
-                        }
-                  ],
-                  "choices": [
-                        {
-                              "id": "ms-choice-occult-success-proceed",
-                              "text": "Vesper summoned something real \u2014 and someone sabotaged the containment.",
-                              "outcomes": {
-                                    "critical": "ms-act3-the-reckoning",
-                                    "success": "ms-act3-the-reckoning",
-                                    "partial": "ms-act3-the-reckoning",
-                                    "failure": "ms-act3-the-reckoning",
-                                    "fumble": "ms-act3-the-reckoning"
-                              }
-                        }
-                  ],
-                  "onEnter": [
-                        {
-                              "type": "disposition",
-                              "target": "npc-vesper",
-                              "delta": 2
-                        },
-                        {
-                              "type": "reputation",
-                              "target": "Hermetic Order of the Grey Dawn",
-                              "delta": 1
-                        }
-                  ]
-            },
-            {
-                  "id": "ms-act2-occult-partial",
-                  "act": 2,
-                  "narrative": "You recognise fragments of the Grey Dawn invocation in Vesper's chant. This is not standard parlour spiritualism \u2014 she is using real occult protocols, or a convincing approximation. When the manifestation fades, Vesper collapses. You reach her before the other guests. 'It was not supposed to be like this,' she murmurs. 'The numbers were wrong.' She will say no more.",
-                  "cluesAvailable": [
-                        {
-                              "clueId": "ms-clue-grey-dawn-sigil",
-                              "method": "exploration"
-                        }
-                  ],
-                  "choices": [
-                        {
-                              "id": "ms-choice-occult-partial-proceed",
-                              "text": "Vesper knows more than she is saying. Press on.",
-                              "outcomes": {
-                                    "critical": "ms-act3-the-reckoning",
-                                    "success": "ms-act3-the-reckoning",
-                                    "partial": "ms-act3-the-reckoning",
-                                    "failure": "ms-act3-the-reckoning",
-                                    "fumble": "ms-act3-the-reckoning"
-                              }
-                        }
-                  ],
-                  "onEnter": []
-            },
-            {
-                  "id": "ms-act2-occult-fail",
-                  "act": 2,
-                  "narrative": "The chant is unfamiliar \u2014 you catch fragments that might be Grey Dawn liturgy, but the manifestation overwhelms your concentration. The cold, the voice, the impossible levitation \u2014 your rational mind rebels against what your senses report. When the gas lamps flare back, Vesper is unconscious and the guests are fleeing. Whatever happened here, you were not prepared for it.",
-                  "cluesAvailable": [],
-                  "choices": [
-                        {
-                              "id": "ms-choice-occult-fail-proceed",
-                              "text": "You were overwhelmed. Regroup and investigate.",
-                              "outcomes": {
-                                    "critical": "ms-act3-the-reckoning",
-                                    "success": "ms-act3-the-reckoning",
-                                    "partial": "ms-act3-the-reckoning",
-                                    "failure": "ms-act3-the-reckoning",
-                                    "fumble": "ms-act3-the-reckoning"
-                              }
-                        }
-                  ],
-                  "onEnter": [
-                        {
-                              "type": "composure",
-                              "delta": -2
-                        }
-                  ]
-            },
-            {
-                  "id": "ms-act2-pemberton-breaks",
-                  "act": 2,
-                  "narrative": "You catch Pemberton's arm as he rises from the table. 'Sit down,' you say, quietly enough that only he can hear. 'I know about the mechanism under the table.' The blood drains from his face. In the confusion of the aftermath, he talks \u2014 quickly, desperately. He built the mechanism at Lady Ashworth's request. The s\u00e9ance was to be faked: proof of the spirit world, the foundation inherits, Ashworth keeps her house. But Pemberton's gambling debts gave him a different motive \u2014 if the s\u00e9ance failed publicly, Ashworth's creditors would foreclose, and the markers he holds become worthless. He sabotaged his own mechanism. 'But I didn't do that,' he says, pointing at the still-hovering table. 'That was real.'",
-                  "cluesAvailable": [
-                        {
-                              "clueId": "ms-clue-pemberton-debts",
-                              "method": "dialogue"
-                        },
-                        {
-                              "clueId": "ms-clue-hidden-mechanism",
-                              "method": "automatic"
-                        }
-                  ],
-                  "choices": [
-                        {
-                              "id": "ms-choice-pemberton-breaks-proceed",
-                              "text": "Pemberton and Ashworth conspired \u2014 but something else intervened.",
-                              "outcomes": {
-                                    "critical": "ms-act3-the-reckoning",
-                                    "success": "ms-act3-the-reckoning",
-                                    "partial": "ms-act3-the-reckoning",
-                                    "failure": "ms-act3-the-reckoning",
-                                    "fumble": "ms-act3-the-reckoning"
-                              }
-                        }
-                  ],
-                  "onEnter": [
-                        {
-                              "type": "disposition",
-                              "target": "npc-pemberton",
-                              "delta": -2
-                        },
-                        {
-                              "type": "suspicion",
-                              "target": "npc-pemberton",
-                              "delta": 2
-                        }
-                  ]
-            },
-            {
-                  "id": "ms-act2-pemberton-partial",
-                  "act": 2,
-                  "narrative": "Pemberton is rattled enough to let something slip. 'The mechanism,' he mutters, 'it wasn't supposed to \u2014 I disconnected it.' He catches himself, but the admission is enough. He knows about the hidden apparatus. He may have built it. But his terror at the manifestation was genuine \u2014 whatever he planned, this was not it.",
-                  "cluesAvailable": [],
-                  "choices": [
-                        {
-                              "id": "ms-choice-pemberton-partial-proceed",
-                              "text": "Pemberton is involved, but frightened. The truth lies deeper.",
-                              "outcomes": {
-                                    "critical": "ms-act3-the-reckoning",
-                                    "success": "ms-act3-the-reckoning",
-                                    "partial": "ms-act3-the-reckoning",
-                                    "failure": "ms-act3-the-reckoning",
-                                    "fumble": "ms-act3-the-reckoning"
-                              }
-                        }
-                  ],
-                  "onEnter": [
-                        {
-                              "type": "suspicion",
-                              "target": "npc-pemberton",
-                              "delta": 1
-                        }
-                  ]
-            },
-            {
-                  "id": "ms-act2-pemberton-stonewalls",
-                  "act": 2,
-                  "narrative": "Pemberton recovers his composure with the speed of a man accustomed to bluffing. 'I have no idea what you are talking about,' he says, straightening his cuffs. 'I am a guest, nothing more. If you wish to investigate parlour tricks, I suggest you speak to the medium.' He excuses himself with a curt nod. Whatever Pemberton knows, he has no intention of sharing it with you.",
-                  "cluesAvailable": [],
-                  "choices": [
-                        {
-                              "id": "ms-choice-pemberton-stonewalls-proceed",
-                              "text": "Pemberton will not talk. Find another way.",
-                              "outcomes": {
-                                    "critical": "ms-act3-the-reckoning",
-                                    "success": "ms-act3-the-reckoning",
-                                    "partial": "ms-act3-the-reckoning",
-                                    "failure": "ms-act3-the-reckoning",
-                                    "fumble": "ms-act3-the-reckoning"
-                              }
-                        }
-                  ],
-                  "onEnter": [
-                        {
-                              "type": "composure",
-                              "delta": -1
-                        }
-                  ]
+              "type": "hasFlag",
+              "target": "ms-has-panel-key"
             }
+          ],
+          "outcomes": {
+            "critical": "ms-act2-hidden-panel",
+            "success": "ms-act2-hidden-panel",
+            "partial": "ms-act2-hidden-panel",
+            "failure": "ms-act2-hidden-panel",
+            "fumble": "ms-act2-hidden-panel"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1
+        }
       ]
+    },
+    {
+      "id": "ms-act2-rational-success",
+      "act": 2,
+      "narrative": "You break the circle and drop beneath the table. The wires are there — but they are slack. The bellows mechanism is disconnected. Whatever lifted the table, it was not the hidden apparatus. And yet the apparatus exists, which means someone planned to fake this séance. You trace the wires to a concealed panel and find a control lever — recently oiled, recently used. Beside it, a monogrammed handkerchief: 'P.' Lord Pemberton. He built the mechanism. But something else provided the performance.",
+      "cluesAvailable": [
+        {
+          "clueId": "ms-clue-hidden-mechanism",
+          "method": "exploration"
+        },
+        {
+          "clueId": "ms-clue-pemberton-debts",
+          "method": "check",
+          "requiresFaculty": {
+            "faculty": "reason",
+            "minimum": 12
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "ms-choice-rational-success-proceed",
+          "text": "Pemberton rigged the séance — but something real intervened. Confront him.",
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "ms-choice-reflect-0",
+          "text": "Take a moment to piece together what you have learned before acting.",
+          "faculty": "reason",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "suspicion",
+          "target": "npc-pemberton",
+          "delta": 3
+        },
+        {
+          "type": "vitality",
+          "delta": 1,
+          "description": "Adrenaline courses through you — the truth is within reach"
+        }
+      ]
+    },
+    {
+      "id": "ms-act2-rational-partial",
+      "act": 2,
+      "narrative": "You find the wires beneath the table — copper, recently installed. But they are slack, disconnected from whatever mechanism they once served. The séance effects were not produced by this apparatus. Someone built a fraud, but something else delivered the real thing. The guests are in disarray. Lord Pemberton is edging toward the door.",
+      "cluesAvailable": [
+        {
+          "clueId": "ms-clue-hidden-mechanism",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "ms-choice-rational-partial-proceed",
+          "text": "The mechanism is a dead end. But Pemberton is running.",
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "ms-choice-reflect-1",
+          "text": "Take a moment to piece together what you have learned before acting.",
+          "faculty": "reason",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "ms-act2-rational-fail",
+      "act": 2,
+      "narrative": "You break the circle and search for the mechanism, but in the darkness and confusion you find nothing. The table settles back to the floor. The voice fades. The gas lamps flare back to full brightness, and you are left on your knees beneath a table surrounded by terrified guests, with no evidence and no explanation. Lord Pemberton is the first to recover. 'Hysteria,' he announces. 'Mass hysteria. Nothing more.'",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "ms-choice-rational-fail-proceed",
+          "text": "You found nothing. But the evening is not over.",
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "ms-choice-reflect-2",
+          "text": "Take a moment to piece together what you have learned before acting.",
+          "faculty": "reason",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1
+        }
+      ]
+    },
+    {
+      "id": "ms-act2-occult-success",
+      "act": 2,
+      "narrative": "You recognise the chant — a Grey Dawn invocation, but altered. Vesper has modified the standard summoning protocol, removing the containment clauses. She called something without building a cage for it. You push through the panicking guests to reach her. 'The binding,' you say. 'Where is the binding circle?' Vesper's eyes focus on you with desperate clarity. 'Under the table,' she whispers. 'I carved it myself. But the numbers — the numbers on the invitation — someone changed them. The resonance is wrong.' She presses her journal into your hands.",
+      "cluesAvailable": [
+        {
+          "clueId": "ms-clue-vesper-journal",
+          "method": "dialogue"
+        },
+        {
+          "clueId": "ms-clue-grey-dawn-sigil",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "ms-choice-occult-success-proceed",
+          "text": "Vesper summoned something real — and someone sabotaged the containment.",
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "ms-choice-reflect-3",
+          "text": "Take a moment to piece together what you have learned before acting.",
+          "faculty": "reason",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "disposition",
+          "target": "npc-vesper",
+          "delta": 2
+        },
+        {
+          "type": "reputation",
+          "target": "Hermetic Order of the Grey Dawn",
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "id": "ms-act2-occult-partial",
+      "act": 2,
+      "narrative": "You recognise fragments of the Grey Dawn invocation in Vesper's chant. This is not standard parlour spiritualism — she is using real occult protocols, or a convincing approximation. When the manifestation fades, Vesper collapses. You reach her before the other guests. 'It was not supposed to be like this,' she murmurs. 'The numbers were wrong.' She will say no more.",
+      "cluesAvailable": [
+        {
+          "clueId": "ms-clue-grey-dawn-sigil",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "ms-choice-occult-partial-proceed",
+          "text": "Vesper knows more than she is saying. Press on.",
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "ms-choice-reflect-4",
+          "text": "Take a moment to piece together what you have learned before acting.",
+          "faculty": "reason",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "ms-act2-occult-fail",
+      "act": 2,
+      "narrative": "The chant is unfamiliar — you catch fragments that might be Grey Dawn liturgy, but the manifestation overwhelms your concentration. The cold, the voice, the impossible levitation — your rational mind rebels against what your senses report. When the gas lamps flare back, Vesper is unconscious and the guests are fleeing. Whatever happened here, you were not prepared for it.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "ms-choice-occult-fail-proceed",
+          "text": "You were overwhelmed. Regroup and investigate.",
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "ms-choice-reflect-5",
+          "text": "Take a moment to piece together what you have learned before acting.",
+          "faculty": "reason",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -2
+        }
+      ]
+    },
+    {
+      "id": "ms-act2-pemberton-breaks",
+      "act": 2,
+      "narrative": "You catch Pemberton's arm as he rises from the table. 'Sit down,' you say, quietly enough that only he can hear. 'I know about the mechanism under the table.' The blood drains from his face. In the confusion of the aftermath, he talks — quickly, desperately. He built the mechanism at Lady Ashworth's request. The séance was to be faked: proof of the spirit world, the foundation inherits, Ashworth keeps her house. But Pemberton's gambling debts gave him a different motive — if the séance failed publicly, Ashworth's creditors would foreclose, and the markers he holds become worthless. He sabotaged his own mechanism. 'But I didn't do that,' he says, pointing at the still-hovering table. 'That was real.'",
+      "cluesAvailable": [
+        {
+          "clueId": "ms-clue-pemberton-debts",
+          "method": "dialogue"
+        },
+        {
+          "clueId": "ms-clue-hidden-mechanism",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "ms-choice-pemberton-breaks-proceed",
+          "text": "Pemberton and Ashworth conspired — but something else intervened.",
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "ms-choice-reflect-6",
+          "text": "Take a moment to piece together what you have learned before acting.",
+          "faculty": "reason",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "disposition",
+          "target": "npc-pemberton",
+          "delta": -2
+        },
+        {
+          "type": "suspicion",
+          "target": "npc-pemberton",
+          "delta": 2
+        }
+      ]
+    },
+    {
+      "id": "ms-act2-pemberton-partial",
+      "act": 2,
+      "narrative": "Pemberton is rattled enough to let something slip. 'The mechanism,' he mutters, 'it wasn't supposed to — I disconnected it.' He catches himself, but the admission is enough. He knows about the hidden apparatus. He may have built it. But his terror at the manifestation was genuine — whatever he planned, this was not it.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "ms-choice-pemberton-partial-proceed",
+          "text": "Pemberton is involved, but frightened. The truth lies deeper.",
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "ms-choice-reflect-7",
+          "text": "Take a moment to piece together what you have learned before acting.",
+          "faculty": "reason",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "suspicion",
+          "target": "npc-pemberton",
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "id": "ms-act2-pemberton-stonewalls",
+      "act": 2,
+      "narrative": "Pemberton recovers his composure with the speed of a man accustomed to bluffing. 'I have no idea what you are talking about,' he says, straightening his cuffs. 'I am a guest, nothing more. If you wish to investigate parlour tricks, I suggest you speak to the medium.' He excuses himself with a curt nod. Whatever Pemberton knows, he has no intention of sharing it with you.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "ms-choice-pemberton-stonewalls-proceed",
+          "text": "Pemberton will not talk. Find another way.",
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "ms-choice-reflect-8",
+          "text": "Take a moment to piece together what you have learned before acting.",
+          "faculty": "reason",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1
+        }
+      ]
+    },
+    {
+      "id": "ms-act2-servants-quarters",
+      "act": 2,
+      "narrative": "The servants' quarters are below stairs — a cramped, efficient world of stone floors and gas brackets. Mrs Cole is here, and she is more willing to talk now that the séance has gone wrong. 'I told Lady Ashworth this would end badly,' she says. 'The deliveries started three weeks ago. Packages from Limehouse — heavy, wrapped in oilskin, smelling of chemicals. Madame Vesper took them directly to the séance room.' She produces a crumpled receipt from her apron. 'I kept this. I don't know what it means, but the symbol on it frightened me.'",
+      "cluesAvailable": [
+        {
+          "clueId": "ms-clue-ritual-components",
+          "method": "dialogue"
+        },
+        {
+          "clueId": "ms-clue-servant-key",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "ms-choice-servants-panel",
+          "text": "The hidden panel in the séance room — Mrs Cole, do you have the key?",
+          "conditions": [
+            {
+              "type": "hasFlag",
+              "target": "ms-has-panel-key"
+            }
+          ],
+          "outcomes": {
+            "critical": "ms-act2-hidden-panel",
+            "success": "ms-act2-hidden-panel",
+            "partial": "ms-act2-hidden-panel",
+            "failure": "ms-act2-hidden-panel",
+            "fumble": "ms-act2-hidden-panel"
+          }
+        },
+        {
+          "id": "ms-choice-servants-court",
+          "text": "The Limehouse receipt bears the Court of Smoke mark. Track the supplier.",
+          "faculty": "perception",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "ms-act2-court-contact",
+            "success": "ms-act2-court-contact",
+            "partial": "ms-act2-the-seance",
+            "failure": "ms-act2-the-seance",
+            "fumble": "ms-act2-the-seance"
+          }
+        },
+        {
+          "id": "ms-choice-servants-return",
+          "text": "The receipt is evidence. Return to the main investigation.",
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "disposition",
+          "target": "npc-mrs-cole",
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "id": "ms-act2-hidden-panel",
+      "act": 2,
+      "narrative": "The key turns smoothly in the hidden panel behind the séance room wainscoting. Behind it is a narrow space — not a room, but a recess built into the wall, lined with lead sheeting. Inside, you find a bundle of letters tied with black ribbon, a small glass vial containing a luminous substance, and a leather-bound notebook in a hand you do not recognise. The letters are from someone named Elara Thorne to Gerald Ashworth. They describe increasingly disturbing contact with an entity she calls 'the Presence.' The final letter is dated three days before Elara's disappearance. The notebook contains Gerald's own observations — clinical, precise, and increasingly terrified.",
+      "cluesAvailable": [
+        {
+          "clueId": "ms-clue-elara-letters",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "ms-choice-hidden-panel-return",
+          "text": "Elara Thorne. The Presence. Gerald's terror. This changes everything.",
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "ms-choice-reflect-9",
+          "text": "Take a moment to piece together what you have learned before acting.",
+          "faculty": "reason",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1,
+          "description": "Elara's final letter is deeply unsettling"
+        },
+        {
+          "type": "flag",
+          "target": "ms-found-elara-letters",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "ms-act2-court-contact",
+      "act": 2,
+      "narrative": "The receipt leads you to a Limehouse apothecary that operates behind a tea merchant's shopfront. The proprietor — a thin, sharp-featured man who introduces himself only as Needle — is a Court of Smoke intermediary. He is not pleased to see you, but the receipt in your hand gives you leverage. 'The components were ordered six weeks ago,' Needle says, his eyes darting to the door. 'Consecrated salts, binding chalk, essence of nightshade. Standard Grey Dawn procurement. The buyer was a woman — dark silk, foreign accent. Vesper.' He pauses. 'But the payment came from a different source. A bank draft. Lord Pemberton's account.' He slides a copy of the draft across the counter. 'Pemberton funded the real ritual. The mechanism under the table was his insurance policy — a fake séance in case the real one failed.'",
+      "cluesAvailable": [
+        {
+          "clueId": "ms-clue-court-supplier",
+          "method": "dialogue"
+        }
+      ],
+      "choices": [
+        {
+          "id": "ms-choice-court-contact-return",
+          "text": "Pemberton funded both the fraud and the genuine ritual. The conspiracy has two layers.",
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "ms-choice-reflect-10",
+          "text": "Take a moment to piece together what you have learned before acting.",
+          "faculty": "reason",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "disposition",
+          "target": "npc-needle",
+          "delta": 1
+        },
+        {
+          "type": "reputation",
+          "target": "Court of Smoke",
+          "delta": 1
+        },
+        {
+          "type": "flag",
+          "target": "ms-met-needle",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "ms-act2-guest-interviews",
+      "act": 2,
+      "narrative": "In the aftermath of the séance, the remaining guests cluster in the hallway like survivors of a shipwreck. Dr Whitmore is the most composed — he has been taking notes throughout, and his account is clinical and precise. 'The manufactured effects — the flickering gas lamps, the cold draft — ceased at precisely 9:47,' he says. 'The genuine manifestation began at 9:48. There was a discontinuity. Two separate phenomena, one mechanical and one... otherwise.' He also noted that Pemberton's hands were not on the table during the levitation, contradicting Pemberton's claim of continuous contact. 'Lord Pemberton is lying about something,' Whitmore says. 'I cannot tell you what, but his account does not match my observations.'",
+      "cluesAvailable": [
+        {
+          "clueId": "ms-clue-guest-testimony",
+          "method": "dialogue"
+        }
+      ],
+      "choices": [
+        {
+          "id": "ms-choice-guest-interviews-return",
+          "text": "Whitmore's clinical account confirms the dual nature of the séance. Return to the reckoning.",
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "ms-choice-reflect-11",
+          "text": "Take a moment to piece together what you have learned before acting.",
+          "faculty": "reason",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "disposition",
+          "target": "npc-whitmore",
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "id": "ms-act2-ashworth-study",
+      "act": 2,
+      "narrative": "Lady Ashworth's study is unlocked in the chaos following the séance. Gerald's will lies on the desk, annotated in violet ink. The key clause is devastating in its simplicity: the entire Ashworth estate — house, investments, foundation — passes to the Ashworth Foundation for Spiritual Research if credible evidence of spirit communication is produced within two years of Gerald's death. The deadline is six weeks away. Without proof, the estate goes to creditors. Lady Ashworth loses everything. The will explains the desperation. It does not explain the genuine manifestation.",
+      "cluesAvailable": [
+        {
+          "clueId": "ms-clue-ashworth-will",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "ms-choice-ashworth-study-return",
+          "text": "The will explains the motive. Now confront the conspirators.",
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "ms-choice-reflect-12",
+          "text": "Take a moment to piece together what you have learned before acting.",
+          "faculty": "reason",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "ms-act3-the-reckoning",
+            "success": "ms-act3-the-reckoning",
+            "partial": "ms-act3-the-reckoning",
+            "failure": "ms-act3-the-reckoning",
+            "fumble": "ms-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "ms-found-will",
+          "value": true
+        }
+      ]
+    }
+  ]
 }

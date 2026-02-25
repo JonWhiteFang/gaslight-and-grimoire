@@ -3,7 +3,7 @@
     {
       "id": "amos-act1-southwark-bridge",
       "act": 1,
-      "narrative": "Southwark Bridge at midnight. The Thames below is black and slow. A Lamplighter contact \u2014 a woman who gives her name only as 'Wren' \u2014 tells you the courier's last known location was a dosshouse on Tooley Street. She hands you a description and a warning: 'Don't ask what was in the package.'",
+      "narrative": "Southwark Bridge at midnight. The Thames below is black and slow. A Lamplighter contact — a woman who gives her name only as 'Wren' — tells you the courier's last known location was a dosshouse on Tooley Street. She hands you a description and a warning: 'Don't ask what was in the package.'",
       "ambientAudio": "ambient-thames-night",
       "cluesAvailable": [
         {
@@ -35,13 +35,26 @@
             "failure": "amos-act1-dosshouse",
             "fumble": "amos-act1-dosshouse"
           }
+        },
+        {
+          "id": "amos-choice-southwark-underworld",
+          "text": "Before heading to Tooley Street, survey the Southwark streets. Someone may be watching.",
+          "faculty": "perception",
+          "difficulty": 9,
+          "outcomes": {
+            "critical": "amos-act1-southwark-underworld",
+            "success": "amos-act1-southwark-underworld",
+            "partial": "amos-act1-dosshouse",
+            "failure": "amos-act1-dosshouse",
+            "fumble": "amos-act1-dosshouse"
+          }
         }
       ]
     },
     {
       "id": "amos-act1-dosshouse",
       "act": 1,
-      "narrative": "The Tooley Street dosshouse is a sagging three-storey building that smells of tallow and damp wool. The night-keeper, a rheumy man named Briggs, remembers the courier \u2014 a young woman, red scarf, nervous hands. She took a room two nights ago and left before dawn. Her bed is cold. Under the mattress you find a torn corner of oilskin wrapping, still faintly waxed.",
+      "narrative": "The Tooley Street dosshouse is a sagging three-storey building that smells of tallow and damp wool. The night-keeper, a rheumy man named Briggs, remembers the courier — a young woman, red scarf, nervous hands. She took a room two nights ago and left before dawn. Her bed is cold. Under the mattress you find a torn corner of oilskin wrapping, still faintly waxed.",
       "ambientAudio": "ambient-southwark-night",
       "cluesAvailable": [
         {
@@ -79,7 +92,7 @@
     {
       "id": "amos-act1-wren-reveals",
       "act": 1,
-      "narrative": "Wren's composure cracks \u2014 just for a moment. 'The package was a list,' she says, voice barely above the river noise. 'Names. Lamplighter informants embedded in three factions. If that list reaches the wrong hands, people die.' She looks past you into the dark. 'The courier knew what she was carrying. That's why she ran.'",
+      "narrative": "Wren's composure cracks — just for a moment. 'The package was a list,' she says, voice barely above the river noise. 'Names. Lamplighter informants embedded in three factions. If that list reaches the wrong hands, people die.' She looks past you into the dark. 'The courier knew what she was carrying. That's why she ran.'",
       "ambientAudio": "ambient-thames-night",
       "cluesAvailable": [
         {
@@ -141,7 +154,7 @@
     {
       "id": "amos-act2-resolution",
       "act": 2,
-      "narrative": "You find the courier \u2014 a young woman named Elspeth \u2014 sheltering beneath Pickle Herring Stairs, the package still tucked inside her coat. She is frightened but unharmed. The shadows that followed her were cast by a rival faction's watcher, now gone cold at the sight of you. The list is intact. Elspeth presses it into your hands without a word.\n\nYou return it to Wren at a pre-arranged drop. She does not thank you. She does not need to. The Lamplighters remember their debts.",
+      "narrative": "You find the courier — a young woman named Elspeth — sheltering beneath Pickle Herring Stairs, the package still tucked inside her coat. She is frightened but unharmed. The shadows that followed her were cast by a rival faction's watcher, now gone cold at the sight of you. The list is intact. Elspeth presses it into your hands without a word.\n\nYou return it to Wren at a pre-arranged drop. She does not thank you. She does not need to. The Lamplighters remember their debts.",
       "ambientAudio": "ambient-thames-night",
       "cluesAvailable": [],
       "onEnter": [
@@ -178,6 +191,23 @@
             "failure": "amos-act2-end-loyal",
             "fumble": "amos-act2-end-loyal"
           }
+        },
+        {
+          "id": "amos-choice-grey-dawn-deal",
+          "text": "The Grey Dawn wants the list to protect their own people. Give it to them.",
+          "conditions": [
+            {
+              "type": "hasFlag",
+              "target": "amos-spotted-watcher"
+            }
+          ],
+          "outcomes": {
+            "critical": "amos-act2-end-grey-dawn",
+            "success": "amos-act2-end-grey-dawn",
+            "partial": "amos-act2-end-grey-dawn",
+            "failure": "amos-act2-end-grey-dawn",
+            "fumble": "amos-act2-end-grey-dawn"
+          }
         }
       ]
     },
@@ -209,7 +239,7 @@
     {
       "id": "amos-act2-end-leverage",
       "act": 2,
-      "narrative": "You memorise three names before sealing the package. The Lamplighters get their list. You get something harder to quantify \u2014 a thread you can pull, if you ever need to. Wren watches you go with eyes that suggest she knows exactly what you did. She says nothing. Neither do you.",
+      "narrative": "You memorise three names before sealing the package. The Lamplighters get their list. You get something harder to quantify — a thread you can pull, if you ever need to. Wren watches you go with eyes that suggest she knows exactly what you did. She says nothing. Neither do you.",
       "ambientAudio": "ambient-thames-night",
       "cluesAvailable": [],
       "onEnter": [
@@ -225,6 +255,259 @@
         }
       ],
       "choices": []
+    },
+    {
+      "id": "amos-act1-southwark-underworld",
+      "act": 1,
+      "narrative": "The Southwark streets south of the bridge are a different London — narrower, darker, with the sour smell of the tanneries and the constant drip of water from overhead pipes. A Court of Smoke watcher has been following you since the bridge. You spotted him three streets back — a thin man in a docker's cap who moves with the practised invisibility of someone who does this for a living. He is not hostile. He is assessing.",
+      "cluesAvailable": [
+        {
+          "clueId": "amos-clue-court-watcher",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "amos-choice-confront-watcher",
+          "text": "Turn and confront the watcher. Force the Court's hand.",
+          "faculty": "nerve",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "amos-act1-watcher-confronted",
+            "success": "amos-act1-watcher-confronted",
+            "partial": "amos-act1-watcher-flees",
+            "failure": "amos-act1-watcher-flees",
+            "fumble": "amos-act1-watcher-flees"
+          }
+        },
+        {
+          "id": "amos-choice-lose-watcher",
+          "text": "Lose the tail in Southwark's alleys. You don't need the Court watching your every move.",
+          "faculty": "vigor",
+          "difficulty": 9,
+          "outcomes": {
+            "critical": "amos-act1-dosshouse",
+            "success": "amos-act1-dosshouse",
+            "partial": "amos-act1-dosshouse",
+            "failure": "amos-act1-dosshouse",
+            "fumble": "amos-act1-dosshouse"
+          }
+        },
+        {
+          "id": "amos-choice-let-follow",
+          "text": "Let him follow. If the Court is watching, they have a stake in this. That may be useful.",
+          "outcomes": {
+            "critical": "amos-act1-dosshouse",
+            "success": "amos-act1-dosshouse",
+            "partial": "amos-act1-dosshouse",
+            "failure": "amos-act1-dosshouse",
+            "fumble": "amos-act1-dosshouse"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "amos-spotted-watcher",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "amos-act1-watcher-confronted",
+      "act": 1,
+      "narrative": "The watcher does not run when you turn on him. He raises his hands — empty — and speaks quickly. 'Name's Finch. Not the Lamplighter — different Finch. Court of Smoke. We know about the courier and the list. We want it found before the Hermetic Order does.' He produces a brass token. 'Sable sent me. The list has names on it that the Court needs to stay hidden. Help us, and we help you. The courier went south from the dosshouse — toward Pickle Herring Stairs. But she is not alone. Someone else is looking for her.'",
+      "cluesAvailable": [
+        {
+          "clueId": "amos-clue-court-watcher",
+          "method": "dialogue"
+        }
+      ],
+      "choices": [
+        {
+          "id": "amos-choice-watcher-accept",
+          "text": "The Court's help could be useful. Accept the alliance.",
+          "outcomes": {
+            "critical": "amos-act1-safe-house",
+            "success": "amos-act1-safe-house",
+            "partial": "amos-act1-safe-house",
+            "failure": "amos-act1-safe-house",
+            "fumble": "amos-act1-safe-house"
+          }
+        },
+        {
+          "id": "amos-choice-watcher-refuse",
+          "text": "I work alone. But the information about Pickle Herring Stairs is useful.",
+          "outcomes": {
+            "critical": "amos-act2-resolution",
+            "success": "amos-act2-resolution",
+            "partial": "amos-act2-resolution",
+            "failure": "amos-act2-resolution",
+            "fumble": "amos-act2-resolution"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "amos-court-contact",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "amos-act1-watcher-flees",
+      "act": 1,
+      "narrative": "The watcher bolts the moment you turn — fast, practised, gone into Southwark's maze of alleys before you can close the distance. The Court of Smoke is watching this operation, but they are not ready to show their hand. You are on your own.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "amos-choice-watcher-flees-proceed",
+          "text": "The Court is watching. Press on to the dosshouse.",
+          "outcomes": {
+            "critical": "amos-act1-dosshouse",
+            "success": "amos-act1-dosshouse",
+            "partial": "amos-act1-dosshouse",
+            "failure": "amos-act1-dosshouse",
+            "fumble": "amos-act1-dosshouse"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "amos-act1-safe-house",
+      "act": 1,
+      "narrative": "The Lamplighter safe house is a room above a chandler's shop on Tooley Street — unremarkable from the outside, reinforced from within. Wren has left supplies: a change of clothes, a loaded pistol, and a coded message. The message confirms what the Court watcher told you — the courier went south toward the river stairs, but a second party is searching for her. The Hermetic Order of the Grey Dawn has agents in Southwark. They want the list for their own purposes. The courier is caught between three factions, and time is running out.",
+      "cluesAvailable": [
+        {
+          "clueId": "amos-clue-safe-house-intel",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "amos-choice-safe-house-proceed",
+          "text": "Three factions hunting one courier. Move fast.",
+          "outcomes": {
+            "critical": "amos-act2-alley-encounter",
+            "success": "amos-act2-alley-encounter",
+            "partial": "amos-act2-alley-encounter",
+            "failure": "amos-act2-alley-encounter",
+            "fumble": "amos-act2-alley-encounter"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "vitality",
+          "delta": 1,
+          "description": "The safe house provides a moment of respite"
+        },
+        {
+          "type": "flag",
+          "target": "amos-visited-safe-house",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "amos-act2-alley-encounter",
+      "act": 2,
+      "narrative": "The alley near Pickle Herring Stairs is narrow and dark, hemmed in by warehouse walls. Two men block your path — not Court of Smoke, not Lamplighters. Grey Dawn enforcers, by the sigils stitched into their coat linings. 'The courier,' one says. 'Where is she?' They are not asking politely.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1,
+          "description": "The Grey Dawn enforcers mean business"
+        }
+      ],
+      "encounter": {
+        "isSupernatural": false,
+        "rounds": [
+          {
+            "roundNumber": 1,
+            "isSupernatural": false,
+            "choices": [
+              {
+                "id": "amos-enc-fight",
+                "text": "Fight through them. The courier is close.",
+                "faculty": "vigor",
+                "difficulty": 11,
+                "outcomes": {
+                  "critical": "amos-act2-resolution",
+                  "success": "amos-act2-resolution",
+                  "partial": "amos-act2-resolution",
+                  "failure": "amos-act2-resolution",
+                  "fumble": "amos-act2-resolution"
+                },
+                "encounterDamage": {
+                  "vitalityDelta": -2
+                }
+              },
+              {
+                "id": "amos-enc-bluff",
+                "text": "Bluff. 'The Lamplighters know I'm here. Touch me and you start a faction war.'",
+                "faculty": "influence",
+                "difficulty": 10,
+                "outcomes": {
+                  "critical": "amos-act2-resolution",
+                  "success": "amos-act2-resolution",
+                  "partial": "amos-act2-resolution",
+                  "failure": "amos-act2-resolution",
+                  "fumble": "amos-act2-resolution"
+                },
+                "encounterDamage": {
+                  "composureDelta": -1
+                }
+              },
+              {
+                "id": "amos-enc-escape",
+                "text": "There is a gap between the warehouses. Squeeze through and run.",
+                "isEscapePath": true,
+                "outcomes": {
+                  "critical": "amos-act2-resolution",
+                  "success": "amos-act2-resolution",
+                  "partial": "amos-act2-resolution",
+                  "failure": "amos-act2-resolution",
+                  "fumble": "amos-act2-resolution"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "amos-act2-end-grey-dawn",
+      "act": 2,
+      "narrative": "The Grey Dawn enforcers catch up to you at the river stairs. But this time, they come with an offer, not a threat. 'The list contains names of Grey Dawn members embedded in the Lamplighters,' their leader says. 'Our people. If the Lamplighters discover them, they die.' He offers a trade: the Grey Dawn will protect the courier and ensure her safety, in exchange for the list. Wren will never know. The Lamplighter informants will be quietly extracted. No one dies. It is a clean solution — if you trust the Grey Dawn to keep their word.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "amos-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "amos-list-to-grey-dawn",
+          "value": true
+        },
+        {
+          "type": "reputation",
+          "target": "Hermetic Order of the Grey Dawn",
+          "delta": 2
+        },
+        {
+          "type": "reputation",
+          "target": "Lamplighters",
+          "delta": -1
+        }
+      ]
     }
   ]
 }

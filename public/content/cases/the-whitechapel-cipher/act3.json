@@ -5,14 +5,21 @@
       "act": 3,
       "narrative": "The cellar beneath the Dorset Street printshop is lit by a single oil lamp. The man you have been hunting — a former Scotland Yard clerk named Aldgate, now in the employ of someone far above him — stands at the far end with a revolver and the look of a man who has run out of options. The cipher notes are stacked on a workbench beside him. Three murders. A cover-up that reaches to the Deputy Commissioner. And you, alone, in a cellar that smells of ink and old fear. How you end this is up to you.",
       "ambientAudio": "ambient-cellar",
-      "cluesAvailable": [],
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-aldgate-letters",
+          "method": "exploration"
+        }
+      ],
       "choices": [
         {
           "id": "wc-choice-force-through",
           "text": "Rush him before he can fire — close the distance and end this with your hands.",
           "faculty": "vigor",
           "difficulty": 12,
-          "advantageIf": ["wc-clue-cobblestone-symbol"],
+          "advantageIf": [
+            "wc-clue-cobblestone-symbol"
+          ],
           "outcomes": {
             "critical": "wc-act3-ending-force",
             "success": "wc-act3-ending-force",
@@ -26,7 +33,9 @@
           "text": "Talk him down — he is a frightened man, not a true believer. Give him a way out.",
           "faculty": "influence",
           "difficulty": 12,
-          "advantageIf": ["wc-clue-graves-testimony"],
+          "advantageIf": [
+            "wc-clue-graves-testimony"
+          ],
           "outcomes": {
             "critical": "wc-act3-ending-negotiate",
             "success": "wc-act3-ending-negotiate",
@@ -46,6 +55,45 @@
             "failure": "wc-act3-cellar-encounter",
             "fumble": "wc-act3-cellar-encounter"
           }
+        },
+        {
+          "id": "wc-choice-court-deal",
+          "text": "Aldgate, I have friends in the Court of Smoke. They want this stopped too. There is a deal to be made.",
+          "faculty": "influence",
+          "difficulty": 10,
+          "conditions": [
+            {
+              "type": "hasFlag",
+              "target": "wc-sable-alliance"
+            }
+          ],
+          "advantageIf": [
+            "wc-clue-court-token"
+          ],
+          "outcomes": {
+            "critical": "wc-act3-ending-court-deal",
+            "success": "wc-act3-ending-court-deal",
+            "partial": "wc-act3-ending-negotiate",
+            "failure": "wc-act3-ending-negotiate",
+            "fumble": "wc-act3-ending-force"
+          }
+        },
+        {
+          "id": "wc-choice-occult-seal",
+          "text": "The ward chalk on the walls — the ritual can be sealed from within. Close the circle and trap whatever was summoned.",
+          "faculty": "lore",
+          "difficulty": 12,
+          "requiresClue": "wc-clue-ward-chalk",
+          "advantageIf": [
+            "wc-clue-ritual-residue"
+          ],
+          "outcomes": {
+            "critical": "wc-act3-ending-occult-seal",
+            "success": "wc-act3-ending-occult-seal",
+            "partial": "wc-act3-cellar-encounter",
+            "failure": "wc-act3-cellar-encounter",
+            "fumble": "wc-act3-cellar-encounter"
+          }
         }
       ],
       "onEnter": []
@@ -58,7 +106,10 @@
       "cluesAvailable": [],
       "choices": [],
       "onEnter": [
-        { "type": "composure", "delta": -1 }
+        {
+          "type": "composure",
+          "delta": -1
+        }
       ],
       "encounter": {
         "isSupernatural": true,
@@ -72,10 +123,12 @@
                 "text": "Recite the Grey Dawn's dismissal ward — the primer described the counter-sigil.",
                 "faculty": "lore",
                 "difficulty": 11,
-                "advantageIf": ["wc-clue-hermetic-primer"],
+                "advantageIf": [
+                  "wc-clue-hermetic-primer"
+                ],
                 "outcomes": {
-                  "critical": "wc-act3-ending-negotiate",
-                  "success": "wc-act3-ending-negotiate",
+                  "critical": "wc-act3-ending-occult-seal",
+                  "success": "wc-act3-ending-occult-seal",
                   "partial": "wc-act3-ending-negotiate",
                   "failure": "wc-act3-ending-negotiate",
                   "fumble": "wc-act3-ending-negotiate"
@@ -125,8 +178,8 @@
                 "faculty": "perception",
                 "difficulty": 10,
                 "outcomes": {
-                  "critical": "wc-act3-ending-negotiate",
-                  "success": "wc-act3-ending-negotiate",
+                  "critical": "wc-act3-ending-occult-seal",
+                  "success": "wc-act3-ending-occult-seal",
                   "partial": "wc-act3-ending-negotiate",
                   "failure": "wc-act3-ending-force",
                   "fumble": "wc-act3-ending-force"
@@ -160,10 +213,31 @@
       "cluesAvailable": [],
       "choices": [],
       "onEnter": [
-        { "type": "flag", "target": "wc-case-complete", "value": true },
-        { "type": "flag", "target": "wc-aldgate-arrested", "value": true },
-        { "type": "vitality", "delta": -2 },
-        { "type": "reputation", "target": "Rationalists Circle", "delta": 1 }
+        {
+          "type": "flag",
+          "target": "wc-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "wc-aldgate-arrested",
+          "value": true
+        },
+        {
+          "type": "vitality",
+          "delta": -2,
+          "description": "The struggle leaves its marks — bruised ribs, split knuckles"
+        },
+        {
+          "type": "reputation",
+          "target": "Rationalists Circle",
+          "delta": 1
+        },
+        {
+          "type": "reputation",
+          "target": "Lamplighters",
+          "delta": 1
+        }
       ]
     },
     {
@@ -173,11 +247,115 @@
       "cluesAvailable": [],
       "choices": [],
       "onEnter": [
-        { "type": "flag", "target": "wc-case-complete", "value": true },
-        { "type": "flag", "target": "wc-aldgate-turned", "value": true },
-        { "type": "disposition", "target": "npc-graves", "delta": 2 },
-        { "type": "reputation", "target": "Rationalists Circle", "delta": -1 },
-        { "type": "reputation", "target": "Hermetic Order of the Grey Dawn", "delta": 1 }
+        {
+          "type": "flag",
+          "target": "wc-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "wc-aldgate-turned",
+          "value": true
+        },
+        {
+          "type": "disposition",
+          "target": "npc-graves",
+          "delta": 2
+        },
+        {
+          "type": "reputation",
+          "target": "Rationalists Circle",
+          "delta": -1
+        },
+        {
+          "type": "reputation",
+          "target": "Hermetic Order of the Grey Dawn",
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "id": "wc-act3-ending-occult-seal",
+      "act": 3,
+      "narrative": "The ward chalk responds to your hand as if it has been waiting. You complete the protective circle that someone — Vane, perhaps, or another Grey Dawn initiate — began but could not finish. The symbols flare with cold white light. The presence in the vaulted chamber screams — not with sound, but with a pressure that drives you to your knees. Then silence. The grey light fades. The shadows return to their proper places. The summoning circle is sealed, its anchor points burned clean. Whatever was being called through the Veil has been sent back, and the door has been locked behind it. Aldgate drops his revolver and weeps. He was never the architect of this — merely the instrument. The true reckoning lies above, in the offices of Scotland Yard and the sanctums of the Grey Dawn. But the killing has stopped. The ritual is broken. And you have touched something that most of London will never know exists.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "wc-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "wc-ritual-sealed",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "wc-aldgate-turned",
+          "value": true
+        },
+        {
+          "type": "composure",
+          "delta": -2,
+          "description": "Sealing the ritual exacts a psychic toll"
+        },
+        {
+          "type": "reputation",
+          "target": "Hermetic Order of the Grey Dawn",
+          "delta": 2
+        },
+        {
+          "type": "reputation",
+          "target": "Lamplighters",
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "id": "wc-act3-ending-court-deal",
+      "act": 3,
+      "narrative": "Aldgate stares at the Court of Smoke token in your hand, and something shifts behind his eyes — not hope, exactly, but the desperate calculation of a man who sees a door he had not considered. 'The Court can protect me?' he asks. 'From Harland?' You make no promises you cannot keep, but you lay out the terms: Aldgate surrenders the cipher notes and the ledger. The Court of Smoke takes possession of the ritual components — removing them from circulation, or so they claim. Aldgate disappears into the Court's network, beyond Harland's reach. The murders stop. The conspiracy is dismantled — not through justice, but through commerce. Sable's people arrive within the hour, efficient and silent. The cellar is stripped clean. Aldgate is led away with a new name and a one-way ticket to Calais. The Yard will find nothing. The Grey Dawn will find nothing. Only you and the Court of Smoke will know the full truth — and the Court, as always, remembers its debts.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "wc-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "wc-aldgate-vanished",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "wc-court-deal-made",
+          "value": true
+        },
+        {
+          "type": "reputation",
+          "target": "Court of Smoke",
+          "delta": 2
+        },
+        {
+          "type": "reputation",
+          "target": "Rationalists Circle",
+          "delta": -1
+        },
+        {
+          "type": "reputation",
+          "target": "Lamplighters",
+          "delta": -1
+        },
+        {
+          "type": "disposition",
+          "target": "npc-sable",
+          "delta": 3,
+          "description": "Sable considers you a valuable asset — a dangerous compliment"
+        }
       ]
     }
   ]

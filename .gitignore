@@ -34,3 +34,5 @@ pnpm-debug.log*
 
 # Test coverage
 coverage/
+test-game-screen.png
+test-title-screen.png

@@ -6,7 +6,7 @@
       "title": "The Cipher Note",
       "description": "A folded slip of paper bearing a sequence of symbols that repeat at irregular intervals. The ink is fresh — no more than six hours old.",
       "sceneSource": "wc-act1-arrival",
-      "connectsTo": ["wc-clue-hermetic-primer", "wc-clue-printshop-type"],
+      "connectsTo": ["wc-clue-hermetic-primer", "wc-clue-printshop-type", "wc-clue-aldgate-letters"],
       "tags": ["paper", "cipher", "whitechapel", "hermetic"],
       "status": "new",
       "isRevealed": false
@@ -17,7 +17,7 @@
       "title": "Cobblestone Carving",
       "description": "A shallow glyph scratched into the cobblestone near the body. It matches the final symbol on the cipher note precisely.",
       "sceneSource": "wc-act1-arrival",
-      "connectsTo": ["wc-clue-cipher-note", "wc-clue-hermetic-primer"],
+      "connectsTo": ["wc-clue-cipher-note", "wc-clue-hermetic-primer", "wc-clue-ritual-residue"],
       "tags": ["stone", "glyph", "whitechapel", "hermetic"],
       "status": "new",
       "isRevealed": false
@@ -28,7 +28,7 @@
       "title": "Hermetic Primer Fragment",
       "description": "A torn page from what appears to be an initiation manual for the Hermetic Order of the Grey Dawn. The symbols match those on the cipher note.",
       "sceneSource": "wc-act2-the-web",
-      "connectsTo": ["wc-clue-cipher-note", "wc-clue-cobblestone-symbol"],
+      "connectsTo": ["wc-clue-cipher-note", "wc-clue-cobblestone-symbol", "wc-clue-ward-chalk"],
       "grantsFaculty": "lore",
       "tags": ["paper", "occult", "hermetic", "grey-dawn"],
       "status": "new",
@@ -40,7 +40,7 @@
       "title": "Distinctive Typeface",
       "description": "The cipher note was printed, not handwritten. The typeface is unusual — a Continental Gothic used by only a handful of London printers.",
       "sceneSource": "wc-act2-the-web",
-      "connectsTo": ["wc-clue-cipher-note"],
+      "connectsTo": ["wc-clue-cipher-note", "wc-clue-cellar-ledger"],
       "tags": ["paper", "printing", "whitechapel"],
       "status": "new",
       "isRevealed": false
@@ -51,7 +51,7 @@
       "title": "Graves's Confession",
       "description": "Inspector Graves admits, reluctantly, that Scotland Yard received an identical cipher three weeks ago — and buried it. Someone above him gave the order.",
       "sceneSource": "wc-act1-arrival",
-      "connectsTo": ["wc-clue-cipher-note"],
+      "connectsTo": ["wc-clue-cipher-note", "wc-clue-harland-memo"],
       "tags": ["police", "cover-up", "graves"],
       "status": "new",
       "isRevealed": false
@@ -64,6 +64,95 @@
       "sceneSource": "wc-act1-arrival",
       "connectsTo": [],
       "tags": ["paper", "occult", "vane"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "wc-clue-cellar-ledger",
+      "type": "physical",
+      "title": "The Cellar Ledger",
+      "description": "A water-stained ledger found beneath loose flagstones in the Dorset Street cellar. It records payments in gold sovereigns — dates, amounts, and a column of initials. The initials 'H.' and 'A.' recur with damning frequency. The final entry is dated the night of the most recent murder.",
+      "sceneSource": "wc-act2-cellar-search",
+      "connectsTo": ["wc-clue-printshop-type", "wc-clue-aldgate-letters", "wc-clue-harland-memo"],
+      "tags": ["paper", "ledger", "money", "cellar", "conspiracy"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "wc-clue-court-token",
+      "type": "physical",
+      "title": "Court of Smoke Token",
+      "description": "A brass disc the size of a shilling, stamped with a coiling serpent wreathed in smoke. The metal is warm to the touch — warmer than it should be. Those who traffic in London's occult underworld know this mark: the Court of Smoke, who deal in things that should not be bought or sold.",
+      "sceneSource": "wc-act2-limehouse",
+      "connectsTo": ["wc-clue-cellar-ledger", "wc-clue-ritual-residue"],
+      "tags": ["metal", "court-of-smoke", "underworld", "occult"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "wc-clue-lamplighter-report",
+      "type": "testimony",
+      "title": "Lamplighter Field Report",
+      "description": "A coded report from a Lamplighter agent — one of Scotland Yard's secret supernatural investigators — documenting Grey Dawn activity in Whitechapel over the past month. The report notes 'unusual ritual preparations' at three sites that correspond precisely to the three murder locations. The agent's name has been redacted. The report was never filed.",
+      "sceneSource": "wc-act2-lamplighter-contact",
+      "connectsTo": ["wc-clue-graves-testimony", "wc-clue-ritual-residue", "wc-clue-cobblestone-symbol"],
+      "tags": ["paper", "lamplighters", "police", "grey-dawn", "ritual"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "wc-clue-ritual-residue",
+      "type": "occult",
+      "title": "Ritual Residue",
+      "description": "A faint, oily sheen on the cobblestones around the murder site — invisible in gaslight but unmistakable to anyone trained in occult forensics. The residue forms a partial circle, broken at the cardinal points. Whatever ritual was performed here was interrupted before completion. The substance smells of sulphur and old libraries.",
+      "sceneSource": "wc-act1-occult-traces",
+      "connectsTo": ["wc-clue-cobblestone-symbol", "wc-clue-hermetic-primer", "wc-clue-ward-chalk"],
+      "grantsFaculty": "lore",
+      "tags": ["occult", "ritual", "whitechapel", "residue"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "wc-clue-aldgate-letters",
+      "type": "physical",
+      "title": "Aldgate's Correspondence",
+      "description": "A bundle of letters found in the cellar, written in a clerk's precise hand. They detail instructions from an unnamed superior: which symbols to use, which streets to mark, which nights to act. The tone shifts from obedient to desperate over the course of six weeks. The final letter is unfinished, ending mid-sentence: 'I cannot continue this. The things I have seen in the cellar at night, when the symbols—'",
+      "sceneSource": "wc-act3-the-reckoning",
+      "connectsTo": ["wc-clue-cipher-note", "wc-clue-cellar-ledger", "wc-clue-harland-memo"],
+      "tags": ["paper", "aldgate", "letters", "conspiracy"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "wc-clue-ward-chalk",
+      "type": "occult",
+      "title": "Protective Ward Marks",
+      "description": "Chalk marks on the cellar walls, drawn in a hand different from the carved symbols. These are Grey Dawn protective wards — hastily applied, as if someone was trying to contain something already present. The chalk is fresh. Someone has been here recently, and they were afraid.",
+      "sceneSource": "wc-act2-cellar-search",
+      "connectsTo": ["wc-clue-hermetic-primer", "wc-clue-ritual-residue"],
+      "tags": ["chalk", "occult", "ward", "cellar", "grey-dawn"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "wc-clue-red-herring-docker",
+      "type": "redHerring",
+      "title": "Docker Walsh's Testimony",
+      "description": "A Whitechapel docker named Walsh swears he saw a tall man in a grey coat leaving the murder scene at speed. His description matches Professor Vane almost exactly — the height, the coat, the scholarly bearing. But Walsh was drinking that night, and the gaslight plays tricks. Three other witnesses describe a shorter man in dark clothing.",
+      "sceneSource": "wc-act1-docker-testimony",
+      "connectsTo": ["wc-clue-red-herring-occultist"],
+      "tags": ["testimony", "witness", "docker", "misdirection"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "wc-clue-harland-memo",
+      "type": "testimony",
+      "title": "Harland's Suppression Order",
+      "description": "A memorandum on Scotland Yard letterhead, signed by Deputy Commissioner Harland, ordering the destruction of 'all materials pertaining to the Whitechapel cipher correspondence.' The memo is dated three days before the first murder. Harland knew about the ciphers before anyone died — and he wanted them buried.",
+      "sceneSource": "wc-act2-harland-office",
+      "connectsTo": ["wc-clue-graves-testimony", "wc-clue-cellar-ledger", "wc-clue-aldgate-letters"],
+      "tags": ["paper", "police", "harland", "cover-up", "conspiracy"],
       "status": "new",
       "isRevealed": false
     }

@@ -5,11 +5,11 @@
   "acts": 3,
   "firstScene": "wc-act1-arrival",
   "facultyDistribution": {
-    "reason": 4,
-    "perception": 3,
-    "nerve": 2,
-    "vigor": 2,
-    "influence": 3,
-    "lore": 2
+    "reason": 6,
+    "perception": 5,
+    "nerve": 4,
+    "vigor": 4,
+    "influence": 5,
+    "lore": 4
   }
 }

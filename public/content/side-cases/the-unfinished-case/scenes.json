@@ -1,0 +1,255 @@
+{
+  "scenes": [
+    {
+      "id": "tuc-act1-pawnshop",
+      "act": 1,
+      "narrative": "The pawnshop on Brick Lane is a narrow establishment crammed with the detritus of a thousand desperate transactions. Mr Sefton, the proprietor, is a cautious man who remembers everything that passes through his hands. When you show him the Whitechapel cipher symbols, his eyes widen. 'I have seen those before,' he says. 'Six months ago. A woman brought in a bundle of papers covered in those same marks. Said she needed money for passage out of London. I gave her three shillings for the lot.' He reaches beneath the counter. 'She never came back for them. And three weeks later, I read in the papers that a woman matching her description was found dead in Spitalfields.'",
+      "ambientAudio": "ambient-london-day",
+      "cluesAvailable": [
+        {
+          "clueId": "tuc-clue-second-cipher",
+          "method": "automatic"
+        },
+        {
+          "clueId": "tuc-clue-first-victim",
+          "method": "dialogue"
+        },
+        {
+          "clueId": "tuc-clue-red-herring-landlord",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "tuc-choice-investigate-kellner",
+          "text": "Mary Kellner. Find her former lodgings in Spitalfields.",
+          "faculty": "perception",
+          "difficulty": 9,
+          "outcomes": {
+            "critical": "tuc-act1-kellner-lodgings",
+            "success": "tuc-act1-kellner-lodgings",
+            "partial": "tuc-act1-kellner-partial",
+            "failure": "tuc-act1-kellner-partial",
+            "fumble": "tuc-act1-kellner-partial"
+          }
+        },
+        {
+          "id": "tuc-choice-question-sefton",
+          "text": "Sefton, describe the woman. Everything you remember.",
+          "faculty": "influence",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "tuc-act1-sefton-details",
+            "success": "tuc-act1-sefton-details",
+            "partial": "tuc-act1-kellner-partial",
+            "failure": "tuc-act1-kellner-partial",
+            "fumble": "tuc-act1-kellner-partial"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "tuc-act1-kellner-lodgings",
+      "act": 1,
+      "narrative": "Mary Kellner's former lodgings are in a crumbling tenement on Dorset Street — the same street as the printshop from the Whitechapel case. The coincidence is too precise to be accidental. Her neighbour, Mrs Pratt, remembers her well. 'Quiet woman. Kept to herself. Worked at night — I could hear the press running through the walls.' A press. In a Spitalfields tenement. You search Kellner's room and find the false wall within minutes.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "tuc-choice-workshop",
+          "text": "Open the false wall. See what Kellner was hiding.",
+          "outcomes": {
+            "critical": "tuc-act2-workshop",
+            "success": "tuc-act2-workshop",
+            "partial": "tuc-act2-workshop",
+            "failure": "tuc-act2-workshop",
+            "fumble": "tuc-act2-workshop"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "disposition",
+          "target": "npc-kellner-neighbour",
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "id": "tuc-act1-kellner-partial",
+      "act": 1,
+      "narrative": "The trail to Kellner's lodgings is cold but not dead. Neighbours remember a quiet woman who worked at night. The address is on Dorset Street — the same street as the Whitechapel printshop. The connection is unmistakable.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "tuc-choice-kellner-partial-proceed",
+          "text": "Dorset Street again. Search Kellner's room.",
+          "outcomes": {
+            "critical": "tuc-act2-workshop",
+            "success": "tuc-act2-workshop",
+            "partial": "tuc-act2-workshop",
+            "failure": "tuc-act2-workshop",
+            "fumble": "tuc-act2-workshop"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "tuc-act1-sefton-details",
+      "act": 1,
+      "narrative": "Sefton's memory is precise. 'Young woman, late twenties. Dark hair, ink-stained fingers — a printer's hands. She was frightened. Said someone was following her. She wanted passage money, not pawn value — she would have taken a shilling for the lot.' He pauses. 'She mentioned a name. Aldgate. Said Aldgate had found her workshop and she needed to disappear before he came back.' Aldgate. The same Yard clerk from the Whitechapel case. The connection is undeniable.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "tuc-choice-sefton-details-proceed",
+          "text": "Aldgate found Kellner's workshop. She ran. She died. Find the workshop.",
+          "outcomes": {
+            "critical": "tuc-act1-kellner-lodgings",
+            "success": "tuc-act1-kellner-lodgings",
+            "partial": "tuc-act1-kellner-lodgings",
+            "failure": "tuc-act1-kellner-lodgings",
+            "fumble": "tuc-act1-kellner-lodgings"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "tuc-aldgate-connection",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "tuc-act2-workshop",
+      "act": 2,
+      "narrative": "Behind the false wall is a workshop — small, meticulous, and unmistakably the origin of the Whitechapel cipher system. A small printing press. Trays of Continental Gothic type — the same typeface Mott used. Grey Dawn reference materials annotated in a woman's hand. And on the workbench, a half-finished cipher note that was never completed. Mary Kellner was not a victim of the cipher conspiracy. She was its creator. She designed the substitution code, built the printing system, and — based on the Grey Dawn materials — understood the occult significance of the symbols she was using. Someone killed her and took over her operation. Aldgate, or whoever was behind him, inherited Kellner's work and turned it to murder.",
+      "cluesAvailable": [
+        {
+          "clueId": "tuc-clue-workshop-evidence",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "tuc-choice-workshop-report",
+          "text": "Report the workshop to the Lamplighters. Kellner's murder is a cold case that deserves justice.",
+          "outcomes": {
+            "critical": "tuc-act2-ending-justice",
+            "success": "tuc-act2-ending-justice",
+            "partial": "tuc-act2-ending-justice",
+            "failure": "tuc-act2-ending-justice",
+            "fumble": "tuc-act2-ending-justice"
+          }
+        },
+        {
+          "id": "tuc-choice-workshop-grey-dawn",
+          "text": "The Grey Dawn materials suggest Kellner was one of theirs. Return the materials to the Order.",
+          "outcomes": {
+            "critical": "tuc-act2-ending-grey-dawn",
+            "success": "tuc-act2-ending-grey-dawn",
+            "partial": "tuc-act2-ending-grey-dawn",
+            "failure": "tuc-act2-ending-grey-dawn",
+            "fumble": "tuc-act2-ending-grey-dawn"
+          }
+        },
+        {
+          "id": "tuc-choice-workshop-destroy",
+          "text": "Destroy the workshop. The cipher system has caused enough death.",
+          "outcomes": {
+            "critical": "tuc-act2-ending-destroyed",
+            "success": "tuc-act2-ending-destroyed",
+            "partial": "tuc-act2-ending-destroyed",
+            "failure": "tuc-act2-ending-destroyed",
+            "fumble": "tuc-act2-ending-destroyed"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1,
+          "description": "The revelation that Kellner created the cipher system recontextualises everything"
+        }
+      ]
+    },
+    {
+      "id": "tuc-act2-ending-justice",
+      "act": 2,
+      "narrative": "The Lamplighters take custody of the workshop and its contents. Kellner's murder is reopened as a cold case, with the cipher evidence providing the connection to the Whitechapel conspiracy that the original investigation lacked. It will not bring Kellner back. But it completes the picture — the Whitechapel Cipher was not born in a cellar on Dorset Street. It was born in this workshop, in the hands of a woman who understood both the science of codes and the power of occult symbols. She was killed for that knowledge. And now, at last, someone knows her name.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "tuc-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "tuc-kellner-justice",
+          "value": true
+        },
+        {
+          "type": "reputation",
+          "target": "Lamplighters",
+          "delta": 1
+        },
+        {
+          "type": "composure",
+          "delta": 1,
+          "description": "Justice, however late, brings a measure of peace"
+        }
+      ]
+    },
+    {
+      "id": "tuc-act2-ending-grey-dawn",
+      "act": 2,
+      "narrative": "The Grey Dawn receives Kellner's materials with the solemn gravity of an Order reclaiming its dead. 'Mary Kellner was an initiate,' the contact confirms. 'She was developing a communication system for the Order — a cipher that could carry occult resonance through printed symbols. She was brilliant. And she was murdered by someone who wanted her work for darker purposes.' The Order takes the workshop's contents and seals the room. Kellner's name is added to the Grey Dawn's roll of martyrs. The cipher system she created will be studied — and perhaps, in time, used as she intended: for communication, not for killing.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "tuc-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "tuc-kellner-grey-dawn",
+          "value": true
+        },
+        {
+          "type": "reputation",
+          "target": "Hermetic Order of the Grey Dawn",
+          "delta": 2
+        }
+      ]
+    },
+    {
+      "id": "tuc-act2-ending-destroyed",
+      "act": 2,
+      "narrative": "You burn the workshop. The printing press, the type trays, the Grey Dawn materials, the half-finished cipher note — all of it feeds the fire. The Continental Gothic typeface melts into slag. The cipher system that killed three people in Whitechapel and one woman in Spitalfields is reduced to ash and twisted metal. Mrs Pratt watches from the hallway with the resigned expression of someone who has seen worse. 'She would have wanted that,' the neighbour says. 'Mary always said the symbols were dangerous. That they carried something in them that printing alone could not explain.' The fire burns hot and clean. The cipher is dead. Mary Kellner's ghost, if it lingers, can rest.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "tuc-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "tuc-workshop-destroyed",
+          "value": true
+        },
+        {
+          "type": "composure",
+          "delta": 1,
+          "description": "The destruction of the cipher system brings closure"
+        }
+      ]
+    }
+  ]
+}

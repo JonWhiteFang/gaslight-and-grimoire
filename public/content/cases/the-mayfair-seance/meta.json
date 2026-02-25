@@ -5,11 +5,11 @@
   "acts": 3,
   "firstScene": "ms-act1-invitation",
   "facultyDistribution": {
-    "influence": 4,
-    "nerve": 3,
-    "lore": 3,
-    "perception": 3,
-    "reason": 2,
-    "vigor": 1
+    "influence": 6,
+    "nerve": 4,
+    "lore": 5,
+    "perception": 5,
+    "reason": 4,
+    "vigor": 4
   }
 }

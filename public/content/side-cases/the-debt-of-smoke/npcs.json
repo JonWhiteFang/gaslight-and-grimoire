@@ -1,0 +1,6 @@
+{
+  "npcs": [
+    { "id": "npc-sable-dos", "name": "Sable", "faction": "Court of Smoke", "disposition": 5, "suspicion": 2, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "npc-court-enforcer", "name": "Ashwick", "faction": "Court of Smoke", "disposition": -3, "suspicion": 6, "memoryFlags": {}, "isAlive": true, "isAccessible": true }
+  ]
+}

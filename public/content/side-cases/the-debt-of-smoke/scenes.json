@@ -1,0 +1,338 @@
+{
+  "scenes": [
+    {
+      "id": "dos-act1-midnight-meeting",
+      "act": 1,
+      "narrative": "Sable is waiting for you at the Limehouse warehouse, but the usual composure is gone. She stands in the lamplight with a letter in one hand and a pistol in the other. 'I need your help,' she says. It is the first time you have heard her ask for anything. 'Someone in the Court wants me dead. And the reason—' she hesitates, then sets the letter on the table between you — 'the reason is something I stole. Something I should have destroyed. But I could not bring myself to do it.'",
+      "ambientAudio": "ambient-whitechapel-night",
+      "cluesAvailable": [
+        {
+          "clueId": "dos-clue-threat-letter",
+          "method": "automatic"
+        },
+        {
+          "clueId": "dos-clue-red-herring-rival",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "dos-choice-what-stolen",
+          "text": "What did you steal, Sable? Show me.",
+          "faculty": "influence",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "dos-act1-sable-reveals",
+            "success": "dos-act1-sable-reveals",
+            "partial": "dos-act1-sable-reveals",
+            "failure": "dos-act1-sable-guarded",
+            "fumble": "dos-act1-sable-guarded"
+          }
+        },
+        {
+          "id": "dos-choice-who-threat",
+          "text": "Who sent the letter? Who in the Court wants you dead?",
+          "faculty": "reason",
+          "difficulty": 9,
+          "outcomes": {
+            "critical": "dos-act1-sable-reveals",
+            "success": "dos-act1-sable-guarded",
+            "partial": "dos-act1-sable-guarded",
+            "failure": "dos-act1-sable-guarded",
+            "fumble": "dos-act1-sable-guarded"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "dos-act1-sable-reveals",
+      "act": 1,
+      "narrative": "Sable reaches into her coat and produces a small leather pouch. Inside is a stone — warm, smooth, glowing with a faint inner fire that is visible only when the gaslight dims. 'The Court calls it the Ember,' she says. 'It was recovered from the Gasworks — a Veil fragment, like the others, but older. More powerful. It does not whisper. It sings.' She holds it up, and for a moment you hear it — a single, clear note, achingly beautiful, that seems to come from everywhere and nowhere. 'I stole it because I recognised what it was. The Court was going to sell it to the highest bidder. A thing like this should not be sold. It should be destroyed.' She meets your eyes. 'But I cannot destroy it. Every time I try, the song stops me.'",
+      "cluesAvailable": [
+        {
+          "clueId": "dos-clue-ember-artifact",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "dos-choice-investigate-court",
+          "text": "Who in the Court authorised storing the Ember? Follow the paper trail.",
+          "outcomes": {
+            "critical": "dos-act2-court-investigation",
+            "success": "dos-act2-court-investigation",
+            "partial": "dos-act2-court-investigation",
+            "failure": "dos-act2-court-investigation",
+            "fumble": "dos-act2-court-investigation"
+          }
+        },
+        {
+          "id": "dos-choice-destroy-ember",
+          "text": "Give me the Ember. I will destroy it.",
+          "faculty": "nerve",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "dos-act2-ending-destroyed",
+            "success": "dos-act2-ending-destroyed",
+            "partial": "dos-act2-court-investigation",
+            "failure": "dos-act2-court-investigation",
+            "fumble": "dos-act2-court-investigation"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1,
+          "description": "The Ember's song is hauntingly beautiful — and deeply unsettling"
+        }
+      ]
+    },
+    {
+      "id": "dos-act1-sable-guarded",
+      "act": 1,
+      "narrative": "Sable shakes her head. 'Not yet. I need to know I can trust you before I show you what I took. Help me find who sent the letter. Then I will tell you everything.' Her caution is maddening but understandable. In the Court of Smoke, trust is the rarest commodity.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "dos-choice-sable-guarded-investigate",
+          "text": "Fine. The letter first. Who in the Court wants you dead?",
+          "outcomes": {
+            "critical": "dos-act2-court-investigation",
+            "success": "dos-act2-court-investigation",
+            "partial": "dos-act2-court-investigation",
+            "failure": "dos-act2-court-investigation",
+            "fumble": "dos-act2-court-investigation"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "dos-act2-court-investigation",
+      "act": 2,
+      "narrative": "The Court of Smoke's internal politics are a labyrinth of favours, debts, and carefully maintained power balances. Sable's contacts point you toward Ashwick — a Court enforcer who handles the vault and its most dangerous contents. Ashwick is the one who catalogued the Ember. He is also the one who noticed it was missing. The threat letter's handwriting matches his. But Ashwick is not acting alone — he is following orders from someone higher in the Court's hierarchy. Someone who wants the Ember not destroyed, but delivered.",
+      "cluesAvailable": [
+        {
+          "clueId": "dos-clue-court-ledger",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "dos-choice-confront-ashwick",
+          "text": "Confront Ashwick directly. Force the truth.",
+          "faculty": "nerve",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "dos-act2-ashwick-breaks",
+            "success": "dos-act2-ashwick-breaks",
+            "partial": "dos-act2-ashwick-fights",
+            "failure": "dos-act2-ashwick-fights",
+            "fumble": "dos-act2-ashwick-fights"
+          }
+        },
+        {
+          "id": "dos-choice-negotiate-ashwick",
+          "text": "Negotiate. Ashwick is an enforcer, not a leader. Offer him a way out.",
+          "faculty": "influence",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "dos-act2-ashwick-breaks",
+            "success": "dos-act2-ashwick-breaks",
+            "partial": "dos-act2-ashwick-fights",
+            "failure": "dos-act2-ashwick-fights",
+            "fumble": "dos-act2-ashwick-fights"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "dos-found-ashwick",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "dos-act2-ashwick-breaks",
+      "act": 2,
+      "narrative": "Ashwick is a big man, but fear makes him small. 'I was following orders,' he says. 'The Ember was supposed to be sold — a buyer from outside London, someone with Grey Dawn connections. When Sable took it, the deal fell through. My superiors want it back. They do not care if Sable survives the recovery.' He gives you the buyer's name and the delivery location. The choice is yours: destroy the Ember, return it to the Court, or let the sale proceed.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "dos-choice-destroy",
+          "text": "The Ember is too dangerous. Destroy it.",
+          "outcomes": {
+            "critical": "dos-act2-ending-destroyed",
+            "success": "dos-act2-ending-destroyed",
+            "partial": "dos-act2-ending-destroyed",
+            "failure": "dos-act2-ending-destroyed",
+            "fumble": "dos-act2-ending-destroyed"
+          }
+        },
+        {
+          "id": "dos-choice-return-court",
+          "text": "Return the Ember to the Court. Sable's life for the artifact.",
+          "outcomes": {
+            "critical": "dos-act2-ending-returned",
+            "success": "dos-act2-ending-returned",
+            "partial": "dos-act2-ending-returned",
+            "failure": "dos-act2-ending-returned",
+            "fumble": "dos-act2-ending-returned"
+          }
+        },
+        {
+          "id": "dos-choice-protect-sable",
+          "text": "Protect Sable. She was right to steal it. Help her disappear.",
+          "outcomes": {
+            "critical": "dos-act2-ending-protected",
+            "success": "dos-act2-ending-protected",
+            "partial": "dos-act2-ending-protected",
+            "failure": "dos-act2-ending-protected",
+            "fumble": "dos-act2-ending-protected"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "dos-act2-ashwick-fights",
+      "act": 2,
+      "narrative": "Ashwick does not break. He fights. The confrontation is brief and brutal — Ashwick is a professional, but he is outnumbered by circumstance and outmatched by determination. When it is over, you find the vault records on his person. The Ember's provenance is clear. The choice remains: what to do with it.",
+      "cluesAvailable": [
+        {
+          "clueId": "dos-clue-court-ledger",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "dos-choice-fights-destroy",
+          "text": "Destroy the Ember.",
+          "outcomes": {
+            "critical": "dos-act2-ending-destroyed",
+            "success": "dos-act2-ending-destroyed",
+            "partial": "dos-act2-ending-destroyed",
+            "failure": "dos-act2-ending-destroyed",
+            "fumble": "dos-act2-ending-destroyed"
+          }
+        },
+        {
+          "id": "dos-choice-fights-protect",
+          "text": "Protect Sable and the Ember.",
+          "outcomes": {
+            "critical": "dos-act2-ending-protected",
+            "success": "dos-act2-ending-protected",
+            "partial": "dos-act2-ending-protected",
+            "failure": "dos-act2-ending-protected",
+            "fumble": "dos-act2-ending-protected"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "vitality",
+          "delta": -1,
+          "description": "The fight with Ashwick leaves its marks"
+        }
+      ]
+    },
+    {
+      "id": "dos-act2-ending-destroyed",
+      "act": 2,
+      "narrative": "The Ember shatters when you strike it with an iron hammer — Sable's suggestion, delivered with the grim practicality of someone who has handled dangerous goods her entire life. The song cuts off mid-note. The fragments go dark. For a moment, the air in the warehouse feels lighter, as if a pressure you had not noticed has been released. Sable watches the fragments cool with an expression that is equal parts relief and grief. 'It was beautiful,' she says. 'That is what made it dangerous.' The Court will not forgive the destruction of a valuable asset. But the Ember is gone, and with it, the threat to Sable's life. She owes you a debt that the Court's ledgers cannot quantify.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "dos-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "dos-ember-destroyed",
+          "value": true
+        },
+        {
+          "type": "reputation",
+          "target": "Court of Smoke",
+          "delta": -1
+        },
+        {
+          "type": "disposition",
+          "target": "npc-sable-dos",
+          "delta": 3,
+          "description": "Sable's gratitude is genuine and deep"
+        }
+      ]
+    },
+    {
+      "id": "dos-act2-ending-returned",
+      "act": 2,
+      "narrative": "The Ember goes back to the Court's vault. Sable watches you hand it over with an expression you cannot read — betrayal, perhaps, or the weary acceptance of someone who has lived in the Court long enough to know that survival requires compromise. Ashwick takes the artifact with professional satisfaction. The threat against Sable is lifted. The Court's hierarchy is appeased. But the Ember sits in its vault, singing its beautiful, dangerous song, waiting for the next person who cannot resist its call.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "dos-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "dos-ember-returned",
+          "value": true
+        },
+        {
+          "type": "reputation",
+          "target": "Court of Smoke",
+          "delta": 2
+        },
+        {
+          "type": "disposition",
+          "target": "npc-sable-dos",
+          "delta": -2,
+          "description": "Sable's trust in you is shaken"
+        }
+      ]
+    },
+    {
+      "id": "dos-act2-ending-protected",
+      "act": 2,
+      "narrative": "Sable disappears. You arrange passage on a merchant vessel bound for Calais, using Lamplighter contacts who owe you favours and ask no questions. The Ember goes with her — still singing, still dangerous, but in the hands of someone who understands what it is and will not sell it. The Court of Smoke searches for her, but Sable has spent a lifetime learning how to vanish. Ashwick is left to explain the loss to his superiors. You are left with a debt from a woman who may never return to London — and the knowledge that somewhere across the Channel, a fragment of the Veil sings in the darkness, beautiful and patient and waiting.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "dos-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "dos-sable-escaped",
+          "value": true
+        },
+        {
+          "type": "reputation",
+          "target": "Court of Smoke",
+          "delta": -2
+        },
+        {
+          "type": "reputation",
+          "target": "Lamplighters",
+          "delta": 1
+        },
+        {
+          "type": "disposition",
+          "target": "npc-sable-dos",
+          "delta": 5,
+          "description": "Sable will remember this for the rest of her life"
+        }
+      ]
+    }
+  ]
+}

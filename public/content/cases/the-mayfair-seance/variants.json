@@ -9,7 +9,7 @@
         "target": "Hermetic Order of the Grey Dawn",
         "value": 2
       },
-      "narrative": "The carriage draws up before a Mayfair townhouse ablaze with gaslight. You recognise the symbols etched into the door frame \u2014 Grey Dawn ward-marks, barely visible beneath the paint. Someone in this house has dealings with the Order, and your reputation precedes you. The butler's eyes widen slightly when he sees you. 'You are expected,' he says, with an emphasis that suggests more than Lady Ashworth's invitation. In the drawing room, Madame Vesper looks up as you enter \u2014 and for a moment, her mask of serene detachment slips into something like relief.",
+      "narrative": "The carriage draws up before a Mayfair townhouse ablaze with gaslight. You recognise the symbols etched into the door frame — Grey Dawn ward-marks, barely visible beneath the paint. Someone in this house has dealings with the Order, and your reputation precedes you. The butler's eyes widen slightly when he sees you. 'You are expected,' he says, with an emphasis that suggests more than Lady Ashworth's invitation. In the drawing room, Madame Vesper looks up as you enter — and for a moment, her mask of serene detachment slips into something like relief.",
       "ambientAudio": "ambient-mayfair-evening",
       "cluesAvailable": [
         {
@@ -24,7 +24,7 @@
       "choices": [
         {
           "id": "ms-choice-question-ashworth-variant",
-          "text": "Engage Lady Ashworth \u2014 your Grey Dawn connections may loosen her tongue.",
+          "text": "Engage Lady Ashworth — your Grey Dawn connections may loosen her tongue.",
           "faculty": "influence",
           "difficulty": 9,
           "outcomes": {
@@ -37,7 +37,7 @@
         },
         {
           "id": "ms-choice-examine-room-variant",
-          "text": "Examine the s\u00e9ance room \u2014 the ward-marks suggest hidden preparations.",
+          "text": "Examine the séance room — the ward-marks suggest hidden preparations.",
           "faculty": "perception",
           "difficulty": 10,
           "outcomes": {
@@ -50,7 +50,7 @@
         },
         {
           "id": "ms-choice-study-vesper-variant",
-          "text": "Approach Vesper directly \u2014 she recognised you. She wants to talk.",
+          "text": "Approach Vesper directly — she recognised you. She wants to talk.",
           "faculty": "lore",
           "difficulty": 9,
           "outcomes": {
@@ -71,7 +71,7 @@
         "type": "hasFlag",
         "target": "ability-veil-sight-active"
       },
-      "narrative": "The gas lamps dim. Through the Veil, you see what the others cannot: the s\u00e9ance table is ringed with sigils that glow faintly in a spectrum beyond normal sight. Madame Vesper's chant is not theatre \u2014 it is a genuine invocation, and the words carry weight in the air like smoke. When the table rises, you perceive the threads of force anchoring it \u2014 not wires, but lines of occult energy converging on the Grey Dawn binding circle carved beneath. The voice that speaks from the darkness has a shape to your heightened senses: old, hungry, and not entirely present. Pemberton cannot see what you see. His terror is blind. But Vesper \u2014 Vesper knows exactly what she has called.",
+      "narrative": "The gas lamps dim. Through the Veil, you see what the others cannot: the séance table is ringed with sigils that glow faintly in a spectrum beyond normal sight. Madame Vesper's chant is not theatre — it is a genuine invocation, and the words carry weight in the air like smoke. When the table rises, you perceive the threads of force anchoring it — not wires, but lines of occult energy converging on the Grey Dawn binding circle carved beneath. The voice that speaks from the darkness has a shape to your heightened senses: old, hungry, and not entirely present. Pemberton cannot see what you see. His terror is blind. But Vesper — Vesper knows exactly what she has called.",
       "ambientAudio": "ambient-seance",
       "cluesAvailable": [
         {
@@ -114,7 +114,7 @@
         },
         {
           "id": "ms-choice-confront-pemberton-veil",
-          "text": "Pemberton's terror is blind \u2014 he cannot see what you see. Use that.",
+          "text": "Pemberton's terror is blind — he cannot see what you see. Use that.",
           "faculty": "influence",
           "difficulty": 11,
           "outcomes": {
@@ -143,7 +143,7 @@
         "target": "breakdown-occurred",
         "value": false
       },
-      "narrative": "The s\u00e9ance room spins. The gaslight fractures into a thousand points of amber, and the voices \u2014 the living and the dead \u2014 merge into a single unbearable chorus. You grip the edge of the table but your fingers find no purchase. The boundary between what you have witnessed and what your mind can contain has been crossed. You are aware, distantly, of someone calling your name. Lady Ashworth, perhaps. Or something else entirely. The darkness takes you gently, almost kindly.",
+      "narrative": "The séance room spins. The gaslight fractures into a thousand points of amber, and the voices — the living and the dead — merge into a single unbearable chorus. You grip the edge of the table but your fingers find no purchase. The boundary between what you have witnessed and what your mind can contain has been crossed. You are aware, distantly, of someone calling your name. Lady Ashworth, perhaps. Or something else entirely. The darkness takes you gently, almost kindly.",
       "cluesAvailable": [],
       "choices": [],
       "onEnter": [
@@ -163,7 +163,7 @@
         "target": "incapacitated",
         "value": false
       },
-      "narrative": "The supernatural assault overwhelms your physical form. The cold that radiates from the manifestation is not merely atmospheric \u2014 it drains warmth from your very blood. You stagger, catch yourself on a chair back, and then your legs simply cease to function. The Mayfair townhouse's polished floor rises to meet you. Through dimming vision you see Madame Vesper reaching toward you, her expression one of genuine horror. Then the world goes dark, and the last thing you hear is the entity's voice, whispering something that sounds almost like an apology.",
+      "narrative": "The supernatural assault overwhelms your physical form. The cold that radiates from the manifestation is not merely atmospheric — it drains warmth from your very blood. You stagger, catch yourself on a chair back, and then your legs simply cease to function. The Mayfair townhouse's polished floor rises to meet you. Through dimming vision you see Madame Vesper reaching toward you, her expression one of genuine horror. Then the world goes dark, and the last thing you hear is the entity's voice, whispering something that sounds almost like an apology.",
       "cluesAvailable": [],
       "choices": [],
       "onEnter": [
@@ -171,6 +171,156 @@
           "type": "flag",
           "target": "incapacitated",
           "value": true
+        }
+      ]
+    },
+    {
+      "id": "ms-act1-invitation-variant-court-rep",
+      "act": 1,
+      "variantOf": "ms-act1-invitation",
+      "variantCondition": {
+        "type": "factionReputation",
+        "target": "Court of Smoke",
+        "value": 2
+      },
+      "narrative": "The carriage draws up before a Mayfair townhouse ablaze with gaslight. As you step down, a boy presses a folded note into your hand and vanishes. The note reads: \"The medium bought ritual components through our channels. Pemberton paid. Watch them both. — S.\" The Court of Smoke is already watching this house. Lady Ashworth greets you at the door, unaware that her evening has attracted attention from London's occult underworld.",
+      "ambientAudio": "ambient-mayfair-evening",
+      "cluesAvailable": [
+        {
+          "clueId": "ms-clue-invitation-letter",
+          "method": "automatic"
+        },
+        {
+          "clueId": "ms-clue-ritual-components",
+          "method": "automatic"
+        },
+        {
+          "clueId": "ms-clue-red-herring-servant",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "ms-choice-question-ashworth-court-v",
+          "text": "Engage Lady Ashworth — you already know more than she suspects.",
+          "faculty": "influence",
+          "difficulty": 9,
+          "outcomes": {
+            "critical": "ms-act1-ashworth-confides",
+            "success": "ms-act1-ashworth-guarded",
+            "partial": "ms-act1-ashworth-guarded",
+            "failure": "ms-act1-ashworth-deflects",
+            "fumble": "ms-act1-ashworth-deflects"
+          }
+        },
+        {
+          "id": "ms-choice-examine-room-court-v",
+          "text": "Examine the séance room — the Court's note mentioned ritual components.",
+          "faculty": "perception",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "ms-act1-room-thorough",
+            "success": "ms-act1-room-partial",
+            "partial": "ms-act1-room-partial",
+            "failure": "ms-act1-room-nothing",
+            "fumble": "ms-act1-room-nothing"
+          }
+        },
+        {
+          "id": "ms-choice-study-vesper-court-v",
+          "text": "Study Vesper — the Court says she bought the components herself.",
+          "faculty": "lore",
+          "difficulty": 9,
+          "outcomes": {
+            "critical": "ms-act1-vesper-read",
+            "success": "ms-act1-vesper-glimpse",
+            "partial": "ms-act1-vesper-glimpse",
+            "failure": "ms-act1-vesper-nothing",
+            "fumble": "ms-act1-vesper-nothing"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "ms-met-needle",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "ms-act2-the-seance-variant-lamplighter-rep",
+      "act": 2,
+      "variantOf": "ms-act2-the-seance",
+      "variantCondition": {
+        "type": "factionReputation",
+        "target": "Lamplighters",
+        "value": 3
+      },
+      "narrative": "The gas lamps dim. But you are not unprepared — a Lamplighter briefing warned you that Grey Dawn summoning protocols have been detected at this address. When the table rises and the voice speaks from the darkness, you recognise the signs: a genuine manifestation, not a parlour trick. The Lamplighters trained you for this. The question is not whether the supernatural is real — it is how to contain it.",
+      "ambientAudio": "ambient-seance",
+      "cluesAvailable": [
+        {
+          "clueId": "ms-clue-grey-dawn-sigil",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "ms-choice-rational-path-lamp",
+          "text": "Find the mechanism — separate the fraud from the genuine manifestation.",
+          "faculty": "reason",
+          "difficulty": 10,
+          "advantageIf": [
+            "ms-clue-hidden-mechanism"
+          ],
+          "outcomes": {
+            "critical": "ms-act2-rational-success",
+            "success": "ms-act2-rational-partial",
+            "partial": "ms-act2-rational-partial",
+            "failure": "ms-act2-rational-fail",
+            "fumble": "ms-act2-rational-fail"
+          }
+        },
+        {
+          "id": "ms-choice-occult-path-lamp",
+          "text": "The binding circle is failing. Reinforce it before the entity breaks free.",
+          "faculty": "lore",
+          "difficulty": 10,
+          "advantageIf": [
+            "ms-clue-vesper-journal"
+          ],
+          "outcomes": {
+            "critical": "ms-act2-occult-success",
+            "success": "ms-act2-occult-partial",
+            "partial": "ms-act2-occult-partial",
+            "failure": "ms-act2-occult-fail",
+            "fumble": "ms-act2-occult-fail"
+          }
+        },
+        {
+          "id": "ms-choice-confront-pemberton-lamp",
+          "text": "Pemberton knows about the mechanism. Break him.",
+          "faculty": "influence",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "ms-act2-pemberton-breaks",
+            "success": "ms-act2-pemberton-partial",
+            "partial": "ms-act2-pemberton-partial",
+            "failure": "ms-act2-pemberton-stonewalls",
+            "fumble": "ms-act2-pemberton-stonewalls"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1
+        },
+        {
+          "type": "reputation",
+          "target": "Lamplighters",
+          "delta": 1
         }
       ]
     }

@@ -62,10 +62,5 @@ The engine layer and UI shell are fully built and tested:
 
 ## What Appears Actively Evolving
 
-- **Content is thin** — Only 1 main case ("The Whitechapel Cipher", 3 acts) and 1 side case ("A Matter of Shadows"). The engine supports arbitrary cases but the content pipeline has only produced two.
-- **ClueDiscoveryCard** — Comment in NarrativePanel says "stub, fully implemented in Task 10". The component exists but may not be feature-complete.
-- **No case selection UI** — ✅ FIXED: `CaseSelection` component added. Flow is now Character Creation → Case Selection → Play. Cases listed via `content/manifest.json`. Hardcoded case ID removed from App.tsx.
-- **No case completion screen** — ✅ FIXED: `GameContent` detects terminal scenes (no choices, no encounter) and shows a "Case Complete" button. Triggers `handleCompleteCase` → `CaseCompletion` screen with ending narrative, faculty bonus, and vignette unlock.
-- **Encounter UI** — The encounter engine is fully implemented (startEncounter, processEncounterChoice, getEncounterChoices) but encounters flow through the generic choice/narrative panels rather than a dedicated encounter UI.
-- **Ambient audio** — The `AmbientAudio` component exists and reads `scene.ambientAudio`, but no audio asset files are present in the repo (the `/audio/sfx/` paths are referenced but the files aren't committed).
+- **Audio/visual assets absent** — The audio system (Howler.js, 9 SFX events, ambient tracks) and illustration system are fully coded but no `.mp3` or image files exist. The game is silent with no illustrations.
 - **Determinism concerns** — `buildDeduction` uses `Date.now()` and `Math.random()` directly for ID generation. `rollD20()` uses `Math.random()` with no seeding/DI. `hintEngine` uses `Date.now()` for scene dwell tracking. These are functional but not reproducible.

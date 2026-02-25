@@ -1,0 +1,15 @@
+{
+  "id": "the-lamplighters-wake",
+  "title": "The Lamplighter's Wake",
+  "synopsis": "A Lamplighter agent is found dead in a locked room in Whitechapel. Scotland Yard calls it suicide. The Lamplighters suspect otherwise — and the trail leads to the Gasworks, where the Court of Smoke is trafficking in things that should not exist.",
+  "acts": 3,
+  "firstScene": "lw-act1-locked-room",
+  "facultyDistribution": {
+    "reason": 5,
+    "perception": 5,
+    "nerve": 4,
+    "vigor": 5,
+    "influence": 4,
+    "lore": 5
+  }
+}

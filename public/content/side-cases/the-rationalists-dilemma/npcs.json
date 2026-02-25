@@ -1,0 +1,6 @@
+{
+  "npcs": [
+    { "id": "npc-hargrove", "name": "Dr Hargrove", "faction": "Rationalists Circle", "disposition": 2, "suspicion": 1, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "npc-circle-director", "name": "Director Ashby", "faction": "Rationalists Circle", "disposition": 0, "suspicion": 0, "memoryFlags": {}, "isAlive": true, "isAccessible": true }
+  ]
+}

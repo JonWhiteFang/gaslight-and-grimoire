@@ -1,0 +1,463 @@
+{
+  "scenes": [
+    {
+      "id": "lw-act1-locked-room",
+      "act": 1,
+      "narrative": "The lodging house on Flower and Dean Street is the kind of place where questions are unwelcome and privacy is purchased by the week. Wren meets you at the door — the same Lamplighter handler you have dealt with before, though she looks older tonight. 'Agent Marsh,' she says. 'Found this morning. Locked room, key inside, no signs of forced entry. The Yard is calling it suicide.' She leads you up three flights of narrow stairs to a room that smells of tallow, old wool, and something chemical — sharp, bitter, wrong. Marsh lies on the bed, fully clothed, his face composed in an expression of mild surprise. There is no blood. No visible wound. But the room tells a story that contradicts the Yard's verdict.",
+      "ambientAudio": "ambient-whitechapel-night",
+      "cluesAvailable": [
+        {
+          "clueId": "lw-clue-locked-room-key",
+          "method": "exploration"
+        },
+        {
+          "clueId": "lw-clue-poison-vial",
+          "method": "exploration"
+        },
+        {
+          "clueId": "lw-clue-case-notes",
+          "method": "check",
+          "requiresFaculty": {
+            "faculty": "reason",
+            "minimum": 10
+          }
+        },
+        {
+          "clueId": "lw-clue-red-herring-landlord",
+          "method": "exploration"
+        },
+        {
+          "clueId": "lw-clue-marsh-final-message",
+          "method": "check",
+          "requiresFaculty": {
+            "faculty": "perception",
+            "minimum": 11
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "lw-choice-examine-body",
+          "text": "Examine the body. The cause of death is the first question.",
+          "faculty": "perception",
+          "difficulty": 9,
+          "outcomes": {
+            "critical": "lw-act1-body-examined",
+            "success": "lw-act1-body-examined",
+            "partial": "lw-act1-body-partial",
+            "failure": "lw-act1-body-partial",
+            "fumble": "lw-act1-body-partial"
+          }
+        },
+        {
+          "id": "lw-choice-search-room",
+          "text": "Search the room methodically. A Lamplighter agent would have hidden his findings.",
+          "faculty": "reason",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "lw-act1-room-searched",
+            "success": "lw-act1-room-searched",
+            "partial": "lw-act1-room-partial",
+            "failure": "lw-act1-room-partial",
+            "fumble": "lw-act1-room-partial"
+          }
+        },
+        {
+          "id": "lw-choice-question-wren",
+          "text": "Question Wren. What was Marsh investigating? Why was he killed?",
+          "faculty": "influence",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "lw-act1-lamplighter-briefing",
+            "success": "lw-act1-lamplighter-briefing",
+            "partial": "lw-act1-wren-guarded",
+            "failure": "lw-act1-wren-guarded",
+            "fumble": "lw-act1-wren-guarded"
+          }
+        },
+        {
+          "id": "lw-choice-occult-scan",
+          "text": "The chemical smell is wrong — not poison alone. Scan for occult traces.",
+          "faculty": "lore",
+          "difficulty": 10,
+          "conditions": [
+            {
+              "type": "archetypeIs",
+              "target": "occultist",
+              "value": "occultist"
+            }
+          ],
+          "outcomes": {
+            "critical": "lw-act1-ritual-discovered",
+            "success": "lw-act1-ritual-discovered",
+            "partial": "lw-act1-body-examined",
+            "failure": "lw-act1-body-partial",
+            "fumble": "lw-act1-body-partial"
+          }
+        },
+        {
+          "id": "lw-choice-operator-window",
+          "text": "The window. Check the frame, the sill, the drainpipe. Locked rooms have solutions.",
+          "faculty": "vigor",
+          "difficulty": 9,
+          "conditions": [
+            {
+              "type": "archetypeIs",
+              "target": "operator",
+              "value": "operator"
+            }
+          ],
+          "outcomes": {
+            "critical": "lw-act1-window-clue",
+            "success": "lw-act1-window-clue",
+            "partial": "lw-act1-room-partial",
+            "failure": "lw-act1-room-partial",
+            "fumble": "lw-act1-room-partial"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "lw-act1-body-examined",
+      "act": 1,
+      "narrative": "The body tells its story to trained eyes. No external wounds. The poison vial in the coat pocket contains nightshade residue, but Marsh's lips and tongue show no staining — he did not drink it. The poison was administered through the skin, likely via a treated surface. You check his hands: the right palm shows a faint chemical burn consistent with contact poison on a door handle. Someone poisoned the room itself. And beneath his shirt, drawn in consecrated chalk on his chest, is a Grey Dawn binding sigil — applied after death. Someone wanted to interrogate a dead man.",
+      "cluesAvailable": [
+        {
+          "clueId": "lw-clue-ritual-marks",
+          "method": "automatic"
+        },
+        {
+          "clueId": "lw-clue-poison-vial",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "lw-choice-body-briefing",
+          "text": "The binding sigil changes everything. Demand a full briefing from Wren.",
+          "outcomes": {
+            "critical": "lw-act1-lamplighter-briefing",
+            "success": "lw-act1-lamplighter-briefing",
+            "partial": "lw-act1-lamplighter-briefing",
+            "failure": "lw-act1-lamplighter-briefing",
+            "fumble": "lw-act1-lamplighter-briefing"
+          }
+        },
+        {
+          "id": "lw-choice-body-proceed",
+          "text": "You have the cause of death and the occult connection. Press on.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1,
+          "description": "The binding sigil on a dead man's chest is deeply unsettling"
+        },
+        {
+          "type": "flag",
+          "target": "lw-found-ritual-marks",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "lw-act1-body-partial",
+      "act": 1,
+      "narrative": "The body reveals fragments. The poison vial is obvious, but the cause of death is not — Marsh's lips show no poison staining. Something is wrong with the official verdict. You note the chemical smell but cannot identify its source.",
+      "cluesAvailable": [
+        {
+          "clueId": "lw-clue-poison-vial",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "lw-choice-body-partial-wren",
+          "text": "Ask Wren for context.",
+          "outcomes": {
+            "critical": "lw-act1-lamplighter-briefing",
+            "success": "lw-act1-lamplighter-briefing",
+            "partial": "lw-act1-lamplighter-briefing",
+            "failure": "lw-act1-lamplighter-briefing",
+            "fumble": "lw-act1-lamplighter-briefing"
+          }
+        },
+        {
+          "id": "lw-choice-body-partial-proceed",
+          "text": "Move on with what you have.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "lw-act1-room-searched",
+      "act": 1,
+      "narrative": "You search the room with systematic precision. The notebook is in the coat lining — standard Lamplighter concealment. The key is beneath the floorboards near the window, placed deliberately. And scratched into the windowsill, barely visible: 'CROKE KNOWS. VAULT 7. TELL WREN.' Marsh knew he was dying and left a message.",
+      "cluesAvailable": [
+        {
+          "clueId": "lw-clue-case-notes",
+          "method": "automatic"
+        },
+        {
+          "clueId": "lw-clue-locked-room-key",
+          "method": "automatic"
+        },
+        {
+          "clueId": "lw-clue-marsh-final-message",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "lw-choice-room-searched-wren",
+          "text": "Show Wren the message.",
+          "outcomes": {
+            "critical": "lw-act1-lamplighter-briefing",
+            "success": "lw-act1-lamplighter-briefing",
+            "partial": "lw-act1-lamplighter-briefing",
+            "failure": "lw-act1-lamplighter-briefing",
+            "fumble": "lw-act1-lamplighter-briefing"
+          }
+        },
+        {
+          "id": "lw-choice-room-searched-proceed",
+          "text": "Croke and Vault 7. You have a trail.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": 1,
+          "description": "Marsh's final message gives you a clear direction"
+        }
+      ]
+    },
+    {
+      "id": "lw-act1-room-partial",
+      "act": 1,
+      "narrative": "The room yields fragments. You find the poison vial and note the chemical smell, but the notebook and the windowsill message elude you. Wren watches you search with patient anxiety.",
+      "cluesAvailable": [
+        {
+          "clueId": "lw-clue-poison-vial",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "lw-choice-room-partial-wren",
+          "text": "Ask Wren what Marsh was investigating.",
+          "outcomes": {
+            "critical": "lw-act1-lamplighter-briefing",
+            "success": "lw-act1-lamplighter-briefing",
+            "partial": "lw-act1-lamplighter-briefing",
+            "failure": "lw-act1-lamplighter-briefing",
+            "fumble": "lw-act1-lamplighter-briefing"
+          }
+        },
+        {
+          "id": "lw-choice-room-partial-proceed",
+          "text": "Move on.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "lw-act1-lamplighter-briefing",
+      "act": 1,
+      "narrative": "Wren closes the door and speaks quickly. 'Marsh was investigating disappearances near the Gasworks. Workers going missing — six in the past two months. The Yard wrote them off as transients, but Marsh found a pattern. The missing workers all handled shipments from a specific loading dock. Shipments that came through Court of Smoke channels.' She hands you a folded paper — Marsh's last filed report. 'He was getting close to something. Close enough that someone decided he needed to stop.' She meets your eyes. 'Find what killed him. Find what he found. And if the Court of Smoke is involved, make them answer for it.'",
+      "cluesAvailable": [
+        {
+          "clueId": "lw-clue-case-notes",
+          "method": "dialogue"
+        },
+        {
+          "clueId": "lw-clue-red-herring-rival",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "lw-choice-briefing-proceed",
+          "text": "The Gasworks. The Court of Smoke. The disappearances. The web awaits.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "disposition",
+          "target": "npc-wren-lw",
+          "delta": 2,
+          "description": "Wren trusts you with the Lamplighters' most sensitive case"
+        },
+        {
+          "type": "reputation",
+          "target": "Lamplighters",
+          "delta": 1
+        },
+        {
+          "type": "flag",
+          "target": "lw-briefed-by-wren",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "lw-act1-wren-guarded",
+      "act": 1,
+      "narrative": "Wren shakes her head. 'I cannot tell you everything. Not yet. Marsh was investigating something sensitive — Lamplighter business. What I can tell you is that it involved the Gasworks district and the Court of Smoke.' She presses a card into your hand with an address. 'Go to the Gasworks. Ask for Foreman Croke. And be careful.'",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-wren-guarded-proceed",
+          "text": "The Gasworks and Croke. A starting point.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "lw-act1-ritual-discovered",
+      "act": 1,
+      "narrative": "Your occult senses flare the moment you open yourself to the room's hidden frequencies. The chemical smell carries the signature of a Grey Dawn binding ritual, performed within the last twelve hours. The chalk marks on Marsh's chest glow faintly to your trained perception — soul-anchoring. Someone attempted to bind Marsh's spirit to his body after death, preventing it from crossing the Veil. The ritual was interrupted — the binding is incomplete. But the intent is clear: someone wanted to interrogate a dead man.",
+      "cluesAvailable": [
+        {
+          "clueId": "lw-clue-ritual-marks",
+          "method": "automatic"
+        },
+        {
+          "clueId": "lw-clue-poison-vial",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "lw-choice-ritual-briefing",
+          "text": "Soul interrogation. This is Grey Dawn forbidden practice. Demand answers from Wren.",
+          "outcomes": {
+            "critical": "lw-act1-lamplighter-briefing",
+            "success": "lw-act1-lamplighter-briefing",
+            "partial": "lw-act1-lamplighter-briefing",
+            "failure": "lw-act1-lamplighter-briefing",
+            "fumble": "lw-act1-lamplighter-briefing"
+          }
+        },
+        {
+          "id": "lw-choice-ritual-proceed",
+          "text": "The Grey Dawn connection changes everything. Press on.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -2,
+          "description": "The soul-anchoring ritual shakes even your trained composure"
+        },
+        {
+          "type": "flag",
+          "target": "lw-found-ritual-marks",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "lw-act1-window-clue",
+      "act": 1,
+      "narrative": "The window frame tells the story. The latch is locked from inside, but the wood shows fresh scratches — someone used a thin blade to manipulate the latch from outside. The drainpipe is sturdy enough to climb, and fresh scuff marks confirm recent use. This was not a locked room at all. Someone climbed in, poisoned the room, waited for Marsh to die, performed the ritual, and climbed out — relocking the window with a blade. Professional. Methodical. And very dangerous.",
+      "cluesAvailable": [
+        {
+          "clueId": "lw-clue-locked-room-key",
+          "method": "automatic"
+        },
+        {
+          "clueId": "lw-clue-marsh-final-message",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "lw-choice-window-briefing",
+          "text": "This was a professional assassination. Brief Wren.",
+          "outcomes": {
+            "critical": "lw-act1-lamplighter-briefing",
+            "success": "lw-act1-lamplighter-briefing",
+            "partial": "lw-act1-lamplighter-briefing",
+            "failure": "lw-act1-lamplighter-briefing",
+            "fumble": "lw-act1-lamplighter-briefing"
+          }
+        },
+        {
+          "id": "lw-choice-window-proceed",
+          "text": "The killer came through the window. The trail leads outward.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": 1,
+          "description": "The locked room puzzle is solved — your street instincts were right"
+        },
+        {
+          "type": "flag",
+          "target": "lw-solved-locked-room",
+          "value": true
+        }
+      ]
+    }
+  ]
+}

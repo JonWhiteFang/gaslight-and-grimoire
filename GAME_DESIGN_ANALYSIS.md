@@ -1,13 +1,13 @@
 # Gaslight & Grimoire — Game Design Analysis
 
-Date: 2026-02-23
+Date: 2026-02-25
 Scope: Full codebase, content, assets, engine, UI/UX, and documentation review
 
 ---
 
 ## Executive Summary
 
-Gaslight & Grimoire has a strong architectural foundation — clean engine/content separation, well-typed data models, a solid Zustand store, and thorough documentation. The core gameplay loop (discover → connect → act → reflect) is well-designed on paper. However, the game currently suffers from thin content, absent media assets, several unimplemented interaction mechanics, and balance issues that would significantly undermine player engagement. The 10 improvements below are ordered by impact on the player experience.
+Gaslight & Grimoire has a strong architectural foundation — clean engine/content separation, well-typed data models, a solid Zustand store, and thorough documentation. The core gameplay loop (discover → connect → act → reflect) is well-designed on paper. However, the game currently suffers from absent media assets. The 10 improvements below are ordered by impact on the player experience — 9 of 10 are now complete.
 
 ---
 
@@ -42,40 +42,25 @@ Gaslight & Grimoire has a strong architectural foundation — clean engine/conte
 
 ---
 
-## 3. Deepen Branching and Content Volume
+## ~~3. Deepen Branching and Content Volume~~ — ✅ COMPLETE
 
 **Category:** Content
-**Severity:** High — replayability is very limited
+**Severity:** High — ✅ RESOLVED
 
-**Issue:** Quantitative analysis of the content reveals thin branching:
+**Resolution:** Full content depth uplift completed. All 3 main cases now at design doc targets. New third case "The Lamplighter's Wake" created. 3 new vignettes authored. Court of Smoke introduced as active faction across all content. Archetype-exclusive scenes added to all main cases.
 
-| Metric | Whitechapel Cipher | Mayfair Séance | A Matter of Shadows |
-|---|---|---|---|
-| Scenes | 22 | 25 | 7 |
-| Avg choices/scene | 1.2 | 1.1 | 1.3 |
-| Faculty checks | 11 | 9 | 2 |
-| Dead-end scenes | 3 | 4 | 2 |
-| Clues | 6 | 6 | 2 |
-| NPCs | 3 | 3 | 1 |
-| Variants | 1 | 1 | 0 |
+**Final metrics:**
 
-An average of ~1.1 choices per scene means most scenes are linear corridors with a single "continue" option. Only 1 variant scene per case means cross-case state barely affects the narrative. 6 clues per case is thin for an evidence-board mechanic that requires connecting pairs.
+| Metric | Whitechapel Cipher | Mayfair Séance | Lamplighter's Wake | A Matter of Shadows | Rationalist's Dilemma | Debt of Smoke | Unfinished Case |
+|---|---|---|---|---|---|---|---|
+| Scenes | 66 | 49 | 43 | 13 | 10 | 9 | 8 |
+| Clues | 14 | 13 | 13 | 5 | 5 | 4 | 4 |
+| NPCs | 7 | 7 | 7 | 3 | 2 | 2 | 2 |
+| Variants | 6 | 6 | 3 | 0 | 0 | 0 | 0 |
+| Avg choices/scene | 2.1 | 2.4 | 2.1 | 2.0 | 2.1 | 2.0 | 1.6 |
+| Endings | 4 | 4 | 4 | 3 | 3 | 3 | 3 |
 
-**Impact:** Players will experience the game as largely linear on first playthrough and have little reason to replay. The Evidence Board — the game's signature mechanic — has too few clues to create interesting deduction puzzles.
-
-**Proposed Solution:**
-- Increase average choices per scene to 2.0–2.5 for main cases. Every non-terminal scene should offer at least 2 meaningful choices.
-- Add 4–6 more clues per case (target: 10–12 total) with richer `connectsTo` graphs. Include more red herrings to make deduction non-trivial.
-- Add 2–3 variant scenes per case that trigger based on faction reputation, NPC disposition, or cross-case flags.
-- Add 2–3 more NPCs per case with faction diversity. The current cases only have 2 factions represented.
-- Author at least 1 additional vignette with a different unlock condition (e.g., NPC disposition ≥ 7).
-
-**Files to modify:**
-- `public/content/cases/*/act*.json` — expand scene graphs
-- `public/content/cases/*/clues.json` — add clues
-- `public/content/cases/*/npcs.json` — add NPCs
-- `public/content/cases/*/variants.json` — add variant scenes
-- `public/content/side-cases/` — new vignette directories
+**Totals:** 198 scenes, 58 clues, 30 NPCs across 7 cases. All 4 factions active. Archetype-exclusive scenes in all 3 main cases.
 
 ---
 
@@ -193,7 +178,7 @@ These didn't make the top 10 but are worth noting:
 |---|---|---|---|---|
 | 1 | ~~Active Clue Discovery~~ ✅ | Medium | High | P0 — DONE |
 | 2 | Audio & Visual Assets | High (asset creation) | High | P0 |
-| 3 | Deepen Branching & Content | High (content authoring) | High | P0 |
+| 3 | ~~Deepen Branching & Content~~ ✅ | High (content authoring) | High | P0 — DONE |
 | 4 | ~~NPC Dialogue System~~ ✅ | High | High | P1 — DONE |
 | 5 | ~~Recovery Mechanics~~ ✅ | Low-Medium | High | P1 — DONE |
 | 6 | ~~Persistent Evidence Board~~ ✅ | Medium | Medium-High | P1 — DONE |

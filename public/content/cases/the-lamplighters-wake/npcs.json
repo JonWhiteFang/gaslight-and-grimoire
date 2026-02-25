@@ -1,0 +1,11 @@
+{
+  "npcs": [
+    { "id": "npc-wren-lw", "name": "Wren", "faction": "Lamplighters", "disposition": 3, "suspicion": 0, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "npc-croke", "name": "Foreman Croke", "faction": null, "disposition": -1, "suspicion": 3, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "npc-tallow", "name": "Tallow", "faction": "Court of Smoke", "disposition": -2, "suspicion": 5, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "npc-sister-maren", "name": "Sister Maren", "faction": "Hermetic Order of the Grey Dawn", "disposition": 1, "suspicion": 2, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "npc-inspector-bell", "name": "Inspector Bell", "faction": "Rationalists Circle", "disposition": 0, "suspicion": 1, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "npc-sparrow", "name": "Sparrow", "faction": "Lamplighters", "disposition": -1, "suspicion": 4, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "npc-gasworks-worker", "name": "Brennan", "faction": null, "disposition": 0, "suspicion": 1, "memoryFlags": {}, "isAlive": true, "isAccessible": true }
+  ]
+}

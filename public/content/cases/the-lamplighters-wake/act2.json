@@ -1,0 +1,1168 @@
+{
+  "scenes": [
+    {
+      "id": "lw-act2-the-web",
+      "act": 2,
+      "narrative": "Three threads lead from Marsh's death into the heart of London's shadow world. The Gasworks district, where workers are disappearing and shipments move through Court of Smoke channels. The Court of Smoke itself, whose Limehouse operations may hold the key to what Marsh discovered. And the Grey Dawn, whose forbidden binding ritual was performed on a dead man's body. Each thread is dangerous. Each may lead to the truth — or to the same fate as Agent Marsh.",
+      "ambientAudio": "ambient-london-day",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-gasworks",
+          "text": "Investigate the Gasworks. Marsh's notes point to Foreman Croke and Vault 7.",
+          "faculty": "vigor",
+          "difficulty": 9,
+          "advantageIf": [
+            "lw-clue-case-notes"
+          ],
+          "outcomes": {
+            "critical": "lw-act2-gasworks",
+            "success": "lw-act2-gasworks",
+            "partial": "lw-act2-gasworks",
+            "failure": "lw-act2-gasworks",
+            "fumble": "lw-act2-gasworks"
+          }
+        },
+        {
+          "id": "lw-choice-court-territory",
+          "text": "Enter Court of Smoke territory. Someone there supplied the poison and the ritual components.",
+          "faculty": "nerve",
+          "difficulty": 10,
+          "advantageIf": [
+            "lw-clue-court-manifest"
+          ],
+          "outcomes": {
+            "critical": "lw-act2-court-territory",
+            "success": "lw-act2-court-territory",
+            "partial": "lw-act2-court-territory",
+            "failure": "lw-act2-court-territory",
+            "fumble": "lw-act2-court-territory"
+          }
+        },
+        {
+          "id": "lw-choice-grey-dawn-meeting",
+          "text": "Seek out the Grey Dawn. The binding sigil on Marsh's body was their work.",
+          "faculty": "lore",
+          "difficulty": 10,
+          "advantageIf": [
+            "lw-clue-ritual-marks"
+          ],
+          "outcomes": {
+            "critical": "lw-act2-grey-dawn-meeting",
+            "success": "lw-act2-grey-dawn-meeting",
+            "partial": "lw-act2-grey-dawn-meeting",
+            "failure": "lw-act2-grey-dawn-meeting",
+            "fumble": "lw-act2-grey-dawn-meeting"
+          }
+        },
+        {
+          "id": "lw-choice-yard-investigation",
+          "text": "The Yard called it suicide. Inspector Bell handled the case. Challenge his verdict.",
+          "faculty": "influence",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "lw-act2-inspector-bell",
+            "success": "lw-act2-inspector-bell",
+            "partial": "lw-act2-inspector-bell-deflects",
+            "failure": "lw-act2-inspector-bell-deflects",
+            "fumble": "lw-act2-inspector-bell-deflects"
+          }
+        },
+        {
+          "id": "lw-choice-brennan",
+          "text": "Find the worker who was exposed to the fragments. He may know where Vault 7 is.",
+          "faculty": "perception",
+          "difficulty": 9,
+          "outcomes": {
+            "critical": "lw-act2-brennan-encounter",
+            "success": "lw-act2-brennan-encounter",
+            "partial": "lw-act2-brennan-encounter",
+            "failure": "lw-act2-gasworks",
+            "fumble": "lw-act2-gasworks"
+          }
+        },
+        {
+          "id": "lw-choice-sparrow",
+          "text": "Marsh had a partner — codename Sparrow. Find him.",
+          "faculty": "influence",
+          "difficulty": 9,
+          "conditions": [
+            {
+              "type": "hasFlag",
+              "target": "lw-briefed-by-wren"
+            }
+          ],
+          "outcomes": {
+            "critical": "lw-act2-sparrow-confrontation",
+            "success": "lw-act2-sparrow-confrontation",
+            "partial": "lw-act2-sparrow-confrontation",
+            "failure": "lw-act2-sparrow-confrontation",
+            "fumble": "lw-act2-sparrow-confrontation"
+          }
+        },
+        {
+          "id": "lw-choice-deductionist-timeline",
+          "text": "The evidence forms a pattern. Lay it out and let deduction do its work.",
+          "faculty": "reason",
+          "difficulty": 10,
+          "conditions": [
+            {
+              "type": "archetypeIs",
+              "target": "deductionist",
+              "value": "deductionist"
+            }
+          ],
+          "outcomes": {
+            "critical": "lw-act2-deductionist-timeline",
+            "success": "lw-act2-deductionist-timeline",
+            "partial": "lw-act2-gasworks",
+            "failure": "lw-act2-gasworks",
+            "fumble": "lw-act2-gasworks"
+          }
+        },
+        {
+          "id": "lw-choice-mesmerist-interrogation",
+          "text": "Someone at the Gasworks knows the practitioner's schedule. Find them and extract it.",
+          "faculty": "influence",
+          "difficulty": 10,
+          "conditions": [
+            {
+              "type": "archetypeIs",
+              "target": "mesmerist",
+              "value": "mesmerist"
+            }
+          ],
+          "outcomes": {
+            "critical": "lw-act2-mesmerist-interrogation",
+            "success": "lw-act2-mesmerist-interrogation",
+            "partial": "lw-act2-court-territory",
+            "failure": "lw-act2-court-territory",
+            "fumble": "lw-act2-court-territory"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "lw-act2-gasworks",
+      "act": 2,
+      "narrative": "The Gasworks looms against the grey sky like a cathedral of industry — chimneys belching smoke, furnaces roaring, the air thick with chemical fumes that burn the throat. Foreman Croke is a heavyset man with the permanently reddened face of someone who has spent twenty years breathing industrial vapours. He watches you approach with the wary calculation of a man who has been expecting trouble. 'You're not from the Yard,' he says. It is not a question.",
+      "ambientAudio": "ambient-whitechapel-night",
+      "cluesAvailable": [
+        {
+          "clueId": "lw-clue-gasworks-manifest",
+          "method": "exploration"
+        },
+        {
+          "clueId": "lw-clue-croke-testimony",
+          "method": "check",
+          "requiresFaculty": {
+            "faculty": "influence",
+            "minimum": 10
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "lw-choice-croke-intimidate",
+          "text": "Marsh is dead, Croke. His last message named you. Start talking.",
+          "faculty": "nerve",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "lw-act2-croke-breaks",
+            "success": "lw-act2-croke-breaks",
+            "partial": "lw-act2-croke-deflects",
+            "failure": "lw-act2-croke-deflects",
+            "fumble": "lw-act2-croke-deflects"
+          },
+          "npcEffect": {
+            "npcId": "npc-croke",
+            "dispositionDelta": -2,
+            "suspicionDelta": 2
+          }
+        },
+        {
+          "id": "lw-choice-croke-persuade",
+          "text": "Workers are disappearing, Croke. You are next unless you help me stop this.",
+          "faculty": "influence",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "lw-act2-croke-breaks",
+            "success": "lw-act2-croke-breaks",
+            "partial": "lw-act2-croke-deflects",
+            "failure": "lw-act2-croke-deflects",
+            "fumble": "lw-act2-croke-deflects"
+          },
+          "npcEffect": {
+            "npcId": "npc-croke",
+            "dispositionDelta": 1,
+            "suspicionDelta": -1
+          }
+        },
+        {
+          "id": "lw-choice-vault-7",
+          "text": "Skip Croke. Find Vault 7 yourself.",
+          "faculty": "perception",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "lw-act2-gasworks-deep",
+            "success": "lw-act2-gasworks-deep",
+            "partial": "lw-act2-gasworks-hazard",
+            "failure": "lw-act2-gasworks-hazard",
+            "fumble": "lw-act2-gasworks-hazard"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "lw-act2-croke-breaks",
+      "act": 2,
+      "narrative": "Croke breaks. 'The Court of Smoke paid me to look the other way,' he says, his voice cracking. 'Shipments through my loading dock — crates marked as industrial solvents. I didn't know what was in them until one broke open and Brennan went mad. Started screaming about voices, clawing at his own face. They took him away and I never saw him again.' He gives you the name of his Court contact — a man called Tallow. 'Vault 7 is where they store the worst of it. The things that whisper.'",
+      "cluesAvailable": [
+        {
+          "clueId": "lw-clue-croke-testimony",
+          "method": "automatic"
+        },
+        {
+          "clueId": "lw-clue-gasworks-manifest",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "lw-choice-croke-vault",
+          "text": "Vault 7. Take me there now.",
+          "outcomes": {
+            "critical": "lw-act2-gasworks-deep",
+            "success": "lw-act2-gasworks-deep",
+            "partial": "lw-act2-gasworks-deep",
+            "failure": "lw-act2-gasworks-deep",
+            "fumble": "lw-act2-gasworks-deep"
+          }
+        },
+        {
+          "id": "lw-choice-croke-tallow",
+          "text": "Tallow. Where do I find him?",
+          "outcomes": {
+            "critical": "lw-act2-court-territory",
+            "success": "lw-act2-court-territory",
+            "partial": "lw-act2-court-territory",
+            "failure": "lw-act2-court-territory",
+            "fumble": "lw-act2-court-territory"
+          }
+        },
+        {
+          "id": "lw-choice-croke-return",
+          "text": "Return to the hub with Croke's testimony.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "setMemoryFlag",
+          "target": "npc-croke",
+          "value": "confessed"
+        },
+        {
+          "type": "flag",
+          "target": "lw-croke-confessed",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-croke-deflects",
+      "act": 2,
+      "narrative": "Croke's jaw sets. 'I don't know what you're talking about. I run a gasworks, not a conspiracy.' But his hands are shaking and he will not meet your eyes. He knows. He is simply more afraid of whoever is behind this than he is of you.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-croke-deflects-vault",
+          "text": "Fine. Find Vault 7 without Croke's help.",
+          "faculty": "perception",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "lw-act2-gasworks-deep",
+            "success": "lw-act2-gasworks-deep",
+            "partial": "lw-act2-gasworks-hazard",
+            "failure": "lw-act2-gasworks-hazard",
+            "fumble": "lw-act2-gasworks-hazard"
+          }
+        },
+        {
+          "id": "lw-choice-croke-deflects-return",
+          "text": "Croke is a wall. Try another path.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "suspicion",
+          "target": "npc-croke",
+          "delta": 2
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-gasworks-deep",
+      "act": 2,
+      "narrative": "Vault 7 is deep in the Gasworks — behind a locked door that Croke's key opens, or that yields to determined force. The walls are covered in Grey Dawn containment sigils etched into the brickwork with acid. The air shimmers with unnatural heat. In the centre of the vault, on a stone plinth, sits an iron box. Inside: a shard of obsidian that pulses with faint inner light. It whispers at the edge of hearing — not words, exactly, but the shape of words, pressing against the boundary of comprehension. This is a Veil fragment. A piece of the boundary between worlds, extracted and contained. And someone has been trafficking them through the Gasworks.",
+      "cluesAvailable": [
+        {
+          "clueId": "lw-clue-gasworks-sigils",
+          "method": "automatic"
+        },
+        {
+          "clueId": "lw-clue-tainted-artifact",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "lw-choice-vault-take",
+          "text": "Take the artifact. It is evidence — and it is too dangerous to leave here.",
+          "faculty": "nerve",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "lw-act2-artifact-secured",
+            "success": "lw-act2-artifact-secured",
+            "partial": "lw-act2-artifact-secured",
+            "failure": "lw-act2-artifact-exposure",
+            "fumble": "lw-act2-artifact-exposure"
+          }
+        },
+        {
+          "id": "lw-choice-vault-seal",
+          "text": "Seal the vault. The containment sigils can be reinforced.",
+          "faculty": "lore",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "lw-act2-artifact-secured",
+            "success": "lw-act2-artifact-secured",
+            "partial": "lw-act2-artifact-exposure",
+            "failure": "lw-act2-artifact-exposure",
+            "fumble": "lw-act2-artifact-exposure"
+          }
+        },
+        {
+          "id": "lw-choice-vault-return",
+          "text": "Leave the artifact. Report what you found.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -2,
+          "description": "The Veil fragment's whispers press against your sanity"
+        },
+        {
+          "type": "flag",
+          "target": "lw-found-vault-7",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-gasworks-hazard",
+      "act": 2,
+      "narrative": "The Gasworks is a labyrinth of pipes, furnaces, and chemical storage. Without Croke's guidance, you stumble into a section where the air is thick with toxic fumes. Your vision blurs. The walls seem to breathe. A worker — Brennan, hollow-eyed and muttering — grabs your arm. 'Don't go to Vault 7,' he whispers. 'The things in there — they talk to you. They show you things that aren't real. Or maybe they are.' He releases you and shuffles away into the chemical haze.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "vitality",
+          "delta": -1,
+          "description": "The toxic fumes sear your lungs"
+        }
+      ],
+      "encounter": {
+        "isSupernatural": false,
+        "rounds": [
+          {
+            "roundNumber": 1,
+            "isSupernatural": false,
+            "choices": [
+              {
+                "id": "lw-enc-gasworks-push",
+                "text": "Push through the fumes. Vault 7 is close.",
+                "faculty": "vigor",
+                "difficulty": 11,
+                "outcomes": {
+                  "critical": "lw-act2-gasworks-deep",
+                  "success": "lw-act2-gasworks-deep",
+                  "partial": "lw-act2-gasworks-deep",
+                  "failure": "lw-act2-the-web",
+                  "fumble": "lw-act2-the-web"
+                },
+                "encounterDamage": {
+                  "vitalityDelta": -1
+                }
+              },
+              {
+                "id": "lw-enc-gasworks-navigate",
+                "text": "Use your wits to find a safer route through the Gasworks.",
+                "faculty": "reason",
+                "difficulty": 10,
+                "outcomes": {
+                  "critical": "lw-act2-gasworks-deep",
+                  "success": "lw-act2-gasworks-deep",
+                  "partial": "lw-act2-the-web",
+                  "failure": "lw-act2-the-web",
+                  "fumble": "lw-act2-the-web"
+                },
+                "encounterDamage": {
+                  "composureDelta": -1
+                }
+              },
+              {
+                "id": "lw-enc-gasworks-retreat",
+                "text": "Retreat. The fumes are too dangerous without protection.",
+                "isEscapePath": true,
+                "outcomes": {
+                  "critical": "lw-act2-the-web",
+                  "success": "lw-act2-the-web",
+                  "partial": "lw-act2-the-web",
+                  "failure": "lw-act2-the-web",
+                  "fumble": "lw-act2-the-web"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lw-act2-artifact-secured",
+      "act": 2,
+      "narrative": "The Veil fragment is secured — contained in its iron box, the whispers muffled but not silenced. You have the evidence of what the Court of Smoke has been trafficking: pieces of the boundary between worlds, harvested and sold like any other commodity. The disappearing workers were not victims of industrial accident. They were exposed to the fragments and lost their minds — or worse, were consumed by what the fragments attracted.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-artifact-reckoning",
+          "text": "You have the artifact and the truth. Time for the reckoning.",
+          "outcomes": {
+            "critical": "lw-act3-the-reckoning",
+            "success": "lw-act3-the-reckoning",
+            "partial": "lw-act3-the-reckoning",
+            "failure": "lw-act3-the-reckoning",
+            "fumble": "lw-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "lw-choice-artifact-return",
+          "text": "Return to the hub. There are more threads to pull.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "lw-artifact-secured",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-artifact-exposure",
+      "act": 2,
+      "narrative": "The Veil fragment's whispers intensify as you handle it. For a terrible moment, the boundary between the vault and somewhere else thins to nothing. You see — or think you see — a vast dark space beyond the walls, populated by shapes that move with alien purpose. Then the moment passes, and you are back in the vault, gasping, the iron box clutched to your chest. The fragment is contained. But it has shown you something you cannot unsee.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-exposure-reckoning",
+          "text": "The artifact is secured, at a cost. Time for the reckoning.",
+          "outcomes": {
+            "critical": "lw-act3-the-reckoning",
+            "success": "lw-act3-the-reckoning",
+            "partial": "lw-act3-the-reckoning",
+            "failure": "lw-act3-the-reckoning",
+            "fumble": "lw-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -2,
+          "description": "The Veil fragment showed you things no mortal mind should witness"
+        },
+        {
+          "type": "flag",
+          "target": "lw-artifact-secured",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-court-territory",
+      "act": 2,
+      "narrative": "The Court of Smoke's Limehouse operations are conducted from a warehouse that smells of sandalwood and old money. Tallow — the Court intermediary who handled the Gasworks shipments — is a gaunt man with the careful movements of someone who has survived by never being the most threatening person in the room. He receives you with the wary courtesy of a merchant who suspects you are not here to buy.",
+      "cluesAvailable": [
+        {
+          "clueId": "lw-clue-court-manifest",
+          "method": "check",
+          "requiresFaculty": {
+            "faculty": "perception",
+            "minimum": 10
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "lw-choice-tallow-negotiate",
+          "text": "I know about the Gasworks shipments. The Veil fragments. Tell me who is buying them.",
+          "faculty": "influence",
+          "difficulty": 12,
+          "advantageIf": [
+            "lw-clue-gasworks-manifest"
+          ],
+          "outcomes": {
+            "critical": "lw-act2-tallow-reveals",
+            "success": "lw-act2-tallow-reveals",
+            "partial": "lw-act2-tallow-partial",
+            "failure": "lw-act2-tallow-partial",
+            "fumble": "lw-act2-tallow-partial"
+          },
+          "npcEffect": {
+            "npcId": "npc-tallow",
+            "dispositionDelta": 0,
+            "suspicionDelta": 2
+          }
+        },
+        {
+          "id": "lw-choice-tallow-threaten",
+          "text": "A Lamplighter agent is dead. The Court is implicated. Cooperate or face consequences.",
+          "faculty": "nerve",
+          "difficulty": 12,
+          "outcomes": {
+            "critical": "lw-act2-tallow-reveals",
+            "success": "lw-act2-tallow-partial",
+            "partial": "lw-act2-tallow-partial",
+            "failure": "lw-act2-tallow-partial",
+            "fumble": "lw-act2-tallow-partial"
+          },
+          "npcEffect": {
+            "npcId": "npc-tallow",
+            "dispositionDelta": -2,
+            "suspicionDelta": 3
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "lw-met-tallow",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-tallow-reveals",
+      "act": 2,
+      "narrative": "Tallow's composure cracks. 'The buyer is a Grey Dawn scholar — calls herself Sister Maren. She has been purchasing Veil fragments for months. Says she is conducting research. But the quantities she is buying — no one needs that many fragments for research. She is building something.' He slides a manifest across the table. 'The Court does not care what she builds, as long as she pays. But a dead Lamplighter is bad for business. Find Maren. Stop whatever she is doing. And keep the Court's name out of it.'",
+      "cluesAvailable": [
+        {
+          "clueId": "lw-clue-court-manifest",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "lw-choice-tallow-maren",
+          "text": "Sister Maren. Where does she operate?",
+          "outcomes": {
+            "critical": "lw-act2-grey-dawn-meeting",
+            "success": "lw-act2-grey-dawn-meeting",
+            "partial": "lw-act2-grey-dawn-meeting",
+            "failure": "lw-act2-grey-dawn-meeting",
+            "fumble": "lw-act2-grey-dawn-meeting"
+          }
+        },
+        {
+          "id": "lw-choice-tallow-reckoning",
+          "text": "You have the Court's records and a name. Time for the reckoning.",
+          "outcomes": {
+            "critical": "lw-act3-the-reckoning",
+            "success": "lw-act3-the-reckoning",
+            "partial": "lw-act3-the-reckoning",
+            "failure": "lw-act3-the-reckoning",
+            "fumble": "lw-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "reputation",
+          "target": "Court of Smoke",
+          "delta": 1
+        },
+        {
+          "type": "flag",
+          "target": "lw-knows-maren",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-tallow-partial",
+      "act": 2,
+      "narrative": "Tallow gives you fragments — enough to confirm the Court's involvement in the Gasworks shipments, but not enough to identify the buyer. 'We deal in goods, not names,' he says. 'If you want the buyer, find the Grey Dawn. They are the ones with the knowledge to use what we sell.'",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-tallow-partial-return",
+          "text": "The Grey Dawn is the next thread. Return to the hub.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "lw-act2-grey-dawn-meeting",
+      "act": 2,
+      "narrative": "The Grey Dawn contact meets you in the crypt of St Sepulchre's — neutral ground between factions. Sister Maren is a woman of perhaps fifty, with the calm intensity of a scholar who has spent decades studying things that would drive lesser minds to madness. She confirms that the binding sigil on Marsh's body is genuine Grey Dawn work — and deeply forbidden. 'Whoever drew that sigil was trying to interrogate the dead,' she says. 'They wanted to know what Marsh had discovered. And they have the knowledge to do it.' She will not name the practitioner, but her fear is palpable.",
+      "cluesAvailable": [
+        {
+          "clueId": "lw-clue-grey-dawn-contact",
+          "method": "dialogue"
+        }
+      ],
+      "choices": [
+        {
+          "id": "lw-choice-maren-press",
+          "text": "Sister Maren, who in the Grey Dawn has the knowledge to perform soul interrogation?",
+          "faculty": "influence",
+          "difficulty": 12,
+          "advantageIf": [
+            "lw-clue-ritual-marks"
+          ],
+          "outcomes": {
+            "critical": "lw-act2-maren-reveals",
+            "success": "lw-act2-maren-reveals",
+            "partial": "lw-act2-maren-guarded",
+            "failure": "lw-act2-maren-guarded",
+            "fumble": "lw-act2-maren-guarded"
+          }
+        },
+        {
+          "id": "lw-choice-maren-lore",
+          "text": "The Veil fragments — what are they being used for?",
+          "faculty": "lore",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "lw-act2-maren-reveals",
+            "success": "lw-act2-maren-reveals",
+            "partial": "lw-act2-maren-guarded",
+            "failure": "lw-act2-maren-guarded",
+            "fumble": "lw-act2-maren-guarded"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "disposition",
+          "target": "npc-sister-maren",
+          "delta": 1
+        },
+        {
+          "type": "flag",
+          "target": "lw-met-maren",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-maren-reveals",
+      "act": 2,
+      "narrative": "Sister Maren closes her eyes. 'The fragments are being assembled into a Veil Key — a device that can open a permanent breach between worlds. The Grey Dawn has theorised about such a device for centuries, but the materials were never available. Until the Court of Smoke began harvesting fragments from sites of supernatural activity.' She opens her eyes. 'The practitioner who killed Marsh and drew the binding sigil is building the Key in the Gasworks. They killed Marsh because he discovered the operation. And they interrogated his spirit to learn whether anyone else knew.' She grips your hand. 'You must destroy the Key before it is completed. If the Veil is breached permanently, what comes through will make the Whitechapel murders look like a parlour game.'",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-maren-reckoning",
+          "text": "The Veil Key. The Gasworks. This ends now.",
+          "outcomes": {
+            "critical": "lw-act3-the-reckoning",
+            "success": "lw-act3-the-reckoning",
+            "partial": "lw-act3-the-reckoning",
+            "failure": "lw-act3-the-reckoning",
+            "fumble": "lw-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "reputation",
+          "target": "Hermetic Order of the Grey Dawn",
+          "delta": 1
+        },
+        {
+          "type": "flag",
+          "target": "lw-knows-veil-key",
+          "value": true
+        },
+        {
+          "type": "composure",
+          "delta": -1,
+          "description": "The scale of the threat is staggering"
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-maren-guarded",
+      "act": 2,
+      "narrative": "Sister Maren shakes her head. 'I have told you what I can. The Grey Dawn does not expose its own — even those who have strayed into forbidden practice. Find the evidence yourself. The Gasworks holds the answers.' She rises and disappears into the crypt's shadows.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-maren-guarded-return",
+          "text": "The Grey Dawn is protecting someone. Return to the hub.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "lw-act2-inspector-bell",
+      "act": 2,
+      "narrative": "Inspector Bell is a methodical man who takes pride in closed cases. He does not appreciate having his verdict questioned. But when you present the evidence — the contact poison, the binding sigil, the window scratches — his professional pride wars with his institutional loyalty. 'If what you are saying is true,' he says slowly, 'then I signed off on a murder as a suicide. That is... not acceptable.' He opens his case file. 'I will reopen the investigation. Quietly. But I need more evidence before I can act officially.'",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-bell-alliance",
+          "text": "Bell is an ally. Share what you know about the Gasworks.",
+          "conditions": [
+            {
+              "type": "hasFlag",
+              "target": "lw-croke-confessed"
+            }
+          ],
+          "outcomes": {
+            "critical": "lw-act2-bell-alliance",
+            "success": "lw-act2-bell-alliance",
+            "partial": "lw-act2-bell-alliance",
+            "failure": "lw-act2-bell-alliance",
+            "fumble": "lw-act2-bell-alliance"
+          }
+        },
+        {
+          "id": "lw-choice-bell-return",
+          "text": "Bell will reopen the case. Return to the hub.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "disposition",
+          "target": "npc-inspector-bell",
+          "delta": 2
+        },
+        {
+          "type": "reputation",
+          "target": "Rationalists Circle",
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-inspector-bell-deflects",
+      "act": 2,
+      "narrative": "Inspector Bell is unmoved. 'The evidence supports suicide,' he says flatly. 'I will not reopen a closed case on the basis of speculation.' His tone brooks no argument. The Yard's verdict stands — for now.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-bell-deflects-return",
+          "text": "The Yard will not help. Find the truth yourself.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1,
+          "description": "The Yard's indifference is infuriating"
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-bell-alliance",
+      "act": 2,
+      "narrative": "Bell reads Croke's testimony with the careful attention of a man who is reconsidering everything he thought he knew. 'The Gasworks. Disappearing workers. Court of Smoke shipments.' He closes the file. 'I will have constables at the Gasworks within the hour. But I need you there first — to secure whatever evidence exists before it can be destroyed.' He hands you a warrant. 'This gives you legal authority to search the premises. Use it wisely.'",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-bell-alliance-reckoning",
+          "text": "A warrant and police backup. Time for the reckoning.",
+          "outcomes": {
+            "critical": "lw-act3-the-reckoning",
+            "success": "lw-act3-the-reckoning",
+            "partial": "lw-act3-the-reckoning",
+            "failure": "lw-act3-the-reckoning",
+            "fumble": "lw-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "lw-bell-alliance",
+          "value": true
+        },
+        {
+          "type": "reputation",
+          "target": "Rationalists Circle",
+          "delta": 1
+        },
+        {
+          "type": "composure",
+          "delta": 1,
+          "description": "Official backing strengthens your resolve"
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-brennan-encounter",
+      "act": 2,
+      "narrative": "Brennan finds you in the Gasworks corridors — or perhaps you find him. The worker is a shell of a man, hollow-eyed and muttering, but lucid enough to recognise a sympathetic face. 'I handled the crates,' he says. 'The ones from Limehouse. One of them cracked open on the loading dock and I touched what was inside. Just for a second.' He holds up his hand — the palm is scarred with a burn in the shape of a sigil. 'I hear them now. All the time. Voices from the other side of something. They tell me things. Things that haven't happened yet.' His eyes focus on you with terrible clarity. 'They told me you were coming.'",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-brennan-listen",
+          "text": "What do the voices tell you, Brennan? What have they shown you?",
+          "faculty": "nerve",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "lw-act2-brennan-vision",
+            "success": "lw-act2-brennan-vision",
+            "partial": "lw-act2-brennan-dismissed",
+            "failure": "lw-act2-brennan-dismissed",
+            "fumble": "lw-act2-brennan-dismissed"
+          }
+        },
+        {
+          "id": "lw-choice-brennan-help",
+          "text": "Brennan, I can help you. But I need to know where Vault 7 is.",
+          "faculty": "influence",
+          "difficulty": 9,
+          "outcomes": {
+            "critical": "lw-act2-gasworks-deep",
+            "success": "lw-act2-gasworks-deep",
+            "partial": "lw-act2-gasworks-hazard",
+            "failure": "lw-act2-gasworks-hazard",
+            "fumble": "lw-act2-gasworks-hazard"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "disposition",
+          "target": "npc-gasworks-worker",
+          "delta": 1,
+          "description": "Brennan is grateful someone is listening"
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-brennan-vision",
+      "act": 2,
+      "narrative": "Brennan's eyes go distant. 'They show me the Gasworks,' he says. 'But not as it is — as it will be. The furnaces cold. The walls covered in sigils. And in the centre, where Vault 7 is, a door that opens onto nothing. Not darkness — nothing. The absence of everything.' He shudders. 'The man who comes at night — the one with the chalk — he is building that door. Each fragment he adds makes it wider. And the things on the other side are pressing against it, waiting.' He grabs your arm. 'You have to stop him. Before the door opens. Because what comes through will not go back.'",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-brennan-vision-vault",
+          "text": "The door in Vault 7. Take me there, Brennan.",
+          "outcomes": {
+            "critical": "lw-act2-gasworks-deep",
+            "success": "lw-act2-gasworks-deep",
+            "partial": "lw-act2-gasworks-deep",
+            "failure": "lw-act2-gasworks-deep",
+            "fumble": "lw-act2-gasworks-deep"
+          }
+        },
+        {
+          "id": "lw-choice-brennan-vision-return",
+          "text": "Brennan's vision confirms the worst. Return to the hub and plan.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1,
+          "description": "Brennan's vision of the Veil door is deeply disturbing"
+        },
+        {
+          "type": "flag",
+          "target": "lw-brennan-vision",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-brennan-dismissed",
+      "act": 2,
+      "narrative": "Brennan's lucidity fades. He begins muttering again — fragments of sentences, names you do not recognise, coordinates that may or may not correspond to real locations. The Veil fragment's influence has eroded his mind too far for coherent testimony. But his scarred palm and his terror are evidence enough that the Gasworks is hiding something terrible.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-brennan-dismissed-return",
+          "text": "Brennan cannot help further. Press on.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "lw-act2-sparrow-confrontation",
+      "act": 2,
+      "narrative": "The rival Lamplighter agent — codename Sparrow — intercepts you outside the Gasworks. He is a wiry man with the suspicious eyes of someone who trusts no one, least of all fellow investigators. 'I know what you are doing,' he says. 'Marsh was my partner before he was reassigned. I have been conducting my own investigation.' His alibi for the night of the murder is airtight — he was surveilling a different target in Southwark — but his hostility is palpable. 'Marsh was getting close to something the Lamplighters did not want found. Ask Wren why she reassigned him. Ask her what she is hiding.'",
+      "cluesAvailable": [
+        {
+          "clueId": "lw-clue-red-herring-rival",
+          "method": "dialogue"
+        }
+      ],
+      "choices": [
+        {
+          "id": "lw-choice-sparrow-trust",
+          "text": "Sparrow, we are on the same side. Share what you know.",
+          "faculty": "influence",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "lw-act2-sparrow-shares",
+            "success": "lw-act2-sparrow-shares",
+            "partial": "lw-act2-sparrow-refuses",
+            "failure": "lw-act2-sparrow-refuses",
+            "fumble": "lw-act2-sparrow-refuses"
+          }
+        },
+        {
+          "id": "lw-choice-sparrow-dismiss",
+          "text": "Sparrow's grudge is a distraction. Move on.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "lw-met-sparrow",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-sparrow-shares",
+      "act": 2,
+      "narrative": "Sparrow's hostility cracks. 'Marsh found something in the Gasworks that frightened him,' he says. 'He told me — off the record — that the Court of Smoke was trafficking in occult artefacts. Not trinkets. Real power. Fragments of the Veil itself.' He produces a sketch from his pocket — a rough drawing of the Veil Key's framework, copied from Marsh's notes. 'He drew this the night before he died. He said it was a device that could tear a permanent hole in reality. And he said the Grey Dawn was involved — not the Order officially, but a renegade working alone.' Sparrow meets your eyes. 'Find the renegade. End this. For Marsh.'",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-sparrow-shares-reckoning",
+          "text": "The Veil Key. The renegade. This ends at the Gasworks.",
+          "outcomes": {
+            "critical": "lw-act3-the-reckoning",
+            "success": "lw-act3-the-reckoning",
+            "partial": "lw-act3-the-reckoning",
+            "failure": "lw-act3-the-reckoning",
+            "fumble": "lw-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "lw-choice-sparrow-shares-return",
+          "text": "Sparrow's intelligence fills in the gaps. Return to the hub.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "disposition",
+          "target": "npc-sparrow",
+          "delta": 3,
+          "description": "Sparrow has set aside his rivalry for Marsh's sake"
+        },
+        {
+          "type": "flag",
+          "target": "lw-knows-veil-key",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-sparrow-refuses",
+      "act": 2,
+      "narrative": "Sparrow shakes his head. 'I don't trust you. I don't trust Wren. I don't trust anyone who wasn't there when Marsh needed help.' He turns and vanishes into the Gasworks smoke. His suspicion is a dead end — but his mention of Wren's reassignment order lingers.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-sparrow-refuses-return",
+          "text": "Sparrow is gone. Press on.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "lw-act2-deductionist-timeline",
+      "act": 2,
+      "narrative": "You lay out the evidence on a table in the Lamplighter safe house and let your mind do what it does best. The timeline crystallises: six weeks of shipments, six disappearing workers, three ritual sites mapped in Marsh's notes. The pattern is not random — it is a countdown. Each shipment brought more Veil fragments. Each disappearance removed a witness. And the ritual sites form a triangle around the Gasworks, just as the Whitechapel murders formed a triangle around the Dorset Street cellar. The geometry is identical. The same mind designed both operations. Whoever built the Veil Key studied the Whitechapel case — or was involved in it.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-deductionist-timeline-reckoning",
+          "text": "The pattern is clear. The Gasworks is the focal point. End this.",
+          "outcomes": {
+            "critical": "lw-act3-the-reckoning",
+            "success": "lw-act3-the-reckoning",
+            "partial": "lw-act3-the-reckoning",
+            "failure": "lw-act3-the-reckoning",
+            "fumble": "lw-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "lw-choice-deductionist-timeline-return",
+          "text": "The connection to the Whitechapel case is crucial intelligence. Return to the hub.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": 1,
+          "description": "The pattern clicks — your deductive mind has found the shape of the conspiracy"
+        },
+        {
+          "type": "flag",
+          "target": "lw-deductionist-timeline",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "lw-act2-mesmerist-interrogation",
+      "act": 2,
+      "narrative": "You find the renegade practitioner's assistant — a nervous young man who handles the Gasworks deliveries — in a pub on Commercial Street. He does not know you are an investigator. He does not know he is being interrogated. Over the course of two pints, you extract everything: the practitioner's schedule, the location of Vault 7, the number of Veil fragments assembled so far, and — crucially — the date of the planned activation. Tomorrow night. The young man thinks he has been having a pleasant conversation with a sympathetic stranger. He has no idea he has just betrayed his employer's most dangerous secret.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-mesmerist-reckoning",
+          "text": "Tomorrow night. You have less than twenty-four hours.",
+          "outcomes": {
+            "critical": "lw-act3-the-reckoning",
+            "success": "lw-act3-the-reckoning",
+            "partial": "lw-act3-the-reckoning",
+            "failure": "lw-act3-the-reckoning",
+            "fumble": "lw-act3-the-reckoning"
+          }
+        },
+        {
+          "id": "lw-choice-mesmerist-return",
+          "text": "The activation date is critical intelligence. Return to the hub and plan.",
+          "outcomes": {
+            "critical": "lw-act2-the-web",
+            "success": "lw-act2-the-web",
+            "partial": "lw-act2-the-web",
+            "failure": "lw-act2-the-web",
+            "fumble": "lw-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": 1,
+          "description": "Your silver tongue has extracted the enemy's timetable"
+        },
+        {
+          "type": "flag",
+          "target": "lw-mesmerist-interrogation",
+          "value": true
+        }
+      ]
+    }
+  ]
+}

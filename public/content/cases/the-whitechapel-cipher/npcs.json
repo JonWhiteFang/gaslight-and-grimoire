@@ -29,6 +29,46 @@
       "memoryFlags": {},
       "isAlive": true,
       "isAccessible": true
+    },
+    {
+      "id": "npc-sable",
+      "name": "Sable",
+      "faction": "Court of Smoke",
+      "disposition": -2,
+      "suspicion": 5,
+      "memoryFlags": {},
+      "isAlive": true,
+      "isAccessible": true
+    },
+    {
+      "id": "npc-finch",
+      "name": "Constable Finch",
+      "faction": "Lamplighters",
+      "disposition": 1,
+      "suspicion": 0,
+      "memoryFlags": {},
+      "isAlive": true,
+      "isAccessible": true
+    },
+    {
+      "id": "npc-harland",
+      "name": "Deputy Commissioner Harland",
+      "faction": "Rationalists Circle",
+      "disposition": -1,
+      "suspicion": 0,
+      "memoryFlags": {},
+      "isAlive": true,
+      "isAccessible": true
+    },
+    {
+      "id": "npc-walsh",
+      "name": "Docker Walsh",
+      "faction": null,
+      "disposition": 0,
+      "suspicion": 1,
+      "memoryFlags": {},
+      "isAlive": true,
+      "isAccessible": true
     }
   ]
 }

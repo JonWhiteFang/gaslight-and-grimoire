@@ -1,0 +1,10 @@
+{
+  "id": "the-unfinished-case",
+  "title": "The Unfinished Case",
+  "synopsis": "A loose thread from the Whitechapel Cipher — Aldgate mentioned a second set of cipher notes that were never recovered. They surface in a pawnshop, and the trail leads to an unresolved murder that predates the events of the first case.",
+  "firstScene": "tuc-act1-pawnshop",
+  "triggerCondition": {
+    "type": "hasFlag",
+    "target": "wc-case-complete"
+  }
+}

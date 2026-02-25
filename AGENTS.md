@@ -265,11 +265,24 @@ Base faculty score: 8. Bonus points to allocate: 12. Composure and Vitality: 0�
 
 ## Current Content
 
-- Main case: "The Whitechapel Cipher" (3 acts, full scene graph with variants)
-- Main case: "The Mayfair Séance" (3 acts, full scene graph with variants, supernatural encounter)
-- Side case: "A Matter of Shadows" (unlocks at Lamplighters faction rep ≥ 2)
+### Main Cases (3-act structure)
+- **"The Whitechapel Cipher"** — 66 scenes, 14 clues, 7 NPCs, 6 variants, 4 endings. Cipher murders in Whitechapel, conspiracy reaching Scotland Yard. Court of Smoke underworld path, archetype-exclusive scenes.
+- **"The Mayfair Séance"** — 49 scenes, 13 clues, 7 NPCs, 6 variants, 4 endings. Society séance turns deadly, fraud meets genuine supernatural. Court of Smoke ritual supplier path.
+- **"The Lamplighter's Wake"** — 43 scenes, 13 clues, 7 NPCs, 3 variants, 4 endings. Dead Lamplighter agent, locked room, Gasworks Veil fragment trafficking. Court of Smoke as primary antagonist.
 
-## Known Bugs & Gaps (as of 2026-02-23)
+### Side Cases (vignettes, 2-act structure)
+- **"A Matter of Shadows"** — 13 scenes, 5 clues, 3 NPCs, 3 endings. Missing Lamplighter courier in Southwark. Unlocks at Lamplighters rep ≥ 2.
+- **"The Rationalist's Dilemma"** — 10 scenes, 5 clues, 2 NPCs, 3 endings. Scientist detects the Veil electromagnetically; Circle wants it buried. Unlocks at Rationalists Circle rep ≥ 2.
+- **"The Debt of Smoke"** — 9 scenes, 4 clues, 2 NPCs, 3 endings. Court of Smoke contact asks for help with a stolen Veil fragment. Unlocks at NPC Sable disposition ≥ 7.
+- **"The Unfinished Case"** — 8 scenes, 4 clues, 2 NPCs, 3 endings. Cold case: the original cipher maker was murdered before the Whitechapel events. Unlocks after completing The Whitechapel Cipher.
+
+### Content Totals
+- 198 scenes, 58 clues, 30 NPCs across 7 cases
+- All 4 factions active: Rationalists Circle, Hermetic Order of the Grey Dawn, Lamplighters, Court of Smoke
+- Archetype-exclusive scenes in all 3 main cases (Deductionist, Occultist, Operator, Mesmerist)
+- Average 2.0+ choices per scene across all content
+
+## Known Bugs & Gaps (as of 2026-02-25)
 
 These are documented in detail in `devdocs/evolution/gap_analysis.md`, `smoke_tests/check_what_is_working/report.md`, and `GAME_DESIGN_ANALYSIS.md`.
 
@@ -279,7 +292,7 @@ These are documented in detail in `devdocs/evolution/gap_analysis.md`, `smoke_te
 ### High (game design — player experience gaps)
 - ~~**Active clue discovery unimplemented**~~ — ✅ FIXED. All four discovery methods now work: `automatic` and `dialogue` auto-discover on scene entry (dialogue shows speech-bubble variant card), `exploration` renders atmospheric clickable prompts, `check` performs a dice roll via `performCheck`. New files: `src/engine/cluePrompts.ts`, `src/components/NarrativePanel/SceneCluePrompts.tsx`.
 - **Zero audio/visual assets** — Audio system and illustration system are fully coded but no `.mp3` or image files exist. Game is silent with no illustrations.
-- **Thin content** — Avg 1.1–1.3 choices/scene, only 6 clues and 3 NPCs per case, 1 variant per case. Low replayability.
+- ~~**Thin content**~~ — ✅ FIXED. Content depth uplift complete. All 3 main cases now at design doc targets (40-66 scenes, 12-14 clues, 7 NPCs, 4 endings, 2.0+ avg choices/scene). 4 vignettes with 8-13 scenes each. Court of Smoke active across all content. Archetype-exclusive scenes in all main cases.
 - ~~**NPCs have no dialogue system**~~ — ✅ FIXED. Disposition/suspicion/memoryFlag-gated dialogue choices added to existing scenes. New `npcMemoryFlag` condition type and `setMemoryFlag` effect type. 8 new dialogue scenes across both cases. `memoryFlags` now populated on key NPC interactions.
 
 ### Medium (game design — mechanics and UX)
@@ -306,7 +319,7 @@ Things to be aware of when making changes:
 - **Evidence Board connections persist in store** — `evidenceSlice.connections` holds ID pairs. DOM points are recomputed on render. Connections cleared on case/vignette load and on deduction (success or failure).
 - **`adjustDisposition` has a hidden cross-slice call** — After updating NPC disposition, it calls `get().adjustReputation(faction, delta * 0.5)` for faction-aligned NPCs. This coupling is in `src/store/slices/npcSlice.ts`.
 - **Faction reputation is clamped** — Disposition [-10,+10], suspicion [0,10], composure/vitality [0,10], faction reputation [-10,+10]. All numeric state is now bounded.
-- **`Object.keys(data.scenes)[0]` is the fallback for first scene** — In `loadAndStartCase`. Used only when `meta.json` lacks a `firstScene` field. Both existing cases now have `firstScene` set explicitly.
+- **`Object.keys(data.scenes)[0]` is the fallback for first scene** — In `loadAndStartCase`. Used only when `meta.json` lacks a `firstScene` field. All cases now have `firstScene` set explicitly.
 - **No audio files in repo** — The audio system is fully coded but silent. Howler silently handles missing files. SFX is triggered via a store subscription in `src/store/audioSubscription.ts` (initialized in `main.tsx`), not from slice actions.
 - **`Date.now()` and `Math.random()` used directly** — In `diceEngine.rollD20()`, `hintEngine`, `saveManager`, `metaSlice.saveGame`, `buildDeduction`. Not injectable. Tests work around this.
 
@@ -318,4 +331,4 @@ See `devdocs/evolution/implementation_roadmap.md` for the full phased plan. Summ
 - **Phase B (Core Refactoring)**: ✅ COMPLETE — Extracted pure computeChoiceResult, moved buildDeduction to engine, audio subscription, consolidated CheckResult types, runtime content validation with tier completeness
 - **Phase C (Gap Filling)**: ✅ COMPLETE — ClueDiscoveryCard, save button, faction display, error display, case completion screen
 - **Phase D (Integration)**: ✅ COMPLETE — Encounter UI, stale state cleanup, remove dead code
-- **Phase E (Game Design)**: 🟡 IN PROGRESS — ~~Active clue discovery~~ ✅, ~~consequence feedback~~ ✅, ~~Veil Sight~~ ✅, ~~recovery mechanics~~ ✅, ~~persistent evidence board~~ ✅, ~~faction clamping~~ ✅, ~~CI validation~~ ✅, ~~NPC dialogue~~ ✅, ~~scene history~~ ✅, ~~testing expansion~~ ✅, audio/visual assets, content depth. See `GAME_DESIGN_ANALYSIS.md` for full analysis.
+- **Phase E (Game Design)**: ✅ COMPLETE — ~~Active clue discovery~~ ✅, ~~consequence feedback~~ ✅, ~~Veil Sight~~ ✅, ~~recovery mechanics~~ ✅, ~~persistent evidence board~~ ✅, ~~faction clamping~~ ✅, ~~CI validation~~ ✅, ~~NPC dialogue~~ ✅, ~~scene history~~ ✅, ~~testing expansion~~ ✅, ~~content depth~~ ✅. Remaining: audio/visual assets. See `GAME_DESIGN_ANALYSIS.md` for full analysis.

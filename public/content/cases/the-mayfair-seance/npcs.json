@@ -29,6 +29,46 @@
       "memoryFlags": {},
       "isAlive": true,
       "isAccessible": true
+    },
+    {
+      "id": "npc-needle",
+      "name": "Needle",
+      "faction": "Court of Smoke",
+      "disposition": -2,
+      "suspicion": 6,
+      "memoryFlags": {},
+      "isAlive": true,
+      "isAccessible": true
+    },
+    {
+      "id": "npc-whitmore",
+      "name": "Dr Whitmore",
+      "faction": "Rationalists Circle",
+      "disposition": 2,
+      "suspicion": 0,
+      "memoryFlags": {},
+      "isAlive": true,
+      "isAccessible": true
+    },
+    {
+      "id": "npc-mrs-cole",
+      "name": "Mrs Cole",
+      "faction": null,
+      "disposition": 1,
+      "suspicion": 1,
+      "memoryFlags": {},
+      "isAlive": true,
+      "isAccessible": true
+    },
+    {
+      "id": "npc-gerald-associate",
+      "name": "Mr Blackwood",
+      "faction": "Hermetic Order of the Grey Dawn",
+      "disposition": 0,
+      "suspicion": 3,
+      "memoryFlags": {},
+      "isAlive": true,
+      "isAccessible": true
     }
   ]
 }

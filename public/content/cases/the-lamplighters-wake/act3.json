@@ -1,0 +1,304 @@
+{
+  "scenes": [
+    {
+      "id": "lw-act3-the-reckoning",
+      "act": 3,
+      "narrative": "The Gasworks at midnight. The furnaces are banked but the heat remains — and beneath it, a deeper warmth that has nothing to do with coal. Vault 7 is open. Inside, the Veil fragments have been assembled into a device of terrible elegance: a ring of obsidian shards suspended in a framework of consecrated iron, pulsing with grey light. The Veil Key. And standing before it, hands raised in the final gestures of activation, is the practitioner who killed Agent Marsh — a Grey Dawn renegade whose name does not matter. What matters is the Key, and the crack in reality that is already forming at its centre.",
+      "ambientAudio": "ambient-cellar",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "lw-choice-destroy-key",
+          "text": "Destroy the Key. Smash the framework before the breach opens fully.",
+          "faculty": "vigor",
+          "difficulty": 12,
+          "advantageIf": [
+            "lw-clue-tainted-artifact"
+          ],
+          "outcomes": {
+            "critical": "lw-act3-ending-destroy",
+            "success": "lw-act3-ending-destroy",
+            "partial": "lw-act3-veil-encounter",
+            "failure": "lw-act3-veil-encounter",
+            "fumble": "lw-act3-veil-encounter"
+          }
+        },
+        {
+          "id": "lw-choice-seal-breach",
+          "text": "Use Grey Dawn knowledge to seal the breach from this side.",
+          "faculty": "lore",
+          "difficulty": 12,
+          "advantageIf": [
+            "lw-clue-gasworks-sigils"
+          ],
+          "outcomes": {
+            "critical": "lw-act3-ending-sealed",
+            "success": "lw-act3-ending-sealed",
+            "partial": "lw-act3-veil-encounter",
+            "failure": "lw-act3-veil-encounter",
+            "fumble": "lw-act3-veil-encounter"
+          }
+        },
+        {
+          "id": "lw-choice-expose-operation",
+          "text": "Bell's constables are outside. Signal them. Let the Yard handle this.",
+          "conditions": [
+            {
+              "type": "hasFlag",
+              "target": "lw-bell-alliance"
+            }
+          ],
+          "outcomes": {
+            "critical": "lw-act3-ending-exposed",
+            "success": "lw-act3-ending-exposed",
+            "partial": "lw-act3-ending-exposed",
+            "failure": "lw-act3-ending-exposed",
+            "fumble": "lw-act3-ending-exposed"
+          }
+        },
+        {
+          "id": "lw-choice-court-seizure",
+          "text": "The Court of Smoke wants the fragments. Let them take the Key — contained, not destroyed.",
+          "conditions": [
+            {
+              "type": "hasFlag",
+              "target": "lw-met-tallow"
+            }
+          ],
+          "faculty": "influence",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "lw-act3-ending-court-seizure",
+            "success": "lw-act3-ending-court-seizure",
+            "partial": "lw-act3-ending-court-seizure",
+            "failure": "lw-act3-veil-encounter",
+            "fumble": "lw-act3-veil-encounter"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1,
+          "description": "The Veil Key pulses with terrible purpose"
+        }
+      ]
+    },
+    {
+      "id": "lw-act3-veil-encounter",
+      "act": 3,
+      "narrative": "The breach opens. Grey light floods the vault, and the temperature drops to freezing. Something is coming through — not a shape, not a presence, but an absence. A void in the shape of hunger. The Veil Key hums with resonance, and the obsidian shards begin to spin. You have seconds before the breach becomes permanent.",
+      "ambientAudio": "ambient-cellar",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -2,
+          "description": "The breach in reality assaults your sanity"
+        }
+      ],
+      "encounter": {
+        "isSupernatural": true,
+        "rounds": [
+          {
+            "roundNumber": 1,
+            "isSupernatural": true,
+            "choices": [
+              {
+                "id": "lw-enc-lore-seal",
+                "text": "Recite the Grey Dawn sealing ward. Close the breach from within.",
+                "faculty": "lore",
+                "difficulty": 12,
+                "advantageIf": [
+                  "lw-clue-grey-dawn-contact"
+                ],
+                "outcomes": {
+                  "critical": "lw-act3-ending-sealed",
+                  "success": "lw-act3-ending-sealed",
+                  "partial": "lw-act3-ending-destroy",
+                  "failure": "lw-act3-ending-destroy",
+                  "fumble": "lw-act3-ending-destroy"
+                },
+                "encounterDamage": {
+                  "composureDelta": -2,
+                  "vitalityDelta": -1
+                }
+              },
+              {
+                "id": "lw-enc-vigor-smash",
+                "text": "Smash the Key. Brute force against occult engineering.",
+                "faculty": "vigor",
+                "difficulty": 11,
+                "outcomes": {
+                  "critical": "lw-act3-ending-destroy",
+                  "success": "lw-act3-ending-destroy",
+                  "partial": "lw-act3-ending-destroy",
+                  "failure": "lw-act3-ending-destroy",
+                  "fumble": "lw-act3-ending-destroy"
+                },
+                "encounterDamage": {
+                  "vitalityDelta": -2
+                }
+              },
+              {
+                "id": "lw-enc-escape",
+                "text": "Flee the vault. The breach is beyond your ability to close.",
+                "isEscapePath": true,
+                "outcomes": {
+                  "critical": "lw-act3-ending-exposed",
+                  "success": "lw-act3-ending-exposed",
+                  "partial": "lw-act3-ending-exposed",
+                  "failure": "lw-act3-ending-exposed",
+                  "fumble": "lw-act3-ending-exposed"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lw-act3-ending-destroy",
+      "act": 3,
+      "narrative": "The iron framework shatters under your assault. Obsidian shards scatter across the vault floor, their whispers dying to silence. The breach collapses — not gracefully, but violently, with a concussion that knocks you off your feet and cracks the vault walls. The Veil Key is destroyed. The fragments are inert. The renegade practitioner lies unconscious amid the wreckage. When Wren arrives with Lamplighter reinforcements, she surveys the destruction with grim satisfaction. 'Marsh would have approved,' she says. The Gasworks operation is dismantled. The Court of Smoke loses a revenue stream. The Grey Dawn loses a renegade. And the Veil, for now, holds.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "lw-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "lw-key-destroyed",
+          "value": true
+        },
+        {
+          "type": "vitality",
+          "delta": -2,
+          "description": "The Key's destruction exacts a physical toll"
+        },
+        {
+          "type": "reputation",
+          "target": "Lamplighters",
+          "delta": 2
+        },
+        {
+          "type": "reputation",
+          "target": "Court of Smoke",
+          "delta": -1
+        }
+      ]
+    },
+    {
+      "id": "lw-act3-ending-sealed",
+      "act": 3,
+      "narrative": "The sealing ward takes hold. Grey Dawn sigils flare along the vault walls — the containment etchings responding to your invocation, reinforcing the boundary that the Key was designed to breach. The obsidian shards go dark. The breach closes with a sound like a door slamming in a cathedral. The Veil Key remains intact but inert — sealed, not destroyed. Sister Maren arrives within the hour, summoned by the ward's resonance. She takes custody of the Key with trembling hands. 'This will be studied,' she says. 'Safely. Under containment. The Grey Dawn owes you a debt that cannot be measured in mortal currency.' The renegade practitioner is taken into Grey Dawn custody — their justice, not the Yard's. Marsh is avenged. The Veil holds. And you have earned the respect of an Order that does not give it lightly.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "lw-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "lw-key-sealed",
+          "value": true
+        },
+        {
+          "type": "composure",
+          "delta": -2,
+          "description": "Sealing the breach exacts a psychic toll"
+        },
+        {
+          "type": "reputation",
+          "target": "Hermetic Order of the Grey Dawn",
+          "delta": 2
+        },
+        {
+          "type": "reputation",
+          "target": "Lamplighters",
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "id": "lw-act3-ending-exposed",
+      "act": 3,
+      "narrative": "Inspector Bell's constables flood the Gasworks. The renegade practitioner is arrested. The Veil Key is seized as evidence — though Bell has no idea what it actually is, and the Yard's forensic scientists will spend months trying to explain the obsidian shards before filing them as 'anomalous materials.' The Gasworks operation is shut down. The Court of Smoke's involvement is documented but unprovable in court. The Grey Dawn distances itself from the renegade with practised efficiency. The case is closed as a murder investigation, with the practitioner charged for Marsh's death. It is a rational resolution to an irrational crime — and the Veil Key sits in a Scotland Yard evidence locker, inert but not destroyed, waiting.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "lw-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "lw-key-in-yard-custody",
+          "value": true
+        },
+        {
+          "type": "reputation",
+          "target": "Rationalists Circle",
+          "delta": 2
+        },
+        {
+          "type": "reputation",
+          "target": "Lamplighters",
+          "delta": 1
+        },
+        {
+          "type": "reputation",
+          "target": "Court of Smoke",
+          "delta": -1
+        }
+      ]
+    },
+    {
+      "id": "lw-act3-ending-court-seizure",
+      "act": 3,
+      "narrative": "Tallow's people arrive with the quiet efficiency you have come to associate with the Court of Smoke. The Veil Key is dismantled — not destroyed, but disassembled into its component fragments, each sealed in an iron box and distributed across the Court's network. No single fragment is dangerous alone. Together, they could be reassembled — but only by someone with the Court's resources and the Grey Dawn's knowledge. The renegade practitioner is given to the Court as well. Their fate is not your concern. Marsh is avenged, after a fashion. The Lamplighters get their closure. The Court gets its merchandise. And you are left with the uncomfortable knowledge that the most dangerous artefact in London is now in the hands of people who trade in dangerous artefacts. Tallow presses a brass token into your hand. 'The Court remembers its friends,' he says. It is not a compliment. It is a contract.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "lw-case-complete",
+          "value": true
+        },
+        {
+          "type": "flag",
+          "target": "lw-key-with-court",
+          "value": true
+        },
+        {
+          "type": "reputation",
+          "target": "Court of Smoke",
+          "delta": 2
+        },
+        {
+          "type": "reputation",
+          "target": "Lamplighters",
+          "delta": -1
+        },
+        {
+          "type": "reputation",
+          "target": "Hermetic Order of the Grey Dawn",
+          "delta": -1
+        },
+        {
+          "type": "disposition",
+          "target": "npc-tallow",
+          "delta": 3,
+          "description": "Tallow considers you a valuable business partner"
+        }
+      ]
+    }
+  ]
+}

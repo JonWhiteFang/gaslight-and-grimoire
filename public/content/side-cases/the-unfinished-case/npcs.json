@@ -1,0 +1,6 @@
+{
+  "npcs": [
+    { "id": "npc-pawnbroker", "name": "Mr Sefton", "faction": null, "disposition": 0, "suspicion": 2, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "npc-kellner-neighbour", "name": "Mrs Pratt", "faction": null, "disposition": 1, "suspicion": 0, "memoryFlags": {}, "isAlive": true, "isAccessible": true }
+  ]
+}

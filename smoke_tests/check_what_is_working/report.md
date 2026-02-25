@@ -12,7 +12,7 @@
 | 1.1 | TypeScript strict compile | ✅ PASS | `npx tsc --noEmit` — exit 0, zero errors |
 | 1.2 | Vite production build | ✅ PASS | `npm run build` — exit 0. `dist/index.html` (0.51 KB), JS (375.39 KB), CSS (26.77 KB). 453 modules transformed in 1.79s |
 | 1.3 | Dependency audit | ✅ PASS | `npm audit` — "found 0 vulnerabilities" |
-| 1.4 | Content JSON validation | ✅ PASS | `node scripts/validateCase.mjs` — "✓ cases/the-whitechapel-cipher — 22 scenes, 6 clues", "✓ side-cases/a-matter-of-shadows — 7 scenes, 2 clues", "All 2 case(s) validated successfully." |
+| 1.4 | Content JSON validation | ✅ PASS | `node scripts/validateCase.mjs` — 7 cases validated: the-whitechapel-cipher (66 scenes, 14 clues), the-mayfair-seance (49 scenes, 13 clues), the-lamplighters-wake (43 scenes, 13 clues), a-matter-of-shadows (13 scenes, 5 clues), the-rationalists-dilemma (10 scenes, 5 clues), the-debt-of-smoke (9 scenes, 4 clues), the-unfinished-case (8 scenes, 4 clues). "All 7 case(s) validated successfully." |
 | 1.5 | All existing tests | ✅ PASS | `npm run test:run` — 24 files, 310 tests, 0 failures |
 
 **Summary**: The codebase is in a clean state. TypeScript compiles without errors under strict mode. The production build succeeds. No dependency vulnerabilities. All content validates. All 310 tests pass.
@@ -81,8 +81,8 @@
 - **Build pipeline**: TypeScript strict compile, Vite build, npm audit — all clean.
 - **Engine layer**: All 6 engine modules pass their tests. Property-based tests provide strong invariant coverage for dice, NPC bounds, save migration, conditions, deductions, and slice isolation.
 - **Component layer**: All 9 component test files pass. Character creation, choice panel, evidence board components, status bars, outcome feedback — all render correctly.
-- **Content**: Both cases validate with no broken references.
-- **Total**: 269/269 tests pass. 0 type errors. 0 vulnerabilities. 0 content validation errors.
+- **Content**: All 7 cases validate with no broken references (198 scenes, 58 clues total).
+- **Total**: 310/310 tests pass. 0 type errors. 0 vulnerabilities. 0 content validation errors.
 
 ### What's broken but acceptable
 - **`node:39994` Warning**: `--localstorage-file was provided without a valid path` during test run. This is a jsdom/Node warning about localStorage simulation. Tests still pass. Cosmetic issue.

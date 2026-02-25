@@ -1,0 +1,11 @@
+{
+  "id": "the-rationalists-dilemma",
+  "title": "The Rationalist's Dilemma",
+  "synopsis": "A Rationalist scientist's experiment has produced results that defy explanation. The Circle wants it debunked — or buried. The truth may be more dangerous than either option.",
+  "firstScene": "rd-act1-laboratory",
+  "triggerCondition": {
+    "type": "factionReputation",
+    "target": "Rationalists Circle",
+    "value": 2
+  }
+}

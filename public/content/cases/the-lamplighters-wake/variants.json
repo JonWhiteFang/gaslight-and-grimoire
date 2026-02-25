@@ -1,0 +1,39 @@
+{
+  "variants": [
+    {
+      "id": "lw-breakdown",
+      "act": 0,
+      "variantOf": "breakdown",
+      "variantCondition": { "type": "hasFlag", "target": "breakdown-occurred", "value": false },
+      "narrative": "The Gasworks fumes and the Veil fragment's whispers converge into a single unbearable assault on your senses. The boundary between what is real and what the fragment shows you dissolves. You see Marsh's face — not dead, but speaking, his lips forming words you cannot hear. You see the Veil itself, thin as gauze, with shapes pressing against it from the other side. Then darkness, and the cold stone floor of the Gasworks, and the distant sound of furnaces. Your mind has reached its limit. The investigation must wait.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [{ "type": "flag", "target": "breakdown-occurred", "value": true }]
+    },
+    {
+      "id": "lw-incapacitation",
+      "act": 0,
+      "variantOf": "incapacitation",
+      "variantCondition": { "type": "hasFlag", "target": "incapacitated", "value": false },
+      "narrative": "The Gasworks takes its toll. Between the toxic fumes, the physical confrontations, and the supernatural exposure, your body simply stops cooperating. You collapse near the loading dock, and it is Brennan — the hollow-eyed worker — who finds you and drags you to safety. 'The whispers got you too,' he says, with the weary sympathy of someone who understands. You are carried to a surgeon's rooms in Whitechapel. Recovery will take time.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [{ "type": "flag", "target": "incapacitated", "value": true }]
+    },
+    {
+      "id": "lw-act2-the-web-variant-court-rep",
+      "act": 2,
+      "variantOf": "lw-act2-the-web",
+      "variantCondition": { "type": "factionReputation", "target": "Court of Smoke", "value": 3 },
+      "narrative": "Three threads lead from Marsh's death — but the Court of Smoke has already reached out. A runner delivers a message: 'Tallow will see you. Limehouse basin, warehouse 4. Come alone.' Your reputation with the Court opens a door that would otherwise require force or cunning. The Gasworks and the Grey Dawn remain as alternative paths, but the Court's invitation is the most direct route to the truth.",
+      "ambientAudio": "ambient-london-day",
+      "cluesAvailable": [],
+      "choices": [
+        { "id": "lw-choice-court-direct-v", "text": "Accept Tallow's invitation. The Court is offering answers.", "outcomes": { "critical": "lw-act2-court-territory", "success": "lw-act2-court-territory", "partial": "lw-act2-court-territory", "failure": "lw-act2-court-territory", "fumble": "lw-act2-court-territory" } },
+        { "id": "lw-choice-gasworks-v", "text": "Investigate the Gasworks first. Don't walk into the Court's territory without leverage.", "faculty": "vigor", "difficulty": 9, "outcomes": { "critical": "lw-act2-gasworks", "success": "lw-act2-gasworks", "partial": "lw-act2-gasworks", "failure": "lw-act2-gasworks", "fumble": "lw-act2-gasworks" } },
+        { "id": "lw-choice-grey-dawn-v", "text": "Seek the Grey Dawn first. The binding sigil is their work.", "faculty": "lore", "difficulty": 10, "outcomes": { "critical": "lw-act2-grey-dawn-meeting", "success": "lw-act2-grey-dawn-meeting", "partial": "lw-act2-grey-dawn-meeting", "failure": "lw-act2-grey-dawn-meeting", "fumble": "lw-act2-grey-dawn-meeting" } }
+      ],
+      "onEnter": []
+    }
+  ]
+}

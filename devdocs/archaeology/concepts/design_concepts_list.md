@@ -14,8 +14,8 @@ Main cases have 3 acts, each in a separate JSON file (`act1.json`, `act2.json`, 
 
 ### Two-Act Vignette Structure
 Side cases use a single `scenes.json` (no act split). Triggered by faction reputation, NPC disposition, or flags. Lighter-weight than main cases.
-- **Status**: Fully implemented (engine + 1 vignette)
-- **Files**: `content/side-cases/a-matter-of-shadows/`, `src/engine/narrativeEngine.ts` → `loadVignette`
+- **Status**: Fully implemented (engine + 4 vignettes)
+- **Files**: `content/side-cases/*/`, `src/engine/narrativeEngine.ts` → `loadVignette`
 
 ### Scene Variants
 A variant scene can override a base scene when a `variantCondition` is met. Variants live in `variants.json` and reference their base via `variantOf`. Resolved at render time, not navigation time.

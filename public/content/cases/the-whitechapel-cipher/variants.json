@@ -9,31 +9,20 @@
         "target": "Hermetic Order of the Grey Dawn",
         "value": 3
       },
-      "narrative": "The hansom cab deposits you at the edge of Whitechapel. Inspector Graves meets you at the cordon \u2014 but so does a hooded figure who melts back into the fog the moment you step down. Someone in the Order knows you are here. 'Third one this month,' Graves says, handing you the cipher note. His eyes flick to where the figure stood. The symbols on the note are familiar to you now \u2014 you have seen their like in Order correspondence. That knowledge may prove useful.",
+      "narrative": "The hansom cab deposits you at the edge of Whitechapel. Inspector Graves meets you at the cordon — but so does a hooded figure who melts back into the fog the moment you step down. Someone in the Order knows you are here. 'Third one this month,' Graves says, handing you the cipher note. His eyes flick to where the figure stood. The symbols on the note are familiar to you now — you have seen their like in Order correspondence. That knowledge may prove useful.",
       "ambientAudio": "ambient-whitechapel-night",
       "cluesAvailable": [
-        {
-          "clueId": "wc-clue-cipher-note",
-          "method": "automatic"
-        },
-        {
-          "clueId": "wc-clue-cobblestone-symbol",
-          "method": "exploration"
-        },
-        {
-          "clueId": "wc-clue-red-herring-occultist",
-          "method": "exploration"
-        }
+        { "clueId": "wc-clue-cipher-note", "method": "automatic" },
+        { "clueId": "wc-clue-cobblestone-symbol", "method": "exploration" },
+        { "clueId": "wc-clue-red-herring-occultist", "method": "exploration" }
       ],
       "choices": [
         {
           "id": "wc-choice-examine-note-variant",
-          "text": "Study the cipher note carefully \u2014 your familiarity with the Order's symbols gives you an edge.",
+          "text": "Study the cipher note carefully — your familiarity with the Order's symbols gives you an edge.",
           "faculty": "reason",
           "difficulty": 10,
-          "advantageIf": [
-            "wc-clue-hermetic-primer"
-          ],
+          "advantageIf": ["wc-clue-hermetic-primer"],
           "outcomes": {
             "critical": "wc-act1-cipher-decoded",
             "success": "wc-act1-cipher-partial",
@@ -67,7 +56,82 @@
             "failure": "wc-act1-scene-nothing",
             "fumble": "wc-act1-scene-nothing"
           }
+        },
+        {
+          "id": "wc-choice-chase-watcher-variant",
+          "text": "The broad man in the waterman's coat — pursue him.",
+          "faculty": "vigor",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "wc-act1-chase-caught",
+            "success": "wc-act1-chase-caught",
+            "partial": "wc-act1-chase-lost",
+            "failure": "wc-act1-chase-lost",
+            "fumble": "wc-act1-chase-lost"
+          }
         }
+      ]
+    },
+    {
+      "id": "wc-act1-arrival-variant-court-rep",
+      "act": 1,
+      "variantOf": "wc-act1-arrival",
+      "variantCondition": {
+        "type": "factionReputation",
+        "target": "Court of Smoke",
+        "value": 2
+      },
+      "narrative": "The hansom cab deposits you at the edge of Whitechapel. Before you reach the cordon, a boy of perhaps ten materialises from the fog and presses a brass token into your hand — the Court of Smoke serpent. 'Sable says you'll want to know,' the boy whispers. 'The dead man was carrying Court goods. Someone's using our channels for murder.' He vanishes before you can respond. Inspector Graves meets you at the cordon, oblivious. 'Third one this month,' he says. But you already know more than he does.",
+      "ambientAudio": "ambient-whitechapel-night",
+      "cluesAvailable": [
+        { "clueId": "wc-clue-cipher-note", "method": "automatic" },
+        { "clueId": "wc-clue-court-token", "method": "automatic" },
+        { "clueId": "wc-clue-cobblestone-symbol", "method": "exploration" },
+        { "clueId": "wc-clue-red-herring-occultist", "method": "exploration" }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-examine-note-court-variant",
+          "text": "Study the cipher note under the gaslight.",
+          "faculty": "reason",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "wc-act1-cipher-decoded",
+            "success": "wc-act1-cipher-partial",
+            "partial": "wc-act1-cipher-partial",
+            "failure": "wc-act1-cipher-stumped",
+            "fumble": "wc-act1-cipher-stumped"
+          }
+        },
+        {
+          "id": "wc-choice-question-graves-court-variant",
+          "text": "Press Inspector Graves for details.",
+          "faculty": "influence",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "wc-act1-graves-confides",
+            "success": "wc-act1-graves-talks",
+            "partial": "wc-act1-graves-talks",
+            "failure": "wc-act1-graves-clams",
+            "fumble": "wc-act1-graves-hostile"
+          }
+        },
+        {
+          "id": "wc-choice-survey-scene-court-variant",
+          "text": "Survey the crime scene.",
+          "faculty": "perception",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "wc-act1-scene-full",
+            "success": "wc-act1-scene-partial",
+            "partial": "wc-act1-scene-partial",
+            "failure": "wc-act1-scene-nothing",
+            "fumble": "wc-act1-scene-nothing"
+          }
+        }
+      ],
+      "onEnter": [
+        { "type": "flag", "target": "wc-sable-alliance", "value": true }
       ]
     },
     {
@@ -78,23 +142,18 @@
         "type": "hasFlag",
         "target": "ability-veil-sight-active"
       },
-      "narrative": "The threads converge \u2014 and through the Veil, you perceive more than the rational eye allows. The cipher is not merely a code: the symbols carry a residue of intent, a faint occult charge that lingers like perfume. Someone has been using the Grey Dawn's sigils not just as a cipher key but as a channel. The murders are not the message \u2014 they are the ritual. Each killing site forms a point on a larger pattern, and the pattern is incomplete. Two paths present themselves: the printshop on Dorset Street, where the typeface may betray the note's origin, and Professor Vane's townhouse, where your heightened perception may reveal what ordinary investigation cannot.",
+      "narrative": "The threads converge — and through the Veil, you perceive more than the rational eye allows. The cipher is not merely a code: the symbols carry a residue of intent, a faint occult charge that lingers like perfume. Someone has been using the Grey Dawn's sigils not just as a cipher key but as a channel. The murders are not the message — they are the ritual. Each killing site forms a point on a larger pattern, and the pattern is incomplete. Three paths present themselves: the printshop, Professor Vane's townhouse, and the Limehouse basin — where your heightened perception reveals a trail of occult residue flowing toward the Court of Smoke's territory.",
       "ambientAudio": "ambient-london-day",
       "cluesAvailable": [
-        {
-          "clueId": "wc-clue-hermetic-primer",
-          "method": "automatic"
-        }
+        { "clueId": "wc-clue-hermetic-primer", "method": "automatic" }
       ],
       "choices": [
         {
           "id": "wc-choice-visit-printshop-veil",
-          "text": "Follow the rational thread \u2014 visit the printshop on Dorset Street.",
+          "text": "Follow the rational thread — visit the printshop on Dorset Street.",
           "faculty": "reason",
           "difficulty": 8,
-          "advantageIf": [
-            "wc-clue-printshop-type"
-          ],
+          "advantageIf": ["wc-clue-printshop-type"],
           "outcomes": {
             "critical": "wc-act2-printshop",
             "success": "wc-act2-printshop",
@@ -105,12 +164,78 @@
         },
         {
           "id": "wc-choice-confront-vane-veil",
-          "text": "Confront Professor Vane \u2014 the Veil reveals the occult residue on his correspondence.",
+          "text": "Confront Professor Vane — the Veil reveals the occult residue on his correspondence.",
           "faculty": "lore",
           "difficulty": 9,
-          "advantageIf": [
-            "wc-clue-hermetic-primer"
-          ],
+          "advantageIf": ["wc-clue-hermetic-primer"],
+          "outcomes": {
+            "critical": "wc-act2-vane-confrontation",
+            "success": "wc-act2-vane-confrontation",
+            "partial": "wc-act2-vane-confrontation",
+            "failure": "wc-act2-vane-confrontation",
+            "fumble": "wc-act2-vane-confrontation"
+          }
+        },
+        {
+          "id": "wc-choice-limehouse-veil",
+          "text": "Follow the occult residue trail toward Limehouse and the Court of Smoke.",
+          "faculty": "lore",
+          "difficulty": 9,
+          "outcomes": {
+            "critical": "wc-act2-limehouse",
+            "success": "wc-act2-limehouse",
+            "partial": "wc-act2-limehouse",
+            "failure": "wc-act2-limehouse",
+            "fumble": "wc-act2-limehouse"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act2-the-web-variant-lamplighter-rep",
+      "act": 2,
+      "variantOf": "wc-act2-the-web",
+      "variantCondition": {
+        "type": "factionReputation",
+        "target": "Lamplighters",
+        "value": 3
+      },
+      "narrative": "The threads converge — and the Lamplighters have been watching them converge for weeks. Constable Finch intercepts you before you can choose your next move. 'We've been tracking the ritual sites,' he says, pressing a coded report into your hands. 'Three murder locations, three points of a triangle. The focal point is a cellar on Dorset Street. And the man who has been using it is a Yard clerk named Aldgate.' The Lamplighters' intelligence gives you a head start. Three paths remain: the printshop, Professor Vane, and the Limehouse basin — but now you have a name and a location.",
+      "ambientAudio": "ambient-london-day",
+      "cluesAvailable": [
+        { "clueId": "wc-clue-lamplighter-report", "method": "automatic" }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-visit-printshop-lamp",
+          "text": "Visit the printshop — Aldgate's name may loosen Mott's tongue.",
+          "faculty": "reason",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "wc-act2-printshop",
+            "success": "wc-act2-printshop",
+            "partial": "wc-act2-printshop",
+            "failure": "wc-act2-printshop",
+            "fumble": "wc-act2-printshop"
+          }
+        },
+        {
+          "id": "wc-choice-cellar-direct-lamp",
+          "text": "Go directly to the Dorset Street cellar. The Lamplighters have given you the key.",
+          "outcomes": {
+            "critical": "wc-act2-cellar-search",
+            "success": "wc-act2-cellar-search",
+            "partial": "wc-act2-cellar-search",
+            "failure": "wc-act2-cellar-search",
+            "fumble": "wc-act2-cellar-search"
+          }
+        },
+        {
+          "id": "wc-choice-confront-vane-lamp",
+          "text": "Confront Professor Vane about the Grey Dawn's involvement.",
+          "faculty": "influence",
+          "difficulty": 10,
           "outcomes": {
             "critical": "wc-act2-vane-confrontation",
             "success": "wc-act2-vane-confrontation",
@@ -120,7 +245,10 @@
           }
         }
       ],
-      "onEnter": []
+      "onEnter": [
+        { "type": "flag", "target": "wc-met-finch", "value": true },
+        { "type": "flag", "target": "wc-knows-aldgate-name", "value": true }
+      ]
     },
     {
       "id": "wc-breakdown",
@@ -131,15 +259,11 @@
         "target": "breakdown-occurred",
         "value": false
       },
-      "narrative": "The Whitechapel fog closes in like a living thing. The cipher symbols swim before your eyes \u2014 on the walls, on the cobblestones, carved into the very air. You cannot tell what is real and what is the product of a mind pushed past its limits. You find yourself pressed against a damp brick wall, breathing in shallow gasps, the taste of copper on your tongue. The case has broken something in you. Not permanently, perhaps. But for now, the investigation must wait.",
+      "narrative": "The Whitechapel fog closes in like a living thing. The cipher symbols swim before your eyes — on the walls, on the cobblestones, carved into the very air. You cannot tell what is real and what is the product of a mind pushed past its limits. You find yourself pressed against a damp brick wall, breathing in shallow gasps, the taste of copper on your tongue. The case has broken something in you. Not permanently, perhaps. But for now, the investigation must wait.",
       "cluesAvailable": [],
       "choices": [],
       "onEnter": [
-        {
-          "type": "flag",
-          "target": "breakdown-occurred",
-          "value": true
-        }
+        { "type": "flag", "target": "breakdown-occurred", "value": true }
       ]
     },
     {
@@ -151,15 +275,11 @@
         "target": "incapacitated",
         "value": false
       },
-      "narrative": "You collapse in the alley behind the printshop. The cobblestones are slick with rain and something darker. Your body has absorbed too much \u2014 the blows, the falls, the relentless pace of the investigation through Whitechapel's unforgiving streets. A costermongering woman finds you and calls for help. You are carried to a surgeon's rooms on Commercial Street, where the damage is assessed with grim efficiency. You will recover. But not tonight.",
+      "narrative": "You collapse in the alley behind the printshop. The cobblestones are slick with rain and something darker. Your body has absorbed too much — the blows, the falls, the relentless pace of the investigation through Whitechapel's unforgiving streets. A costermongering woman finds you and calls for help. You are carried to a surgeon's rooms on Commercial Street, where the damage is assessed with grim efficiency. You will recover. But not tonight.",
       "cluesAvailable": [],
       "choices": [],
       "onEnter": [
-        {
-          "type": "flag",
-          "target": "incapacitated",
-          "value": true
-        }
+        { "type": "flag", "target": "incapacitated", "value": true }
       ]
     }
   ]

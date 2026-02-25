@@ -1,26 +1,9 @@
 {
   "clues": [
-    {
-      "id": "amos-clue-courier-description",
-      "type": "testimony",
-      "title": "Description of the Missing Courier",
-      "description": "A young woman, slight build, red scarf, nervous hands. Last seen leaving the Tooley Street dosshouse before dawn two nights ago. The night-keeper Briggs remembers her — she paid in advance and asked no questions.",
-      "sceneSource": "amos-act1-southwark-bridge",
-      "tags": ["courier", "Tooley Street", "Lamplighters", "person"],
-      "connectsTo": ["amos-clue-package-contents"],
-      "status": "new",
-      "isRevealed": false
-    },
-    {
-      "id": "amos-clue-package-contents",
-      "type": "testimony",
-      "title": "Contents of the Package",
-      "description": "The package contained a list of Lamplighter informants embedded within three rival factions. The courier was instructed to destroy it rather than allow capture. In the wrong hands, the list is a death warrant for every name on it.",
-      "sceneSource": "amos-act1-wren-reveals",
-      "tags": ["package", "Lamplighters", "informants", "factions", "sensitive"],
-      "connectsTo": ["amos-clue-courier-description"],
-      "status": "new",
-      "isRevealed": false
-    }
+    { "id": "amos-clue-courier-description", "type": "testimony", "title": "Description of the Missing Courier", "description": "A young woman, slight build, red scarf, nervous hands. Last seen leaving the Tooley Street dosshouse before dawn two nights ago.", "sceneSource": "amos-act1-southwark-bridge", "tags": ["courier", "Tooley Street", "Lamplighters", "person"], "connectsTo": ["amos-clue-package-contents", "amos-clue-safe-house-intel"], "status": "new", "isRevealed": false },
+    { "id": "amos-clue-package-contents", "type": "testimony", "title": "Contents of the Package", "description": "The package contained a list of Lamplighter informants embedded within three rival factions. The courier was instructed to destroy it rather than allow capture.", "sceneSource": "amos-act1-wren-reveals", "tags": ["package", "Lamplighters", "informants", "factions", "sensitive"], "connectsTo": ["amos-clue-courier-description", "amos-clue-court-watcher"], "status": "new", "isRevealed": false },
+    { "id": "amos-clue-court-watcher", "type": "testimony", "title": "Court of Smoke Surveillance", "description": "The Court of Smoke has been watching the courier's route. Their watcher confirms the courier went south toward Pickle Herring Stairs, and that the Grey Dawn also has agents searching for her.", "sceneSource": "amos-act1-watcher-confronted", "tags": ["court-of-smoke", "surveillance", "grey-dawn"], "connectsTo": ["amos-clue-package-contents", "amos-clue-safe-house-intel"], "status": "new", "isRevealed": false },
+    { "id": "amos-clue-safe-house-intel", "type": "physical", "title": "Lamplighter Safe House Intelligence", "description": "A coded message at the Lamplighter safe house confirms three factions are hunting the courier: the Lamplighters (to recover the list), the Court of Smoke (to protect their embedded agents), and the Grey Dawn (to protect theirs).", "sceneSource": "amos-act1-safe-house", "tags": ["lamplighters", "safe-house", "intelligence"], "connectsTo": ["amos-clue-courier-description", "amos-clue-court-watcher"], "status": "new", "isRevealed": false },
+    { "id": "amos-clue-red-herring-docker", "type": "redHerring", "title": "The Suspicious Docker", "description": "A docker at the Tooley Street wharf claims to have seen the courier boarding a boat. But the boat he describes does not match any vessel registered at the wharf, and the docker's account contradicts the physical evidence.", "sceneSource": "amos-act1-dosshouse", "tags": ["docker", "misdirection", "boat"], "connectsTo": [], "status": "new", "isRevealed": false }
   ]
 }

@@ -259,22 +259,11 @@ Goal: Transform the technically sound but content-thin game into a compelling pl
 
 ---
 
-### E3. Deepen Branching and Content Volume — P0
+### ~~E3. Deepen Branching and Content Volume~~ — ✅ COMPLETE
 
-**What**: Average 1.1–1.3 choices per scene. Only 6 clues and 3 NPCs per case. Only 1 variant scene per case. Thin content undermines replayability and the Evidence Board mechanic.
+**What**: Average 1.1–1.3 choices per scene. Only 6 clues and 3 NPCs per case. Only 1 variant scene per case. Thin content undermined replayability and the Evidence Board mechanic.
 
-**Files**: `public/content/cases/*/act*.json`, `public/content/cases/*/clues.json`, `public/content/cases/*/npcs.json`, `public/content/cases/*/variants.json`, new vignette directories
-
-**Changes**:
-1. Increase avg choices/scene to 2.0–2.5 for main cases.
-2. Add 4–6 clues per case (target 10–12 total) with richer `connectsTo` graphs.
-3. Add 2–3 variant scenes per case.
-4. Add 2–3 NPCs per case with faction diversity.
-5. Author 1+ additional vignette.
-
-**Dependencies**: None.
-
-**Risk**: Low (additive content). High effort (content authoring).
+**Resolution**: Full content depth uplift completed. Both existing cases (Whitechapel Cipher, Mayfair Séance) deepened to design doc targets. New third main case "The Lamplighter's Wake" created from the design doc's starter case concept. 3 new vignettes authored (The Rationalist's Dilemma, The Debt of Smoke, The Unfinished Case). Existing "A Matter of Shadows" vignette expanded. Court of Smoke introduced as active faction across all content. Archetype-exclusive scenes added to all 3 main cases. Final totals: 198 scenes, 58 clues, 30 NPCs across 7 cases. All 4 factions active. Average 2.0+ choices per scene.
 
 ---
 
@@ -346,7 +335,7 @@ Phase A–D (✅ ALL COMPLETE)
 Phase E (Game Design Improvements):
   E1 (active clue discovery)     — ✅ COMPLETE
   E2 (audio/visual assets)       — independent
-  E3 (content depth)             — independent
+  E3 (content depth)             — ✅ COMPLETE
   E4 (NPC dialogue)              — ✅ COMPLETE
   E5 (recovery mechanics)        — ✅ COMPLETE
   E6 (persistent evidence board) — ✅ COMPLETE

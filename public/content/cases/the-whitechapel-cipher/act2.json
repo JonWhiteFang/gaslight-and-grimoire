@@ -1,408 +1,1322 @@
 {
-      "scenes": [
+  "scenes": [
+    {
+      "id": "wc-act2-the-web",
+      "act": 2,
+      "narrative": "The threads converge. The cipher is not merely a calling card — it is a key. Someone has been encoding meeting times and locations in plain sight, using the symbols of the Hermetic Order of the Grey Dawn as a private postal system. The question is whether the murders are the message, or merely the postage. Three paths present themselves: the printshop on Dorset Street, where the typeface may betray the note's origin; Professor Vane's townhouse in Bloomsbury, where the Order's symbols may yield their meaning; and the Limehouse basin, where the Court of Smoke's underworld channels may reveal who is moving ritual components through Whitechapel.",
+      "ambientAudio": "ambient-london-day",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-visit-printshop",
+          "text": "Follow the rational thread — visit the printshop on Dorset Street.",
+          "faculty": "reason",
+          "difficulty": 8,
+          "advantageIf": [
+            "wc-clue-printshop-type"
+          ],
+          "outcomes": {
+            "critical": "wc-act2-printshop",
+            "success": "wc-act2-printshop",
+            "partial": "wc-act2-printshop",
+            "failure": "wc-act2-printshop",
+            "fumble": "wc-act2-printshop"
+          }
+        },
+        {
+          "id": "wc-choice-confront-vane",
+          "text": "Follow the occult thread — confront Professor Vane about the Order's symbols.",
+          "faculty": "influence",
+          "difficulty": 10,
+          "advantageIf": [
+            "wc-clue-hermetic-primer"
+          ],
+          "outcomes": {
+            "critical": "wc-act2-vane-confrontation",
+            "success": "wc-act2-vane-confrontation",
+            "partial": "wc-act2-vane-confrontation",
+            "failure": "wc-act2-vane-confrontation",
+            "fumble": "wc-act2-vane-confrontation"
+          }
+        },
+        {
+          "id": "wc-choice-limehouse",
+          "text": "Follow the underworld thread — the Court of Smoke is moving ritual components through Limehouse.",
+          "faculty": "nerve",
+          "difficulty": 10,
+          "advantageIf": [
+            "wc-clue-court-token"
+          ],
+          "outcomes": {
+            "critical": "wc-act2-limehouse",
+            "success": "wc-act2-limehouse",
+            "partial": "wc-act2-limehouse",
+            "failure": "wc-act2-limehouse",
+            "fumble": "wc-act2-limehouse"
+          }
+        },
+        {
+          "id": "wc-choice-harland-office",
+          "text": "Go directly to the source of the cover-up — Deputy Commissioner Harland's office at Scotland Yard.",
+          "faculty": "influence",
+          "difficulty": 12,
+          "conditions": [
             {
-                  "id": "wc-act2-the-web",
-                  "act": 2,
-                  "narrative": "The threads converge. The cipher is not merely a calling card \u2014 it is a key. Someone has been encoding meeting times and locations in plain sight, using the symbols of the Hermetic Order of the Grey Dawn as a private postal system. The question is whether the murders are the message, or merely the postage. Two paths present themselves: the printshop on Dorset Street, where the typeface may betray the note's origin, and Professor Vane's townhouse in Bloomsbury, where the Order's symbols may yield their meaning.",
-                  "ambientAudio": "ambient-london-day",
-                  "cluesAvailable": [],
-                  "choices": [
-                        {
-                              "id": "wc-choice-visit-printshop",
-                              "text": "Follow the rational thread \u2014 visit the printshop on Dorset Street.",
-                              "faculty": "reason",
-                              "difficulty": 8,
-                              "advantageIf": [
-                                    "wc-clue-printshop-type"
-                              ],
-                              "outcomes": {
-                                    "critical": "wc-act2-printshop",
-                                    "success": "wc-act2-printshop",
-                                    "partial": "wc-act2-printshop",
-                                    "failure": "wc-act2-printshop",
-                                    "fumble": "wc-act2-printshop"
-                              }
-                        },
-                        {
-                              "id": "wc-choice-confront-vane",
-                              "text": "Follow the occult thread \u2014 confront Professor Vane about the Order's symbols.",
-                              "faculty": "influence",
-                              "difficulty": 10,
-                              "advantageIf": [
-                                    "wc-clue-hermetic-primer"
-                              ],
-                              "outcomes": {
-                                    "critical": "wc-act2-vane-confrontation",
-                                    "success": "wc-act2-vane-confrontation",
-                                    "partial": "wc-act2-vane-confrontation",
-                                    "failure": "wc-act2-vane-confrontation",
-                                    "fumble": "wc-act2-vane-confrontation"
-                              }
-                        }
-                  ],
-                  "onEnter": []
-            },
-            {
-                  "id": "wc-act2-printshop",
-                  "act": 2,
-                  "narrative": "The printshop on Dorset Street is a cramped, ink-smelling establishment wedged between a pawnbroker and a gin-house. Ezra Mott, the proprietor, is a lean man with stained fingers and the watchful eyes of someone who has survived Whitechapel by knowing when to keep his mouth shut. He greets you with the particular wariness of a man who has something to hide and knows you know it.",
-                  "ambientAudio": "ambient-printshop",
-                  "cluesAvailable": [
-                        {
-                              "clueId": "wc-clue-printshop-type",
-                              "method": "exploration"
-                        }
-                  ],
-                  "choices": [
-                        {
-                              "id": "wc-choice-mott-intimidate",
-                              "text": "Lean on Mott \u2014 he is frightened, and frightened men talk.",
-                              "faculty": "nerve",
-                              "difficulty": 10,
-                              "outcomes": {
-                                    "critical": "wc-act2-printshop-success",
-                                    "success": "wc-act2-printshop-success",
-                                    "partial": "wc-act2-printshop-success",
-                                    "failure": "wc-act2-printshop-fail",
-                                    "fumble": "wc-act2-printshop-fail"
-                              },
-                              "npcEffect": {
-                                    "npcId": "npc-printer",
-                                    "dispositionDelta": -1,
-                                    "suspicionDelta": 2
-                              }
-                        },
-                        {
-                              "id": "wc-choice-mott-persuade",
-                              "text": "Appeal to Mott's self-interest \u2014 whoever is using his press is a danger to him too.",
-                              "faculty": "influence",
-                              "difficulty": 12,
-                              "advantageIf": [
-                                    "wc-clue-graves-testimony"
-                              ],
-                              "outcomes": {
-                                    "critical": "wc-act2-printshop-success",
-                                    "success": "wc-act2-printshop-success",
-                                    "partial": "wc-act2-printshop-fail",
-                                    "failure": "wc-act2-printshop-fail",
-                                    "fumble": "wc-act2-printshop-fail"
-                              },
-                              "npcEffect": {
-                                    "npcId": "npc-printer",
-                                    "dispositionDelta": 1,
-                                    "suspicionDelta": -1
-                              }
-                        },
-                        {
-                              "id": "wc-choice-show-mott-cipher",
-                              "text": "Show Mott the cipher note \u2014 watch his reaction carefully.",
-                              "faculty": "perception",
-                              "difficulty": 9,
-                              "requiresClue": "wc-clue-cipher-note",
-                              "outcomes": {
-                                    "critical": "wc-act2-mott-recognises",
-                                    "success": "wc-act2-mott-recognises",
-                                    "partial": "wc-act2-mott-deflects",
-                                    "failure": "wc-act2-mott-deflects",
-                                    "fumble": "wc-act2-mott-deflects"
-                              }
-                        }
-                  ],
-                  "onEnter": []
-            },
-            {
-                  "id": "wc-act2-printshop-success",
-                  "act": 2,
-                  "narrative": "Mott breaks. The words come out in a rush: a man came to him three weeks ago, paid in gold sovereigns, and commissioned a run of cipher notes using a typeface Mott had imported from Frankfurt. The man wore a good coat and spoke like a gentleman. He gave no name, but he left a forwarding address \u2014 a cellar on Dorset Street, two doors down. 'I didn't know what they were for,' Mott says. 'I swear it.' You believe him. That almost makes it worse.",
-                  "cluesAvailable": [],
-                  "choices": [
-                        {
-                              "id": "wc-choice-printshop-success-proceed",
-                              "text": "The cellar. That is where this ends.",
-                              "outcomes": {
-                                    "critical": "wc-act3-the-reckoning",
-                                    "success": "wc-act3-the-reckoning",
-                                    "partial": "wc-act3-the-reckoning",
-                                    "failure": "wc-act3-the-reckoning",
-                                    "fumble": "wc-act3-the-reckoning"
-                              }
-                        }
-                  ],
-                  "onEnter": [
-                        {
-                              "type": "disposition",
-                              "target": "npc-printer",
-                              "delta": 1
-                        },
-                        {
-                              "type": "vitality",
-                              "delta": 1,
-                              "description": "Mott offers you a cup of strong tea \u2014 you drink gratefully"
-                        },
-                        {
-                              "type": "setMemoryFlag",
-                              "target": "npc-printer",
-                              "value": "cooperated"
-                        }
-                  ]
-            },
-            {
-                  "id": "wc-act2-printshop-fail",
-                  "act": 2,
-                  "narrative": "Mott stonewalls you. His jaw sets and his eyes go flat, and no amount of pressure or persuasion moves him. He has been frightened by someone more frightening than you, and that someone has left a deeper impression. You leave with the typeface evidence but without the name or address you needed. The cellar will have to be found another way.",
-                  "cluesAvailable": [],
-                  "choices": [
-                        {
-                              "id": "wc-choice-printshop-fail-proceed",
-                              "text": "Mott will not help. Find the cellar through other means.",
-                              "outcomes": {
-                                    "critical": "wc-act3-the-reckoning",
-                                    "success": "wc-act3-the-reckoning",
-                                    "partial": "wc-act3-the-reckoning",
-                                    "failure": "wc-act3-the-reckoning",
-                                    "fumble": "wc-act3-the-reckoning"
-                              }
-                        }
-                  ],
-                  "onEnter": [
-                        {
-                              "type": "composure",
-                              "delta": -1
-                        }
-                  ]
-            },
-            {
-                  "id": "wc-act2-vane-confrontation",
-                  "act": 2,
-                  "narrative": "Professor Vane receives you in his Bloomsbury study, surrounded by shelves of arcane volumes and the faint smell of incense. He is a small, precise man with the manner of someone accustomed to being underestimated. When you produce the cipher note, his composure does not crack \u2014 but his eyes do. He recognises it. 'Where did you get this?' he asks, very quietly.",
-                  "ambientAudio": "ambient-study",
-                  "cluesAvailable": [
-                        {
-                              "clueId": "wc-clue-hermetic-primer",
-                              "method": "dialogue"
-                        }
-                  ],
-                  "choices": [
-                        {
-                              "id": "wc-choice-vane-press",
-                              "text": "Press Vane directly \u2014 his calling card was at the scene.",
-                              "faculty": "influence",
-                              "difficulty": 12,
-                              "advantageIf": [
-                                    "wc-clue-red-herring-occultist"
-                              ],
-                              "outcomes": {
-                                    "critical": "wc-act2-vane-success",
-                                    "success": "wc-act2-vane-success",
-                                    "partial": "wc-act2-vane-fail",
-                                    "failure": "wc-act2-vane-fail",
-                                    "fumble": "wc-act2-vane-fail"
-                              },
-                              "npcEffect": {
-                                    "npcId": "npc-vane",
-                                    "dispositionDelta": -1,
-                                    "suspicionDelta": 1
-                              }
-                        },
-                        {
-                              "id": "wc-choice-vane-lore",
-                              "text": "Appeal to his expertise \u2014 ask him to translate the cipher as a scholar.",
-                              "faculty": "lore",
-                              "difficulty": 10,
-                              "advantageIf": [
-                                    "wc-clue-cobblestone-symbol"
-                              ],
-                              "outcomes": {
-                                    "critical": "wc-act2-vane-success",
-                                    "success": "wc-act2-vane-success",
-                                    "partial": "wc-act2-vane-fail",
-                                    "failure": "wc-act2-vane-fail",
-                                    "fumble": "wc-act2-vane-fail"
-                              },
-                              "npcEffect": {
-                                    "npcId": "npc-vane",
-                                    "dispositionDelta": 1,
-                                    "suspicionDelta": 0
-                              }
-                        },
-                        {
-                              "id": "wc-choice-vane-mott-evidence",
-                              "text": "Confront Vane with what Mott revealed about the typeface.",
-                              "faculty": "influence",
-                              "difficulty": 10,
-                              "conditions": [
-                                    {
-                                          "type": "npcMemoryFlag",
-                                          "target": "npc-printer",
-                                          "value": "shown-cipher"
-                                    }
-                              ],
-                              "outcomes": {
-                                    "critical": "wc-act2-vane-cornered",
-                                    "success": "wc-act2-vane-cornered",
-                                    "partial": "wc-act2-vane-confrontation",
-                                    "failure": "wc-act2-vane-confrontation",
-                                    "fumble": "wc-act2-vane-confrontation"
-                              }
-                        }
-                  ],
-                  "onEnter": []
-            },
-            {
-                  "id": "wc-act2-vane-success",
-                  "act": 2,
-                  "narrative": "Vane's resistance crumbles. He produces a torn page from an Order initiation manual \u2014 the Hermetic Primer \u2014 and lays it beside the cipher note. The symbols align perfectly. 'Someone has stolen our sacred script and turned it into a murder weapon,' he says, his voice tight with outrage. 'The cellar on Dorset Street \u2014 that is where the renegade chapter meets. I have been trying to expose them for months.' He gives you the address. His alibi, you note, is airtight.",
-                  "cluesAvailable": [],
-                  "choices": [
-                        {
-                              "id": "wc-choice-vane-success-proceed",
-                              "text": "Vane is not the villain. The cellar is.",
-                              "outcomes": {
-                                    "critical": "wc-act3-the-reckoning",
-                                    "success": "wc-act3-the-reckoning",
-                                    "partial": "wc-act3-the-reckoning",
-                                    "failure": "wc-act3-the-reckoning",
-                                    "fumble": "wc-act3-the-reckoning"
-                              }
-                        }
-                  ],
-                  "onEnter": [
-                        {
-                              "type": "disposition",
-                              "target": "npc-vane",
-                              "delta": 2
-                        },
-                        {
-                              "type": "reputation",
-                              "target": "Hermetic Order of the Grey Dawn",
-                              "delta": 1
-                        }
-                  ]
-            },
-            {
-                  "id": "wc-act2-vane-fail",
-                  "act": 2,
-                  "narrative": "Vane retreats behind a wall of scholarly hauteur. 'I am afraid I cannot help you,' he says, and rings for his manservant. You are shown out into the Bloomsbury drizzle with nothing but the Hermetic Primer fragment and the growing certainty that Vane knows more than he is saying \u2014 though whether from guilt or fear, you cannot yet determine. The cellar will have to be found through other means.",
-                  "cluesAvailable": [],
-                  "choices": [
-                        {
-                              "id": "wc-choice-vane-fail-proceed",
-                              "text": "Vane will not help. Find the cellar another way.",
-                              "outcomes": {
-                                    "critical": "wc-act3-the-reckoning",
-                                    "success": "wc-act3-the-reckoning",
-                                    "partial": "wc-act3-the-reckoning",
-                                    "failure": "wc-act3-the-reckoning",
-                                    "fumble": "wc-act3-the-reckoning"
-                              }
-                        }
-                  ],
-                  "onEnter": [
-                        {
-                              "type": "composure",
-                              "delta": -1
-                        }
-                  ]
-            },
-            {
-                  "id": "wc-act2-mott-recognises",
-                  "act": 2,
-                  "narrative": "Mott's stained fingers freeze over the cipher note. His eyes widen \u2014 then narrow. 'Where did you get this?' he whispers. 'This typeface \u2014 I set it myself. Three months ago. A private commission, paid in gold sovereigns. The client wore gloves and spoke through a scarf.' He swallows hard. 'I kept a proof copy. I always keep proof copies.' He reaches beneath the counter and produces a sheet \u2014 the same symbols, but with a margin note in a different hand. An address in Bloomsbury.",
-                  "cluesAvailable": [
-                        {
-                              "clueId": "wc-clue-printshop-type",
-                              "method": "automatic"
-                        }
-                  ],
-                  "choices": [
-                        {
-                              "id": "wc-choice-mott-recognises-proceed",
-                              "text": "The proof copy changes everything. Follow the Bloomsbury address.",
-                              "outcomes": {
-                                    "critical": "wc-act2-vane-confrontation",
-                                    "success": "wc-act2-vane-confrontation",
-                                    "partial": "wc-act2-vane-confrontation",
-                                    "failure": "wc-act2-vane-confrontation",
-                                    "fumble": "wc-act2-vane-confrontation"
-                              }
-                        }
-                  ],
-                  "onEnter": [
-                        {
-                              "type": "setMemoryFlag",
-                              "target": "npc-printer",
-                              "value": "shown-cipher"
-                        },
-                        {
-                              "type": "disposition",
-                              "target": "npc-printer",
-                              "delta": 1,
-                              "description": "Mott respects your directness"
-                        }
-                  ]
-            },
-            {
-                  "id": "wc-act2-mott-deflects",
-                  "act": 2,
-                  "narrative": "Mott glances at the cipher note and shrugs with practised indifference. 'Symbols. Could be anything. I print what people pay me to print.' But his fingers drum the counter a fraction too quickly, and he will not meet your eyes. He knows more than he is saying \u2014 but he is not ready to say it.",
-                  "cluesAvailable": [],
-                  "choices": [
-                        {
-                              "id": "wc-choice-mott-deflects-proceed",
-                              "text": "Mott is hiding something. You will need leverage \u2014 or patience.",
-                              "outcomes": {
-                                    "critical": "wc-act2-vane-confrontation",
-                                    "success": "wc-act2-vane-confrontation",
-                                    "partial": "wc-act2-vane-confrontation",
-                                    "failure": "wc-act2-vane-confrontation",
-                                    "fumble": "wc-act2-vane-confrontation"
-                              }
-                        }
-                  ],
-                  "onEnter": [
-                        {
-                              "type": "suspicion",
-                              "target": "npc-printer",
-                              "delta": 1
-                        }
-                  ]
-            },
-            {
-                  "id": "wc-act2-vane-cornered",
-                  "act": 2,
-                  "narrative": "Vane's composure shatters. 'Mott told you about the typeface? That fool.' He sinks into his chair, suddenly looking every one of his years. 'Yes. I commissioned the cipher notes. But not for the reasons you think. The Order has been infiltrated \u2014 someone is using our symbols to communicate, and I was trying to trace them. The murders are not our doing. They are a message to us.' He meets your eyes with desperate sincerity. 'Someone is hunting the Grey Dawn, Inspector. And they are using our own language to do it.'",
-                  "cluesAvailable": [],
-                  "choices": [
-                        {
-                              "id": "wc-choice-vane-cornered-proceed",
-                              "text": "Vane's story changes the shape of the conspiracy entirely.",
-                              "outcomes": {
-                                    "critical": "wc-act3-the-reckoning",
-                                    "success": "wc-act3-the-reckoning",
-                                    "partial": "wc-act3-the-reckoning",
-                                    "failure": "wc-act3-the-reckoning",
-                                    "fumble": "wc-act3-the-reckoning"
-                              }
-                        }
-                  ],
-                  "onEnter": [
-                        {
-                              "type": "setMemoryFlag",
-                              "target": "npc-vane",
-                              "value": "confessed-infiltration"
-                        },
-                        {
-                              "type": "disposition",
-                              "target": "npc-vane",
-                              "delta": 3,
-                              "description": "Vane has placed his trust \u2014 and his Order's secrets \u2014 in your hands"
-                        },
-                        {
-                              "type": "reputation",
-                              "target": "Hermetic Order of the Grey Dawn",
-                              "delta": 1
-                        }
-                  ]
+              "type": "hasFlag",
+              "target": "wc-met-finch"
             }
+          ],
+          "advantageIf": [
+            "wc-clue-graves-testimony"
+          ],
+          "outcomes": {
+            "critical": "wc-act2-harland-office",
+            "success": "wc-act2-harland-office",
+            "partial": "wc-act2-harland-deflects",
+            "failure": "wc-act2-harland-deflects",
+            "fumble": "wc-act2-harland-deflects"
+          }
+        },
+        {
+          "id": "wc-choice-deductionist-pattern",
+          "text": "The three murder sites form a pattern on the map. Plot them and see what geometry reveals.",
+          "faculty": "reason",
+          "difficulty": 10,
+          "conditions": [
+            {
+              "type": "archetypeIs",
+              "target": "deductionist",
+              "value": "deductionist"
+            }
+          ],
+          "outcomes": {
+            "critical": "wc-act2-pattern-revealed",
+            "success": "wc-act2-pattern-revealed",
+            "partial": "wc-act2-printshop",
+            "failure": "wc-act2-printshop",
+            "fumble": "wc-act2-printshop"
+          }
+        },
+        {
+          "id": "wc-choice-operator-streets",
+          "text": "Forget the gentlemen and their symbols. Work the streets — Whitechapel's underworld knows who moves through its alleys at night.",
+          "faculty": "vigor",
+          "difficulty": 9,
+          "conditions": [
+            {
+              "type": "archetypeIs",
+              "target": "operator",
+              "value": "operator"
+            }
+          ],
+          "outcomes": {
+            "critical": "wc-act2-street-contacts",
+            "success": "wc-act2-street-contacts",
+            "partial": "wc-act2-limehouse",
+            "failure": "wc-act2-limehouse",
+            "fumble": "wc-act2-limehouse"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act2-printshop",
+      "act": 2,
+      "narrative": "The printshop on Dorset Street is a cramped, ink-smelling establishment wedged between a pawnbroker and a gin-house. Ezra Mott, the proprietor, is a lean man with stained fingers and the watchful eyes of someone who has survived Whitechapel by knowing when to keep his mouth shut. He greets you with the particular wariness of a man who has something to hide and knows you know it.",
+      "ambientAudio": "ambient-printshop",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-printshop-type",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-mott-intimidate",
+          "text": "Lean on Mott — he is frightened, and frightened men talk.",
+          "faculty": "nerve",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "wc-act2-printshop-success",
+            "success": "wc-act2-printshop-success",
+            "partial": "wc-act2-printshop-fail",
+            "failure": "wc-act2-printshop-fail",
+            "fumble": "wc-act2-printshop-fail"
+          },
+          "npcEffect": {
+            "npcId": "npc-printer",
+            "dispositionDelta": -1,
+            "suspicionDelta": 2
+          }
+        },
+        {
+          "id": "wc-choice-mott-persuade",
+          "text": "Appeal to Mott's self-interest — whoever is using his press is a danger to him too.",
+          "faculty": "influence",
+          "difficulty": 12,
+          "advantageIf": [
+            "wc-clue-graves-testimony"
+          ],
+          "outcomes": {
+            "critical": "wc-act2-printshop-success",
+            "success": "wc-act2-printshop-success",
+            "partial": "wc-act2-printshop-fail",
+            "failure": "wc-act2-printshop-fail",
+            "fumble": "wc-act2-printshop-fail"
+          },
+          "npcEffect": {
+            "npcId": "npc-printer",
+            "dispositionDelta": 1,
+            "suspicionDelta": -1
+          }
+        },
+        {
+          "id": "wc-choice-show-mott-cipher",
+          "text": "Show Mott the cipher note — watch his reaction carefully.",
+          "faculty": "perception",
+          "difficulty": 9,
+          "requiresClue": "wc-clue-cipher-note",
+          "outcomes": {
+            "critical": "wc-act2-mott-recognises",
+            "success": "wc-act2-mott-recognises",
+            "partial": "wc-act2-mott-deflects",
+            "failure": "wc-act2-mott-deflects",
+            "fumble": "wc-act2-mott-deflects"
+          }
+        },
+        {
+          "id": "wc-choice-search-printshop",
+          "text": "While Mott talks, search the printshop. The press itself may hold evidence.",
+          "faculty": "perception",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "wc-act2-cellar-search",
+            "success": "wc-act2-cellar-search",
+            "partial": "wc-act2-printshop-fail",
+            "failure": "wc-act2-printshop-fail",
+            "fumble": "wc-act2-printshop-fail"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act2-printshop-success",
+      "act": 2,
+      "narrative": "Mott breaks. The words come out in a rush: a man came to him three weeks ago, paid in gold sovereigns, and commissioned a run of cipher notes using a typeface Mott had imported from Frankfurt. The man wore a good coat and spoke like a gentleman. He gave no name, but he left a forwarding address — a cellar on Dorset Street, two doors down. 'I didn't know what they were for,' Mott says. 'I swear it.' You believe him. That almost makes it worse.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-printshop-success-cellar",
+          "text": "The cellar. Search it before anyone can clear the evidence.",
+          "outcomes": {
+            "critical": "wc-act2-cellar-search",
+            "success": "wc-act2-cellar-search",
+            "partial": "wc-act2-cellar-search",
+            "failure": "wc-act2-cellar-search",
+            "fumble": "wc-act2-cellar-search"
+          }
+        },
+        {
+          "id": "wc-choice-printshop-success-proceed",
+          "text": "The cellar can wait. Follow the other threads first.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "disposition",
+          "target": "npc-printer",
+          "delta": 1
+        },
+        {
+          "type": "vitality",
+          "delta": 1,
+          "description": "Mott offers you a cup of strong tea — you drink gratefully"
+        },
+        {
+          "type": "setMemoryFlag",
+          "target": "npc-printer",
+          "value": "cooperated"
+        },
+        {
+          "type": "flag",
+          "target": "wc-mott-cooperated",
+          "value": true
+        }
       ]
+    },
+    {
+      "id": "wc-act2-printshop-fail",
+      "act": 2,
+      "narrative": "Mott stonewalls you. His jaw sets and his eyes go flat, and no amount of pressure or persuasion moves him. He has been frightened by someone more frightening than you, and that someone has left a deeper impression. You leave with the typeface evidence but without the name or address you needed.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-printshop-fail-return",
+          "text": "Mott will not help. Return to the hub and try another path.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-mott-recognises",
+      "act": 2,
+      "narrative": "Mott's stained fingers freeze over the cipher note. His eyes widen — then narrow. 'Where did you get this?' he whispers. 'This typeface — I set it myself. Three months ago. A private commission, paid in gold sovereigns. The client wore gloves and spoke through a scarf.' He swallows hard. 'I kept a proof copy. I always keep proof copies.' He reaches beneath the counter and produces a sheet — the same symbols, but with a margin note in a different hand. An address in Bloomsbury.",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-printshop-type",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-mott-recognises-cellar",
+          "text": "The cellar two doors down — Mott, has anyone been using it?",
+          "faculty": "influence",
+          "difficulty": 8,
+          "outcomes": {
+            "critical": "wc-act2-cellar-search",
+            "success": "wc-act2-cellar-search",
+            "partial": "wc-act2-vane-confrontation",
+            "failure": "wc-act2-vane-confrontation",
+            "fumble": "wc-act2-vane-confrontation"
+          }
+        },
+        {
+          "id": "wc-choice-mott-recognises-proceed",
+          "text": "The proof copy changes everything. Follow the Bloomsbury address.",
+          "outcomes": {
+            "critical": "wc-act2-vane-confrontation",
+            "success": "wc-act2-vane-confrontation",
+            "partial": "wc-act2-vane-confrontation",
+            "failure": "wc-act2-vane-confrontation",
+            "fumble": "wc-act2-vane-confrontation"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "setMemoryFlag",
+          "target": "npc-printer",
+          "value": "shown-cipher"
+        },
+        {
+          "type": "disposition",
+          "target": "npc-printer",
+          "delta": 1,
+          "description": "Mott respects your directness"
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-mott-deflects",
+      "act": 2,
+      "narrative": "Mott glances at the cipher note and shrugs with practised indifference. 'Symbols. Could be anything. I print what people pay me to print.' But his fingers drum the counter a fraction too quickly, and he will not meet your eyes. He knows more than he is saying — but he is not ready to say it.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-mott-deflects-return",
+          "text": "Mott is hiding something. You will need leverage — or patience. Try another path.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "suspicion",
+          "target": "npc-printer",
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-cellar-search",
+      "act": 2,
+      "narrative": "The cellar beneath the Dorset Street building is accessed through a rusted iron door that opens onto a flight of stone steps descending into darkness. The air below is cold and damp, carrying the smell of old ink, tallow, and something else — the same sulphurous residue you have encountered before. The cellar is larger than expected: a vaulted space with a workbench, stacks of cipher notes, and — beneath loose flagstones — a water-stained ledger. The walls bear chalk marks in two distinct hands: one set of Grey Dawn protective wards, hastily applied, and another set of symbols you do not recognise. Someone has been working here. Someone has been afraid here.",
+      "ambientAudio": "ambient-cellar",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-cellar-ledger",
+          "method": "exploration"
+        },
+        {
+          "clueId": "wc-clue-ward-chalk",
+          "method": "check",
+          "requiresFaculty": {
+            "faculty": "lore",
+            "minimum": 10
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-cellar-ledger",
+          "text": "Study the ledger. The payments will reveal the conspiracy's structure.",
+          "faculty": "reason",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "wc-act2-cellar-revelation",
+            "success": "wc-act2-cellar-revelation",
+            "partial": "wc-act2-cellar-partial",
+            "failure": "wc-act2-cellar-partial",
+            "fumble": "wc-act2-cellar-partial"
+          }
+        },
+        {
+          "id": "wc-choice-cellar-wards",
+          "text": "Examine the chalk wards. Someone was trying to contain something here.",
+          "faculty": "lore",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "wc-act2-cellar-revelation",
+            "success": "wc-act2-cellar-partial",
+            "partial": "wc-act2-cellar-partial",
+            "failure": "wc-act2-cellar-partial",
+            "fumble": "wc-act2-cellar-partial"
+          }
+        },
+        {
+          "id": "wc-choice-cellar-ambush",
+          "text": "Wait. Someone is coming down the stairs.",
+          "faculty": "nerve",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "wc-act2-cellar-ambush",
+            "success": "wc-act2-cellar-ambush",
+            "partial": "wc-act2-cellar-ambush",
+            "failure": "wc-act2-cellar-ambush",
+            "fumble": "wc-act2-cellar-ambush"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "wc-searched-cellar",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-cellar-revelation",
+      "act": 2,
+      "narrative": "The ledger tells the story in cold arithmetic. Gold sovereigns flowing from an account marked 'H.' to a recipient marked 'A.' — Harland to Aldgate. The dates correspond precisely to the three murders. But the ledger reveals more: a third column of payments, flowing outward to an entity marked only with the Court of Smoke serpent. Someone has been paying the Court to supply ritual components — rare chalks, consecrated metals, substances that have no legitimate use. The conspiracy is not merely a cover-up. It is a procurement operation. Harland is funding occult rituals through a Yard clerk, using the Court of Smoke as a supply chain. The murders are not crimes of passion — they are industrial.",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-cellar-ledger",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-cellar-revelation-return",
+          "text": "The ledger changes everything. Return to the hub with this evidence.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        },
+        {
+          "id": "wc-choice-cellar-revelation-reckoning",
+          "text": "You have enough. Confront the conspiracy directly.",
+          "outcomes": {
+            "critical": "wc-act3-the-reckoning",
+            "success": "wc-act3-the-reckoning",
+            "partial": "wc-act3-the-reckoning",
+            "failure": "wc-act3-the-reckoning",
+            "fumble": "wc-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": 1,
+          "description": "The conspiracy's shape is finally clear"
+        },
+        {
+          "type": "flag",
+          "target": "wc-found-ledger",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-cellar-partial",
+      "act": 2,
+      "narrative": "The cellar yields fragments but not the full picture. The ledger is water-damaged, and the chalk wards are partially smeared. You can make out payment records and protective symbols, but the connections between them remain unclear. Someone has been conducting business here — dangerous business — but the specifics elude you. The cellar's secrets will require more context to unlock.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-cellar-partial-return",
+          "text": "The cellar has given what it can. Return to the hub and gather more context.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act2-cellar-ambush",
+      "act": 2,
+      "narrative": "Footsteps on the stairs. Two men descend into the cellar — heavyset, dressed in docker's clothing, but moving with the coordinated precision of men who have done violence before. They are not surprised to find you here. 'The gentleman said someone might come poking around,' the larger one says, cracking his knuckles. 'Said to discourage them.' They spread apart, blocking the stairs and the far wall. The cellar suddenly feels very small.",
+      "ambientAudio": "ambient-cellar",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1,
+          "description": "The ambush catches you off guard"
+        }
+      ],
+      "encounter": {
+        "isSupernatural": false,
+        "rounds": [
+          {
+            "roundNumber": 1,
+            "isSupernatural": false,
+            "choices": [
+              {
+                "id": "wc-enc-cellar-fight",
+                "text": "Fight your way through. The larger one is the threat — take him down first.",
+                "faculty": "vigor",
+                "difficulty": 11,
+                "outcomes": {
+                  "critical": "wc-act2-cellar-revelation",
+                  "success": "wc-act2-cellar-revelation",
+                  "partial": "wc-act2-cellar-revelation",
+                  "failure": "wc-act2-cellar-partial",
+                  "fumble": "wc-act2-cellar-partial"
+                },
+                "encounterDamage": {
+                  "vitalityDelta": -2
+                }
+              },
+              {
+                "id": "wc-enc-cellar-bluff",
+                "text": "Bluff. 'Inspector Graves knows I'm here. His constables are upstairs. You have ten seconds.'",
+                "faculty": "influence",
+                "difficulty": 10,
+                "advantageIf": [
+                  "wc-clue-graves-testimony"
+                ],
+                "outcomes": {
+                  "critical": "wc-act2-cellar-revelation",
+                  "success": "wc-act2-cellar-revelation",
+                  "partial": "wc-act2-cellar-partial",
+                  "failure": "wc-act2-cellar-partial",
+                  "fumble": "wc-act2-cellar-partial"
+                },
+                "encounterDamage": {
+                  "composureDelta": -1
+                }
+              },
+              {
+                "id": "wc-enc-cellar-escape",
+                "text": "There is a coal chute in the far wall. Dive for it.",
+                "isEscapePath": true,
+                "outcomes": {
+                  "critical": "wc-act2-the-web",
+                  "success": "wc-act2-the-web",
+                  "partial": "wc-act2-the-web",
+                  "failure": "wc-act2-the-web",
+                  "fumble": "wc-act2-the-web"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "wc-act2-vane-confrontation",
+      "act": 2,
+      "narrative": "Professor Vane receives you in his Bloomsbury study, surrounded by shelves of arcane volumes and the faint smell of incense. He is a small, precise man with the manner of someone accustomed to being underestimated. When you produce the cipher note, his composure does not crack — but his eyes do. He recognises it. 'Where did you get this?' he asks, very quietly.",
+      "ambientAudio": "ambient-study",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-hermetic-primer",
+          "method": "dialogue"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-vane-press",
+          "text": "Press Vane directly — his calling card was at the scene.",
+          "faculty": "influence",
+          "difficulty": 12,
+          "advantageIf": [
+            "wc-clue-red-herring-occultist"
+          ],
+          "outcomes": {
+            "critical": "wc-act2-vane-success",
+            "success": "wc-act2-vane-success",
+            "partial": "wc-act2-vane-fail",
+            "failure": "wc-act2-vane-fail",
+            "fumble": "wc-act2-vane-fail"
+          },
+          "npcEffect": {
+            "npcId": "npc-vane",
+            "dispositionDelta": -1,
+            "suspicionDelta": 1
+          }
+        },
+        {
+          "id": "wc-choice-vane-lore",
+          "text": "Appeal to his expertise — ask him to translate the cipher as a scholar.",
+          "faculty": "lore",
+          "difficulty": 10,
+          "advantageIf": [
+            "wc-clue-cobblestone-symbol"
+          ],
+          "outcomes": {
+            "critical": "wc-act2-vane-success",
+            "success": "wc-act2-vane-success",
+            "partial": "wc-act2-vane-fail",
+            "failure": "wc-act2-vane-fail",
+            "fumble": "wc-act2-vane-fail"
+          },
+          "npcEffect": {
+            "npcId": "npc-vane",
+            "dispositionDelta": 1,
+            "suspicionDelta": 0
+          }
+        },
+        {
+          "id": "wc-choice-vane-mott-evidence",
+          "text": "Confront Vane with what Mott revealed about the typeface.",
+          "faculty": "influence",
+          "difficulty": 10,
+          "conditions": [
+            {
+              "type": "npcMemoryFlag",
+              "target": "npc-printer",
+              "value": "shown-cipher"
+            }
+          ],
+          "outcomes": {
+            "critical": "wc-act2-vane-cornered",
+            "success": "wc-act2-vane-cornered",
+            "partial": "wc-act2-vane-fail",
+            "failure": "wc-act2-vane-fail",
+            "fumble": "wc-act2-vane-fail"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act2-vane-success",
+      "act": 2,
+      "narrative": "Vane's resistance crumbles. He produces a torn page from an Order initiation manual — the Hermetic Primer — and lays it beside the cipher note. The symbols align perfectly. 'Someone has stolen our sacred script and turned it into a murder weapon,' he says, his voice tight with outrage. 'The cellar on Dorset Street — that is where the renegade chapter meets. I have been trying to expose them for months.' He gives you the address. His alibi, you note, is airtight.",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-hermetic-primer",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-vane-success-return",
+          "text": "Vane is not the villain. Return to the hub with this intelligence.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        },
+        {
+          "id": "wc-choice-vane-success-reckoning",
+          "text": "You have enough. Confront the conspiracy directly.",
+          "outcomes": {
+            "critical": "wc-act3-the-reckoning",
+            "success": "wc-act3-the-reckoning",
+            "partial": "wc-act3-the-reckoning",
+            "failure": "wc-act3-the-reckoning",
+            "fumble": "wc-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "disposition",
+          "target": "npc-vane",
+          "delta": 2
+        },
+        {
+          "type": "reputation",
+          "target": "Hermetic Order of the Grey Dawn",
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-vane-fail",
+      "act": 2,
+      "narrative": "Vane retreats behind a wall of scholarly hauteur. 'I am afraid I cannot help you,' he says, and rings for his manservant. You are shown out into the Bloomsbury drizzle with nothing but the Hermetic Primer fragment and the growing certainty that Vane knows more than he is saying — though whether from guilt or fear, you cannot yet determine.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-vane-fail-return",
+          "text": "Vane will not help. Return to the hub and try another approach.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-vane-cornered",
+      "act": 2,
+      "narrative": "Vane's composure shatters. 'Mott told you about the typeface? That fool.' He sinks into his chair, suddenly looking every one of his years. 'Yes. I commissioned the cipher notes. But not for the reasons you think. The Order has been infiltrated — someone is using our symbols to communicate, and I was trying to trace them. The murders are not our doing. They are a message to us.' He meets your eyes with desperate sincerity. 'Someone is hunting the Grey Dawn, Inspector. And they are using our own language to do it.'",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-vane-cornered-return",
+          "text": "Vane's story changes the shape of the conspiracy. Return to the hub.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        },
+        {
+          "id": "wc-choice-vane-cornered-reckoning",
+          "text": "The conspiracy is clear. Confront it directly.",
+          "outcomes": {
+            "critical": "wc-act3-the-reckoning",
+            "success": "wc-act3-the-reckoning",
+            "partial": "wc-act3-the-reckoning",
+            "failure": "wc-act3-the-reckoning",
+            "fumble": "wc-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "setMemoryFlag",
+          "target": "npc-vane",
+          "value": "confessed-infiltration"
+        },
+        {
+          "type": "disposition",
+          "target": "npc-vane",
+          "delta": 3,
+          "description": "Vane has placed his trust — and his Order's secrets — in your hands"
+        },
+        {
+          "type": "reputation",
+          "target": "Hermetic Order of the Grey Dawn",
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-limehouse",
+      "act": 2,
+      "narrative": "The Limehouse basin at dusk is a world apart from Bloomsbury's genteel streets. The air smells of tar, opium smoke, and the brackish Thames. Warehouses line the waterfront, their doors marked with symbols that mean nothing to the uninitiated and everything to those who trade in London's shadow economy. The Court of Smoke operates here with the casual authority of a government — collecting tariffs, settling disputes, and moving goods that no customs officer would recognise. You are watched from the moment you arrive. The question is whether you will be welcomed or warned off.",
+      "ambientAudio": "ambient-whitechapel-night",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-court-token",
+          "method": "exploration"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-limehouse-token",
+          "text": "Show Sable's token. The Court's people will recognise it.",
+          "conditions": [
+            {
+              "type": "hasFlag",
+              "target": "wc-sable-alliance"
+            }
+          ],
+          "outcomes": {
+            "critical": "wc-act2-limehouse-welcomed",
+            "success": "wc-act2-limehouse-welcomed",
+            "partial": "wc-act2-limehouse-welcomed",
+            "failure": "wc-act2-limehouse-welcomed",
+            "fumble": "wc-act2-limehouse-welcomed"
+          }
+        },
+        {
+          "id": "wc-choice-limehouse-bluff",
+          "text": "Bluff your way in. Carry yourself like someone who belongs.",
+          "faculty": "influence",
+          "difficulty": 12,
+          "outcomes": {
+            "critical": "wc-act2-limehouse-welcomed",
+            "success": "wc-act2-limehouse-guarded",
+            "partial": "wc-act2-limehouse-guarded",
+            "failure": "wc-act2-limehouse-rejected",
+            "fumble": "wc-act2-limehouse-rejected"
+          }
+        },
+        {
+          "id": "wc-choice-limehouse-force",
+          "text": "You are not here to negotiate. Push through and find what you need.",
+          "faculty": "vigor",
+          "difficulty": 12,
+          "outcomes": {
+            "critical": "wc-act2-limehouse-guarded",
+            "success": "wc-act2-limehouse-guarded",
+            "partial": "wc-act2-limehouse-rejected",
+            "failure": "wc-act2-limehouse-rejected",
+            "fumble": "wc-act2-limehouse-rejected"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act2-limehouse-welcomed",
+      "act": 2,
+      "narrative": "The token opens doors. A Court runner — a boy of perhaps twelve with ancient eyes — leads you through a labyrinth of warehouses to a counting house overlooking the basin. Sable is there, or one of her lieutenants, and the reception is businesslike. 'The ritual components,' they tell you, 'were ordered through our channels six weeks ago. Rare chalks, consecrated silver, binding salts. The buyer used a Yard account — we traced it to a clerk named Aldgate. The delivery address was the Dorset Street cellar.' They slide a manifest across the table. 'We want this stopped. It is drawing attention we cannot afford.'",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-court-token",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-limehouse-welcomed-return",
+          "text": "Aldgate. The name connects the Yard to the murders. Return to the hub.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        },
+        {
+          "id": "wc-choice-limehouse-welcomed-reckoning",
+          "text": "Aldgate and the cellar. You have enough to end this.",
+          "outcomes": {
+            "critical": "wc-act3-the-reckoning",
+            "success": "wc-act3-the-reckoning",
+            "partial": "wc-act3-the-reckoning",
+            "failure": "wc-act3-the-reckoning",
+            "fumble": "wc-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "reputation",
+          "target": "Court of Smoke",
+          "delta": 1
+        },
+        {
+          "type": "flag",
+          "target": "wc-knows-aldgate-name",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-limehouse-guarded",
+      "act": 2,
+      "narrative": "The Court's people are wary but not hostile. They confirm that ritual components have been moving through their channels — 'unusual orders, paid in gold, no questions asked' — but they will not name the buyer or the destination. 'We trade in goods, not information,' a scarred woman tells you. 'If you want names, bring something to trade.' The Court of Smoke deals in favours and leverage. You have neither — yet.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-limehouse-guarded-return",
+          "text": "The Court wants leverage. Return to the hub and find some.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "wc-act2-limehouse-rejected",
+      "act": 2,
+      "narrative": "You are met at the waterfront by three men who do not introduce themselves. Their message is delivered with economy: 'You are not welcome here. Leave now.' One of them produces a knife — not threateningly, but with the casual familiarity of a man who uses one daily. The Court of Smoke has closed its doors. You will need a different approach — or a different currency — to open them.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-limehouse-rejected-return",
+          "text": "The Court is closed. Return to the hub.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": -1,
+          "description": "The Court's rejection is a reminder of your limitations"
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-harland-office",
+      "act": 2,
+      "narrative": "Scotland Yard's corridors are polished and purposeful, a world away from Whitechapel's fog. Deputy Commissioner Harland's office is on the third floor — oak-panelled, gas-lit, with a view of the Embankment. Harland himself is a broad man in his fifties with the careful grooming of someone who has climbed far and intends to climb further. He receives you with the measured courtesy of a man who is already calculating how to manage you. 'I understand you have been assisting Inspector Graves with the Whitechapel matter,' he says. 'A tragic business. How can I help?'",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-harland-memo",
+          "method": "check",
+          "requiresFaculty": {
+            "faculty": "perception",
+            "minimum": 12
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-harland-direct",
+          "text": "You buried the first cipher. Why?",
+          "faculty": "nerve",
+          "difficulty": 12,
+          "advantageIf": [
+            "wc-clue-graves-testimony"
+          ],
+          "outcomes": {
+            "critical": "wc-act2-harland-cracks",
+            "success": "wc-act2-harland-cracks",
+            "partial": "wc-act2-harland-deflects",
+            "failure": "wc-act2-harland-deflects",
+            "fumble": "wc-act2-harland-deflects"
+          },
+          "npcEffect": {
+            "npcId": "npc-harland",
+            "dispositionDelta": -2,
+            "suspicionDelta": 3
+          }
+        },
+        {
+          "id": "wc-choice-harland-subtle",
+          "text": "Play the cooperative investigator. Let Harland think you are useful — and watch what he reveals.",
+          "faculty": "influence",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "wc-act2-harland-cracks",
+            "success": "wc-act2-harland-slips",
+            "partial": "wc-act2-harland-deflects",
+            "failure": "wc-act2-harland-deflects",
+            "fumble": "wc-act2-harland-deflects"
+          }
+        },
+        {
+          "id": "wc-choice-harland-search",
+          "text": "While Harland talks, scan his desk. A man this careful will have left traces.",
+          "faculty": "perception",
+          "difficulty": 12,
+          "outcomes": {
+            "critical": "wc-act2-harland-memo-found",
+            "success": "wc-act2-harland-memo-found",
+            "partial": "wc-act2-harland-deflects",
+            "failure": "wc-act2-harland-deflects",
+            "fumble": "wc-act2-harland-deflects"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "wc-visited-harland",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-harland-cracks",
+      "act": 2,
+      "narrative": "Harland's composure fractures — not dramatically, but in the small ways that matter: a tightening around the eyes, a hand that moves to straighten papers that are already straight. 'The cipher was assessed as a hoax,' he says, but his voice has lost its polish. 'I made a judgment call. If I was wrong—' He stops. Starts again. 'There are interests at play here that you do not understand. The Rationalists Circle has spent decades building a framework of rational governance. If it becomes known that Scotland Yard is investigating occult murders—' He meets your eyes. 'The damage would be incalculable. I buried the cipher to protect the institution. Not to protect a murderer.' You are not certain you believe him. But his fear is genuine.",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-harland-memo",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-harland-cracks-return",
+          "text": "Harland is compromised but not the mastermind. Return to the hub.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        },
+        {
+          "id": "wc-choice-harland-cracks-reckoning",
+          "text": "The cover-up is exposed. Time to confront the conspiracy itself.",
+          "outcomes": {
+            "critical": "wc-act3-the-reckoning",
+            "success": "wc-act3-the-reckoning",
+            "partial": "wc-act3-the-reckoning",
+            "failure": "wc-act3-the-reckoning",
+            "fumble": "wc-act3-the-reckoning"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "disposition",
+          "target": "npc-harland",
+          "delta": -1
+        },
+        {
+          "type": "reputation",
+          "target": "Rationalists Circle",
+          "delta": -1
+        },
+        {
+          "type": "flag",
+          "target": "wc-harland-exposed",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-harland-deflects",
+      "act": 2,
+      "narrative": "Harland is too practised a politician to be caught off guard. He deflects your questions with the smooth authority of a man who has spent thirty years managing inconvenient truths. 'I appreciate your diligence,' he says, rising to signal the meeting is over. 'Inspector Graves has my full confidence. I'm sure the matter will be resolved through proper channels.' The dismissal is absolute. Whatever Harland knows, he has no intention of sharing it — and he now knows that you are asking questions.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-harland-deflects-return",
+          "text": "Harland is a wall. Return to the hub and find another way.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "suspicion",
+          "target": "npc-harland",
+          "delta": 2,
+          "description": "Harland will be watching you now"
+        },
+        {
+          "type": "composure",
+          "delta": -1,
+          "description": "The Deputy Commissioner's smooth deflection is more unsettling than hostility"
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-harland-slips",
+      "act": 2,
+      "narrative": "Harland is careful, but not careful enough. While playing the cooperative superior, he lets slip a detail: 'The Dorset Street matter has been contained.' You did not mention Dorset Street. Harland's eyes flicker — he knows he has erred — but he recovers smoothly. 'Inspector Graves's report mentioned the location, of course.' But Graves has not filed a report. Harland knows about Dorset Street from another source entirely.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-harland-slips-return",
+          "text": "Harland knows about Dorset Street. That is enough for now.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "wc-harland-slipped",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-harland-memo-found",
+      "act": 2,
+      "narrative": "While Harland speaks, your eyes move across his desk with the trained precision of someone who reads rooms for a living. There — half-concealed beneath a stack of correspondence — a memorandum on Yard letterhead. You cannot read the full text, but the header is visible: 'RE: Suppression of Whitechapel Cipher Materials.' The date is three days before the first murder. Harland follows your gaze and his expression hardens. 'I think we are done here,' he says. But you have seen enough. The suppression order exists, and Harland signed it before anyone died.",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-harland-memo",
+          "method": "automatic"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-harland-memo-return",
+          "text": "The memo is damning. Return to the hub with this evidence.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "wc-found-harland-memo",
+          "value": true
+        },
+        {
+          "type": "suspicion",
+          "target": "npc-harland",
+          "delta": 3
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-pattern-revealed",
+      "act": 2,
+      "narrative": "You spread a map of Whitechapel across the nearest flat surface and mark the three murder sites with precise dots. The pattern is immediately apparent to your trained eye: the sites form an equilateral triangle, each point exactly 400 yards from the centre. And at the centre — you check the map twice, then a third time — is the Dorset Street cellar. This is not coincidence. This is geometry. Someone has been using the murder sites as vertices of a ritual triangle, with the cellar as the focal point. The murders are not random acts of violence. They are surveying marks for something much larger.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-pattern-cellar",
+          "text": "The cellar is the focal point. Search it immediately.",
+          "outcomes": {
+            "critical": "wc-act2-cellar-search",
+            "success": "wc-act2-cellar-search",
+            "partial": "wc-act2-cellar-search",
+            "failure": "wc-act2-cellar-search",
+            "fumble": "wc-act2-cellar-search"
+          }
+        },
+        {
+          "id": "wc-choice-pattern-return",
+          "text": "The geometric pattern is a crucial insight. Return to the hub with this knowledge.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": 1,
+          "description": "The pattern clicks into place — your deductive instincts are vindicated"
+        },
+        {
+          "type": "flag",
+          "target": "wc-deductionist-pattern",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-street-contacts",
+      "act": 2,
+      "narrative": "You know Whitechapel's streets the way a surgeon knows anatomy — every alley, every doss-house, every gin-shop where information changes hands. Within an hour you have spoken to three of your regular contacts: a costerwife who watches Dorset Street from her barrow, a mudlark who works the Thames foreshore near Limehouse, and a retired cracksman who drinks at the Ten Bells. The picture they paint is consistent: a well-dressed man has been visiting the Dorset Street cellar at irregular intervals, always after dark, always carrying a heavy leather bag. He arrives by hansom and leaves on foot. The mudlark adds a detail the others missed: on two occasions, the man was followed at a distance by someone else — a woman in dark clothing who moved with the quiet confidence of someone who knows how to not be seen.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-street-contacts-cellar",
+          "text": "The cellar is the key. Go there now, while the trail is fresh.",
+          "outcomes": {
+            "critical": "wc-act2-cellar-search",
+            "success": "wc-act2-cellar-search",
+            "partial": "wc-act2-cellar-search",
+            "failure": "wc-act2-cellar-search",
+            "fumble": "wc-act2-cellar-search"
+          }
+        },
+        {
+          "id": "wc-choice-street-contacts-woman",
+          "text": "The woman who followed the man — that sounds like Court of Smoke surveillance. Head to Limehouse.",
+          "outcomes": {
+            "critical": "wc-act2-limehouse",
+            "success": "wc-act2-limehouse",
+            "partial": "wc-act2-limehouse",
+            "failure": "wc-act2-limehouse",
+            "fumble": "wc-act2-limehouse"
+          }
+        },
+        {
+          "id": "wc-choice-street-contacts-return",
+          "text": "Good intelligence. Return to the hub and plan your next move.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "flag",
+          "target": "wc-operator-street-intel",
+          "value": true
+        },
+        {
+          "type": "composure",
+          "delta": 1,
+          "description": "Your street contacts deliver — Whitechapel is your territory"
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-lamplighter-contact",
+      "act": 2,
+      "narrative": "Constable Finch meets you at a coffee house on Commercial Street — neutral ground, away from the Yard's eyes. He is more composed than at the crime scene, but the urgency remains. 'The Lamplighters have been tracking this for weeks,' he says, sliding a coded report across the table. 'Three ritual sites, all in Whitechapel, all showing signs of Grey Dawn methodology — but modified. Someone is adapting the Order's summoning protocols for a purpose we haven't seen before.' He lowers his voice. 'My superiors believe someone within the Yard is facilitating this. Providing cover, suppressing evidence. We need proof.'",
+      "cluesAvailable": [
+        {
+          "clueId": "wc-clue-lamplighter-report",
+          "method": "dialogue"
+        }
+      ],
+      "choices": [
+        {
+          "id": "wc-choice-lamplighter-share",
+          "text": "Share what you know about Harland's suppression order. The Lamplighters need this.",
+          "conditions": [
+            {
+              "type": "hasFlag",
+              "target": "wc-harland-exposed"
+            }
+          ],
+          "outcomes": {
+            "critical": "wc-act2-lamplighter-alliance",
+            "success": "wc-act2-lamplighter-alliance",
+            "partial": "wc-act2-lamplighter-alliance",
+            "failure": "wc-act2-lamplighter-alliance",
+            "fumble": "wc-act2-lamplighter-alliance"
+          }
+        },
+        {
+          "id": "wc-choice-lamplighter-take-report",
+          "text": "Take the report and continue your investigation independently.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "disposition",
+          "target": "npc-finch",
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "id": "wc-act2-lamplighter-alliance",
+      "act": 2,
+      "narrative": "Finch reads the details of Harland's suppression order with an expression that shifts from disbelief to cold fury. 'This is what we needed,' he says. 'Proof that the cover-up reaches the Deputy Commissioner's office.' He folds the information carefully into his pocket book. 'The Lamplighters will act on this — but carefully. Harland has allies. In the meantime, we can offer you something in return.' He produces a key on a leather cord. 'The Dorset Street cellar. We've had it under surveillance. This will get you in without alerting whoever is using it.'",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "wc-choice-lamplighter-alliance-cellar",
+          "text": "The cellar key. Use it immediately.",
+          "outcomes": {
+            "critical": "wc-act2-cellar-search",
+            "success": "wc-act2-cellar-search",
+            "partial": "wc-act2-cellar-search",
+            "failure": "wc-act2-cellar-search",
+            "fumble": "wc-act2-cellar-search"
+          }
+        },
+        {
+          "id": "wc-choice-lamplighter-alliance-return",
+          "text": "The Lamplighter alliance strengthens your position. Return to the hub.",
+          "outcomes": {
+            "critical": "wc-act2-the-web",
+            "success": "wc-act2-the-web",
+            "partial": "wc-act2-the-web",
+            "failure": "wc-act2-the-web",
+            "fumble": "wc-act2-the-web"
+          }
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "reputation",
+          "target": "Lamplighters",
+          "delta": 2
+        },
+        {
+          "type": "disposition",
+          "target": "npc-finch",
+          "delta": 2,
+          "description": "Finch considers you a true ally now"
+        },
+        {
+          "type": "flag",
+          "target": "wc-lamplighter-alliance",
+          "value": true
+        }
+      ]
+    }
+  ]
 }
