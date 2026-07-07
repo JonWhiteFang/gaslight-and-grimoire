@@ -52,7 +52,6 @@ async function injectSharedScenes(scenes: Record<string, SceneNode>): Promise<Re
 
 /**
  * Loads all JSON files for a case and assembles a CaseData object.
- * Req 17.1
  */
 export async function loadCase(caseId: string): Promise<CaseData> {
   const base = `/content/cases/${caseId}`;
@@ -78,7 +77,6 @@ export async function loadCase(caseId: string): Promise<CaseData> {
 
 /**
  * Loads all JSON files for a vignette and assembles a VignetteData object.
- * Req 17.2
  */
 export async function loadVignette(vignetteId: string): Promise<VignetteData> {
   const base = `/content/side-cases/${vignetteId}`;
@@ -102,7 +100,6 @@ export async function loadVignette(vignetteId: string): Promise<VignetteData> {
 /**
  * Validates a loaded CaseData for broken scene-graph edges and missing clue
  * references. Logs descriptive errors on failure.
- * Req 17.3, 17.4, 17.5
  */
 export function validateContent(caseData: CaseData): ValidationResult {
   const errors: string[] = [];
@@ -194,7 +191,6 @@ export function validateContent(caseData: CaseData): ValidationResult {
  * Evaluates an array of conditions against the current game state.
  * All conditions must be satisfied (AND logic).
  * This is a pure function — no side effects, no store access.
- * Req 2.5, 2.9
  */
 export function evaluateConditions(
   conditions: Condition[],
@@ -241,7 +237,7 @@ function evaluateCondition(condition: Condition, state: GameState): boolean {
     }
 
     case 'npcSuspicion': {
-      // Maps suspicion tier names to numeric ranges (Req 8.3–8.6)
+      // Maps suspicion tier names to numeric ranges
       const npc = state.npcs[target];
       if (!npc) return false;
       const tier = value as NpcSuspicionTier;
@@ -275,7 +271,6 @@ function evaluateCondition(condition: Condition, state: GameState): boolean {
 
 /**
  * Returns the variant scene if its condition is met, otherwise the base scene.
- * Req 2.6, 10.7
  */
 export function resolveScene(
   sceneId: string,
@@ -306,7 +301,7 @@ export function resolveScene(
  * Returns true if the given ClueDiscovery's gate requirements are satisfied
  * by the current game state.
  *
- * Gates checked (Req 6.2):
+ * Gates checked:
  *   - requiresFaculty: investigator's faculty score must meet the minimum
  *   - requiresDeduction: the specified deduction ID must exist in the store
  *
@@ -378,7 +373,6 @@ export function computeChoiceResult(
 /**
  * Processes a player choice: computes the outcome, applies npcEffect,
  * and navigates to the next scene.
- * Req 8.2
  */
 export function processChoice(
   choice: Choice,
@@ -426,13 +420,12 @@ function indexById<T extends { id: string }>(items: T[]): Record<string, T> {
 /**
  * Starts an encounter, performing a Reaction_Check for supernatural encounters.
  *
- * For supernatural encounters (Req 9.3, 9.4):
+ * For supernatural encounters:
  *   - Performs a Nerve or Lore check at DC 12
  *   - On failure: reduces Composure by 1–2 and replaces the first choice in
  *     round 1 with its `worseAlternative` (if provided)
  *
  * Returns an EncounterState ready for the first round.
- * Req 9.1, 9.3, 9.4
  */
 export function startEncounter(
   encounterId: string,
@@ -446,7 +439,7 @@ export function startEncounter(
   let processedRounds = rounds.map((r) => ({ ...r, choices: [...r.choices] }));
 
   if (isSupernatural && rounds.length > 0) {
-    // Use the higher of Nerve or Lore, with Nerve as tiebreaker (Req 9.3)
+    // Use the higher of Nerve or Lore, with Nerve as tiebreaker
     const reactionFaculty =
       state.investigator.faculties['nerve'] >= state.investigator.faculties['lore']
         ? 'nerve' as const
@@ -456,11 +449,11 @@ export function startEncounter(
     reactionCheckPassed = result.tier === 'success' || result.tier === 'critical';
 
     if (!reactionCheckPassed) {
-      // Reduce Composure by 1 or 2 (Req 9.4)
+      // Reduce Composure by 1 or 2
       const composureDamage = (rollD20() % 2) + 1; // 1 or 2
       actions.adjustComposure(-composureDamage);
 
-      // Replace first choice in round 1 with worseAlternative if available (Req 9.4)
+      // Replace first choice in round 1 with worseAlternative if available
       const firstRound = processedRounds[0];
       if (firstRound.choices.length > 0 && firstRound.choices[0].worseAlternative) {
         const replacement = firstRound.choices[0].worseAlternative;
@@ -485,13 +478,12 @@ export function startEncounter(
  * Processes a player's choice within an encounter round.
  *
  * - Performs the Faculty_Check for the choice
- * - For supernatural encounters: applies dual-axis damage (Composure + Vitality) on failure (Req 9.5)
+ * - For supernatural encounters: applies dual-axis damage (Composure + Vitality) on failure
  * - For mundane encounters: applies only the relevant damage type
  * - Advances currentRound; sets isComplete when all rounds are done
- * - Grants Advantage when the investigator holds a relevant Occult Fragment clue (Req 9.6)
+ * - Grants Advantage when the investigator holds a relevant Occult Fragment clue
  *
  * Returns updated EncounterState and ChoiceResult.
- * Req 9.1, 9.2, 9.5, 9.6
  */
 export function processEncounterChoice(
   choice: Choice,
@@ -503,7 +495,7 @@ export function processEncounterChoice(
   const currentRound = encounterState.rounds[encounterState.currentRound];
   const isSupernatural = currentRound?.isSupernatural ?? false;
 
-  // Determine Advantage: granted by Occult Fragment clues (Req 9.6)
+  // Determine Advantage: granted by Occult Fragment clues
   const hasOccultAdvantage =
     choice.advantageIf?.some((clueId) => {
       const clue = state.clues[clueId];
@@ -546,13 +538,13 @@ export function processEncounterChoice(
     actions.setFlag('last-critical-faculty', choice.faculty as unknown as boolean);
   }
 
-  // Apply damage effects (Req 9.2, 9.5)
+  // Apply damage effects
   const isFailure = tier === 'failure' || tier === 'fumble';
   if (isFailure && choice.encounterDamage) {
     const { composureDelta, vitalityDelta } = choice.encounterDamage;
 
     if (isSupernatural) {
-      // Dual-axis: apply both Composure and Vitality damage (Req 9.5)
+      // Dual-axis: apply both Composure and Vitality damage
       if (composureDelta !== undefined) actions.adjustComposure(composureDelta);
       if (vitalityDelta !== undefined) actions.adjustVitality(vitalityDelta);
     } else {
@@ -594,11 +586,10 @@ export function processEncounterChoice(
  * Returns the filtered choices for a given encounter round.
  *
  * - Filters choices using `evaluateConditions`
- * - Grants Advantage on choices where the investigator holds a relevant Occult Fragment clue (Req 9.6)
- * - Always includes escape path choices when their flag condition is met (Req 9.7)
+ * - Grants Advantage on choices where the investigator holds a relevant Occult Fragment clue
+ * - Always includes escape path choices when their flag condition is met
  *
  * Returns an array of choices with an `_hasAdvantage` annotation (via a wrapper type).
- * Req 9.6, 9.7
  */
 export function getEncounterChoices(
   round: EncounterRound,
@@ -628,7 +619,7 @@ export function getEncounterChoices(
 
     const conditionsMet = evaluateConditions(conditions, state);
 
-    // Escape paths are always included when their flag condition is met (Req 9.7)
+    // Escape paths are always included when their flag condition is met
     if (choice.isEscapePath) {
       if (conditionsMet) {
         filtered.push({ ...choice, _hasAdvantage: false });
@@ -638,7 +629,7 @@ export function getEncounterChoices(
 
     if (!conditionsMet) continue;
 
-    // Check for Occult Fragment advantage (Req 9.6)
+    // Check for Occult Fragment advantage
     const hasOccultAdvantage =
       choice.advantageIf?.some((clueId) => {
         const clue = state.clues[clueId];

@@ -67,9 +67,9 @@ export function trackActivity(event: HintEvent): void {
 
 /**
  * Returns true when a hint should be shown to the player.
- * Always returns false when hints are disabled in settings (Req 13.6).
+ * Always returns false when hints are disabled in settings.
  *
- * Trigger conditions (Req 13.1):
+ * Trigger conditions:
  * - 3+ board visits with no connection attempts, OR
  * - 5+ minutes elapsed on the current scene
  */
@@ -87,10 +87,10 @@ export function shouldShowHint(hintsEnabled: boolean): boolean {
 
 /**
  * Returns hint content for the requested level.
- * Tracks the highest level shown so Level 3 is gated behind Level 2 (Req 13.4).
+ * Tracks the highest level shown so Level 3 is gated behind Level 2.
  */
 export function getHint(level: HintLevel, gameState: GameState): HintContent {
-  // Level 3 is only available after Level 2 has been shown (Req 13.4)
+  // Level 3 is only available after Level 2 has been shown
   if (level === 3 && (state.lastHintLevelShown === null || state.lastHintLevelShown < 2)) {
     return {
       level: 2,
@@ -102,12 +102,12 @@ export function getHint(level: HintLevel, gameState: GameState): HintContent {
 
   switch (level) {
     case 1:
-      // Narrative nudge (Req 13.2)
+      // Narrative nudge
       text = 'Consider revisiting the scene where you found your most recent clue.';
       break;
 
     case 2: {
-      // Specific clue connection suggestion (Req 13.3)
+      // Specific clue connection suggestion
       const connectedClues = Object.values(gameState.clues).filter(
         (c) => c.connectsTo && c.connectsTo.length > 0 && c.isRevealed,
       );
@@ -122,7 +122,7 @@ export function getHint(level: HintLevel, gameState: GameState): HintContent {
     }
 
     case 3:
-      // Direct reveal (Req 13.4)
+      // Direct reveal
       text =
         'The key connection is between your most recently discovered clue and the one before it.';
       break;
@@ -137,7 +137,7 @@ export function getHint(level: HintLevel, gameState: GameState): HintContent {
 }
 
 /**
- * Reset all tracking state when the player moves to a new scene (Req 13.1).
+ * Reset all tracking state when the player moves to a new scene.
  */
 export function resetForScene(): void {
   state.boardVisitCount = 0;

@@ -2,13 +2,13 @@
  * Unit tests for HintEngine — hint trigger conditions.
  *
  * Tests:
- * 1. shouldShowHint returns false when hintsEnabled is false (Req 13.6)
- * 2. shouldShowHint returns true after 3 board visits with no connection attempts (Req 13.1)
- * 3. shouldShowHint returns false after 2 board visits (Req 13.1)
- * 4. shouldShowHint returns false after 3 board visits if a connection was attempted (Req 13.1)
- * 5. shouldShowHint returns true when scene dwell time exceeds 5 minutes (Req 13.1)
- * 6. resetForScene resets board visit count and scene entry time (Req 13.1)
- * 7. getHint level 3 is blocked when level 2 has not been shown (Req 13.4)
+ * 1. shouldShowHint returns false when hintsEnabled is false
+ * 2. shouldShowHint returns true after 3 board visits with no connection attempts
+ * 3. shouldShowHint returns false after 2 board visits
+ * 4. shouldShowHint returns false after 3 board visits if a connection was attempted
+ * 5. shouldShowHint returns true when scene dwell time exceeds 5 minutes
+ * 6. resetForScene resets board visit count and scene entry time
+ * 7. getHint level 3 is blocked when level 2 has not been shown
  *
  * Requirements: 13.1, 13.6
  */

@@ -25,7 +25,7 @@ export const createNpcSlice: StateCreator<
         npc.disposition = Math.max(-10, Math.min(10, npc.disposition + delta));
       }
     });
-    // Faction reputation propagation (Req 8.9, 19.2):
+    // Faction reputation propagation:
     // When a faction-aligned NPC's Disposition changes, apply a proportional
     // shift (delta * 0.5) to the associated faction's reputation.
     const npc = get().npcs[npcId];

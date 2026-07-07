@@ -1,8 +1,5 @@
 /**
  * Unit tests for clue discovery gating — Task 10.1
- *
- * Req 6.2: A Clue requiring a specific Faculty score or prior Deduction
- *          is only discoverable when the requirement is met.
  */
 import { describe, it, expect } from 'vitest';
 import { canDiscoverClue } from '../../engine/narrativeEngine';
@@ -56,7 +53,7 @@ function makeDeduction(id: string): Deduction {
 
 // ─── requiresFaculty gate ─────────────────────────────────────────────────────
 
-describe('canDiscoverClue — requiresFaculty gate (Req 6.2)', () => {
+describe('canDiscoverClue — requiresFaculty gate', () => {
   const discovery: ClueDiscovery = {
     clueId: 'clue-cipher',
     method: 'check',
@@ -106,7 +103,7 @@ describe('canDiscoverClue — requiresFaculty gate (Req 6.2)', () => {
 
 // ─── requiresDeduction gate ───────────────────────────────────────────────────
 
-describe('canDiscoverClue — requiresDeduction gate (Req 6.2)', () => {
+describe('canDiscoverClue — requiresDeduction gate', () => {
   const discovery: ClueDiscovery = {
     clueId: 'clue-hidden-passage',
     method: 'exploration',
@@ -135,7 +132,7 @@ describe('canDiscoverClue — requiresDeduction gate (Req 6.2)', () => {
 
 // ─── Both gates together ──────────────────────────────────────────────────────
 
-describe('canDiscoverClue — both gates combined (Req 6.2)', () => {
+describe('canDiscoverClue — both gates combined', () => {
   const discovery: ClueDiscovery = {
     clueId: 'clue-occult-symbol',
     method: 'dialogue',

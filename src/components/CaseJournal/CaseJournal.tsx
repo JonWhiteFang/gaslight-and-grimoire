@@ -1,7 +1,5 @@
 /**
  * CaseJournal — full-screen overlay with narrative-friendly case summary.
- *
- * Req 12.10: Auto-updates with a summary of the current Case's key events.
  */
 import { useEffect } from 'react';
 import { useStore } from '../../store';

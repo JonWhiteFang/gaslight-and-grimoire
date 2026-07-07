@@ -1,12 +1,5 @@
 /**
  * VitalityMeter — animated physical health bar (0–10).
- *
- * Req 5.1: Display Vitality as an animated meter bar.
- * Req 5.2: On decrease, pulse red and show "Bruised" for 3 s.
- * Req 5.3: On increase, pulse warm gold and show "Mended" for 3 s.
- * Req 5.4: At ≤ 2, shift to persistent pulsing red (critical threshold).
- * Req 5.6: When Vitality reaches 0, trigger Incapacitation narrative event.
- * Req 5.7: When reducedMotion is true, suppress all pulse animations.
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';

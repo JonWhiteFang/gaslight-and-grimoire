@@ -1,13 +1,6 @@
 /**
  * ChoiceCard — displays a single player choice with Faculty tag,
  * proficiency colour + text label, Advantage indicator, and key icon.
- *
- * Req 3.1: Display all available choices for the current Scene_Node.
- * Req 3.3: Display a Faculty tag on each choice requiring a Faculty_Check.
- * Req 3.4: Colour-code Faculty tag: green (≥+2), amber (0–+1), red (≤-1).
- * Req 3.5: Show Advantage indicator icon when investigator holds a relevant clue.
- * Req 3.6: Display text labels alongside colour-coded indicators.
- * Req 16.4: Display a key icon on choices unlocked by a Deduction or Clue.
  */
 import React from 'react';
 import { calculateModifier, getTrainedBonus } from '../../engine/diceEngine';
@@ -90,7 +83,7 @@ export function ChoiceCard({
         className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-xs font-medium ${styles}`}
         aria-label={`${FACULTY_DISPLAY[choice.faculty]} check, modifier ${modifierStr}, ${label}`}
       >
-        {/* Colour swatch — decorative, info also in text label (Req 3.6) */}
+        {/* Colour swatch — decorative, info also in text label */}
         <span aria-hidden="true">{FACULTY_DISPLAY[choice.faculty]}</span>
         <span aria-hidden="true">{modifierStr}</span>
         <span className="opacity-75">· {label}</span>
@@ -116,7 +109,7 @@ export function ChoiceCard({
 
         {/* Right-side icons */}
         <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-          {/* Key icon — choice unlocked by a Clue or Deduction (Req 16.4) */}
+          {/* Key icon — choice unlocked by a Clue or Deduction */}
           {isUnlockedByPreparation && (
             <span
               aria-label="Unlocked by your preparation"
@@ -127,7 +120,7 @@ export function ChoiceCard({
             </span>
           )}
 
-          {/* Advantage indicator (Req 3.5) */}
+          {/* Advantage indicator */}
           {hasAdvantage && (
             <span
               aria-label="Advantage: you hold a relevant clue"

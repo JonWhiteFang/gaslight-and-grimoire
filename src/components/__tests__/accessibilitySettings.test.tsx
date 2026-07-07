@@ -1,9 +1,6 @@
 /**
  * Unit tests for AccessibilityProvider — settings propagation to DOM
  *
- * Req 12.1: Font size controls affect all narrative text, choice cards, and UI labels.
- * Req 12.4: Reduced motion mode disables animations.
- *
  * Sub-task 22.1
  *
  * Strategy: render <AccessibilityProvider> with a mocked store state and
@@ -69,7 +66,7 @@ afterEach(() => {
   document.documentElement.style.removeProperty('--high-contrast');
 });
 
-// ─── reducedMotion class (Req 12.4) ──────────────────────────────────────────
+// ─── reducedMotion class ──────────────────────────────────────────
 
 describe('AccessibilityProvider — reducedMotion class', () => {
   it('adds "reduced-motion" class to documentElement when reducedMotion is true', () => {
@@ -83,7 +80,7 @@ describe('AccessibilityProvider — reducedMotion class', () => {
   });
 });
 
-// ─── highContrast class (Req 12.2) ───────────────────────────────────────────
+// ─── highContrast class ───────────────────────────────────────────
 
 describe('AccessibilityProvider — highContrast class', () => {
   it('adds "high-contrast" class to documentElement when highContrast is true', () => {
@@ -97,7 +94,7 @@ describe('AccessibilityProvider — highContrast class', () => {
   });
 });
 
-// ─── --font-size-base CSS custom property (Req 12.1) ─────────────────────────
+// ─── --font-size-base CSS custom property ─────────────────────────
 
 describe('AccessibilityProvider — --font-size-base CSS property', () => {
   it('sets --font-size-base to "16px" when fontSize is "standard"', () => {

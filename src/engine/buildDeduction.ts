@@ -1,7 +1,5 @@
 /**
  * buildDeduction — pure helper that constructs a Deduction from a set of clue IDs.
- *
- * Req 7.10: If any connected clue is a Red Herring, isRedHerring must be true.
  */
 import type { Clue, Deduction } from '../types';
 

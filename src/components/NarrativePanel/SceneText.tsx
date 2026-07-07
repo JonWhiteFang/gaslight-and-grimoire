@@ -1,8 +1,6 @@
 /**
  * SceneText — displays narrative text with a typewriter effect.
  * Click/tap to skip to full text.
- *
- * Req 2.2, 2.3
  */
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 

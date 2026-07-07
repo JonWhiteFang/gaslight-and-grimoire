@@ -163,7 +163,7 @@ describe('Store slice isolation — Property 1', () => {
   });
 
   it('adjustDisposition does not mutate investigator, clues, flags, or narrative slices', () => {
-    // Note: factionReputation IS allowed to change here — Req 8.9 requires that
+    // Note: factionReputation IS allowed to change here — the design requires that
     // adjusting a faction-aligned NPC's disposition propagates a proportional
     // shift to factionReputation. The isolation guarantee is that unrelated
     // slices (investigator, clues, flags, scene) are untouched.
@@ -191,7 +191,7 @@ describe('Store slice isolation — Property 1', () => {
   });
 
   it('adjustDisposition propagates to factionReputation for faction-aligned NPCs', () => {
-    // Req 8.9, 19.2: disposition delta * 0.5 applied to faction reputation
+    // disposition delta * 0.5 applied to faction reputation
     fc.assert(
       fc.property(
         fc.integer({ min: -5, max: 5 }),

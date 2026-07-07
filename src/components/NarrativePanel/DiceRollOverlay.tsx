@@ -3,8 +3,6 @@
  *
  * Shows the roll value, modifier, and total after a Faculty_Check.
  * When reducedMotion is true, skips animation and shows result directly.
- *
- * Req 4.6, 4.7
  */
 import { motion, AnimatePresence } from 'framer-motion';
 

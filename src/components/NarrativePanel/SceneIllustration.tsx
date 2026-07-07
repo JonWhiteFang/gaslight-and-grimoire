@@ -1,7 +1,5 @@
 /**
  * SceneIllustration — conditionally renders the scene illustration.
- * Req 2.4: When a Scene_Node has an associated illustration, the NarrativePanel
- * SHALL display the illustration alongside the narrative text.
  */
 import React from 'react';
 

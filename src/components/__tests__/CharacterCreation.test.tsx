@@ -38,7 +38,7 @@ describe('calculateModifier', () => {
   });
 });
 
-// ─── FacultyAllocation — live modifier display (Req 1.5) ─────────────────────
+// ─── FacultyAllocation — live modifier display ─────────────────────
 
 describe('FacultyAllocation — live modifier display', () => {
   const emptyAllocated = (): Record<Faculty, number> =>
@@ -106,7 +106,7 @@ describe('FacultyAllocation — live modifier display', () => {
   });
 });
 
-// ─── CharacterCreation — confirm blocked with unspent points (Req 1.4) ────────
+// ─── CharacterCreation — confirm blocked with unspent points ────────
 
 // Minimal mock for useStore — we only need initInvestigator
 vi.mock('../../store', () => ({

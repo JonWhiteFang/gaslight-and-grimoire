@@ -1,6 +1,5 @@
 /**
  * ClueDiscoveryCard — slide-in notification when a clue is discovered.
- * Req 6.3
  */
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Clue } from '../../types';

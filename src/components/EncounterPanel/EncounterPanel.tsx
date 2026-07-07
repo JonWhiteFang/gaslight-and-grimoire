@@ -1,7 +1,6 @@
 /**
  * EncounterPanel — renders multi-round encounters with reaction checks,
  * faculty choices, and damage feedback.
- * Req 9.1–9.7
  */
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useStore, buildGameState } from '../../store';

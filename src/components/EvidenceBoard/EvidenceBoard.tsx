@@ -1,7 +1,5 @@
 /**
  * EvidenceBoard — full-screen corkboard overlay.
- *
- * Req 7.1–7.8, 12.5
  */
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useClues, useDeductions, useConnections, useStore } from '../../store';

@@ -10,8 +10,6 @@
  *   partial  → muted amber + ⚠ warning
  *   failure  → crimson + ✕ X
  *   fumble   → deep red + ☠ skull
- *
- * Req 4.8, 16.1, 16.2, 16.5
  */
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';

@@ -1,12 +1,5 @@
 /**
  * ComposureMeter — animated mental stability bar (0–10).
- *
- * Req 5.1: Display Composure as an animated meter bar.
- * Req 5.2: On decrease, pulse red and show "Shaken" for 3 s.
- * Req 5.3: On increase, pulse warm gold and show "Steadied" for 3 s.
- * Req 5.4: At ≤ 2, shift to persistent pulsing red (critical threshold).
- * Req 5.5: When Composure reaches 0, trigger Breakdown narrative event.
- * Req 5.7: When reducedMotion is true, suppress all pulse animations.
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';

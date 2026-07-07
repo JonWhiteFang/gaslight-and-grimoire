@@ -4,8 +4,6 @@
  * Composes SceneText, SceneIllustration, DiceRollOverlay, OutcomeBanner,
  * ClueDiscoveryCard, and SceneCluePrompts. Wired to the narrative slice
  * so it re-renders on goToScene.
- *
- * Req 2.2, 2.3, 2.4, 4.6, 4.7, 4.8
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { useStore, useCurrentScene, buildGameState } from '../../store';
@@ -123,7 +121,7 @@ export function NarrativePanel() {
       aria-label="Narrative panel"
       className="flex flex-col gap-4 p-4 max-w-2xl mx-auto"
     >
-      {/* Outcome feedback (Req 4.8, 16.1, 16.2, 16.5) */}
+      {/* Outcome feedback */}
       <OutcomeBanner
         tier={lastCheckResult?.tier}
         visible={bannerVisible}
@@ -131,7 +129,7 @@ export function NarrativePanel() {
         onDismiss={handleBannerDismiss}
       />
 
-      {/* Dice roll result (Req 4.6, 4.7) */}
+      {/* Dice roll result */}
       <DiceRollOverlay
         roll={lastCheckResult?.roll}
         modifier={lastCheckResult?.modifier}
@@ -140,10 +138,10 @@ export function NarrativePanel() {
         reducedMotion={reducedMotion}
       />
 
-      {/* Scene illustration (Req 2.4) */}
+      {/* Scene illustration */}
       <SceneIllustration src={scene?.illustration} />
 
-      {/* Narrative text with typewriter effect (Req 2.2, 2.3) */}
+      {/* Narrative text with typewriter effect */}
       <SceneText
         text={scene?.narrative ?? ''}
         textSpeed={textSpeed}

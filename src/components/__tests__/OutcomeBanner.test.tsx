@@ -1,10 +1,6 @@
 /**
  * Unit tests for OutcomeBanner
  *
- * Req 16.1: Correct icon and colour for each of the five outcome tiers.
- * Req 16.5: reducedMotion — instant transitions (banner not rendered after
- *           the synchronous dismiss).
- *
  * Sub-task 8.1
  */
 import React from 'react';
@@ -25,7 +21,7 @@ function renderBanner(
   );
 }
 
-// ─── Tier config — icon and label (Req 16.1) ─────────────────────────────────
+// ─── Tier config — icon and label ─────────────────────────────────
 
 describe('OutcomeBanner — tier icons and labels', () => {
   beforeEach(() => {
@@ -67,7 +63,7 @@ describe('OutcomeBanner — tier icons and labels', () => {
   });
 });
 
-// ─── Tier colours (Req 16.1) ─────────────────────────────────────────────────
+// ─── Tier colours ─────────────────────────────────────────────────
 
 describe('OutcomeBanner — tier colour classes', () => {
   beforeEach(() => {
@@ -109,7 +105,7 @@ describe('OutcomeBanner — tier colour classes', () => {
   });
 });
 
-// ─── ARIA (Req 16.1) ─────────────────────────────────────────────────────────
+// ─── ARIA ─────────────────────────────────────────────────────────
 
 describe('OutcomeBanner — ARIA labels', () => {
   beforeEach(() => {
@@ -146,7 +142,7 @@ describe('OutcomeBanner — not visible', () => {
   });
 });
 
-// ─── reducedMotion: instant dismiss (Req 16.5) ───────────────────────────────
+// ─── reducedMotion: instant dismiss ───────────────────────────────
 
 describe('OutcomeBanner — reducedMotion: true', () => {
   beforeEach(() => {
@@ -188,7 +184,7 @@ describe('OutcomeBanner — reducedMotion: true', () => {
   });
 });
 
-// ─── Normal mode: 2-second auto-dismiss (Req 16.2) ───────────────────────────
+// ─── Normal mode: 2-second auto-dismiss ───────────────────────────
 
 describe('OutcomeBanner — normal mode auto-dismiss', () => {
   beforeEach(() => {

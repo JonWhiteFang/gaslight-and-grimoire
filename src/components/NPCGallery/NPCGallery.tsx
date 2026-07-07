@@ -1,8 +1,5 @@
 /**
  * NPCGallery — full-screen overlay listing all encountered NPCs.
- *
- * Req 12.11: Shows all encountered NPCs, their faction, and Disposition
- *            described in narrative terms.
  */
 import { useEffect } from 'react';
 import { useNpcs } from '../../store';

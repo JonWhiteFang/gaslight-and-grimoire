@@ -1,8 +1,6 @@
 /**
  * Unit tests for ClueCard status rendering.
  *
- * Req 7.3: Each of the six status states must render the correct visual indicator.
- *
  * Sub-task 12.1
  */
 import React from 'react';

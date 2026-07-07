@@ -1,10 +1,6 @@
 /**
  * Unit tests for ChoicePanel — choice visibility filtering and Advantage indicator
  *
- * Req 3.2: Show a choice only if its required Clue/Deduction/flag/Faculty
- *          threshold is met.
- * Req 3.5: Show Advantage indicator icon when investigator holds a relevant clue.
- *
  * Sub-task 7.1
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -91,7 +87,7 @@ describe('isChoiceVisible — no requirements', () => {
   });
 });
 
-describe('isChoiceVisible — requiresClue (Req 3.2)', () => {
+describe('isChoiceVisible — requiresClue', () => {
   const choice: Choice = {
     ...unconditionalChoice,
     id: 'choice-clue',
@@ -118,7 +114,7 @@ describe('isChoiceVisible — requiresClue (Req 3.2)', () => {
   });
 });
 
-describe('isChoiceVisible — requiresDeduction (Req 3.2)', () => {
+describe('isChoiceVisible — requiresDeduction', () => {
   const choice: Choice = {
     ...unconditionalChoice,
     id: 'choice-deduction',
@@ -138,7 +134,7 @@ describe('isChoiceVisible — requiresDeduction (Req 3.2)', () => {
   });
 });
 
-describe('isChoiceVisible — requiresFlag (Req 3.2)', () => {
+describe('isChoiceVisible — requiresFlag', () => {
   const choice: Choice = {
     ...unconditionalChoice,
     id: 'choice-flag',
@@ -161,7 +157,7 @@ describe('isChoiceVisible — requiresFlag (Req 3.2)', () => {
   });
 });
 
-describe('isChoiceVisible — requiresFaculty (Req 3.2)', () => {
+describe('isChoiceVisible — requiresFaculty', () => {
   const choice: Choice = {
     ...unconditionalChoice,
     id: 'choice-faculty',
@@ -190,7 +186,7 @@ describe('isChoiceVisible — requiresFaculty (Req 3.2)', () => {
   });
 });
 
-// ─── ChoiceCard — Advantage indicator (Req 3.5) ───────────────────────────────
+// ─── ChoiceCard — Advantage indicator ───────────────────────────────
 
 describe('ChoiceCard — Advantage indicator', () => {
   const choiceWithAdvantage: Choice = {
@@ -254,7 +250,7 @@ describe('ChoiceCard — Advantage indicator', () => {
   });
 });
 
-// ─── ChoiceCard — key icon (Req 16.4) ────────────────────────────────────────
+// ─── ChoiceCard — key icon ────────────────────────────────────────
 
 describe('ChoiceCard — key icon for preparation-unlocked choices', () => {
   it('shows key icon when choice is unlocked by a held clue', () => {
@@ -294,7 +290,7 @@ describe('ChoiceCard — key icon for preparation-unlocked choices', () => {
   });
 });
 
-// ─── ChoiceCard — Faculty tag and proficiency colour (Req 3.3, 3.4, 3.6) ─────
+// ─── ChoiceCard — Faculty tag and proficiency colour ─────
 
 describe('ChoiceCard — Faculty tag', () => {
   it('shows Faculty tag with modifier and proficiency label', () => {
@@ -453,7 +449,7 @@ vi.mock('../../store', () => {
   };
 });
 
-describe('ChoicePanel — visibility filtering (Req 3.2)', () => {
+describe('ChoicePanel — visibility filtering', () => {
   const choices: Choice[] = [
     {
       id: 'open',

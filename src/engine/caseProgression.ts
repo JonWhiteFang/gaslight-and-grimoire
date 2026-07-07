@@ -58,11 +58,9 @@ export const CaseProgression = {
    * 1. Persists flags, faction reputation, and NPC state via auto-save.
    * 2. Grants +1 to the Faculty stored in the `last-critical-faculty` flag.
    * 3. Checks vignette unlock conditions.
-   *
-   * Req 10.5, 10.6, 10.8
    */
   completeCase(caseId: string, state: GameState, actions: EngineActions): CaseCompletionResult {
-    // 1. Grant faculty bonus from critical success moment (Req 10.6)
+    // 1. Grant faculty bonus from critical success moment
     const criticalFaculty = state.flags['last-critical-faculty'] as unknown as Faculty | undefined;
     let facultyBonusGranted: Faculty | null = null;
 
@@ -71,7 +69,7 @@ export const CaseProgression = {
       facultyBonusGranted = criticalFaculty;
     }
 
-    // 2. Check vignette unlocks (Req 10.8)
+    // 2. Check vignette unlocks
     const vignetteUnlocked = CaseProgression.checkVignetteUnlocks(state);
 
     if (vignetteUnlocked) {
@@ -85,7 +83,7 @@ export const CaseProgression = {
    * Checks all vignette unlock conditions against the current state.
    * Returns the ID of the first unlocked vignette, or null.
    *
-   * Conditions (Req 10.8):
+   * Conditions:
    *   - faction reputation reaches a threshold
    *   - NPC Disposition ≥ 7
    *   - unresolved prior-Case thread flag exists
@@ -117,7 +115,6 @@ export const CaseProgression = {
 
   /**
    * Grants +1 to the specified Faculty (capped at 20).
-   * Req 10.6
    */
   grantFacultyBonus(faculty: Faculty, actions: EngineActions): void {
     const current = actions.investigator.faculties[faculty] ?? 0;

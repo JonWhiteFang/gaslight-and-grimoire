@@ -174,7 +174,7 @@ export interface Choice {
     dispositionDelta: number;
     suspicionDelta: number;
   };
-  // Encounter extensions (Req 9)
+  // Encounter extensions
   worseAlternative?: Choice;       // replaces this choice on Reaction_Check failure
   isEscapePath?: boolean;          // marks this as the non-combat escape option
   encounterDamage?: {

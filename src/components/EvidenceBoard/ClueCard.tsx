@@ -1,7 +1,7 @@
 /**
  * ClueCard — draggable clue card with six visual status states.
  *
- * Status states (Req 7.3):
+ * Status states:
  *   new       — pulsing amber glow + "NEW" badge
  *   examined  — standard appearance
  *   connected — gold border indicator

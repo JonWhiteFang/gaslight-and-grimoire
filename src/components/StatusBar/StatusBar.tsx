@@ -3,8 +3,6 @@
  *
  * Wires store actions: adjustComposure / adjustVitality trigger Breakdown /
  * Incapacitation narrative events via goToScene when either reaches 0.
- *
- * Req 5.1–5.7
  */
 import React from 'react';
 import { useStore } from '../../store';

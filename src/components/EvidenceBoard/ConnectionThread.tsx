@@ -1,9 +1,5 @@
 /**
  * ConnectionThread — SVG overlay that draws threads between connected clue cards.
- *
- * Req 7.4: Drag a Connection_Thread from one Clue card to another.
- * Req 7.5: Brighten clues sharing at least one tag with the source (handled in EvidenceBoard).
- * Req 7.8: On failure, animate thread going slack.
  */
 import React from 'react';
 import { motion } from 'framer-motion';

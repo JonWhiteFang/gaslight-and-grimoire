@@ -1,6 +1,6 @@
 /**
  * ProgressSummary — shows clue and deduction counts.
- * Totals are always shown as "?" until case complete (Req 7.9).
+ * Totals are always shown as "?" until case complete.
  */
 import React from 'react';
 

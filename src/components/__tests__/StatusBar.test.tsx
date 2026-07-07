@@ -1,13 +1,6 @@
 /**
  * Unit tests for StatusBar — ComposureMeter and VitalityMeter
  *
- * Req 5.4: Critical-threshold styling activates at ≤ 2.
- * Req 5.5: Breakdown event fires when composure reaches 0.
- * Req 5.6: Incapacitation event fires when vitality reaches 0.
- * Req 5.2: On decrease, pulse red and show descriptor for 3 s.
- * Req 5.3: On increase, pulse warm gold and show descriptor for 3 s.
- * Req 5.7: reducedMotion suppresses all pulse animations.
- *
  * Sub-task 9.1
  */
 import React from 'react';
@@ -44,9 +37,9 @@ function renderVitality(
   );
 }
 
-// ─── Req 5.5: Breakdown fires when composure reaches 0 ───────────────────────
+// ─── Breakdown fires when composure reaches 0 ───────────────────────
 
-describe('ComposureMeter — Breakdown event (Req 5.5)', () => {
+describe('ComposureMeter — Breakdown event', () => {
   it('calls onBreakdown when value is 0', () => {
     const onBreakdown = vi.fn();
     renderComposure(0, { onBreakdown });
@@ -71,9 +64,9 @@ describe('ComposureMeter — Breakdown event (Req 5.5)', () => {
   });
 });
 
-// ─── Req 5.6: Incapacitation fires when vitality reaches 0 ───────────────────
+// ─── Incapacitation fires when vitality reaches 0 ───────────────────
 
-describe('VitalityMeter — Incapacitation event (Req 5.6)', () => {
+describe('VitalityMeter — Incapacitation event', () => {
   it('calls onIncapacitation when value is 0', () => {
     const onIncapacitation = vi.fn();
     renderVitality(0, { onIncapacitation });
@@ -146,9 +139,9 @@ describe('VitalityMeter — Incapacitation fires once while value stays 0', () =
   });
 });
 
-// ─── Req 5.4: Critical-threshold styling at ≤ 2 ──────────────────────────────
+// ─── Critical-threshold styling at ≤ 2 ──────────────────────────────
 
-describe('ComposureMeter — critical threshold styling (Req 5.4)', () => {
+describe('ComposureMeter — critical threshold styling', () => {
   it('applies red bar class when value is 2', () => {
     renderComposure(2);
     const bar = screen.getByTestId('composure-bar');
@@ -182,7 +175,7 @@ describe('ComposureMeter — critical threshold styling (Req 5.4)', () => {
   });
 });
 
-describe('VitalityMeter — critical threshold styling (Req 5.4)', () => {
+describe('VitalityMeter — critical threshold styling', () => {
   it('applies red bar class when value is 2', () => {
     renderVitality(2);
     const bar = screen.getByTestId('vitality-bar');
@@ -215,9 +208,9 @@ describe('VitalityMeter — critical threshold styling (Req 5.4)', () => {
   });
 });
 
-// ─── Req 5.2: Decrease descriptor shown for 3 s ──────────────────────────────
+// ─── Decrease descriptor shown for 3 s ──────────────────────────────
 
-describe('ComposureMeter — decrease descriptor (Req 5.2)', () => {
+describe('ComposureMeter — decrease descriptor', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
@@ -237,7 +230,7 @@ describe('ComposureMeter — decrease descriptor (Req 5.2)', () => {
   });
 });
 
-describe('VitalityMeter — decrease descriptor (Req 5.2)', () => {
+describe('VitalityMeter — decrease descriptor', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
@@ -256,9 +249,9 @@ describe('VitalityMeter — decrease descriptor (Req 5.2)', () => {
   });
 });
 
-// ─── Req 5.3: Increase descriptor shown for 3 s ──────────────────────────────
+// ─── Increase descriptor shown for 3 s ──────────────────────────────
 
-describe('ComposureMeter — increase descriptor (Req 5.3)', () => {
+describe('ComposureMeter — increase descriptor', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
@@ -277,7 +270,7 @@ describe('ComposureMeter — increase descriptor (Req 5.3)', () => {
   });
 });
 
-describe('VitalityMeter — increase descriptor (Req 5.3)', () => {
+describe('VitalityMeter — increase descriptor', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
@@ -288,9 +281,9 @@ describe('VitalityMeter — increase descriptor (Req 5.3)', () => {
   });
 });
 
-// ─── Req 5.7: reducedMotion suppresses all pulse animations ──────────────────
+// ─── reducedMotion suppresses all pulse animations ──────────────────
 
-describe('ComposureMeter — reducedMotion suppresses descriptors (Req 5.7)', () => {
+describe('ComposureMeter — reducedMotion suppresses descriptors', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
@@ -307,7 +300,7 @@ describe('ComposureMeter — reducedMotion suppresses descriptors (Req 5.7)', ()
   });
 });
 
-describe('VitalityMeter — reducedMotion suppresses descriptors (Req 5.7)', () => {
+describe('VitalityMeter — reducedMotion suppresses descriptors', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 

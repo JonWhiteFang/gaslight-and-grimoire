@@ -1,9 +1,6 @@
 /**
  * Unit tests for AbilityButton and ability lifecycle
  *
- * Req 15.5: Ability resets to available when a new Case begins.
- * Req 15.6: Ability is visually unavailable after use.
- *
  * Sub-task 18.1
  */
 import React from 'react';
@@ -14,7 +11,7 @@ import { useStore } from '../../store';
 
 // ─── AbilityButton rendering ──────────────────────────────────────────────────
 
-describe('AbilityButton — available state (Req 15.6)', () => {
+describe('AbilityButton — available state', () => {
   it('renders the ability name when abilityUsed is false', () => {
     render(
       <AbilityButton
@@ -65,7 +62,7 @@ describe('AbilityButton — available state (Req 15.6)', () => {
   });
 });
 
-describe('AbilityButton — used state (Req 15.6)', () => {
+describe('AbilityButton — used state', () => {
   it('is disabled when abilityUsed is true', () => {
     render(
       <AbilityButton
@@ -152,7 +149,7 @@ describe('AbilityButton — click behaviour', () => {
   });
 });
 
-// ─── Store: useAbility / resetAbility lifecycle (Req 15.5, 15.6) ─────────────
+// ─── Store: useAbility / resetAbility lifecycle ─────────────
 
 describe('Store — ability lifecycle', () => {
   beforeEach(() => {
@@ -166,12 +163,12 @@ describe('Store — ability lifecycle', () => {
     expect(useStore.getState().investigator.abilityUsed).toBe(false);
   });
 
-  it('useAbility() sets abilityUsed to true (Req 15.6)', () => {
+  it('useAbility() sets abilityUsed to true', () => {
     useStore.getState().useAbility();
     expect(useStore.getState().investigator.abilityUsed).toBe(true);
   });
 
-  it('resetAbility() restores abilityUsed to false (Req 15.5)', () => {
+  it('resetAbility() restores abilityUsed to false', () => {
     useStore.getState().useAbility();
     expect(useStore.getState().investigator.abilityUsed).toBe(true);
 
@@ -179,7 +176,7 @@ describe('Store — ability lifecycle', () => {
     expect(useStore.getState().investigator.abilityUsed).toBe(false);
   });
 
-  it('loadAndStartCase resets abilityUsed to false (Req 15.5)', () => {
+  it('loadAndStartCase resets abilityUsed to false', () => {
     useStore.getState().useAbility();
     expect(useStore.getState().investigator.abilityUsed).toBe(true);
 

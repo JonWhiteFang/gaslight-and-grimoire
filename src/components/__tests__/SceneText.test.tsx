@@ -1,9 +1,6 @@
 /**
  * Unit tests for SceneText — typewriter effect
  *
- * Req 2.2: Narrative text SHALL display with a typewriter effect.
- * Req 2.3: While reduced motion is enabled, text SHALL display instantly.
- *
  * Sub-task 6.1
  */
 import React from 'react';
@@ -13,7 +10,7 @@ import { SceneText } from '../NarrativePanel/SceneText';
 
 const SAMPLE_TEXT = 'The fog rolls in from the Thames, thick with secrets.';
 
-// ─── Req 2.3 — Instant render when reducedMotion is true ─────────────────────
+// ─── Instant render when reducedMotion is true ─────────────────────
 
 describe('SceneText — reducedMotion: true', () => {
   it('renders the full text immediately without any timer', () => {
@@ -42,7 +39,7 @@ describe('SceneText — reducedMotion: true', () => {
   });
 });
 
-// ─── Req 2.2 — Typewriter mode (reducedMotion: false) ────────────────────────
+// ─── Typewriter mode (reducedMotion: false) ────────────────────────
 
 describe('SceneText — typewriter mode', () => {
   beforeEach(() => {

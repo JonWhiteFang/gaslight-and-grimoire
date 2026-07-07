@@ -1,9 +1,5 @@
 /**
  * ChoicePanel — filters and renders available choices for the current scene.
- *
- * Req 3.1: Display all available choices for the current Scene_Node.
- * Req 3.2: Show a choice only if its required Clue/Deduction/flag/Faculty
- *          threshold is met.
  */
 import React, { useCallback } from 'react';
 import { useStore, buildGameState } from '../../store';

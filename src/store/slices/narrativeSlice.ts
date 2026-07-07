@@ -147,7 +147,6 @@ export const createNarrativeSlice: StateCreator<
 
   /**
    * Completes a case: persists state, grants faculty bonus, unlocks vignettes.
-   * Req 10.5, 10.6, 10.8
    */
   completeCase: (caseId) => {
     const result = CaseProgression.completeCase(caseId, snapshotGameState(get()), get());

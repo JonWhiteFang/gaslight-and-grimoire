@@ -1,10 +1,5 @@
 /**
  * DeductionButton — triggers a Reason Faculty_Check to form a Deduction.
- *
- * Req 7.6: When ≥2 clues are connected, "Attempt Deduction" triggers a Reason check.
- * Req 7.7: On success, lock clues as 'deduced', add Deduction to store.
- * Req 7.8: On failure, animate thread slack; reset clues to 'examined' after 2s.
- * Req 7.10: If any connected clue is a Red Herring, isRedHerring = true.
  */
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
