@@ -5,8 +5,6 @@
  * 2. checkVignetteUnlocks returns 'a-matter-of-shadows' when Lamplighters rep ≥ 2
  * 3. checkVignetteUnlocks returns null when Lamplighters rep < 2
  * 4. grantFacultyBonus caps faculty at 20
- *
- * Requirements: 10.5, 10.6, 10.8
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';

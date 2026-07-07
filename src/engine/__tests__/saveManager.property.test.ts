@@ -2,10 +2,8 @@
  * Property-based tests for the Save/Load system.
  *
  * Property 11: `save` followed by `load` produces a `GameState` deeply equal to the original
- * Validates: Requirements 11.1, 11.7
  *
  * Property 12: `migrate` is idempotent — migrating an already-current save file returns an equivalent file
- * Validates: Requirements 11.3, 11.8
  */
 
 import { describe, it, beforeEach, vi } from 'vitest';
@@ -168,7 +166,6 @@ const arbCurrentSaveFile: fc.Arbitrary<SaveFile> = arbGameState.map((state) => (
 
 describe('Property 11 — save then load produces a GameState deeply equal to the original', () => {
   /**
-   * Validates: Requirements 11.1, 11.7
    * For any valid GameState, serialising it with SaveManager.save and then
    * deserialising it with SaveManager.load must return a state that is deeply
    * equal to the original.
@@ -241,7 +238,6 @@ describe('Property 11 — save then load produces a GameState deeply equal to th
 
 describe('Property 12 — migrate is idempotent for current-version save files', () => {
   /**
-   * Validates: Requirements 11.3, 11.8
    * Calling migrate twice on a current-version SaveFile must return a file
    * equivalent to calling it once. The version must always equal CURRENT_SAVE_VERSION.
    */

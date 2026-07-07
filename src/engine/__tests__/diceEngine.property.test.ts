@@ -2,19 +2,15 @@
  * Property-based tests for the Dice Engine.
  *
  * Property 2: `rollD20` always returns an integer in [1, 20]
- * Validates: Requirements 4.1
  *
  * Property 3: Advantage result is always ≥ either individual roll;
  *             Disadvantage result is always ≤ either individual roll
- * Validates: Requirements 4.3, 4.4
  *
  * Property 4: `calculateModifier` is monotonically non-decreasing and matches
  *             the floor formula for all scores 1–20
- * Validates: Requirements 4.1
  *
  * Property 5: `resolveCheck` with natural 20 always returns `critical`;
  *             natural 1 always returns `fumble`
- * Validates: Requirements 4.2
  */
 
 import { describe, it } from 'vitest';

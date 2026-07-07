@@ -2,7 +2,6 @@
  * Property tests for Zustand store slice isolation.
  *
  * Property 1: Updating one slice does not mutate sibling slices.
- * Validates: Requirements 2, 6, 8
  */
 
 import { describe, it, beforeEach } from 'vitest';

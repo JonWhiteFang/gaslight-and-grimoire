@@ -1,6 +1,5 @@
 /**
  * Unit tests for Character Creation — Faculty allocation validation
- * Requirements: 1.3, 1.4, 1.5
  */
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';

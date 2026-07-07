@@ -2,7 +2,6 @@
  * Encounter System Tests
  *
  * Tests for startEncounter, processEncounterChoice, and getEncounterChoices.
- * Requirements: 9.1–9.7
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';

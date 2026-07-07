@@ -3,8 +3,6 @@
  *
  * Handles JSON content loading, condition evaluation, scene resolution,
  * onEnter effect application, and choice processing.
- *
- * Requirements: 2.1, 2.5, 2.6, 2.7, 2.8, 2.9, 8.1–8.9, 10.7, 17.1–17.5
  */
 
 import type {

@@ -6,8 +6,6 @@
  *   2. Motion & Accessibility — reduced motion toggle
  *   3. Audio — ambient and SFX volume sliders
  *   4. Gameplay — auto-save frequency, hints toggle
- *
- * Requirements: 12.1, 12.2, 12.4, 12.8, 12.9, 13.6, 14.7
  */
 import { useEffect, useRef } from 'react';
 import { useSettings, useMetaActions } from '../../store';

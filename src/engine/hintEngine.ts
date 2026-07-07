@@ -1,8 +1,6 @@
 /**
  * HintEngine — stateful singleton that tracks player activity and determines
  * when to surface contextual hints.
- *
- * Implements Requirements 13.1–13.6.
  */
 
 import type { GameState } from '../types';

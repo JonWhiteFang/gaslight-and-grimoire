@@ -2,10 +2,8 @@
  * Property-based tests for NPC disposition and suspicion bounds.
  *
  * Property 9: `adjustDisposition` never produces a value outside [-10, +10]
- * Validates: Requirements 8.1
  *
  * Property 10: `adjustSuspicion` never produces a value outside [0, 10]
- * Validates: Requirements 8.1
  */
 
 import { describe, it } from 'vitest';
@@ -27,7 +25,6 @@ function clampSuspicion(current: number, delta: number): number {
 
 describe('Property 9 — adjustDisposition never produces a value outside [-10, +10]', () => {
   /**
-   * Validates: Requirements 8.1
    * For any starting disposition in [-10, +10] and any integer delta in [-20, +20],
    * the result must always remain within [-10, +10].
    */
@@ -92,7 +89,6 @@ describe('Property 9 — adjustDisposition never produces a value outside [-10, 
 
 describe('Property 10 — adjustSuspicion never produces a value outside [0, 10]', () => {
   /**
-   * Validates: Requirements 8.1
    * For any starting suspicion in [0, 10] and any integer delta in [-10, +10],
    * the result must always remain within [0, 10].
    */

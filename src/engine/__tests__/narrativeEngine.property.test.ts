@@ -2,11 +2,9 @@
  * Property-based tests for the Narrative Engine — condition evaluation.
  *
  * Property 6: `evaluateConditions` with an empty conditions array always returns `true`
- * Validates: Requirements 2.5
  *
  * Property 7: `evaluateConditions` is pure — same state and conditions always
  *             produce the same result
- * Validates: Requirements 2.5, 3.2
  */
 
 import { describe, it } from 'vitest';
@@ -141,7 +139,6 @@ const conditionArb: fc.Arbitrary<Condition> = fc.oneof(
 
 describe('Property 6 — evaluateConditions with empty array always returns true', () => {
   /**
-   * Validates: Requirements 2.5
    * An empty conditions array means "no prerequisites" — always accessible.
    */
   it('returns true for any game state when conditions is []', () => {
@@ -158,7 +155,6 @@ describe('Property 6 — evaluateConditions with empty array always returns true
 
 describe('Property 7 — evaluateConditions is pure (deterministic)', () => {
   /**
-   * Validates: Requirements 2.5, 3.2
    * Calling evaluateConditions twice with identical inputs must yield the same result.
    * This confirms no hidden state, randomness, or side effects.
    */

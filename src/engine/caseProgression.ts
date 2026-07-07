@@ -1,7 +1,5 @@
 /**
  * CaseProgression — end-of-case logic and vignette unlock checks.
- *
- * Requirements: 10.5, 10.6, 10.8
  */
 
 import type { Faculty, GameState } from '../types';

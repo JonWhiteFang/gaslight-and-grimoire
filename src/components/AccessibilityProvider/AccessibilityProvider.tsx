@@ -4,8 +4,6 @@
  * Reads settings from the Zustand store and applies CSS custom properties
  * and class names to document.documentElement so all child components
  * automatically pick up font-size, high-contrast, and reduced-motion changes.
- *
- * Requirements: 12.1, 12.2, 12.4
  */
 import { useEffect, useRef } from 'react';
 import { useSettings, useMetaActions } from '../../store';

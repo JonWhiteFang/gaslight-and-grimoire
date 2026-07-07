@@ -3,8 +3,6 @@
  *
  * Fades in when shouldShowHint() returns true. On click, shows the next
  * hint level in a small popover below the button.
- *
- * Requirements: 13.1–13.6
  */
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';

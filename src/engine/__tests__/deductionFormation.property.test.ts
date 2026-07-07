@@ -3,7 +3,6 @@
  *
  * Property 8: A Deduction formed from clues where any clue is a Red Herring
  *             always sets `isRedHerring = true`.
- * Validates: Requirements 7.10
  */
 
 import { describe, it, expect } from 'vitest';

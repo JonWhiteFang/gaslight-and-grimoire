@@ -9,8 +9,6 @@
  * 5. shouldShowHint returns true when scene dwell time exceeds 5 minutes
  * 6. resetForScene resets board visit count and scene entry time
  * 7. getHint level 3 is blocked when level 2 has not been shown
- *
- * Requirements: 13.1, 13.6
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
