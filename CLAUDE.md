@@ -1,4 +1,4 @@
-# AGENTS.md — Gaslight & Grimoire
+# CLAUDE.md — Gaslight & Grimoire
 
 ## What This Is
 
@@ -37,22 +37,24 @@ Comprehensive archaeology and evolution docs live under `devdocs/`. **Read these
 - `devdocs/archaeology/foundations/` — What the code actually does, implicit design principles, inferred requirements
 - `devdocs/foundations/` — What the docs claim, with "Docs vs Code" delta tables at the end of each file
 
-### Evolution & Roadmap (read before starting new work)
-- `devdocs/evolution/gap_analysis.md` — Current vs desired state, what's broken, what's missing, what's blocked
-- `devdocs/evolution/gap_closure_plan.md` — Phased plan: quick wins → incremental → major refactoring
-- `devdocs/evolution/implementation_roadmap.md` — **The execution plan**: Phase A–D with dependencies, success criteria, verification
-- `devdocs/evolution/refactoring_opportunities.md` — Highest-ROI refactors with effort/risk/benefit
+### Formal Specs (migrated from the former Kiro spec)
+- `devdocs/specs/requirements.md` — 19 requirements / 95 EARS-style acceptance criteria + glossary. Canonical home of the `Req X.Y` numbering that ~41 source files and property tests reference.
+- `devdocs/specs/design.md` — Technical design snapshot: architecture + `processChoice` mermaid diagrams and consolidated engine interface signatures.
 
-### Cleanup & Smoke Tests
+### Evolution & Roadmap (read before starting new work)
+- `devdocs/evolution/implementation_roadmap.md` — **The execution plan**: Phases A–E with dependencies, success criteria, verification (Phases A–D and most of E complete)
+- `devdocs/evolution/gap_analysis.md` — Current vs desired state; the live residue is the "Unknowns" section (mobile perf, save-file size at scale, cross-case persistence)
+- `devdocs/evolution/refactoring_opportunities.md` — Highest-ROI refactors with effort/risk/benefit (R11 determinism/DI is the one still open)
+
+### Cleanup
 - `devdocs/archaeology/cleanup_inventory.md` — What's safe to remove vs what looks dead but must be kept
-- `devdocs/archaeology/5_things_or_not.md` — Top 5 improvements with exact code locations and first steps
-- `smoke_tests/check_what_is_working/report.md` — Baseline: 310/310 tests pass, 0 type errors, 3 broken features identified
+- `devdocs/archaeology/5_things_or_not.md` — Top improvements with exact code locations and first steps
 
 ## Architecture
 
 Two strict domains — never mix them:
 
-- `content/` — narrative data as JSON (cases, clues, NPCs, scenes)
+- `public/content/` — narrative data as JSON (cases, clues, NPCs, scenes). Vite serves `public/` at the site root, so the engine fetches these at runtime as `/content/...`.
 - `src/engine/` — game logic (pure functions where possible)
 
 Components live in `src/components/[Name]/` with `index.ts` barrel exports. State is managed by a single Zustand store composed of six Immer-powered slices.
@@ -84,7 +86,7 @@ Components live in `src/components/[Name]/` with `index.ts` barrel exports. Stat
 ## Directory Layout
 
 ```
-content/
+public/content/                 # served at runtime as /content/
   manifest.json                 # CaseManifest: lists all cases and vignettes with metadata
   shared/
     breakdown.json              # Shared breakdown scene (composure=0), injected into all cases
@@ -284,7 +286,7 @@ Base faculty score: 8. Bonus points to allocate: 12. Composure and Vitality: 0�
 
 ## Known Bugs & Gaps (as of 2026-02-25)
 
-These are documented in detail in `devdocs/evolution/gap_analysis.md`, `smoke_tests/check_what_is_working/report.md`, and `GAME_DESIGN_ANALYSIS.md`.
+These are documented in detail in `devdocs/evolution/gap_analysis.md` and `GAME_DESIGN_ANALYSIS.md`. (Run `npm run test:run` for the live test baseline — 334 tests across 29 files pass as of 2026-07-07.)
 
 ### Critical (blocks core functionality)
 - None remaining. `loadGame` caseData restoration was fixed in Phase A.

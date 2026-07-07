@@ -36,3 +36,6 @@ pnpm-debug.log*
 coverage/
 test-game-screen.png
 test-title-screen.png
+
+# Claude Code — commit shared settings.json + commands/, ignore personal overrides
+.claude/settings.local.json

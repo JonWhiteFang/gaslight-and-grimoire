@@ -1,6 +1,6 @@
 # Project Description (Doc-Inferred)
 
-> Derived from: `docs/Gaslight_&_Grimoire_design.md`, `AGENTS.md`, `.kiro/specs/gaslight-and-grimoire/requirements.md`, `.kiro/specs/gaslight-and-grimoire/design.md`, `CODE_REVIEW.md`
+> Derived from: `docs/Gaslight_&_Grimoire_design.md`, `CLAUDE.md`, `devdocs/specs/requirements.md`, `devdocs/specs/design.md` (formerly `CODE_REVIEW.md`, now retired — see git history)
 
 ## What the Docs Say the System Does
 
@@ -26,7 +26,7 @@ The game features four archetypes (Deductionist, Occultist, Operator, Mesmerist)
 
 ## Starter Case per Docs
 
-The design doc (§9.4) describes "The Lamplighter's Wake" as the starter case — a locked-room murder of a Lamplighter agent in Whitechapel. AGENTS.md lists "The Whitechapel Cipher" as the actual implemented case.
+The design doc (§9.4) describes "The Lamplighter's Wake" as the starter case — a locked-room murder of a Lamplighter agent in Whitechapel. CLAUDE.md lists "The Whitechapel Cipher" as the actual implemented case.
 
 ## Development Roadmap per Docs
 
@@ -44,8 +44,8 @@ The design doc (§15) outlines 5 phases:
 | Topic | Docs say | Code does |
 |---|---|---|
 | Starter case | "The Lamplighter's Wake" (design doc §9.4) | "The Whitechapel Cipher" (different case entirely) |
-| Persistence | IndexedDB primary, localStorage fallback (Req 11.2, design doc §12.1) | localStorage only. CODE_REVIEW #28 confirms IndexedDB TODO was removed |
-| Archetype bonuses | Occultist: +3 Lore, +1 Nerve. Operator: +3 Vigor, +1 Influence. Mesmerist: +3 Influence, +1 Lore (design doc §4.3) | Occultist: +3 Lore, +1 Perception. Operator: +3 Vigor, +1 Nerve. Mesmerist: +3 Influence, +1 Nerve (code + AGENTS.md) |
+| Persistence | IndexedDB primary, localStorage fallback (Req 11.2, design doc §12.1) | localStorage only. IndexedDB was deliberately abandoned (retired code review, issue #28) |
+| Archetype bonuses | Occultist: +3 Lore, +1 Nerve. Operator: +3 Vigor, +1 Influence. Mesmerist: +3 Influence, +1 Lore (design doc §4.3) | Occultist: +3 Lore, +1 Perception. Operator: +3 Vigor, +1 Nerve. Mesmerist: +3 Influence, +1 Nerve (code + CLAUDE.md) |
 | `GameProvider` component | Design doc shows `<GameProvider>` wrapping the app | No provider — Zustand store is a module-level singleton |
 | `colorblindMode` setting | Design doc includes it in `GameSettings` | Not in code's `GameSettings` type |
 | SaveManager API | Design doc shows async `Promise<void>` returns | Code is synchronous (localStorage) |

@@ -1,8 +1,8 @@
 # Known Requirements (Doc-Inferred)
 
-> Derived from: `.kiro/specs/gaslight-and-grimoire/requirements.md` (19 requirements, 95 acceptance criteria), `docs/Gaslight_&_Grimoire_design.md`, `AGENTS.md`
+> Derived from: `devdocs/specs/requirements.md` (19 requirements, 95 acceptance criteria), `docs/Gaslight_&_Grimoire_design.md`, `CLAUDE.md`
 
-## Formal Requirements (from .kiro/specs)
+## Formal Requirements (from devdocs/specs/requirements.md)
 
 The requirements document defines 19 requirements with formal acceptance criteria using SHALL/WHEN/WHILE language. Each is traced via `Req X.Y` comments in code (178 references across 39 files).
 
@@ -96,7 +96,7 @@ Track 4 factions, adjust on player choices, decrease on rival help, persist acro
 - All data local (IndexedDB/localStorage)
 - No accounts, no authentication
 
-## Content Authoring Constraints (from design doc + AGENTS.md)
+## Content Authoring Constraints (from design doc + CLAUDE.md)
 
 - Condition and Effect are the ONLY state mutation mechanism from content
 - Deductions derived from linked clue IDs — never hardcoded

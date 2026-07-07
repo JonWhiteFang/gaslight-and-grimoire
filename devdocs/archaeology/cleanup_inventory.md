@@ -32,7 +32,7 @@ Hooks exported from `src/store/index.ts` that no component imports.
 | `useNpcActions` | Nobody | **Keep.** Same rationale. |
 | `useWorldActions` | Nobody | **Keep.** Same rationale. |
 
-⚠️ **Caution**: The action hooks are part of the documented store API (AGENTS.md, steering docs). They exist for convention enforcement even if current components bypass them. Removing them would violate the stated architecture.
+⚠️ **Caution**: The action hooks are part of the documented store API (CLAUDE.md, steering docs). They exist for convention enforcement even if current components bypass them. Removing them would violate the stated architecture.
 
 ---
 
@@ -137,7 +137,7 @@ Fields defined in types or content that no code reads.
 
 | Feature | Evidence | Status | Verdict |
 |---|---|---|---|
-| IndexedDB persistence | Design doc §12.1 specifies "IndexedDB primary, localStorage fallback". CODE_REVIEW #28: "Removed misleading TODO. Header comment now accurately states localStorage is the storage mechanism." | Deliberately abandoned | **No cleanup needed.** The IndexedDB code was never written. The TODO was removed. The design doc is stale on this point. |
+| IndexedDB persistence | Design doc §12.1 specifies "IndexedDB primary, localStorage fallback". The retired code review (issue #28) removed the misleading TODO; the header comment now accurately states localStorage is the storage mechanism. | Deliberately abandoned | **No cleanup needed.** The IndexedDB code was never written. The TODO was removed. The design doc is stale on this point. |
 | `colorblindMode` setting | Design doc `GameSettings` includes `colorblindMode: boolean`. Code's `GameSettings` does not. | Never implemented | **No cleanup needed.** The field was never added to code. The design doc is aspirational. |
 | `startNewCase` action | Defined in `narrativeSlice`. Superseded by `loadAndStartCase` which does the same thing plus loads content. | Superseded | **Candidate for removal** after updating `AbilityButton.test.tsx` to use `loadAndStartCase` or direct `set()` for test setup. |
 | Starter case "The Lamplighter's Wake" | Design doc §9.4 describes it in detail. | Replaced by "The Whitechapel Cipher" | **No cleanup needed.** The design doc describes a case that was never authored. The actual case is different. |

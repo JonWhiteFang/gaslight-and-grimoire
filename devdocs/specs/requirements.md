@@ -1,5 +1,12 @@
 # Requirements Document
 
+> **Provenance & currency.** Migrated from `.kiro/specs/gaslight-and-grimoire/requirements.md` (the former Kiro spec) on 2026-07-07 when the project moved to Claude Code. This is the canonical home of the formal requirement numbering: **177 `Req X.Y` comments across ~41 source files** and the property tests' `Validates: Requirements X.Y` tags dereference this document. Keep the numbering stable.
+>
+> A few acceptance criteria describe the original design intent, which the shipped code has since diverged from. Known deltas (see `devdocs/foundations/known_requirements.md` for the full "Docs vs Code" table):
+> - **Req 4.2** — Partial Success is written as "within 2 below the DC"; the implemented `resolveCheck` (`src/engine/diceEngine.ts`) uses a **DC-3** band.
+> - **Req 11.2 / Save_File glossary** — specifies **IndexedDB** as primary storage with localStorage fallback; `src/engine/saveManager.ts` is **localStorage-only** (IndexedDB was dropped).
+> - **Req 12.x** — some accessibility criteria (colorblind indicators, reading-pace/audio-volume controls) are **aspirational** and not fully implemented.
+
 ## Introduction
 
 Gaslight & Grimoire is a browser-based choose-your-own-adventure game set in Victorian London (1893) where magic exists beneath the rational world. Players take on the role of an investigator navigating branching mysteries, gathering clues, interrogating suspects, making deductions, and surviving encounters with both mundane and supernatural threats. The game blends Sherlock Holmes-style deductive reasoning with D&D-style stat checks and dice mechanics, wrapped in atmospheric gothic storytelling. Built with React 18+, Zustand, Tailwind CSS, and a JSON-driven narrative engine.

@@ -34,7 +34,7 @@ Every component lives in `src/components/[Name]/` with an `index.ts` barrel expo
 State is read via selector hooks (`useInvestigator`, `useClues`, etc.) and mutated via action hooks (`useInvestigatorActions`, `useEvidenceActions`, etc.). This separation is consistent across all 6 slices and enforced by the hook exports in `store/index.ts`.
 
 ### Requirement traceability
-178 `Req X.Y` references across 39 files. Every component, engine function, and test cites the requirement it implements. This suggests development was driven by a formal requirements document (likely the spec in `.kiro/specs/`). The traceability is unusually thorough for a game project.
+177 `Req X.Y` references across ~41 files. Every component, engine function, and test cites the requirement it implements. This suggests development was driven by a formal requirements document (the spec now at `devdocs/specs/requirements.md`). The traceability is unusually thorough for a game project.
 
 ### Immer draft mutation
 All slice actions use Immer's draft mutation pattern — direct property assignment inside `set()` callbacks. No manual spreading, no `Object.assign` (except one case in `updateSettings`). This is consistent across all 6 slices.

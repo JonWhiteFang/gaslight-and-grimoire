@@ -157,7 +157,7 @@
 
 **Why this shape**: `SaveManager` is a plain object with synchronous localStorage methods. `GameState` is the serialisable type — it intentionally excludes `caseData` (runtime content that shouldn't be in save files). The gap is that `loadGame` restores `GameState` but doesn't re-fetch the content that `GameState` depends on.
 
-**Alternatives likely considered**: IndexedDB for larger saves (documented in design doc, removed per CODE_REVIEW #28 — localStorage was simpler). Including `caseData` in saves (rejected — would bloat save files with static content). Async save API (the `saveGame` action is `async` but contains no async operations — likely a leftover from the IndexedDB plan).
+**Alternatives likely considered**: IndexedDB for larger saves (documented in design doc, deliberately removed — localStorage was simpler; see the retired code review, issue #28, in git history). Including `caseData` in saves (rejected — would bloat save files with static content). Async save API (the `saveGame` action is `async` but contains no async operations — likely a leftover from the IndexedDB plan).
 
 **Edge cases that shaped design**:
 - Save IDs use `Date.now()` — millisecond-level collision possible in automated testing.

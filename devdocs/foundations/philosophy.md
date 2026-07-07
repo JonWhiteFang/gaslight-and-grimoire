@@ -1,6 +1,6 @@
 # Philosophy (Doc-Inferred)
 
-> Derived from: `docs/Gaslight_&_Grimoire_design.md`, `AGENTS.md`, `.kiro/specs/gaslight-and-grimoire/requirements.md`, `.kiro/specs/gaslight-and-grimoire/design.md`
+> Derived from: `docs/Gaslight_&_Grimoire_design.md`, `CLAUDE.md`, `devdocs/specs/requirements.md`, `devdocs/specs/design.md`
 
 ## Stated Design Principles
 
@@ -8,7 +8,7 @@
 The design doc (§2.3) calls this the single principle powering the core loop. Clues grant Advantage on checks. Deductions unlock story branches. Acting without evidence is possible but harder. This is the most explicitly stated design principle in the documentation.
 
 ### Content is data, logic is code
-AGENTS.md: "Two strict domains — never mix them: `content/` — narrative data as JSON, `src/engine/` — game logic." The design doc reinforces this with the JSON scene graph architecture and the content pipeline (§13). Condition and Effect are the only mechanism for content to interact with game state.
+CLAUDE.md: "Two strict domains — never mix them: `content/` — narrative data as JSON, `src/engine/` — game logic." The design doc reinforces this with the JSON scene graph architecture and the content pipeline (§13). Condition and Effect are the only mechanism for content to interact with game state.
 
 ### Accessibility is a core requirement
 Design doc §11: "Accessibility is a core design requirement, not a post-launch addition." The requirements doc dedicates Req 12 (11 acceptance criteria) to accessibility. The roadmap places accessibility foundation in Phase 1, not Phase 4.
@@ -17,13 +17,13 @@ Design doc §11: "Accessibility is a core design requirement, not a post-launch 
 Design doc §1.1: Early scenes lean rational, midpoint introduces ambiguity, late scenes confront with undeniable occult. Every supernatural scene should have a "rational shadow." This is a content philosophy, not enforced by code.
 
 ### No single faculty gates progress
-AGENTS.md: "No single Faculty should gate critical story progress — always provide alternate paths." Req 10.3: "at least two Faculty-based approaches so that no single Faculty is required." Design doc §4.2: "No hard locks."
+CLAUDE.md: "No single Faculty should gate critical story progress — always provide alternate paths." Req 10.3: "at least two Faculty-based approaches so that no single Faculty is required." Design doc §4.2: "No hard locks."
 
 ### Choices have meaningful consequences
-AGENTS.md: "Choices must have meaningful consequences; avoid cosmetic-only branching." Design doc §9.2 defines "meaningful divergence criteria" — a branch must meet at least 2 of 5 criteria (different clues, different NPCs, faction rep change, altered Act III options, persistent flag).
+CLAUDE.md: "Choices must have meaningful consequences; avoid cosmetic-only branching." Design doc §9.2 defines "meaningful divergence criteria" — a branch must meet at least 2 of 5 criteria (different clues, different NPCs, faction rep change, altered Act III options, persistent flag).
 
 ### Narrative tone: measured, atmospheric, never campy
-AGENTS.md states this directly. Design doc §1: "precise, evocative, with moments of dread." Writing guidelines (§13.2): "100–200 words per scene node. Dense, atmospheric, present-tense. Second person."
+CLAUDE.md states this directly. Design doc §1: "precise, evocative, with moments of dread." Writing guidelines (§13.2): "100–200 words per scene node. Dense, atmospheric, present-tense. Second person."
 
 ### Outcomes are narrative, not binary
 Design doc §5.1: "A failed check doesn't mean 'nothing happens' — it means something happens differently." Five outcome tiers (critical, success, partial, failure, fumble) each lead to different scenes, not just pass/fail.
@@ -52,10 +52,10 @@ Design doc §12.1, §12.2, Req 11.2. Rationale: "IndexedDB handles larger save f
 Design doc: "Encapsulates d20 logic, Advantage/Disadvantage, dynamic difficulty — testable in isolation."
 
 ### Framer Motion for animation
-Design doc §12.1 lists "Framer Motion or CSS animations." AGENTS.md confirms Framer Motion is the choice.
+Design doc §12.1 lists "Framer Motion or CSS animations." CLAUDE.md confirms Framer Motion is the choice.
 
 ### Howler.js for audio
-Design doc §12.1 lists "Howler.js or Web Audio API." AGENTS.md confirms Howler.js.
+Design doc §12.1 lists "Howler.js or Web Audio API." CLAUDE.md confirms Howler.js.
 
 ## Content Authoring Philosophy (from docs)
 
@@ -68,9 +68,9 @@ Design doc §12.1 lists "Howler.js or Web Audio API." AGENTS.md confirms Howler.
 - Multi-angle investigation: every key mystery approachable from at least two distinct angles
 - Red herrings have plausible-seeming connections that resolve to failure, not dead ends
 
-## Development Philosophy (from CODE_REVIEW.md)
+## Development Philosophy (from the retired code review)
 
-The CODE_REVIEW.md documents 28 issues found during a full codebase review, all marked as resolved. This implies a development process where:
+A full-codebase code review (formerly `CODE_REVIEW.md`, retired 2026-07-07 — see git history, commit 3909410) documented 28 issues, all resolved. This implies a development process where:
 - Code was written first (possibly AI-generated), then reviewed for correctness
 - Issues were categorized by severity (Critical, High, Medium, Low)
 - All issues were fixed before the review document was finalized
@@ -82,7 +82,7 @@ The CODE_REVIEW.md documents 28 issues found during a full codebase review, all 
 
 | Principle | Docs say | Code does |
 |---|---|---|
-| IndexedDB primary | Explicitly stated as an architectural decision with rationale | localStorage only. The IndexedDB TODO was removed per CODE_REVIEW #28 |
+| IndexedDB primary | Explicitly stated as an architectural decision with rationale | localStorage only. The IndexedDB TODO was deliberately removed (documented in the retired code review, issue #28) |
 | Engine functions are pure | Design doc labels DiceEngine as "pure module, no side effects" | `processChoice`, `applyOnEnterEffects`, `startEncounter`, `processEncounterChoice` all access the store imperatively |
 | Content validation at load time | Req 17.3–17.5 require validation when JSON is loaded | `validateContent` exists but is never called at runtime |
 | Meaningful divergence criteria | Design doc §9.2 defines 5 criteria for major branches | No code enforces these criteria — they're content authoring guidelines only |

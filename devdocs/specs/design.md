@@ -1,5 +1,11 @@
 # Design Document: Gaslight & Grimoire
 
+> **Provenance & currency.** Migrated from `.kiro/specs/gaslight-and-grimoire/design.md` (the former Kiro spec) on 2026-07-07 when the project moved to Claude Code. Retained for its unique content: the two **mermaid diagrams** (architecture graph + `processChoice` sequence) and the consolidated **engine interface signatures**, which are more code-accurate than the vision doc (`docs/Gaslight_&_Grimoire_design.md`). Broader design rationale lives in that design bible and in `CLAUDE.md`.
+>
+> Known stale references in this document:
+> - The architecture diagram, "Key Architectural Decisions" table, and SaveManager interface show **IndexedDB primary / localStorage fallback**; the shipped `src/engine/saveManager.ts` is **localStorage-only**.
+> - The component hierarchy shows a `<GameProvider>` wrapper; the actual root is `<ErrorBoundary><App><AccessibilityProvider>` (see `CLAUDE.md` → Component Hierarchy), and `GameSettings` has no `colorblindMode` field.
+
 ## Overview
 
 Gaslight & Grimoire is a browser-based choose-your-own-adventure game set in Victorian London (1893) where players investigate branching mysteries as an Investigator with D&D-style Faculty checks and dice mechanics. The game is built with React 18+, Zustand (Immer middleware), Tailwind CSS, and a JSON-driven narrative engine.
