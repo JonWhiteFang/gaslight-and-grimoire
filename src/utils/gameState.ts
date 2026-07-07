@@ -13,6 +13,7 @@ export function snapshotGameState(s: GameStore): GameState {
     flags: s.flags,
     factionReputation: s.factionReputation,
     sceneHistory: s.sceneHistory,
+    connections: s.connections,
     settings: s.settings,
   };
 }

@@ -1,11 +1,9 @@
 import type { StateCreator } from 'zustand';
 import type { GameStore } from '../types';
-import type { Clue, ClueStatus, Deduction } from '../../types';
+import type { Clue, ClueConnection, ClueStatus, Deduction } from '../../types';
 
-export interface ClueConnection {
-  fromId: string;
-  toId: string;
-}
+// Re-exported for existing importers; canonical definition lives in src/types.
+export type { ClueConnection };
 
 export interface EvidenceSlice {
   clues: Record<string, Clue>;
@@ -30,9 +28,12 @@ export const createEvidenceSlice: StateCreator<
 
   discoverClue: (clueId) =>
     set((state) => {
-      if (state.clues[clueId]) {
-        state.clues[clueId].isRevealed = true;
-        state.clues[clueId].status = 'new';
+      const clue = state.clues[clueId];
+      // Only initialise status on first discovery. Re-discovering the same clue
+      // in a later scene must preserve any progression (connected/deduced/etc.).
+      if (clue && !clue.isRevealed) {
+        clue.isRevealed = true;
+        clue.status = 'new';
       }
     }),
 

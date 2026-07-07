@@ -98,6 +98,54 @@ describe('VitalityMeter — Incapacitation event (Req 5.6)', () => {
   });
 });
 
+// ─── Regression: terminal callback fires once per zero-episode ───────────────
+
+describe('ComposureMeter — Breakdown fires once while value stays 0', () => {
+  it('calls onBreakdown only once across re-renders with a changing callback identity', () => {
+    const spy = vi.fn();
+    // StatusBar passes a fresh inline closure each render, so onBreakdown
+    // identity changes and the effect re-runs while value is still 0.
+    const { rerender } = render(
+      <ComposureMeter value={0} reducedMotion={false} onBreakdown={() => spy()} />,
+    );
+    rerender(<ComposureMeter value={0} reducedMotion={false} onBreakdown={() => spy()} />);
+    rerender(<ComposureMeter value={0} reducedMotion={false} onBreakdown={() => spy()} />);
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it('fires again after recovery then a second descent to 0', () => {
+    const spy = vi.fn();
+    const { rerender } = render(
+      <ComposureMeter value={0} reducedMotion={false} onBreakdown={() => spy()} />,
+    );
+    rerender(<ComposureMeter value={5} reducedMotion={false} onBreakdown={() => spy()} />);
+    rerender(<ComposureMeter value={0} reducedMotion={false} onBreakdown={() => spy()} />);
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('VitalityMeter — Incapacitation fires once while value stays 0', () => {
+  it('calls onIncapacitation only once across re-renders with a changing callback identity', () => {
+    const spy = vi.fn();
+    const { rerender } = render(
+      <VitalityMeter value={0} reducedMotion={false} onIncapacitation={() => spy()} />,
+    );
+    rerender(<VitalityMeter value={0} reducedMotion={false} onIncapacitation={() => spy()} />);
+    rerender(<VitalityMeter value={0} reducedMotion={false} onIncapacitation={() => spy()} />);
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it('fires again after recovery then a second descent to 0', () => {
+    const spy = vi.fn();
+    const { rerender } = render(
+      <VitalityMeter value={0} reducedMotion={false} onIncapacitation={() => spy()} />,
+    );
+    rerender(<VitalityMeter value={5} reducedMotion={false} onIncapacitation={() => spy()} />);
+    rerender(<VitalityMeter value={0} reducedMotion={false} onIncapacitation={() => spy()} />);
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
+});
+
 // ─── Req 5.4: Critical-threshold styling at ≤ 2 ──────────────────────────────
 
 describe('ComposureMeter — critical threshold styling (Req 5.4)', () => {

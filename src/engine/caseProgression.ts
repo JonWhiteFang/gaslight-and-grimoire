@@ -36,6 +36,18 @@ const VIGNETTE_CONDITIONS: VignetteUnlockCondition[] = [
     id: 'a-matter-of-shadows',
     factionReputation: { faction: 'Lamplighters', threshold: 2 },
   },
+  {
+    id: 'the-rationalists-dilemma',
+    factionReputation: { faction: 'Rationalists Circle', threshold: 2 },
+  },
+  {
+    id: 'the-debt-of-smoke',
+    npcDisposition: { npcId: 'npc-sable', threshold: 7 },
+  },
+  {
+    id: 'the-unfinished-case',
+    requiredFlag: 'wc-case-complete',
+  },
 ];
 
 // ─── CaseProgression ─────────────────────────────────────────────────────────

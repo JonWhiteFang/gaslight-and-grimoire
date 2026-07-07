@@ -2,7 +2,7 @@ import type { StateCreator } from 'zustand';
 import type { GameStore } from '../types';
 import type { GameSettings } from '../../types';
 import { SaveManager } from '../../engine/saveManager';
-import { loadCase } from '../../engine/narrativeEngine';
+import { fetchManifest, loadCase, loadVignette } from '../../engine/narrativeEngine';
 import { snapshotGameState } from '../../utils/gameState';
 
 const MAX_MANUAL_SAVES = 10;
@@ -12,7 +12,7 @@ export interface MetaSlice {
   updateSettings: (partial: Partial<GameSettings>) => void;
   saveGame: () => Promise<void>;
   autoSave: () => void;
-  loadGame: (saveId: string) => Promise<void>;
+  loadGame: (saveId: string) => Promise<boolean>;
 }
 
 const defaultSettings: GameSettings = {
@@ -64,28 +64,45 @@ export const createMetaSlice: StateCreator<
     }
   },
 
-  loadGame: async (saveId: string) => {
+  loadGame: async (saveId: string): Promise<boolean> => {
     const gameState = SaveManager.load(saveId);
-    if (!gameState) return;
-    set((state) => {
-      state.investigator = gameState.investigator;
-      state.currentScene = gameState.currentScene;
-      state.currentCase = gameState.currentCase;
-      state.clues = gameState.clues;
-      state.deductions = gameState.deductions;
-      state.npcs = gameState.npcs;
-      state.flags = gameState.flags;
-      state.factionReputation = gameState.factionReputation;
-      state.sceneHistory = gameState.sceneHistory;
-      state.settings = gameState.settings;
-    });
+    if (!gameState) return false;
 
-    // Restore caseData by re-loading the case JSON (Task 2: fix loadGame)
-    if (gameState.currentCase) {
-      const caseData = await loadCase(gameState.currentCase);
+    try {
+      // Re-load content BEFORE mutating store state, so a content failure
+      // (e.g. a 404) does not leave the store half-restored. Vignette saves
+      // must use the side-cases loader — loadCase would 404 on /content/cases.
+      let caseData = null;
+      if (gameState.currentCase) {
+        const manifest = await fetchManifest();
+        const entry = manifest.cases.find((c) => c.id === gameState.currentCase);
+        if (entry?.type === 'vignette') {
+          const data = await loadVignette(gameState.currentCase);
+          caseData = { ...data, meta: { ...data.meta, acts: 2, facultyDistribution: {} }, variants: [] };
+        } else {
+          caseData = await loadCase(gameState.currentCase);
+        }
+      }
+
       set((state) => {
+        state.investigator = gameState.investigator;
+        state.currentScene = gameState.currentScene;
+        state.currentCase = gameState.currentCase;
+        state.clues = gameState.clues;
+        state.deductions = gameState.deductions;
+        state.npcs = gameState.npcs;
+        state.flags = gameState.flags;
+        state.factionReputation = gameState.factionReputation;
+        state.sceneHistory = gameState.sceneHistory ?? [];
+        state.connections = gameState.connections ?? [];
+        state.settings = gameState.settings;
         state.caseData = caseData;
       });
+
+      return true;
+    } catch {
+      // Content could not be loaded — leave the store untouched and signal failure.
+      return false;
     }
   },
 });

@@ -60,6 +60,10 @@
         {
           "clueId": "amos-clue-courier-description",
           "method": "exploration"
+        },
+        {
+          "clueId": "amos-clue-red-herring-docker",
+          "method": "exploration"
         }
       ],
       "choices": [

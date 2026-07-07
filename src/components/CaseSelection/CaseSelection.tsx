@@ -10,11 +10,39 @@ export interface CaseSelectionProps {
 
 export function CaseSelection({ onSelectCase, onBack }: CaseSelectionProps) {
   const [manifest, setManifest] = useState<CaseManifest | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const flags = useStore((s) => s.flags);
 
   useEffect(() => {
-    fetchManifest().then(setManifest);
+    let cancelled = false;
+    fetchManifest()
+      .then((m) => {
+        if (!cancelled) setManifest(m);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load cases');
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  if (error) {
+    return (
+      <main className="min-h-screen bg-stone-950 text-gaslight-fog font-serif flex flex-col items-center justify-center gap-4 p-4">
+        <p role="alert" className="text-gaslight-crimson text-center max-w-md">
+          The case archive could not be loaded. Please check your connection and try again.
+        </p>
+        <button
+          type="button"
+          onClick={onBack}
+          className="min-h-[44px] px-6 py-3 bg-transparent hover:bg-stone-900 text-stone-400 hover:text-stone-200 font-serif rounded border border-stone-700 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-600"
+        >
+          Back
+        </button>
+      </main>
+    );
+  }
 
   if (!manifest) {
     return (

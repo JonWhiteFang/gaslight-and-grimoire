@@ -30,6 +30,11 @@ export function VitalityMeter({
   const [pulseState, setPulseState] = useState<PulseState>(null);
   const [descriptor, setDescriptor] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Guards against firing the Incapacitation callback more than once per
+  // zero-episode. StatusBar passes a fresh inline closure each render, so this
+  // effect re-runs on every render; without this ref, onIncapacitation would
+  // fire repeatedly while value stays 0.
+  const incapacitatedFiredRef = useRef<boolean>(false);
 
   const isCritical = value <= 2 && value > 0;
   const pct = (value / 10) * 100;
@@ -39,9 +44,15 @@ export function VitalityMeter({
     prevValueRef.current = value;
 
     if (value === 0) {
-      onIncapacitation?.();
+      if (!incapacitatedFiredRef.current) {
+        incapacitatedFiredRef.current = true;
+        onIncapacitation?.();
+      }
       return;
     }
+
+    // Value recovered above 0 — re-arm the terminal callback.
+    incapacitatedFiredRef.current = false;
 
     if (value === prev) return;
 

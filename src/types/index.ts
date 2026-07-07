@@ -221,7 +221,14 @@ export interface GameState {
   flags: Record<string, boolean>;
   factionReputation: Record<string, number>;
   sceneHistory: string[];
+  /** Evidence-board connection threads (clue-id pairs). Persisted from save v2. */
+  connections?: ClueConnection[];
   settings: GameSettings;
+}
+
+export interface ClueConnection {
+  fromId: string;
+  toId: string;
 }
 
 export interface SaveFile {

@@ -11,7 +11,7 @@ import type { GameState, SaveFile } from '../types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-export const CURRENT_SAVE_VERSION = 1;
+export const CURRENT_SAVE_VERSION = 2;
 
 const KEY_PREFIX = 'gg_save_';
 const INDEX_KEY = 'gg_save_index';
@@ -121,6 +121,9 @@ export const SaveManager = {
    *
    * Version history:
    *   0 → 1: ensure `factionReputation` exists (default {})
+   *   1 → 2: backfill `sceneHistory` and `connections` (default []) — fields
+   *          added after v1; a missing `sceneHistory` otherwise crashes
+   *          goToScene's push on the first navigation after load.
    */
   migrate(saveFile: SaveFile): SaveFile {
     if (saveFile.version === CURRENT_SAVE_VERSION) {
@@ -137,6 +140,16 @@ export const SaveManager = {
         factionReputation: state.factionReputation ?? {},
       };
       version = 1;
+    }
+
+    // v1 → v2
+    if (version < 2) {
+      state = {
+        ...state,
+        sceneHistory: state.sceneHistory ?? [],
+        connections: state.connections ?? [],
+      };
+      version = 2;
     }
 
     return {

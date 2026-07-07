@@ -39,7 +39,11 @@ export const createNarrativeSlice: StateCreator<
 
   goToScene: (sceneId) => {
     set((state) => {
-      state.sceneHistory.push(state.currentScene);
+      // Skip the empty-string sentinel present before the first scene loads,
+      // so sceneHistory only ever contains real scene ids.
+      if (state.currentScene) {
+        state.sceneHistory.push(state.currentScene);
+      }
       state.currentScene = sceneId;
     });
     // Auto-save on scene transition if configured
@@ -76,6 +80,9 @@ export const createNarrativeSlice: StateCreator<
       delete state.flags['ability-auto-succeed-vigor'];
       delete state.flags['ability-auto-succeed-influence'];
       delete state.flags['ability-veil-sight-active'];
+      // Clear the pending critical-success faculty reward so a bonus earned in a
+      // previous case cannot leak into this one (granted at completeCase time).
+      delete state.flags['last-critical-faculty'];
 
       // Clear stale state from previous case
       state.clues = {};
@@ -121,6 +128,7 @@ export const createNarrativeSlice: StateCreator<
       delete state.flags['ability-auto-succeed-vigor'];
       delete state.flags['ability-auto-succeed-influence'];
       delete state.flags['ability-veil-sight-active'];
+      delete state.flags['last-critical-faculty'];
       state.clues = {};
       state.npcs = {};
       state.deductions = {};

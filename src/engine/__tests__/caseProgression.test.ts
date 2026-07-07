@@ -286,6 +286,46 @@ describe('checkVignetteUnlocks — a-matter-of-shadows', () => {
   });
 });
 
+// ─── checkVignetteUnlocks — the other three vignettes ────────────────────────
+
+describe('checkVignetteUnlocks — all four vignettes are registered', () => {
+  it('unlocks the-rationalists-dilemma at Rationalists Circle reputation ≥ 2', () => {
+    const state = makeState({ factionReputation: { 'Rationalists Circle': 2 } });
+    expect(CaseProgression.checkVignetteUnlocks(state)).toBe('the-rationalists-dilemma');
+  });
+
+  it('unlocks the-debt-of-smoke when npc-sable disposition ≥ 7', () => {
+    const state = makeState({
+      npcs: {
+        'npc-sable': {
+          id: 'npc-sable', name: 'Sable', faction: 'Court of Smoke',
+          disposition: 7, suspicion: 0, memoryFlags: {}, isAlive: true, isAccessible: true,
+        },
+      },
+    });
+    expect(CaseProgression.checkVignetteUnlocks(state)).toBe('the-debt-of-smoke');
+  });
+
+  it('unlocks the-unfinished-case when the wc-case-complete flag is set', () => {
+    const state = makeState({
+      flags: { 'wc-case-complete': true },
+    });
+    expect(CaseProgression.checkVignetteUnlocks(state)).toBe('the-unfinished-case');
+  });
+
+  it('does not unlock the-debt-of-smoke when npc-sable disposition is below 7', () => {
+    const state = makeState({
+      npcs: {
+        'npc-sable': {
+          id: 'npc-sable', name: 'Sable', faction: 'Court of Smoke',
+          disposition: 6, suspicion: 0, memoryFlags: {}, isAlive: true, isAccessible: true,
+        },
+      },
+    });
+    expect(CaseProgression.checkVignetteUnlocks(state)).toBeNull();
+  });
+});
+
 // ─── Test 4: grantFacultyBonus caps at 20 ────────────────────────────────────
 
 describe('grantFacultyBonus — cap at 20', () => {

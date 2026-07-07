@@ -121,7 +121,12 @@ export default function App() {
 
   const handleLoadSave = useCallback(
     async (saveId: string) => {
-      await loadGame(saveId);
+      const ok = await loadGame(saveId);
+      if (!ok) {
+        setLoadError('This save could not be loaded — it may be corrupted or from an incompatible version.');
+        setScreen('title');
+        return;
+      }
       setScreen('game');
     },
     [loadGame],

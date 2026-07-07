@@ -30,6 +30,11 @@ export function ComposureMeter({
   const [pulseState, setPulseState] = useState<PulseState>(null);
   const [descriptor, setDescriptor] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Guards against firing the Breakdown callback more than once per zero-episode.
+  // The parent (StatusBar) passes a fresh inline closure each render, so this
+  // effect re-runs on every render; without this ref, onBreakdown would fire
+  // repeatedly while value stays 0, polluting sceneHistory and autosaves.
+  const breakdownFiredRef = useRef<boolean>(false);
 
   const isCritical = value <= 2 && value > 0;
   const pct = (value / 10) * 100;
@@ -39,9 +44,15 @@ export function ComposureMeter({
     prevValueRef.current = value;
 
     if (value === 0) {
-      onBreakdown?.();
+      if (!breakdownFiredRef.current) {
+        breakdownFiredRef.current = true;
+        onBreakdown?.();
+      }
       return;
     }
+
+    // Value recovered above 0 — re-arm the terminal callback.
+    breakdownFiredRef.current = false;
 
     if (value === prev) return;
 

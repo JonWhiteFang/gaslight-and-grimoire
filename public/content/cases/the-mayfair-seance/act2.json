@@ -528,6 +528,17 @@
           }
         },
         {
+          "id": "ms-choice-servants-study",
+          "text": "Mrs Cole mentions the study was left unlocked in the chaos. Slip upstairs and search it.",
+          "outcomes": {
+            "critical": "ms-act2-ashworth-study",
+            "success": "ms-act2-ashworth-study",
+            "partial": "ms-act2-ashworth-study",
+            "failure": "ms-act2-ashworth-study",
+            "fumble": "ms-act2-ashworth-study"
+          }
+        },
+        {
           "id": "ms-choice-servants-return",
           "text": "The receipt is evidence. Return to the main investigation.",
           "outcomes": {

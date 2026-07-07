@@ -1198,6 +1198,17 @@
           }
         },
         {
+          "id": "wc-choice-street-contacts-lamplighter",
+          "text": "A woman who knows how to move unseen — that is Lamplighter tradecraft. Send word to Constable Finch and arrange a meeting.",
+          "outcomes": {
+            "critical": "wc-act2-lamplighter-contact",
+            "success": "wc-act2-lamplighter-contact",
+            "partial": "wc-act2-lamplighter-contact",
+            "failure": "wc-act2-lamplighter-contact",
+            "fumble": "wc-act2-lamplighter-contact"
+          }
+        },
+        {
           "id": "wc-choice-street-contacts-return",
           "text": "Good intelligence. Return to the hub and plan your next move.",
           "outcomes": {
