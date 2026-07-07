@@ -1,8 +1,8 @@
-# Design: Rebuild `devdocs/` as a Lean, Accurate Baseline
+# Design: Rebuild Documentation as a Lean, Accurate Baseline under `docs/`
 
 **Date:** 2026-07-07
 **Status:** Approved (pending spec review)
-**Topic:** Delete the current `devdocs/` documentation tree and rebuild it from scratch as a small, high-signal, code-accurate doc set.
+**Topic:** Delete the current `devdocs/` documentation tree and rebuild it from scratch as a small, high-signal, code-accurate doc set living under `docs/`.
 
 ---
 
@@ -17,6 +17,12 @@ as open, stale test counts, references that no longer match the code).
 The goal is a **fresh, accurate baseline**: a lean core of ~5 files that faithfully
 describe the code *as it is today* and are easy to keep current. Every factual
 claim must be verified against the live code, not copied from the old docs.
+
+All documentation consolidates under **`docs/`** — there will be no separate
+`devdocs/` folder. This sits alongside the existing design bible
+(`docs/Gaslight_&_Grimoire_design.md`). GitHub Pages deploys from the Vite `dist`
+build artifact via Actions (`.github/workflows/deploy.yml`), **not** from `/docs`,
+so placing docs there does not affect the published site.
 
 ---
 
@@ -37,15 +43,18 @@ claim must be verified against the live code, not copied from the old docs.
 
 ---
 
-## 3. The New Doc Set (5 files, all under `devdocs/`)
+## 3. The New Doc Set (5 files, all under `docs/`)
+
+The design bible `docs/Gaslight_&_Grimoire_design.md` remains in place. The 5 new
+files are added alongside it under `docs/`:
 
 | File | Purpose | Answers |
 |---|---|---|
-| `README.md` | Orientation + map to the other 4 docs and to `docs/Gaslight_&_Grimoire_design.md` (the vision bible) | "Where do I start?" |
-| `architecture.md` | Component hierarchy, six store slices + actions, 10 engine modules, runtime data flow, cross-slice couplings, determinism / `Date.now()` notes | "How does the system fit together?" |
-| `engine-reference.md` | Per-module function signatures + behavior for every file in `src/engine/` | "How do I call/change the engine?" |
-| `content-authoring.md` | Case/vignette JSON schemas, full `Condition` & `Effect` catalog, validation workflow, authoring rules, **audio asset reference (folds in `AUDIO_ASSET_LIST.md`)** | "How do I write a case?" |
-| `status.md` | Current state only: what's built, content inventory, live test baseline. **Absorbs the still-true substance of `GAME_DESIGN_ANALYSIS.md`.** No forward-looking gaps section. | "What exists right now?" |
+| `docs/README.md` | Orientation + map to the other 4 docs and to `docs/Gaslight_&_Grimoire_design.md` (the vision bible) | "Where do I start?" |
+| `docs/architecture.md` | Component hierarchy, six store slices + actions, 10 engine modules, runtime data flow, cross-slice couplings, determinism / `Date.now()` notes | "How does the system fit together?" |
+| `docs/engine-reference.md` | Per-module function signatures + behavior for every file in `src/engine/` | "How do I call/change the engine?" |
+| `docs/content-authoring.md` | Case/vignette JSON schemas, full `Condition` & `Effect` catalog, validation workflow, authoring rules, **audio asset reference (folds in `AUDIO_ASSET_LIST.md`)** | "How do I write a case?" |
+| `docs/status.md` | Current state only: what's built, content inventory, live test baseline. **Absorbs the still-true substance of `GAME_DESIGN_ANALYSIS.md`.** No forward-looking gaps section. | "What exists right now?" |
 
 ### Deliberately dropped from the old set
 - The `Req X.Y` numbering scheme (old `specs/requirements.md`).
@@ -108,7 +117,8 @@ mangling surrounding text or leaving dangling punctuation.
 ## 6. CLAUDE.md Update
 
 - Rewrite the "Deep Documentation (devdocs/)" section (currently ~lines 7–51,
-  listing all 34 deleted files) to point at the 5 new files with one-line hooks.
+  listing all 34 deleted files) to a "Documentation (docs/)" section pointing at
+  the 5 new files (and the design bible) with one-line hooks.
 - Fix the two other spots that reference `devdocs/...` paths and the stale
   "334 tests across 29 files" count (update to the real, freshly-run number).
 - Remove references to the now-deleted `GAME_DESIGN_ANALYSIS.md` and
@@ -134,7 +144,7 @@ mangling surrounding text or leaving dangling punctuation.
 1. Run `npm run test:run` to capture the **before** baseline (test count).
 2. Read the live code to gather accurate inventories (engine, store, components,
    types, content).
-3. Write the 5 new `devdocs/` files.
+3. Write the 5 new files under `docs/`.
 4. Delete the old `devdocs/` tree (34 files).
 5. Strip `Req X.Y` references from the ~37 source files.
 6. Run `npm run test:run` again — confirm the passing-test count is unchanged.
@@ -147,11 +157,14 @@ mangling surrounding text or leaving dangling punctuation.
 
 ## 9. Success Criteria
 
-- `devdocs/` contains exactly 5 files, each high-signal and code-accurate.
+- The `devdocs/` folder no longer exists; the 5 new files live under `docs/`
+  alongside the design bible.
+- `docs/` contains exactly the 5 new files plus `Gaslight_&_Grimoire_design.md`
+  (and the `docs/superpowers/specs/` design doc), each high-signal and code-accurate.
 - No doc claim contradicts the live code (spot-verified against `src/` and
   `public/content/`).
 - `grep -rE "Req [0-9]" src/` returns nothing.
 - `npm run test:run` passing-test count is identical before and after.
-- No file (docs or code) references a deleted path (`devdocs/archaeology/...`,
-  `GAME_DESIGN_ANALYSIS.md`, `AUDIO_ASSET_LIST.md`, old `devdocs/specs/...`).
+- No file (docs or code) references a deleted path (`devdocs/...`,
+  `GAME_DESIGN_ANALYSIS.md`, `AUDIO_ASSET_LIST.md`).
 - CLAUDE.md's documentation section maps cleanly to the 5 new files.
