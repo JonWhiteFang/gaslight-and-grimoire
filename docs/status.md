@@ -96,11 +96,14 @@ nothing.
 
 As of 2026-07-07, running `npm run test:run`:
 
-- **Tests: 334 passed (334)**
-- **Test Files: 29 passed (29)**
+- **Tests: 368 passed (368)**
+- **Test Files: 30 passed (30)**
 
 The suite includes property-based tests using fast-check (six
 `*.property.test.ts` files covering the dice engine, narrative engine, deduction
 formation, NPC bounds, save manager, and slice isolation). Content is validated
-by `node scripts/validateCase.mjs`, which checks all seven cases for broken
-scene-graph edges and missing clue references.
+by `node scripts/validateCase.mjs`, which delegates to the shared
+`src/engine/contentValidation.ts` module (the same one the runtime
+`validateContent` uses) — checking scene-graph edges, clue references, condition
+targets, variant structure, `npcEffect` refs, encounter-round edges, and (CLI
+only) reachability across all seven cases.

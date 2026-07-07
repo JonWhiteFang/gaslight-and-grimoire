@@ -65,11 +65,11 @@ gating, choice processing, and the encounter system.
 
 **Validation**
 
-- `validateContent(caseData: CaseData): ValidationResult` — checks the scene graph for broken edges: choice-outcome scene references (variant ids count as valid targets), `requiresClue`/`advantageIf`/`cluesAvailable` clue references, and outcome-tier completeness (a faculty check with a difficulty must define all five tiers). Logs each error via `console.error`; returns `{ valid, errors }`.
+- `validateContent(caseData: CaseData): ValidationResult` — delegates to the shared `contentValidation.validateBundle` (errors only; reachability is CLI-only). Checks scene-graph edges, clue/npc references, condition targets, variant structure, `npcEffect` refs, encounter-round edges, and tier completeness (incl. `dynamicDifficulty`). Logs each error via `console.error`; returns `{ valid, errors }`. See the `contentValidation.ts` section below.
 
 **Conditions & scene resolution** (pure)
 
-- `evaluateConditions(conditions: Condition[], state: GameState): boolean` — AND logic; empty array is `true`. Supports `hasClue` (must be revealed), `hasDeduction`, `hasFlag` (bare = `=== true`, or matches `value`), `facultyMin`, `archetypeIs`, `npcDisposition` (`>=`), `npcSuspicion` (tier→range: normal 0–2, evasive 3–5, concealing 6–8, hostile 9–10), `factionReputation` (`>=`), `npcMemoryFlag`.
+- `evaluateConditions(conditions: Condition[], state: GameState): boolean` — AND logic; empty array is `true`. Supports `hasClue` (must be revealed), `hasDeduction`, `hasFlag` (bare = flag is truthy; with `value`, compares `Boolean(flag) === value`, so `value:false` matches an unset flag), `facultyMin`, `archetypeIs`, `npcDisposition` (`>=`), `npcSuspicion` (tier→range: normal 0–2, evasive 3–5, concealing 6–8, hostile 9–10), `factionReputation` (`>=`), `npcMemoryFlag`.
 - `resolveScene(sceneId: string, state: GameState, caseData: CaseData): SceneNode` — returns the first variant whose `variantOf === sceneId` and whose `variantCondition` is met, else the base scene. Throws if the base scene is missing.
 - `canDiscoverClue(discovery: ClueDiscovery, state: GameState): boolean` — pure gate: `requiresFaculty` (score `>=` minimum) and `requiresDeduction` (deduction must exist) must both pass.
 
@@ -84,6 +84,14 @@ gating, choice processing, and the encounter system.
 - `processEncounterChoice(choice: Choice, encounterState: EncounterState, state: GameState, actions: EngineActions): { encounterState: EncounterState; result: ChoiceResult }` — runs the choice's faculty check (advantage from a revealed occult-type `advantageIf` clue, any revealed `advantageIf` clue, or active Veil Sight on a `lore` check). On failure/fumble applies `choice.encounterDamage`: **supernatural = dual-axis** (both composure and vitality); **mundane = single axis** (composure if set, else vitality). Sets `last-critical-faculty` on critical, applies `npcEffect`, advances `currentRound`, marks `isComplete` when rounds are exhausted, and calls `goToScene` only once complete.
 - `getEncounterChoices(round: EncounterRound, state: GameState): Array<Choice & { _hasAdvantage?: boolean }>` — filters a round's choices by their derived conditions (`requiresClue`/`requiresDeduction`/`requiresFlag`/`requiresFaculty`); escape-path choices (`isEscapePath`) are included whenever their conditions are met. Non-escape choices are annotated `_hasAdvantage: true` when a revealed occult clue grants it; escape-path choices are always annotated `_hasAdvantage: false` regardless of any `advantageIf`.
 
+## contentValidation.ts
+
+Pure content validator shared by the runtime `validateContent` and the CLI (`scripts/validateCase.ts` via `vite-node`), so the two can't drift. Operates on an in-memory `ContentBundle` (arrays of scenes/variants/clues/npcs + `firstScene` + `sharedSceneIds`), independent of how content was loaded.
+
+- `validateBundle(bundle: ContentBundle, options?: { includeReachability?: boolean }): { errors: string[]; warnings: string[] }` — errors: choice-outcome edges (base/variant/shared ids valid), `requiresClue`/`advantageIf`/`cluesAvailable`/`onEnter` discoverClue clue refs, `onEnter` npc refs, `npcEffect.npcId` (incl. inside encounter rounds and `worseAlternative`), condition targets (clue/npc/faculty/archetype/faction/suspicion-tier allowlists; `hasFlag value:false` allowed), variant `variantOf`+`variantCondition` presence, encounter-round edge + tier recursion, tier completeness (fixed **or** `dynamicDifficulty`), and `clue.sceneSource`. With `includeReachability`, warns on scenes unreachable from `firstScene` and clues no reachable scene can discover.
+- `computeReachableScenes(bundle: ContentBundle): Set<string>` — BFS from `firstScene` over all choice + encounter outcome edges.
+- `computeMaxDisposition(bundle: ContentBundle, npcId: string): number` — start disposition + every positive reachable disposition delta (onEnter + `npcEffect`); used to check whether a disposition-gated vignette threshold is attainable.
+
 ## buildDeduction.ts
 
 Pure builder that constructs a `Deduction` from a set of clue ids.
@@ -96,7 +104,7 @@ End-of-case logic: faculty bonus and vignette unlocks.
 
 - `interface CaseCompletionResult { facultyBonusGranted: Faculty | null; vignetteUnlocked: string | null }`.
 - `CaseProgression.completeCase(caseId: string, state: GameState, actions: EngineActions): CaseCompletionResult` — grants `+1` to the faculty stored in the `last-critical-faculty` flag (when it names a valid faculty), then checks vignette unlocks and, if one unlocks, sets the `vignette-unlocked-{id}` flag. Returns what was granted/unlocked.
-- `CaseProgression.checkVignetteUnlocks(state: GameState): string | null` — returns the id of the first not-yet-unlocked vignette whose condition is met. Registered conditions: `a-matter-of-shadows` (Lamplighters reputation ≥ 2), `the-rationalists-dilemma` (Rationalists Circle reputation ≥ 2), `the-debt-of-smoke` (NPC `npc-sable` disposition ≥ 7), `the-unfinished-case` (flag `wc-case-complete`).
+- `CaseProgression.checkVignetteUnlocks(state: GameState): string | null` — returns the id of the first not-yet-unlocked vignette whose condition is met. Registered conditions: `a-matter-of-shadows` (Lamplighters reputation ≥ 2), `the-rationalists-dilemma` (Rationalists Circle reputation ≥ 2), `the-debt-of-smoke` (persisted flag `wc-court-deal-made`), `the-unfinished-case` (flag `wc-case-complete`).
 - `CaseProgression.grantFacultyBonus(faculty: Faculty, actions: EngineActions): void` — `actions.updateFaculty(faculty, min(20, current + 1))`.
 
 ## hintEngine.ts
