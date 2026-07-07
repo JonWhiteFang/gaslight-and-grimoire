@@ -99,6 +99,21 @@ describe('metaSlice.loadGame — result signalling', () => {
     expect(ok).toBe(true);
     expect(useStore.getState().caseData?.meta.id).toBe('test-case');
   });
+
+  it('restores visitedScenes so an already-entered scene does not re-fire onEnter on load (F-006)', async () => {
+    useStore.setState({
+      investigator: baseInvestigator(), currentScene: 's1', currentCase: 'test-case',
+      clues: {}, deductions: {}, npcs: {}, flags: {}, factionReputation: {},
+      sceneHistory: [], connections: [], visitedScenes: ['s1'],
+    });
+    SaveManager.save('visited', snapshotGameState(useStore.getState()));
+
+    // Corrupt the live value, then load — it must come back from the save.
+    useStore.setState({ visitedScenes: [] });
+    const ok = await useStore.getState().loadGame('visited');
+    expect(ok).toBe(true);
+    expect(useStore.getState().visitedScenes).toContain('s1');
+  });
 });
 
 describe('metaSlice.loadGame — vignette save restoration', () => {

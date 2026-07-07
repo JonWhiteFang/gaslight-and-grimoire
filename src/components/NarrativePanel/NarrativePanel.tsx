@@ -16,7 +16,6 @@ import { OutcomeBanner } from './OutcomeBanner';
 import { ClueDiscoveryCard } from './ClueDiscoveryCard';
 import { SceneCluePrompts } from './SceneCluePrompts';
 import { EffectFeedback } from './EffectFeedback';
-import { generateEffectMessages } from '../../engine/effectMessages';
 import type { Clue } from '../../types';
 
 export function NarrativePanel() {
@@ -26,16 +25,15 @@ export function NarrativePanel() {
   const lastCheckResult = useStore((s) => s.lastCheckResult);
   const setCheckResult = useStore((s) => s.setCheckResult);
   const discoverClue = useStore((s) => s.discoverClue);
-  const applyEffects = useStore((s) => s.applyEffects);
   const clues = useStore((s) => s.clues);
-  const npcs = useStore((s) => s.npcs);
   const investigator = useStore((s) => s.investigator);
 
   const scene = useCurrentScene();
   const prevSceneRef = useRef('');
 
-  // Effect feedback state
-  const [effectMessages, setEffectMessages] = useState<string[]>([]);
+  // onEnter effect feedback is produced by goToScene (once per scene) and read
+  // from the store, so re-mounting this panel never re-applies or re-shows it.
+  const effectMessages = useStore((s) => s.lastEffectMessages);
 
   // Clue discovery card state
   const [discoveredClue, setDiscoveredClue] = useState<Clue | null>(null);
@@ -56,19 +54,13 @@ export function NarrativePanel() {
     }
   }, [lastCheckResult]);
 
-  // Apply onEnter effects and auto-discover automatic + dialogue clues on scene change
+  // Auto-discover automatic + dialogue clues on scene change. onEnter effects
+  // (and their feedback messages) are applied by goToScene, not here — see F-006.
   useEffect(() => {
     if (!scene || currentSceneId === prevSceneRef.current) return;
     prevSceneRef.current = currentSceneId;
 
     trackActivity({ type: 'sceneChange' });
-
-    if (scene.onEnter && scene.onEnter.length > 0) {
-      applyEffects(scene.onEnter);
-      setEffectMessages(generateEffectMessages(scene.onEnter, npcs));
-    } else {
-      setEffectMessages([]);
-    }
 
     const gameState = buildGameState(useStore.getState());
     let lastDiscoveredId: string | null = null;
@@ -90,7 +82,7 @@ export function NarrativePanel() {
       const timer = setTimeout(() => setClueCardVisible(false), 4000);
       return () => clearTimeout(timer);
     }
-  }, [currentSceneId, scene, discoverClue, applyEffects, npcs]);
+  }, [currentSceneId, scene, discoverClue]);
 
   function handleBannerDismiss() {
     setBannerVisible(false);

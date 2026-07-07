@@ -159,6 +159,56 @@ describe('validateBundle — faculty-check tier completeness', () => {
   });
 });
 
+// ─── Non-check choice must have a navigable outcome (F-022) ────────────────────
+
+describe('validateBundle — non-check choice outcomes', () => {
+  it('flags a non-check choice with no success or critical outcome', () => {
+    const bundle = makeBundle({
+      scenes: [makeScene({ id: 's1', choices: [makeChoice({ id: 'ch-dead', outcomes: {} as Choice['outcomes'] })] })],
+    });
+    const { errors } = validateBundle(bundle);
+    expect(errors.some((e) => e.includes('ch-dead') && /success|critical/.test(e))).toBe(true);
+  });
+
+  it('accepts a non-check choice that provides a success outcome', () => {
+    const bundle = makeBundle({
+      scenes: [
+        makeScene({ id: 's1', choices: [makeChoice({ id: 'ch-ok', outcomes: { success: 's2' } as Choice['outcomes'] })] }),
+        makeScene({ id: 's2' }),
+      ],
+    });
+    const { errors } = validateBundle(bundle);
+    expect(errors).toEqual([]);
+  });
+
+  it('accepts a non-check choice that provides only a critical outcome', () => {
+    const bundle = makeBundle({
+      scenes: [
+        makeScene({ id: 's1', choices: [makeChoice({ id: 'ch-crit', outcomes: { critical: 's2' } as Choice['outcomes'] })] }),
+        makeScene({ id: 's2' }),
+      ],
+    });
+    const { errors } = validateBundle(bundle);
+    expect(errors).toEqual([]);
+  });
+
+  it('does not apply the non-check rule to faculty checks (they use tier completeness)', () => {
+    // A faculty check with all tiers present must NOT be flagged for lacking a
+    // "success/critical fallback" — that rule is for non-check choices only.
+    const bundle = makeBundle({
+      scenes: [
+        makeScene({ id: 's1', choices: [makeChoice({
+          id: 'ch-check', faculty: 'reason', difficulty: 10,
+          outcomes: { critical: 's2', success: 's2', partial: 's2', failure: 's2', fumble: 's2' } as Choice['outcomes'],
+        })] }),
+        makeScene({ id: 's2' }),
+      ],
+    });
+    const { errors } = validateBundle(bundle);
+    expect(errors).toEqual([]);
+  });
+});
+
 // ─── onEnter effect target errors ─────────────────────────────────────────────
 
 describe('validateBundle — onEnter effect targets', () => {

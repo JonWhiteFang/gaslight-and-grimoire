@@ -301,8 +301,17 @@ export function computeChoiceResult(
     };
   }
 
+  const fallbackScene = choice.outcomes['success'] ?? choice.outcomes['critical'];
+  if (!fallbackScene) {
+    // A non-check choice must always name a destination. Without this guard,
+    // navigation to `undefined` yields a blank scene (resolveScene throws,
+    // useCurrentScene swallows it). Fail loudly at the source instead (F-022).
+    throw new Error(
+      `[NarrativeEngine] Choice "${choice.id}" has no dice check and no "success"/"critical" outcome — nowhere to navigate.`,
+    );
+  }
   return {
-    nextSceneId: choice.outcomes['success'] ?? choice.outcomes['critical'],
+    nextSceneId: fallbackScene,
     tier: 'success',
   };
 }
@@ -432,6 +441,20 @@ export function processEncounterChoice(
   const currentRound = encounterState.rounds[encounterState.currentRound];
   const isSupernatural = currentRound?.isSupernatural ?? false;
 
+  // Escape paths are terminal: they leave the encounter immediately for their
+  // fixed outcome scene, rather than advancing to the next round. Without this
+  // an escape choice in a non-final round silently continues the fight (F-004).
+  if (choice.isEscapePath) {
+    const escapeScene = choice.outcomes['success'] ?? choice.outcomes['critical'];
+    if (escapeScene) {
+      actions.goToScene(escapeScene);
+    }
+    return {
+      encounterState: { ...encounterState, isComplete: true },
+      result: { nextSceneId: escapeScene, tier: 'success' },
+    };
+  }
+
   // Determine Advantage: granted by Occult Fragment clues
   const hasOccultAdvantage =
     choice.advantageIf?.some((clueId) => {
@@ -520,19 +543,21 @@ export function processEncounterChoice(
 }
 
 /**
- * Returns the filtered choices for a given encounter round.
+ * Returns the choices available for a given encounter round.
  *
  * - Filters choices using `evaluateConditions`
- * - Grants Advantage on choices where the investigator holds a relevant Occult Fragment clue
  * - Always includes escape path choices when their flag condition is met
  *
- * Returns an array of choices with an `_hasAdvantage` annotation (via a wrapper type).
+ * The occult/Veil-Sight Advantage that applies to the actual roll is computed
+ * in `processEncounterChoice` (the single source of truth for the roll), so this
+ * function no longer annotates it — the former `_hasAdvantage` field had no
+ * consumer and could disagree with the real rule (F-027).
  */
 export function getEncounterChoices(
   round: EncounterRound,
   state: GameState,
-): Array<Choice & { _hasAdvantage?: boolean }> {
-  const filtered: Array<Choice & { _hasAdvantage?: boolean }> = [];
+): Choice[] {
+  const filtered: Choice[] = [];
 
   for (const choice of round.choices) {
     // Evaluate standard conditions
@@ -556,24 +581,14 @@ export function getEncounterChoices(
 
     const conditionsMet = evaluateConditions(conditions, state);
 
-    // Escape paths are always included when their flag condition is met
+    // Escape paths are always included when their flag condition is met.
     if (choice.isEscapePath) {
-      if (conditionsMet) {
-        filtered.push({ ...choice, _hasAdvantage: false });
-      }
+      if (conditionsMet) filtered.push(choice);
       continue;
     }
 
     if (!conditionsMet) continue;
-
-    // Check for Occult Fragment advantage
-    const hasOccultAdvantage =
-      choice.advantageIf?.some((clueId) => {
-        const clue = state.clues[clueId];
-        return clue?.isRevealed && clue.type === 'occult';
-      }) ?? false;
-
-    filtered.push({ ...choice, _hasAdvantage: hasOccultAdvantage });
+    filtered.push(choice);
   }
 
   return filtered;

@@ -223,6 +223,12 @@ export interface GameState {
   sceneHistory: string[];
   /** Evidence-board connection threads (clue-id pairs). Persisted from save v2. */
   connections?: ClueConnection[];
+  /**
+   * Scene ids whose `onEnter` effects have already been applied this playthrough.
+   * Gates onEnter to fire exactly once per scene, so revisiting (back button) or
+   * reloading a save cannot re-apply — or "farm" — its effects. Persisted from save v3.
+   */
+  visitedScenes?: string[];
   settings: GameSettings;
 }
 

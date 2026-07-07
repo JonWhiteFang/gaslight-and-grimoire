@@ -2,7 +2,8 @@ import type { StateCreator } from 'zustand';
 import type { GameStore } from '../types';
 import type { CaseData, OutcomeTier } from '../../types';
 import { CaseProgression, type CaseCompletionResult } from '../../engine/caseProgression';
-import { loadCase, loadVignette, validateContent } from '../../engine/narrativeEngine';
+import { loadCase, loadVignette, resolveScene, validateContent } from '../../engine/narrativeEngine';
+import { generateEffectMessages } from '../../engine/effectMessages';
 import { snapshotGameState } from '../../utils/gameState';
 
 export interface CheckResult {
@@ -16,6 +17,10 @@ export interface NarrativeSlice {
   currentScene: string;
   currentCase: string;
   sceneHistory: string[];
+  /** Scene ids whose onEnter effects have already fired this playthrough (F-006). */
+  visitedScenes: string[];
+  /** Feedback messages from the most recent scene's onEnter effects (transient). */
+  lastEffectMessages: string[];
   lastCheckResult: CheckResult | null;
   caseData: CaseData | null;
   goToScene: (sceneId: string) => void;
@@ -34,6 +39,8 @@ export const createNarrativeSlice: StateCreator<
   currentScene: '',
   currentCase: '',
   sceneHistory: [],
+  visitedScenes: [],
+  lastEffectMessages: [],
   lastCheckResult: null,
   caseData: null,
 
@@ -46,6 +53,44 @@ export const createNarrativeSlice: StateCreator<
       }
       state.currentScene = sceneId;
     });
+
+    // Apply the scene's onEnter effects exactly once per playthrough. Gating on
+    // visitedScenes means revisiting (back button) or reloading a save cannot
+    // re-apply — or "farm" — a scene's composure/vitality/flag effects (F-006).
+    // Owning this here (rather than in a NarrativePanel effect) also decouples
+    // the state transition's consequences from which component happens to be
+    // mounted (F-008).
+    const { caseData, visitedScenes } = get();
+    const alreadyVisited = visitedScenes.includes(sceneId);
+
+    if (caseData && !alreadyVisited) {
+      let onEnter = null;
+      try {
+        onEnter = resolveScene(sceneId, snapshotGameState(get()), caseData).onEnter ?? null;
+      } catch {
+        // Scene not in caseData (e.g. a shared scene not yet indexed) — nothing to apply.
+        onEnter = null;
+      }
+      if (onEnter && onEnter.length > 0) {
+        get().applyEffects(onEnter);
+        const messages = generateEffectMessages(onEnter, get().npcs);
+        set((state) => {
+          state.lastEffectMessages = messages;
+          state.visitedScenes.push(sceneId);
+        });
+      } else {
+        set((state) => {
+          state.lastEffectMessages = [];
+          state.visitedScenes.push(sceneId);
+        });
+      }
+    } else {
+      // Revisit (or no case loaded): no effects re-fire, and no stale feedback lingers.
+      set((state) => {
+        state.lastEffectMessages = [];
+      });
+    }
+
     // Auto-save on scene transition if configured
     if (get().settings.autoSaveFrequency === 'scene') {
       get().autoSave();
@@ -75,6 +120,8 @@ export const createNarrativeSlice: StateCreator<
       state.caseData = data;
       state.currentCase = data.meta.id;
       state.sceneHistory = [];
+      state.visitedScenes = [];
+      state.lastEffectMessages = [];
       state.investigator.abilityUsed = false;
       delete state.flags['ability-auto-succeed-reason'];
       delete state.flags['ability-auto-succeed-vigor'];
@@ -123,6 +170,8 @@ export const createNarrativeSlice: StateCreator<
       state.caseData = asCaseData;
       state.currentCase = data.meta.id;
       state.sceneHistory = [];
+      state.visitedScenes = [];
+      state.lastEffectMessages = [];
       state.investigator.abilityUsed = false;
       delete state.flags['ability-auto-succeed-reason'];
       delete state.flags['ability-auto-succeed-vigor'];
