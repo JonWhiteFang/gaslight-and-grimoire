@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Gaslight and Grimoire">
+  <rect width="64" height="64" rx="12" fill="#1A1A2E"/>
+  <!-- gas lamp post -->
+  <rect x="30" y="34" width="4" height="20" rx="1" fill="#B5860D"/>
+  <rect x="24" y="52" width="16" height="4" rx="2" fill="#B5860D"/>
+  <!-- lantern housing -->
+  <path d="M22 22 h20 l-3 12 h-14 z" fill="#2C3E50" stroke="#B5860D" stroke-width="1.5"/>
+  <rect x="24" y="16" width="16" height="6" rx="2" fill="#2C3E50" stroke="#B5860D" stroke-width="1.5"/>
+  <!-- flame glow -->
+  <circle cx="32" cy="28" r="7" fill="#D4A853" opacity="0.35"/>
+  <!-- flame -->
+  <path d="M32 21 c3 3 4 5 4 7 a4 4 0 0 1 -8 0 c0 -2 1 -4 4 -7 z" fill="#D4A853"/>
+  <path d="M32 25 c1.4 1.4 2 2.6 2 3.8 a2 2 0 0 1 -4 0 c0 -1.2 0.6 -2.4 2 -3.8 z" fill="#C9A84C"/>
+</svg>

@@ -3,6 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -12,10 +14,14 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  # GitHub recommends `false` for Pages so a rapid second push doesn't abort a
+  # live deployment mid-flight.
+  cancel-in-progress: false
 
 jobs:
-  build:
+  # Correctness gate: content validation + full test suite. `build` (and
+  # therefore `deploy`) depends on this, so a failing test blocks the deploy.
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,6 +36,22 @@ jobs:
       - name: Validate case content
         run: node scripts/validateCase.mjs
 
+      - name: Run test suite
+        run: npm run test:run
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
       - name: Audit dependencies
         run: npm audit --audit-level=high
 
@@ -41,6 +63,8 @@ jobs:
 
   deploy:
     needs: build
+    # Deploy only on pushes to main / manual dispatch — never from a PR build.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
