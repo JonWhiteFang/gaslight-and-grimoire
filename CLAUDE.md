@@ -4,51 +4,16 @@
 
 A browser-based choose-your-own-adventure game set in Victorian London where magic exists beneath the rational world. Players investigate branching mysteries blending Sherlock Holmes-style deduction with D&D-style faculty checks and dice mechanics. Built with React 18, Zustand, Tailwind CSS, Framer Motion, and Howler.js. Deployed to GitHub Pages.
 
-## Deep Documentation (devdocs/)
+## Documentation (docs/)
 
-Comprehensive archaeology and evolution docs live under `devdocs/`. **Read these before making significant changes.**
+Project docs live under `docs/`. Read the relevant one before significant changes:
 
-### Architecture & Analysis (read first for orientation)
-- `devdocs/archaeology/small_summary.md` — Non-technical project summary, what's complete vs evolving
-- `devdocs/archaeology/intro2codebase.md` — Data flow diagrams, key abstractions, store patterns, determinism gaps
-- `devdocs/archaeology/intro2deployment.md` — Build, deploy, CI/CD, content assets, environment
-- `devdocs/archaeology/architecture_analysis.md` — Entry points, data models, contracts, patterns, what doesn't make sense
-- `devdocs/archaeology/module_discovery.md` — Module boundaries, coupling/cohesion, dependency graph, boundary violations
-
-### Execution Traces (read for specific subsystem understanding)
-- `devdocs/archaeology/traces/trace_01_case_loading.md` — App → loadAndStartCase → fetch → store → goToScene
-- `devdocs/archaeology/traces/trace_02_scene_navigation.md` — goToScene → NarrativePanel → onEnter effects → clue discovery
-- `devdocs/archaeology/traces/trace_03_choice_processing.md` — ChoicePanel → processChoice → diceEngine → store
-- `devdocs/archaeology/traces/trace_04_evidence_board.md` — Connection flow → buildDeduction → Reason check
-- `devdocs/archaeology/traces/trace_05_npc_faction_propagation.md` — adjustDisposition → adjustReputation cross-slice
-- `devdocs/archaeology/traces/trace_06_save_load.md` — save/autosave/load → SaveManager → localStorage
-- `devdocs/archaeology/traces/trace_07_hint_system.md` — hintEngine singleton → HintButton
-- `devdocs/archaeology/traces/trace_08_encounter_system.md` — startEncounter → processEncounterChoice → EncounterPanel
-- `devdocs/archaeology/traces/trace_09_accessibility_settings.md` — SettingsPanel → AccessibilityProvider → DOM
-- `devdocs/archaeology/traces/trace_10_audio_pipeline.md` — Store slices → AudioManager/AmbientAudio → Howler
-
-### Concept Inventories
-- `devdocs/archaeology/concepts/technical_concepts_list.md` — All technical concepts with implementation status
-- `devdocs/archaeology/concepts/design_concepts_list.md` — Game design concepts with implementation status
-- `devdocs/archaeology/concepts/missing_concepts_list.md` — **Gaps ranked by severity** (critical/high/medium/low)
-- `devdocs/archaeology/concept_mappings.md` — Concept → file mapping with coverage, rationale, edge cases
-
-### Foundations (code-inferred vs doc-inferred)
-- `devdocs/archaeology/foundations/` — What the code actually does, implicit design principles, inferred requirements
-- `devdocs/foundations/` — What the docs claim, with "Docs vs Code" delta tables at the end of each file
-
-### Formal Specs (migrated from the former Kiro spec)
-- `devdocs/specs/requirements.md` — 19 requirements / 95 EARS-style acceptance criteria + glossary. Canonical home of the `Req X.Y` numbering that ~41 source files and property tests reference.
-- `devdocs/specs/design.md` — Technical design snapshot: architecture + `processChoice` mermaid diagrams and consolidated engine interface signatures.
-
-### Evolution & Roadmap (read before starting new work)
-- `devdocs/evolution/implementation_roadmap.md` — **The execution plan**: Phases A–E with dependencies, success criteria, verification (Phases A–D and most of E complete)
-- `devdocs/evolution/gap_analysis.md` — Current vs desired state; the live residue is the "Unknowns" section (mobile perf, save-file size at scale, cross-case persistence)
-- `devdocs/evolution/refactoring_opportunities.md` — Highest-ROI refactors with effort/risk/benefit (R11 determinism/DI is the one still open)
-
-### Cleanup
-- `devdocs/archaeology/cleanup_inventory.md` — What's safe to remove vs what looks dead but must be kept
-- `devdocs/archaeology/5_things_or_not.md` — Top improvements with exact code locations and first steps
+- `docs/README.md` — orientation and doc map (start here)
+- `docs/architecture.md` — component hierarchy, store slices, engine modules, data flow, cross-slice couplings, determinism notes
+- `docs/engine-reference.md` — per-module engine API (signatures + behavior)
+- `docs/content-authoring.md` — case/vignette JSON schemas, Condition/Effect catalogs, validation, audio asset reference
+- `docs/status.md` — current state: systems present, content inventory, test baseline
+- `docs/Gaslight_&_Grimoire_design.md` — the original design bible (vision, world, mechanics, narrative intent)
 
 ## Architecture
 
@@ -286,7 +251,7 @@ Base faculty score: 8. Bonus points to allocate: 12. Composure and Vitality: 0�
 
 ## Known Bugs & Gaps (as of 2026-02-25)
 
-These are documented in detail in `devdocs/evolution/gap_analysis.md` and `GAME_DESIGN_ANALYSIS.md`. (Run `npm run test:run` for the live test baseline — 334 tests across 29 files pass as of 2026-07-07.)
+Current state is documented in `docs/status.md`. (Run `npm run test:run` for the live test baseline — 334 tests across 29 files pass as of 2026-07-07.)
 
 ### Critical (blocks core functionality)
 - None remaining. `loadGame` caseData restoration was fixed in Phase A.
@@ -327,10 +292,10 @@ Things to be aware of when making changes:
 
 ## Implementation Roadmap
 
-See `devdocs/evolution/implementation_roadmap.md` for the full phased plan. Summary:
+The project was built in phases A–E, all complete. Summary:
 
 - **Phase A (Foundation)**: ✅ COMPLETE — Fixed loadGame, deduped snapshots, wired hints, fixed abilities, added validation, added firstScene
 - **Phase B (Core Refactoring)**: ✅ COMPLETE — Extracted pure computeChoiceResult, moved buildDeduction to engine, audio subscription, consolidated CheckResult types, runtime content validation with tier completeness
 - **Phase C (Gap Filling)**: ✅ COMPLETE — ClueDiscoveryCard, save button, faction display, error display, case completion screen
 - **Phase D (Integration)**: ✅ COMPLETE — Encounter UI, stale state cleanup, remove dead code
-- **Phase E (Game Design)**: ✅ COMPLETE — ~~Active clue discovery~~ ✅, ~~consequence feedback~~ ✅, ~~Veil Sight~~ ✅, ~~recovery mechanics~~ ✅, ~~persistent evidence board~~ ✅, ~~faction clamping~~ ✅, ~~CI validation~~ ✅, ~~NPC dialogue~~ ✅, ~~scene history~~ ✅, ~~testing expansion~~ ✅, ~~content depth~~ ✅. Remaining: audio/visual assets. See `GAME_DESIGN_ANALYSIS.md` for full analysis.
+- **Phase E (Game Design)**: ✅ COMPLETE — ~~Active clue discovery~~ ✅, ~~consequence feedback~~ ✅, ~~Veil Sight~~ ✅, ~~recovery mechanics~~ ✅, ~~persistent evidence board~~ ✅, ~~faction clamping~~ ✅, ~~CI validation~~ ✅, ~~NPC dialogue~~ ✅, ~~scene history~~ ✅, ~~testing expansion~~ ✅, ~~content depth~~ ✅. Remaining: audio/visual assets. See `docs/status.md` for current state.
