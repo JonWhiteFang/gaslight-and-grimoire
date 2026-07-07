@@ -14,7 +14,6 @@ import type {
   Clue,
   ClueDiscovery,
   Condition,
-  Effect,
   EncounterRound,
   EncounterState,
   Faculty,
@@ -28,6 +27,7 @@ import type {
 } from '../types';
 import type { EngineActions } from './engineActions';
 import { performCheck, rollD20, resolveDC } from './diceEngine';
+import { validateBundle } from './contentValidation';
 
 // ─── Content Loading ──────────────────────────────────────────────────────────
 
@@ -96,88 +96,24 @@ export async function loadVignette(vignetteId: string): Promise<VignetteData> {
 // ─── Content Validation ───────────────────────────────────────────────────────
 
 /**
- * Validates a loaded CaseData for broken scene-graph edges and missing clue
- * references. Logs descriptive errors on failure.
+ * Validates a loaded CaseData for broken scene-graph edges, missing clue/npc
+ * references, condition targets, variant structure, encounter edges, and clue
+ * sceneSource. Delegates to the shared {@link validateBundle} (errors only —
+ * reachability is a CLI-only concern). Logs descriptive errors on failure.
  */
 export function validateContent(caseData: CaseData): ValidationResult {
-  const errors: string[] = [];
-  const sceneIds = new Set(Object.keys(caseData.scenes));
-  const clueIds = new Set(Object.keys(caseData.clues));
+  const { errors } = validateBundle({
+    scenes: Object.values(caseData.scenes),
+    variants: caseData.variants,
+    clues: Object.values(caseData.clues),
+    npcs: Object.values(caseData.npcs),
+    // breakdown/incapacitation are injected into caseData.scenes as base scenes,
+    // but declare them shared too so variantOf targets resolve if injection changes.
+    sharedSceneIds: ['breakdown', 'incapacitation'],
+  });
 
-  // Also include variant scene IDs as valid targets
-  for (const variant of caseData.variants) {
-    sceneIds.add(variant.id);
-  }
-
-  for (const scene of Object.values(caseData.scenes)) {
-    // Check choice outcome scene references
-    for (const choice of scene.choices) {
-      for (const [tier, targetId] of Object.entries(choice.outcomes)) {
-        if (targetId && !sceneIds.has(targetId)) {
-          const msg = `Scene "${scene.id}" → choice "${choice.id}" → outcome "${tier}" references unknown scene "${targetId}"`;
-          errors.push(msg);
-          console.error(`[NarrativeEngine] ${msg}`);
-        }
-      }
-
-      // Check requiresClue references
-      if (choice.requiresClue && !clueIds.has(choice.requiresClue)) {
-        const msg = `Scene "${scene.id}" → choice "${choice.id}" → requiresClue references unknown clue "${choice.requiresClue}"`;
-        errors.push(msg);
-        console.error(`[NarrativeEngine] ${msg}`);
-      }
-
-      // Check advantageIf clue references
-      if (choice.advantageIf) {
-        for (const clueId of choice.advantageIf) {
-          if (!clueIds.has(clueId)) {
-            const msg = `Scene "${scene.id}" → choice "${choice.id}" → advantageIf references unknown clue "${clueId}"`;
-            errors.push(msg);
-            console.error(`[NarrativeEngine] ${msg}`);
-          }
-        }
-      }
-
-      // Check outcome tier completeness for faculty-check choices
-      if (choice.faculty && (choice.difficulty !== undefined || choice.dynamicDifficulty)) {
-        for (const tier of ['critical', 'success', 'partial', 'failure', 'fumble'] as const) {
-          if (!choice.outcomes[tier]) {
-            const msg = `Scene "${scene.id}" → choice "${choice.id}" → missing outcome tier "${tier}"`;
-            errors.push(msg);
-            console.error(`[NarrativeEngine] ${msg}`);
-          }
-        }
-      }
-    }
-
-    // Check cluesAvailable references
-    for (const discovery of scene.cluesAvailable) {
-      if (!clueIds.has(discovery.clueId)) {
-        const msg = `Scene "${scene.id}" → cluesAvailable references unknown clue "${discovery.clueId}"`;
-        errors.push(msg);
-        console.error(`[NarrativeEngine] ${msg}`);
-      }
-    }
-  }
-
-  // Also validate variant scenes
-  for (const variant of caseData.variants) {
-    for (const choice of variant.choices) {
-      for (const [tier, targetId] of Object.entries(choice.outcomes)) {
-        if (targetId && !sceneIds.has(targetId)) {
-          const msg = `Variant "${variant.id}" → choice "${choice.id}" → outcome "${tier}" references unknown scene "${targetId}"`;
-          errors.push(msg);
-          console.error(`[NarrativeEngine] ${msg}`);
-        }
-      }
-    }
-    for (const discovery of variant.cluesAvailable) {
-      if (!clueIds.has(discovery.clueId)) {
-        const msg = `Variant "${variant.id}" → cluesAvailable references unknown clue "${discovery.clueId}"`;
-        errors.push(msg);
-        console.error(`[NarrativeEngine] ${msg}`);
-      }
-    }
+  for (const msg of errors) {
+    console.error(`[NarrativeEngine] ${msg}`);
   }
 
   return { valid: errors.length === 0, errors };
@@ -213,9 +149,12 @@ function evaluateCondition(condition: Condition, state: GameState): boolean {
     }
 
     case 'hasFlag': {
+      // Compare on truthiness, not identity: an unset flag is `undefined`, so
+      // `{value:false}` (the "flag not yet set" gate used by breakdown/
+      // incapacitation variants) must match undefined/false alike.
       const flagValue = state.flags[target];
       if (value === undefined) return flagValue === true;
-      return flagValue === value;
+      return Boolean(flagValue) === value;
     }
 
     case 'facultyMin': {

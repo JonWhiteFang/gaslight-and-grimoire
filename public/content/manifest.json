@@ -46,9 +46,8 @@
       "synopsis": "A Court of Smoke contact comes to you with a personal problem — someone in the Court is trying to kill them, and the reason involves a stolen artifact.",
       "type": "vignette",
       "triggerCondition": {
-        "type": "npcDisposition",
-        "target": "npc-sable",
-        "value": 7
+        "type": "hasFlag",
+        "target": "wc-court-deal-made"
       }
     },
     {
