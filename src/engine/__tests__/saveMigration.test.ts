@@ -98,3 +98,36 @@ describe('SaveManager v3 migration — visitedScenes', () => {
     expect(migrated.state.visitedScenes).toEqual(['s1']);
   });
 });
+
+describe('SaveManager — chained v0 → current migration (F-031)', () => {
+  // A v0 blob predates factionReputation, sceneHistory, connections, and
+  // visitedScenes. One migrate() call must walk every step and backfill them all.
+  function makeV0State() {
+    const base = makeV1StateWithoutNewFields() as Record<string, unknown>;
+    delete base.factionReputation; // v0 had no faction reputation
+    return { ...base, currentScene: 's2' };
+  }
+
+  it('walks v0 → 1 → 2 → 3 in a single call, backfilling every added field', () => {
+    const old = { version: 0, timestamp: 't', state: makeV0State() } as unknown as SaveFile;
+    const migrated = SaveManager.migrate(old);
+
+    expect(migrated.version).toBe(CURRENT_SAVE_VERSION);
+    expect(migrated.state.factionReputation).toEqual({}); // v0 → 1
+    expect(migrated.state.sceneHistory).toEqual([]);       // v1 → 2
+    expect(migrated.state.connections).toEqual([]);        // v1 → 2
+    // v2 → 3: visitedScenes seeded from (empty) sceneHistory + currentScene.
+    expect(migrated.state.visitedScenes).toContain('s2');
+  });
+
+  it('load() of a v0 blob returns a fully-migrated, non-null state', () => {
+    localStorageMock.clear();
+    const old = { version: 0, timestamp: 't', state: makeV0State() };
+    localStorageMock.setItem('gg_save_v0blob', JSON.stringify(old));
+    const loaded = SaveManager.load('v0blob');
+    expect(loaded).not.toBeNull();
+    expect(loaded!.factionReputation).toEqual({});
+    expect(Array.isArray(loaded!.sceneHistory)).toBe(true);
+    expect(Array.isArray(loaded!.visitedScenes)).toBe(true);
+  });
+});

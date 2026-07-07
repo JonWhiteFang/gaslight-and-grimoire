@@ -59,14 +59,21 @@ Each item below corresponds to implemented code. See
   faction-aligned NPCs propagating to faction reputation.
 - **Encounters** — mundane (single-axis) and supernatural (dual-axis composure
   + vitality) multi-round encounters with escape paths.
-- **Recovery scenes** — shared `breakdown` (composure 0) and `incapacitation`
+- **Recovery / halt** — shared `breakdown` (composure 0) and `incapacitation`
   (vitality 0) scenes injected into every case, with case-specific variants.
+  Reaching either renders a distinct "Investigation halted" screen (not the
+  "Case Complete" terminal); starting a new case restores composure/vitality to
+  full and clears the halt flags, so a knockout cannot brick later cases.
 - **Hint engine** — a stateful three-level escalation (narrative nudge →
   specific clue → direct reveal).
 - **Save/load** — localStorage persistence with multi-save support and
   versioned migrations.
-- **Accessibility settings** — reduced motion, font-size scaling, and high
-  contrast, applied via `AccessibilityProvider`.
+- **Accessibility** — reduced motion, font-size scaling, and a real
+  high-contrast theme (`AccessibilityProvider` toggles the `.high-contrast`
+  class; `index.css` overrides surface/text/accent/border colours under it).
+  Overlays (Evidence Board, Case Journal, NPC Gallery) share a `useFocusTrap`
+  hook (initial focus + Tab trap + focus restore), and the game background is
+  `inert` while an overlay is open.
 - **Consequence feedback** — inline atmospheric messages annotating `onEnter`
   effects (e.g. "A chill settles over you (Composure −1)").
 
@@ -96,8 +103,8 @@ nothing.
 
 As of 2026-07-07, running `npm run test:run`:
 
-- **Tests: 384 passed (384)**
-- **Test Files: 30 passed (30)**
+- **Tests: 481 passed (481)**
+- **Test Files: 44 passed (44)**
 
 The suite includes property-based tests using fast-check (six
 `*.property.test.ts` files covering the dice engine, narrative engine, deduction

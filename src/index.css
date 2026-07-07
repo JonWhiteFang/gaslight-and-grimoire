@@ -11,12 +11,62 @@ body {
   font-size: var(--font-size-base);
 }
 
+/*
+ * High-contrast mode (F-007).
+ *
+ * The base theme paints dark surfaces (bg-gaslight-ink / bg-stone-*) with amber
+ * and fog text — pleasant, but low-contrast for low-vision players. When the
+ * `.high-contrast` class is present on <html> we override those Tailwind
+ * utilities with a maximum-contrast palette: pure-black surfaces, pure-white
+ * body text, bright-yellow accents, and visible white borders. `!important`
+ * is required because Tailwind utility classes are equally specific.
+ */
 .high-contrast {
   --color-bg: #000000;
   --color-text: #ffffff;
+  --color-accent: #ffea00;
   --color-border: #ffffff;
   background-color: var(--color-bg);
   color: var(--color-text);
+}
+
+/* Surfaces → pure black */
+.high-contrast .bg-gaslight-ink,
+.high-contrast .bg-gaslight-slate,
+.high-contrast .bg-black,
+.high-contrast [class*='bg-stone-'],
+.high-contrast [class*='bg-amber-9'] {
+  background-color: #000000 !important;
+}
+
+/* Body / secondary text → pure white */
+.high-contrast .text-gaslight-fog,
+.high-contrast [class*='text-stone-'],
+.high-contrast [class*='text-amber-1'],
+.high-contrast [class*='text-amber-50'] {
+  color: #ffffff !important;
+}
+
+/* Headings / accents → bright yellow */
+.high-contrast .text-gaslight-amber,
+.high-contrast .text-gaslight-gold,
+.high-contrast .text-amber-200,
+.high-contrast .text-amber-300,
+.high-contrast .text-amber-400 {
+  color: var(--color-accent) !important;
+}
+
+/* Primary (amber) buttons → bright-yellow fill with black text */
+.high-contrast [class*='bg-amber-6'],
+.high-contrast [class*='bg-amber-7'],
+.high-contrast [class*='bg-amber-8'] {
+  background-color: var(--color-accent) !important;
+  color: #000000 !important;
+}
+
+/* Borders → visible white */
+.high-contrast [class*='border-'] {
+  border-color: #ffffff !important;
 }
 
 .reduced-motion * {

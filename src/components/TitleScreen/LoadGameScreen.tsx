@@ -1,10 +1,22 @@
 import React, { useState } from 'react';
 import { SaveManager } from '../../engine/saveManager';
 import type { SaveSummary } from '../../engine/saveManager';
+import { deslugifyCaseId } from '../../utils/caseTitle';
 
 export interface LoadGameScreenProps {
   onLoad: (saveId: string) => void;
   onBack: () => void;
+}
+
+/**
+ * Legacy saves stored `caseName` as the raw slug (`the-whitechapel-cipher`);
+ * saves created after the title change store the readable title. De-slugify only
+ * the slug-shaped ones (hyphenated, no spaces) so both display readably (F-010).
+ */
+function displayCaseName(caseName: string): string {
+  if (!caseName) return 'Unknown Case';
+  const looksLikeSlug = caseName.includes('-') && !caseName.includes(' ');
+  return looksLikeSlug ? deslugifyCaseId(caseName) : caseName;
 }
 
 function formatTimestamp(iso: string): string {
@@ -78,7 +90,7 @@ export function LoadGameScreen({ onLoad, onBack }: LoadGameScreenProps) {
                     </span>
                   </div>
                   <div className="font-serif text-stone-400 text-sm mt-0.5 truncate">
-                    {save.caseName || 'Unknown Case'}
+                    {displayCaseName(save.caseName)}
                   </div>
                 </button>
                 <button
