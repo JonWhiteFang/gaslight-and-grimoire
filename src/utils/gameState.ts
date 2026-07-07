@@ -14,6 +14,7 @@ export function snapshotGameState(s: GameStore): GameState {
     factionReputation: s.factionReputation,
     sceneHistory: s.sceneHistory,
     connections: s.connections,
+    visitedScenes: s.visitedScenes,
     settings: s.settings,
   };
 }

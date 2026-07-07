@@ -95,6 +95,11 @@ export const createMetaSlice: StateCreator<
         state.factionReputation = gameState.factionReputation;
         state.sceneHistory = gameState.sceneHistory ?? [];
         state.connections = gameState.connections ?? [];
+        // Restore which scenes have already applied their onEnter effects so a
+        // reload does not re-fire them (F-006). Fall back to the visited history
+        // for pre-v3 saves that predate this field.
+        state.visitedScenes = gameState.visitedScenes ?? [...(gameState.sceneHistory ?? []), gameState.currentScene].filter(Boolean);
+        state.lastEffectMessages = [];
         state.settings = gameState.settings;
         state.caseData = caseData;
       });

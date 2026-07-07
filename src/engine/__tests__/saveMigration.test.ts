@@ -67,3 +67,34 @@ describe('SaveManager v2 migration', () => {
     expect(Array.isArray(loaded!.sceneHistory)).toBe(true);
   });
 });
+
+describe('SaveManager v3 migration — visitedScenes', () => {
+  it('backfills visitedScenes from sceneHistory + currentScene for a v2 save (F-006)', () => {
+    // A v2 state: has sceneHistory/connections but no visitedScenes yet.
+    const v2State = {
+      ...makeV1StateWithoutNewFields(),
+      currentScene: 's3',
+      sceneHistory: ['s1', 's2'],
+      connections: [],
+    };
+    const old = { version: 2, timestamp: 't', state: v2State } as unknown as SaveFile;
+    const migrated = SaveManager.migrate(old);
+    // Everything the player has already seen must count as visited, so reloading
+    // an old save does not re-fire onEnter on scenes they already passed through.
+    expect(migrated.state.visitedScenes).toEqual(expect.arrayContaining(['s1', 's2', 's3']));
+    expect(migrated.version).toBe(CURRENT_SAVE_VERSION);
+  });
+
+  it('leaves an existing visitedScenes array untouched', () => {
+    const state = {
+      ...makeV1StateWithoutNewFields(),
+      currentScene: 's3',
+      sceneHistory: ['s1', 's2'],
+      connections: [],
+      visitedScenes: ['s1'],
+    };
+    const old = { version: 2, timestamp: 't', state } as unknown as SaveFile;
+    const migrated = SaveManager.migrate(old);
+    expect(migrated.state.visitedScenes).toEqual(['s1']);
+  });
+});

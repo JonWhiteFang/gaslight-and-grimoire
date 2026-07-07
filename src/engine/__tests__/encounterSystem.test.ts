@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { Choice, EncounterRound, GameState, Investigator } from '../../types';
+import type { Choice, Clue, EncounterRound, GameState, Investigator } from '../../types';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -329,6 +329,79 @@ describe('processEncounterChoice — dual-axis damage', () => {
   });
 });
 
+// ─── Test 2b: Escape path terminates the encounter immediately (F-004) ─────────
+
+describe('processEncounterChoice — escape path is terminal', () => {
+  it('navigates to the escape outcome and completes the encounter in a non-final round', () => {
+    // An escape choice has no faculty/difficulty; its outcome is fixed.
+    const escapeChoice = makeChoice({
+      id: 'escape',
+      faculty: undefined,
+      difficulty: undefined,
+      isEscapePath: true,
+      outcomes: {
+        critical: 'scene-escaped',
+        success: 'scene-escaped',
+        partial: 'scene-escaped',
+        failure: 'scene-escaped',
+        fumble: 'scene-escaped',
+      },
+    });
+    // Two rounds: escaping in round 0 must NOT advance to round 1.
+    const rounds = [
+      makeRound([escapeChoice], false, 1),
+      makeRound([makeChoice()], false, 2),
+    ];
+    const encounterState = {
+      id: 'enc-1',
+      rounds,
+      currentRound: 0,
+      isComplete: false,
+      reactionCheckPassed: null,
+    };
+    const state = makeGameState();
+
+    const { encounterState: updated } = processEncounterChoice(escapeChoice, encounterState, state, mockActions);
+
+    expect(updated.isComplete).toBe(true);
+    expect(mockGoToScene).toHaveBeenCalledWith('scene-escaped');
+  });
+
+  it('does not apply encounter damage when escaping (escape is not a failed round)', () => {
+    const escapeChoice = makeChoice({
+      id: 'escape',
+      faculty: undefined,
+      difficulty: undefined,
+      isEscapePath: true,
+      encounterDamage: { composureDelta: -3, vitalityDelta: -3 },
+      outcomes: {
+        critical: 'scene-escaped',
+        success: 'scene-escaped',
+        partial: 'scene-escaped',
+        failure: 'scene-escaped',
+        fumble: 'scene-escaped',
+      },
+    });
+    const rounds = [
+      makeRound([escapeChoice], true, 1),
+      makeRound([makeChoice()], true, 2),
+    ];
+    const encounterState = {
+      id: 'enc-1',
+      rounds,
+      currentRound: 0,
+      isComplete: false,
+      reactionCheckPassed: true,
+    };
+    const state = makeGameState();
+
+    processEncounterChoice(escapeChoice, encounterState, state, mockActions);
+
+    expect(mockAdjustComposure).not.toHaveBeenCalled();
+    expect(mockAdjustVitality).not.toHaveBeenCalled();
+  });
+});
+
 // ─── Test 3: Escape path is available when flag condition is met ───────────────
 
 describe('getEncounterChoices — escape path', () => {
@@ -383,95 +456,46 @@ describe('getEncounterChoices — escape path', () => {
   });
 });
 
-// ─── Test 4: Occult Fragment clue grants Advantage ────────────────────────────
+// ─── Test 4: Revealed advantage clue grants Advantage on the roll ─────────────
+//
+// Advantage is applied where it actually matters — the roll in
+// processEncounterChoice (the 4th arg to performCheck). getEncounterChoices no
+// longer annotates a `_hasAdvantage` field (it had no consumer; F-027).
 
-describe('getEncounterChoices — Occult Fragment advantage', () => {
-  it('grants _hasAdvantage when investigator holds a relevant Occult Fragment clue', () => {
-    const choice = makeChoice({
-      id: 'occult-choice',
-      advantageIf: ['clue-occult-1'],
-    });
+describe('processEncounterChoice — advantage on the roll', () => {
+  const occultClue: Clue = {
+    id: 'clue-occult-1', type: 'occult', title: 'Strange Sigil',
+    description: 'A sigil carved in blood.', sceneSource: 'scene-1',
+    tags: ['occult'], status: 'examined', isRevealed: true,
+  };
+
+  function runWithClue(clue: Clue | null, advantageIf: string[]): boolean {
+    mockPerformCheck.mockReturnValue({ tier: 'success', roll: 15, modifier: 0, total: 15, dc: 12, natural: 15 });
+    const choice = makeChoice({ id: 'adv-choice', advantageIf });
     const round = makeRound([choice], true);
+    const encounterState = { id: 'enc-1', rounds: [round], currentRound: 0, isComplete: false, reactionCheckPassed: true };
+    const state = makeGameState({ clues: clue ? { [clue.id]: clue } : {} });
+    processEncounterChoice(choice, encounterState, state, mockActions);
+    // performCheck(faculty, investigator, dc, hasAdvantage, hasDisadvantage)
+    return mockPerformCheck.mock.calls[0][3] as boolean;
+  }
 
-    const state = makeGameState({
-      clues: {
-        'clue-occult-1': {
-          id: 'clue-occult-1',
-          type: 'occult',
-          title: 'Strange Sigil',
-          description: 'A sigil carved in blood.',
-          sceneSource: 'scene-1',
-          tags: ['occult'],
-          status: 'examined',
-          isRevealed: true,
-        },
-      },
-    });
-
-    const choices = getEncounterChoices(round, state);
-    const found = choices.find((c) => c.id === 'occult-choice');
-
-    expect(found).toBeDefined();
-    expect(found?._hasAdvantage).toBe(true);
+  it('rolls with advantage when a relevant revealed Occult Fragment is held', () => {
+    expect(runWithClue(occultClue, ['clue-occult-1'])).toBe(true);
   });
 
-  it('does NOT grant _hasAdvantage for a non-occult clue', () => {
-    const choice = makeChoice({
-      id: 'choice-with-physical-clue',
-      advantageIf: ['clue-physical-1'],
-    });
-    const round = makeRound([choice], true);
-
-    const state = makeGameState({
-      clues: {
-        'clue-physical-1': {
-          id: 'clue-physical-1',
-          type: 'physical', // not occult
-          title: 'Muddy Boot',
-          description: 'A muddy boot.',
-          sceneSource: 'scene-1',
-          tags: ['physical'],
-          status: 'examined',
-          isRevealed: true,
-        },
-      },
-    });
-
-    const choices = getEncounterChoices(round, state);
-    const found = choices.find((c) => c.id === 'choice-with-physical-clue');
-
-    // Choice is still included (standard advantage from any revealed clue)
-    // but _hasAdvantage from occult fragment specifically is false
-    expect(found).toBeDefined();
-    expect(found?._hasAdvantage).toBe(false);
+  it('rolls with advantage for any revealed advantageIf clue (standard advantage)', () => {
+    const physicalClue = { ...occultClue, id: 'clue-physical-1', type: 'physical' as const };
+    expect(runWithClue(physicalClue, ['clue-physical-1'])).toBe(true);
   });
 
-  it('does NOT grant _hasAdvantage when the clue is not revealed', () => {
-    const choice = makeChoice({
-      id: 'occult-choice',
-      advantageIf: ['clue-occult-1'],
-    });
-    const round = makeRound([choice], true);
+  it('does NOT roll with advantage when the advantage clue is not revealed', () => {
+    const hiddenClue = { ...occultClue, status: 'new' as const, isRevealed: false };
+    expect(runWithClue(hiddenClue, ['clue-occult-1'])).toBe(false);
+  });
 
-    const state = makeGameState({
-      clues: {
-        'clue-occult-1': {
-          id: 'clue-occult-1',
-          type: 'occult',
-          title: 'Strange Sigil',
-          description: 'A sigil carved in blood.',
-          sceneSource: 'scene-1',
-          tags: ['occult'],
-          status: 'new',
-          isRevealed: false, // not revealed
-        },
-      },
-    });
-
-    const choices = getEncounterChoices(round, state);
-    const found = choices.find((c) => c.id === 'occult-choice');
-
-    expect(found?._hasAdvantage).toBe(false);
+  it('does NOT roll with advantage when no advantage clue is present', () => {
+    expect(runWithClue(null, ['clue-occult-1'])).toBe(false);
   });
 });
 

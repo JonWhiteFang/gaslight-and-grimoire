@@ -15,6 +15,7 @@ function resetNarrative() {
     currentScene: '',
     currentCase: '',
     sceneHistory: [],
+    visitedScenes: [],
     flags: {},
     clues: {},
     npcs: {},
@@ -71,6 +72,81 @@ describe('narrativeSlice.goToScene — sceneHistory hygiene', () => {
     useStore.getState().goToScene('scene-2');
     expect(useStore.getState().sceneHistory).toEqual(['scene-1']);
     expect(useStore.getState().currentScene).toBe('scene-2');
+  });
+});
+
+// ─── onEnter effects fire once per scene per playthrough (F-006) ───────────────
+
+/** Builds a minimal caseData whose scenes carry the given onEnter effects. */
+function stubCaseDataWithOnEnter(scenes: Record<string, { onEnter?: unknown[] }>) {
+  const sceneRecord: Record<string, unknown> = {};
+  for (const [id, def] of Object.entries(scenes)) {
+    sceneRecord[id] = {
+      id,
+      narrative: id,
+      choices: [],
+      cluesAvailable: [],
+      onEnter: def.onEnter ?? [],
+    };
+  }
+  useStore.setState({
+    caseData: {
+      meta: { id: 'c', title: 'C', firstScene: Object.keys(scenes)[0], acts: 3, facultyDistribution: {} },
+      scenes: sceneRecord,
+      clues: {},
+      npcs: {},
+      variants: [],
+    },
+  } as never);
+}
+
+describe('narrativeSlice.goToScene — onEnter effects are idempotent per scene (F-006)', () => {
+  beforeEach(() => {
+    resetNarrative();
+    useStore.setState((s) => ({ investigator: { ...s.investigator, composure: 10, vitality: 10 } }));
+  });
+
+  it('applies a scene\'s onEnter effect on first entry', () => {
+    stubCaseDataWithOnEnter({
+      'scene-a': { onEnter: [{ type: 'composure', delta: -2 }] },
+    });
+    useStore.getState().goToScene('scene-a');
+    expect(useStore.getState().investigator.composure).toBe(8);
+    expect(useStore.getState().visitedScenes).toContain('scene-a');
+  });
+
+  it('does NOT re-apply onEnter effects when the same scene is entered again', () => {
+    stubCaseDataWithOnEnter({
+      'scene-a': { onEnter: [{ type: 'composure', delta: -2 }] },
+      'scene-b': { onEnter: [] },
+    });
+    useStore.getState().goToScene('scene-a'); // composure 10 -> 8
+    useStore.getState().goToScene('scene-b'); // no effect
+    useStore.getState().goToScene('scene-a'); // revisit: must NOT drop to 6
+
+    expect(useStore.getState().investigator.composure).toBe(8);
+  });
+
+  it('records the effect feedback message for the entered scene, and clears it on an effectless scene', () => {
+    stubCaseDataWithOnEnter({
+      'scene-a': { onEnter: [{ type: 'composure', delta: -2 }] },
+      'scene-b': { onEnter: [] },
+    });
+    useStore.getState().goToScene('scene-a');
+    expect(useStore.getState().lastEffectMessages.length).toBeGreaterThan(0);
+    useStore.getState().goToScene('scene-b');
+    expect(useStore.getState().lastEffectMessages).toEqual([]);
+  });
+
+  it('does not emit feedback messages on revisit of a scene whose effects already fired', () => {
+    stubCaseDataWithOnEnter({
+      'scene-a': { onEnter: [{ type: 'composure', delta: -2 }] },
+      'scene-b': { onEnter: [] },
+    });
+    useStore.getState().goToScene('scene-a');
+    useStore.getState().goToScene('scene-b');
+    useStore.getState().goToScene('scene-a'); // revisit
+    expect(useStore.getState().lastEffectMessages).toEqual([]);
   });
 });
 

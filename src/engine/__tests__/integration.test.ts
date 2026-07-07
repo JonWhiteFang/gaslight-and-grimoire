@@ -84,6 +84,23 @@ describe('Choice → Navigation → Effect pipeline', () => {
     expect(result.nextSceneId).toBe('s-ok');
     expect(mockPerformCheck).not.toHaveBeenCalled();
   });
+
+  it('non-check choice falls back to critical when success is absent', () => {
+    const choice: Choice = {
+      id: 'c1', text: 'Simple', outcomes: { critical: 's-crit' } as Choice['outcomes'],
+    };
+    const result = processChoice(choice, makeState(), mockActions as any);
+    expect(result.nextSceneId).toBe('s-crit');
+  });
+
+  it('throws a clear error for a non-check choice missing both success and critical outcomes (F-022)', () => {
+    const choice: Choice = {
+      id: 'c-broken', text: 'Dead end', outcomes: {} as Choice['outcomes'],
+    };
+    expect(() => processChoice(choice, makeState(), mockActions as any)).toThrow(/c-broken/);
+    // Must not have navigated to an undefined scene.
+    expect(mockActions.goToScene).not.toHaveBeenCalled();
+  });
 });
 
 describe('Condition gating', () => {

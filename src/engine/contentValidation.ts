@@ -270,13 +270,19 @@ function validateChoice(choice: Choice, where: string, ctx: Ctx): void {
     ctx.errors.push(`${at} -> requiresFaculty references invalid faculty "${choice.requiresFaculty.faculty}"`);
   }
 
+  const isCheck = !!choice.faculty && (choice.difficulty !== undefined || !!choice.dynamicDifficulty);
+
   // Tier completeness for faculty checks (fixed OR dynamic difficulty).
-  if (choice.faculty && (choice.difficulty !== undefined || choice.dynamicDifficulty)) {
+  if (isCheck) {
     for (const tier of OUTCOME_TIERS) {
       if (!choice.outcomes?.[tier]) {
         ctx.errors.push(`${at} -> missing outcome tier "${tier}"`);
       }
     }
+  } else if (!choice.outcomes?.success && !choice.outcomes?.critical) {
+    // A non-check choice resolves via success ?? critical. Without one of them
+    // it navigates to `undefined` (blank scene) at runtime — reject it (F-022).
+    ctx.errors.push(`${at} -> non-check choice has no "success" or "critical" outcome (nowhere to navigate)`);
   }
 
   if (choice.npcEffect && !ctx.npcIds.has(choice.npcEffect.npcId)) {

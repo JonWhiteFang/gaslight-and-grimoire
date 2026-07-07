@@ -11,7 +11,7 @@ import type { GameState, SaveFile } from '../types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-export const CURRENT_SAVE_VERSION = 2;
+export const CURRENT_SAVE_VERSION = 3;
 
 const KEY_PREFIX = 'gg_save_';
 const INDEX_KEY = 'gg_save_index';
@@ -124,6 +124,9 @@ export const SaveManager = {
    *   1 → 2: backfill `sceneHistory` and `connections` (default []) — fields
    *          added after v1; a missing `sceneHistory` otherwise crashes
    *          goToScene's push on the first navigation after load.
+   *   2 → 3: backfill `visitedScenes` from the scenes the player has already
+   *          seen (`sceneHistory` + `currentScene`), so reloading a pre-v3 save
+   *          does not re-fire onEnter effects on scenes already passed (F-006).
    */
   migrate(saveFile: SaveFile): SaveFile {
     if (saveFile.version === CURRENT_SAVE_VERSION) {
@@ -150,6 +153,17 @@ export const SaveManager = {
         connections: state.connections ?? [],
       };
       version = 2;
+    }
+
+    // v2 → 3
+    if (version < 3) {
+      state = {
+        ...state,
+        visitedScenes:
+          state.visitedScenes ??
+          [...(state.sceneHistory ?? []), state.currentScene].filter(Boolean),
+      };
+      version = 3;
     }
 
     return {

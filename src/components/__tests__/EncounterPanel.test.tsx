@@ -58,7 +58,7 @@ beforeEach(() => {
     id: 'enc-1', rounds: [baseRound], currentRound: 0, isComplete: false, reactionCheckPassed: null,
   });
   mockGetEncounterChoices.mockReturnValue([
-    { ...baseRound.choices[0], _hasAdvantage: false },
+    { ...baseRound.choices[0] },
   ]);
 });
 
