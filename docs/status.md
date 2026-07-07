@@ -1,0 +1,106 @@
+# Status
+
+Current state of Gaslight & Grimoire as of 2026-07-07. This is a factual
+snapshot of what exists — not a roadmap. For architectural and API detail it
+links to the sibling docs rather than repeating them.
+
+## What this is
+
+A browser-based choose-your-own-adventure game set in a Victorian London where
+magic exists beneath the rational world: an occult mystery that blends Sherlock
+Holmes-style deduction with D&D-style faculty checks and d20 dice mechanics. For
+the design intent and vision, see [Gaslight_&_Grimoire_design.md](./Gaslight_&_Grimoire_design.md).
+
+## Content inventory
+
+Scene and clue counts are from `node scripts/validateCase.mjs`; NPC counts are
+from each case's `npcs.json`.
+
+| Case | Type | Scenes | Clues | NPCs |
+|---|---|---|---|---|
+| The Whitechapel Cipher | main (3-act) | 66 | 14 | 7 |
+| The Mayfair Séance | main (3-act) | 49 | 13 | 7 |
+| The Lamplighter's Wake | main (3-act) | 43 | 13 | 7 |
+| A Matter of Shadows | vignette (2-act) | 13 | 5 | 3 |
+| The Rationalist's Dilemma | vignette (2-act) | 10 | 5 | 2 |
+| The Debt of Smoke | vignette (2-act) | 9 | 4 | 2 |
+| The Unfinished Case | vignette (2-act) | 8 | 4 | 2 |
+| **Total** | **7 cases** | **198** | **58** | **30** |
+
+All four factions appear in the content: Rationalists Circle, Hermetic Order of
+the Grey Dawn, Lamplighters, and Court of Smoke. Archetype-exclusive scenes
+exist across the three main cases — content carries `archetypeIs` conditions
+gating scenes to each of the four archetypes (deductionist, occultist, operator,
+mesmerist).
+
+See [content-authoring.md](./content-authoring.md) for the JSON schema and the
+`Condition`/`Effect` mechanics that drive gating and state mutation.
+
+## Systems present
+
+Each item below corresponds to implemented code. See
+[engine-reference.md](./engine-reference.md) and
+[architecture.md](./architecture.md) for detail.
+
+- **Character creation with four archetypes** — deductionist, occultist,
+  operator, mesmerist, each with +3/+1 faculty bonuses and a once-per-case
+  ability (Elementary, Veil Sight, Street Survivor, Silver Tongue).
+- **d20 faculty-check engine** — modifier from faculty score plus a trained
+  bonus (+1 when the check faculty matches the archetype's primary faculty),
+  advantage/disadvantage, dynamic difficulty, and five outcome tiers
+  (critical / success / partial / failure / fumble).
+- **Four clue-discovery methods** — `automatic` and `dialogue` on scene entry,
+  `exploration` via clickable atmospheric prompts, `check` via a dice roll.
+- **Evidence board** — persistent clue connections (stored as ID pairs in the
+  evidence slice) and deductions derived from connected clue IDs.
+- **NPC interaction** — disposition, suspicion, and memory-flag gated dialogue
+  choices; suspicion tiers escalate NPC behaviour.
+- **Faction reputation** — bounded to [-10, +10], with disposition changes on
+  faction-aligned NPCs propagating to faction reputation.
+- **Encounters** — mundane (single-axis) and supernatural (dual-axis composure
+  + vitality) multi-round encounters with escape paths.
+- **Recovery scenes** — shared `breakdown` (composure 0) and `incapacitation`
+  (vitality 0) scenes injected into every case, with case-specific variants.
+- **Hint engine** — a stateful three-level escalation (narrative nudge →
+  specific clue → direct reveal).
+- **Save/load** — localStorage persistence with multi-save support and
+  versioned migrations.
+- **Accessibility settings** — reduced motion, font-size scaling, and high
+  contrast, applied via `AccessibilityProvider`.
+- **Consequence feedback** — inline atmospheric messages annotating `onEnter`
+  effects (e.g. "A chill settles over you (Composure −1)").
+
+## Assets
+
+The game currently runs **silent and text-only**. The media systems are
+implemented, but no media files ship in the repository.
+
+- **Audio** — `AudioManager` (lazy-cached Howler instances) and `AmbientAudio`
+  are fully implemented. Nine SFX event types are defined (`dice-roll`,
+  `clue-physical`, `clue-testimony`, `clue-occult`, `clue-deduction`,
+  `clue-redHerring`, `composure-decrease`, `vitality-decrease`,
+  `scene-transition`), and scenes reference ambient loops via
+  `SceneNode.ambientAudio`. No `.mp3` files exist under `public/`; Howler
+  silently absorbs the missing-file errors. The intended file list is in
+  [content-authoring.md](./content-authoring.md#audio-asset-reference).
+- **Illustrations** — `SceneIllustration` renders an image from
+  `scene.illustration`, but no image files exist under `public/`.
+- **NPC portraits** — the `NPCGallery` `Portrait` component renders a
+  letter-initial placeholder (the first character of the NPC's name), not an
+  image.
+
+A search for `*.mp3`, `*.png`, `*.jpg`, and `*.webp` under `public/` returns
+nothing.
+
+## Test baseline
+
+As of 2026-07-07, running `npm run test:run`:
+
+- **Tests: 334 passed (334)**
+- **Test Files: 29 passed (29)**
+
+The suite includes property-based tests using fast-check (six
+`*.property.test.ts` files covering the dice engine, narrative engine, deduction
+formation, NPC bounds, save manager, and slice isolation). Content is validated
+by `node scripts/validateCase.mjs`, which checks all seven cases for broken
+scene-graph edges and missing clue references.
