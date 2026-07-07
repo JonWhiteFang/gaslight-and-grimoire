@@ -8,14 +8,15 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-07 (Cleared **4 audit issues across 2 merged PRs**: **#24** — CI now runs the
-test suite + validator and gates deploy, added a `pull_request` trigger, fixed the favicon 404,
-`cancel-in-progress: false`, pinned the OWASP action (closes #1, #11); **#25** — unified the build+runtime
-content validators into one shared `contentValidation.ts` and extended it (conditions, variants, npcEffect,
-encounter edges, reachability), fixed the `hasFlag value:false` engine bug that killed the recovery variants,
-repointed 4 dangling clue `sceneSource`s, and re-gated the unreachable *Debt of Smoke* vignette on a persisted
-flag (closes #2, #3). Test baseline **334 → 368**. Next P0 group: engine bugs #4 (encounter escape) + #5
-(onEnter re-fire).)_
+_Last updated: 2026-07-07 (Added a **content-authoring automation layer** ([ADR-0004](DECISIONS/ADR-0004-content-authoring-automation-layer.md)):
+a `PostToolUse` hook (validator on content-JSON edits + `tsc --noEmit` on TS edits), a read-only
+`content-integrity-reviewer` subagent for the design/tone rules the validator can't check, wired into
+`/new-scene` + `/checkpoint` + a new `/review-content` command (hooks can't dispatch agents, so skills do),
+a `/new-scene` scaffold skill, and two more project-scope MCP servers (`context7`, `github`). Also refreshed
+`CLAUDE.md` currency (CI section, engine/scripts file lists). The reviewer's first run flagged 4 findings in
+*Debt of Smoke* — fixed the 2 warnings (inert Reason-check success band; guarded branch skipped the central
+Ember clue), re-reviewed clean. Test baseline still **368**. Next P0 group unchanged: engine bugs #4 (encounter
+escape) + #5 (onEnter re-fire).)_
 
 ---
 
@@ -27,9 +28,10 @@ flag (closes #2, #3). Test baseline **334 → 368**. Next P0 group: engine bugs 
 - **Active gate:** CI now enforces it. Every push/PR to `main` runs the validator + `npm run test:run` in the
   `test` job; `build` → `deploy` depend on it, and `deploy` is skipped on PR events. Bar unchanged locally:
   test suite green + validator clean before merge.
-- **Branch focus:** `main` (clean, up to date with origin at `dd18933`). Next work starts from a fresh branch
-  off `main` for the #4+#5 engine-bug group.
-- **Verification:** 2026-07-07 — `npm run test:run` → **368 passed (368)** across **30** files; `node scripts/validateCase.mjs` → 7 cases clean; `npm run build` + `tsc --noEmit` green. CI green on both merged PRs (#24, #25); post-merge deploy on `dd18933` running.
+- **Branch focus:** `main` (up to date with origin at `4036be6`, PR #26 merged). This session's tooling +
+  content-fix work lands on its own branch/PR. Next feature work starts from a fresh branch off `main` for the
+  #4+#5 engine-bug group.
+- **Verification:** 2026-07-07 — `npm run test:run` → **368 passed (368)** across **30** files; `node scripts/validateCase.mjs` → 7 cases clean (Debt of Smoke re-reviewed by `content-integrity-reviewer`: 0 blockers/warnings after fixes); `npm run build` + `tsc --noEmit` green. CI green through PR #26 (`4036be6`).
 
 ---
 
@@ -47,6 +49,7 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 | E | Game design (active clue discovery, consequence feedback, Veil Sight, recovery, persistent evidence board, faction clamping, CI validation, NPC dialogue, scene history, testing + content depth) | `[x]` | Complete |
 | — | Docs rebuild (lean `docs/` set: architecture, engine-reference, content-authoring, status, README) | `[x]` | Complete (recent commits) |
 | — | Committed memory spine (this system) | `[x]` | STATE + RUN_LOG + DECISIONS + hook + `/checkpoint` |
+| — | Content-authoring automation layer | `[x]` | ADR-0004: `PostToolUse` hook, `content-integrity-reviewer` subagent, `/new-scene` + `/review-content`, `context7`/`github` MCP |
 | — | Full Ultracode repo audit + backlog | `[x]` | Report in `docs/audits/`; 67 findings → **22 issues** (5 P0/7 P1/7 P2/3 P3) |
 | Q | Audit remediation — P0 blockers | `[~]` | **4/5 done**: CI gate #1 + quick-wins #11 (PR #24); validators #2 + Debt of Smoke #3 (PR #25). Remaining: #4, #5. |
 | Q2 | Audit remediation — P1 | `[ ]` | Issues #6–#12. Do after the P0 group. |
@@ -73,7 +76,7 @@ These are flagged-but-unresolved. Resolve each via an ADR when decided, then mar
 
 ## References
 
-- Decisions: [`DECISIONS/`](DECISIONS/) — [ADR-0001](DECISIONS/ADR-0001-content-engine-separation.md) (content↔engine separation & bounded state, Enacted), [ADR-0002](DECISIONS/ADR-0002-committed-memory-spine.md) (this memory spine, Enacted), [ADR-0003](DECISIONS/ADR-0003-playwright-mcp-project-scope.md) (Playwright MCP at project scope, Enacted).
+- Decisions: [`DECISIONS/`](DECISIONS/) — [ADR-0001](DECISIONS/ADR-0001-content-engine-separation.md) (content↔engine separation & bounded state, Enacted), [ADR-0002](DECISIONS/ADR-0002-committed-memory-spine.md) (this memory spine, Enacted), [ADR-0003](DECISIONS/ADR-0003-playwright-mcp-project-scope.md) (Playwright MCP at project scope, Enacted), [ADR-0004](DECISIONS/ADR-0004-content-authoring-automation-layer.md) (content-authoring automation layer, Enacted).
 - Run history: [`RUN_LOG.md`](RUN_LOG.md).
 - Audit: [`audits/ULTRACODE_FULL_REPO_ANALYSIS.md`](audits/ULTRACODE_FULL_REPO_ANALYSIS.md) (2026-07-07, 67 findings) → GitHub issues #1–#22.
 - Architecture, invariants, store conventions, content rules, known gaps: [../CLAUDE.md](../CLAUDE.md).

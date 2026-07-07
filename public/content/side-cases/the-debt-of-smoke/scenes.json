@@ -36,8 +36,8 @@
           "difficulty": 9,
           "outcomes": {
             "critical": "dos-act1-sable-reveals",
-            "success": "dos-act1-sable-guarded",
-            "partial": "dos-act1-sable-guarded",
+            "success": "dos-act1-sable-reveals",
+            "partial": "dos-act1-sable-reveals",
             "failure": "dos-act1-sable-guarded",
             "fumble": "dos-act1-sable-guarded"
           }
@@ -92,18 +92,18 @@
     {
       "id": "dos-act1-sable-guarded",
       "act": 1,
-      "narrative": "Sable shakes her head. 'Not yet. I need to know I can trust you before I show you what I took. Help me find who sent the letter. Then I will tell you everything.' Her caution is maddening but understandable. In the Court of Smoke, trust is the rarest commodity.",
+      "narrative": "Sable shakes her head. 'Not yet. I need to know I can trust you before I show you what I took.' She studies you a long moment — weighing, the way she weighs everything. In the Court of Smoke, trust is the rarest commodity, and she is not a woman who spends it lightly. But the pistol in her hand is trembling, and she knows it. Whatever you say next will decide whether she lets you in.",
       "cluesAvailable": [],
       "choices": [
         {
           "id": "dos-choice-sable-guarded-investigate",
-          "text": "Fine. The letter first. Who in the Court wants you dead?",
+          "text": "Then let me earn it. Show me the Ember, and I will find who wants you dead.",
           "outcomes": {
-            "critical": "dos-act2-court-investigation",
-            "success": "dos-act2-court-investigation",
-            "partial": "dos-act2-court-investigation",
-            "failure": "dos-act2-court-investigation",
-            "fumble": "dos-act2-court-investigation"
+            "critical": "dos-act1-sable-reveals",
+            "success": "dos-act1-sable-reveals",
+            "partial": "dos-act1-sable-reveals",
+            "failure": "dos-act1-sable-reveals",
+            "fumble": "dos-act1-sable-reveals"
           }
         }
       ],

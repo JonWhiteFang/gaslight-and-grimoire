@@ -23,6 +23,19 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-edit-checks.sh\"",
+            "timeout": 120,
+            "statusMessage": "Checking edit (content validator / type-check)…"
+          }
+        ]
+      }
     ]
   }
 }

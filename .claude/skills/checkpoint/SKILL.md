@@ -17,6 +17,14 @@ auto-memory.
 1. **Review what changed this session.** Run `git status` and `git diff --stat`. Recall the session's
    goal, what actually changed, and what's still open.
 
+   **Content-integrity gate.** If this session changed any file under `public/content/`
+   (check the `git status` / `git diff --stat` output), run a design/tone review before proceeding:
+   first `node scripts/validateCase.mjs` (structural — fix any errors), then dispatch the
+   `content-integrity-reviewer` subagent (Task tool, `subagent_type: "content-integrity-reviewer"`)
+   with the list of changed content files. Apply/​surface any `blocker` findings and re-validate.
+   Skip this gate entirely when no `public/content/` files changed. (Equivalent to running
+   `/review-content` for the session's changes.)
+
 2. **Doc-drift sweep** (keep the docs honest — a *fast, mechanical* pass, not a full audit). Establish
    **ground truth from code/config/git, not from another doc** (a stale doc citing a stale doc proves
    nothing), then scan for drift against it:

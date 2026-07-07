@@ -1,0 +1,70 @@
+{
+  "__doc__": "Annotated SceneNode skeleton for the new-scene skill. Copy the object below (WITHOUT the __doc__/__*__ helper keys) into the target file's scenes/variants array. Every field's rules are in docs/content-authoring.md. Delete optional fields you don't use rather than leaving placeholder values.",
+
+  "__minimal_scene__": {
+    "id": "scene-unique-id",
+    "act": 1,
+    "narrative": "The body text of the scene. Measured, atmospheric, Victorian-gaslit — never campy. This field is 'narrative', NOT 'text'.",
+    "cluesAvailable": [],
+    "choices": [
+      {
+        "id": "choice-a",
+        "text": "A non-check choice — moves the story on with no dice roll.",
+        "outcomes": { "success": "next-scene-id" }
+      }
+    ]
+  },
+
+  "__check_choice_example__": {
+    "__note__": "A faculty-check choice MUST define all five outcome tiers. Provide an alternate non-faculty path elsewhere in the scene so this faculty never solely gates progress. Tiers should be semantically distinct — don't route fumble to the same place as critical.",
+    "id": "choice-b",
+    "text": "Examine the cipher for a hidden hand (Reason).",
+    "faculty": "reason",
+    "difficulty": 12,
+    "advantageIf": ["clue-cipher-note"],
+    "outcomes": {
+      "critical": "scene-cipher-cracked",
+      "success": "scene-cipher-cracked",
+      "partial": "scene-cipher-partial",
+      "failure": "scene-cipher-stumped",
+      "fumble": "scene-cipher-misled"
+    }
+  },
+
+  "__gated_choice_example__": {
+    "__note__": "Gate visibility with requiresClue / requiresDeduction / requiresFlag / requiresFaculty. A bare 'conditions' array on a Choice is NOT evaluated at runtime.",
+    "id": "choice-c",
+    "text": "Confront her with the ledger you found.",
+    "requiresClue": "clue-ledger",
+    "npcEffect": { "npcId": "npc-landlady", "dispositionDelta": -1, "suspicionDelta": 2 },
+    "outcomes": { "success": "scene-landlady-confronted" }
+  },
+
+  "__onEnter_effects_example__": {
+    "__note__": "Effects mutate state on scene entry. delta sign matters: negative drops the meter. 'description' is optional authored feedback; the mechanical annotation is appended automatically. See the Effect catalog.",
+    "onEnter": [
+      { "type": "composure", "delta": -1, "description": "A chill settles over you as the gaslight gutters." },
+      { "type": "flag", "target": "saw-the-symbol", "value": true },
+      { "type": "discoverClue", "target": "clue-chalk-symbol" }
+    ]
+  },
+
+  "__clue_discovery_example__": {
+    "__note__": "Declare in a scene's cluesAvailable. method: automatic | dialogue | exploration | check. A 'check' discovery is usually paired with requiresFaculty.",
+    "cluesAvailable": [
+      { "clueId": "clue-chalk-symbol", "method": "exploration" },
+      { "clueId": "clue-hidden-panel", "method": "check", "requiresFaculty": { "faculty": "perception", "minimum": 12 } }
+    ]
+  },
+
+  "__variant_example__": {
+    "__note__": "Lives in variants.json. Resolves IN PLACE via resolveScene — must NOT be a choice-outcome target. Needs variantOf (an existing base/shared scene id) and variantCondition.",
+    "id": "scene-parlour--veilsight",
+    "act": 1,
+    "variantOf": "scene-parlour",
+    "variantCondition": { "type": "hasFlag", "target": "veil-sight-active" },
+    "narrative": "With the Veil peeled back, the parlour's shadows resolve into something watching.",
+    "cluesAvailable": [{ "clueId": "clue-occult-residue", "method": "automatic" }],
+    "choices": [{ "id": "v-continue", "text": "Steady yourself and look closer.", "outcomes": { "success": "scene-parlour-inner" } }]
+  }
+}
