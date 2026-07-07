@@ -171,3 +171,37 @@ describe('narrativeSlice.loadAndStartCase — last-critical-faculty is cleared',
     expect(useStore.getState().flags['last-critical-faculty']).toBeUndefined();
   });
 });
+
+// Guards the confirmed HIGH review finding: after a knockout (composure/vitality
+// = 0 + breakdown/incapacitated flags set), starting a new case must reset the
+// meters and clear those flags, or every case instantly re-halts (and the
+// autosave written at 0 is poisoned).
+describe('narrativeSlice.loadAndStartCase — recovers meters after a halt', () => {
+  beforeEach(() => {
+    resetNarrative();
+    stubFetchWithFixture();
+    useStore.setState((s) => ({
+      investigator: { ...s.investigator, composure: 0, vitality: 0 },
+      flags: { 'breakdown-occurred': true, 'incapacitated': true },
+    }));
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('restores composure and vitality to full on case load', async () => {
+    await useStore.getState().loadAndStartCase('test-case');
+    expect(useStore.getState().investigator.composure).toBe(10);
+    expect(useStore.getState().investigator.vitality).toBe(10);
+  });
+
+  it('clears the breakdown-occurred and incapacitated flags on case load', async () => {
+    await useStore.getState().loadAndStartCase('test-case');
+    expect(useStore.getState().flags['breakdown-occurred']).toBeUndefined();
+    expect(useStore.getState().flags['incapacitated']).toBeUndefined();
+  });
+
+  it('does not immediately route back to the breakdown scene', async () => {
+    await useStore.getState().loadAndStartCase('test-case');
+    // With composure restored, the first scene stands — no re-halt.
+    expect(useStore.getState().currentScene).toBe('test-scene-1');
+  });
+});

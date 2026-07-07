@@ -2,7 +2,8 @@
  * Integration tests — choice → navigation → effect pipeline.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { Choice, GameState, SceneNode } from '../../types';
+import type { Choice, GameState, Investigator } from '../../types';
+import type { EngineActions } from '../engineActions';
 
 const mockPerformCheck = vi.fn();
 vi.mock('../diceEngine', () => ({
@@ -15,7 +16,15 @@ vi.mock('../diceEngine', () => ({
 
 import { processChoice, evaluateConditions } from '../narrativeEngine';
 
-const mockActions = {
+const mockInvestigator: Investigator = {
+  name: 'Test', archetype: 'deductionist', abilityUsed: false,
+  faculties: { reason: 12, perception: 10, nerve: 10, vigor: 10, influence: 10, lore: 10 },
+  composure: 10, vitality: 10,
+};
+
+// Typed as EngineActions (not `as any`) so a new required action field — or a
+// renamed one — fails this test at compile time rather than silently passing (F-028).
+const mockActions: EngineActions = {
   goToScene: vi.fn(),
   adjustComposure: vi.fn(),
   adjustVitality: vi.fn(),
@@ -25,7 +34,7 @@ const mockActions = {
   adjustReputation: vi.fn(),
   discoverClue: vi.fn(),
   updateFaculty: vi.fn(),
-  setNpcMemoryFlag: vi.fn(),
+  investigator: mockInvestigator,
 };
 
 function makeState(overrides: Partial<GameState> = {}): GameState {
@@ -57,7 +66,7 @@ describe('Choice → Navigation → Effect pipeline', () => {
       outcomes: { critical: 's-crit', success: 's-ok', partial: 's-part', failure: 's-fail', fumble: 's-fumble' },
       npcEffect: { npcId: 'npc-a', dispositionDelta: 2, suspicionDelta: -1 },
     };
-    const result = processChoice(choice, makeState(), mockActions as any);
+    const result = processChoice(choice, makeState(), mockActions);
     expect(result.tier).toBe('success');
     expect(result.nextSceneId).toBe('s-ok');
     expect(mockActions.adjustDisposition).toHaveBeenCalledWith('npc-a', 2);
@@ -71,7 +80,7 @@ describe('Choice → Navigation → Effect pipeline', () => {
       id: 'c1', text: 'Test', faculty: 'reason', difficulty: 12,
       outcomes: { critical: 's-crit', success: 's-ok', partial: 's-part', failure: 's-fail', fumble: 's-fumble' },
     };
-    processChoice(choice, makeState(), mockActions as any);
+    processChoice(choice, makeState(), mockActions);
     expect(mockActions.setFlag).toHaveBeenCalledWith('last-critical-faculty', 'reason');
   });
 
@@ -79,7 +88,7 @@ describe('Choice → Navigation → Effect pipeline', () => {
     const choice: Choice = {
       id: 'c1', text: 'Simple', outcomes: { critical: 's-crit', success: 's-ok', partial: 's-part', failure: 's-fail', fumble: 's-fumble' },
     };
-    const result = processChoice(choice, makeState(), mockActions as any);
+    const result = processChoice(choice, makeState(), mockActions);
     expect(result.tier).toBe('success');
     expect(result.nextSceneId).toBe('s-ok');
     expect(mockPerformCheck).not.toHaveBeenCalled();
@@ -89,7 +98,7 @@ describe('Choice → Navigation → Effect pipeline', () => {
     const choice: Choice = {
       id: 'c1', text: 'Simple', outcomes: { critical: 's-crit' } as Choice['outcomes'],
     };
-    const result = processChoice(choice, makeState(), mockActions as any);
+    const result = processChoice(choice, makeState(), mockActions);
     expect(result.nextSceneId).toBe('s-crit');
   });
 
@@ -97,7 +106,7 @@ describe('Choice → Navigation → Effect pipeline', () => {
     const choice: Choice = {
       id: 'c-broken', text: 'Dead end', outcomes: {} as Choice['outcomes'],
     };
-    expect(() => processChoice(choice, makeState(), mockActions as any)).toThrow(/c-broken/);
+    expect(() => processChoice(choice, makeState(), mockActions)).toThrow(/c-broken/);
     // Must not have navigated to an undefined scene.
     expect(mockActions.goToScene).not.toHaveBeenCalled();
   });

@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ClueCard } from '../EvidenceBoard/ClueCard';
 import type { Clue } from '../../types';
 
@@ -147,7 +147,7 @@ describe('ClueCard — spent status', () => {
   });
 });
 
-// ─── Keyboard: Spacebar initiates connection ──────────────────────────────────
+// ─── Keyboard: Spacebar / Enter initiate connection ───────────────────────────
 
 describe('ClueCard — keyboard navigation', () => {
   it('calls onInitiateConnection with clue id when Spacebar is pressed', async () => {
@@ -162,6 +162,44 @@ describe('ClueCard — keyboard navigation', () => {
     card.focus();
     card.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
     expect(handler).toHaveBeenCalledWith('clue-42');
+  });
+
+  it('calls onInitiateConnection with clue id when Enter is pressed', () => {
+    const handler = vi.fn();
+    render(
+      <ClueCard
+        clue={makeClue({ id: 'clue-42', status: 'examined' })}
+        onInitiateConnection={handler}
+      />,
+    );
+    const card = screen.getByRole('button');
+    card.focus();
+    fireEvent.keyDown(card, { key: 'Enter' });
+    expect(handler).toHaveBeenCalledWith('clue-42');
+  });
+});
+
+// ─── Pointer: click/tap initiates connection (mouse + touch) ───────────────────
+
+describe('ClueCard — pointer interaction (F-002)', () => {
+  it('calls onInitiateConnection with clue id when clicked/tapped', () => {
+    const handler = vi.fn();
+    render(
+      <ClueCard
+        clue={makeClue({ id: 'clue-7', status: 'examined' })}
+        onInitiateConnection={handler}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button'));
+    expect(handler).toHaveBeenCalledWith('clue-7');
+  });
+
+  it('does not advertise a native drag affordance it cannot fulfil', () => {
+    render(<ClueCard clue={makeClue({ status: 'examined' })} />);
+    const card = screen.getByRole('button');
+    // The misleading draggable/grab-cursor promise of drag-to-connect is removed.
+    expect(card).not.toHaveAttribute('draggable', 'true');
+    expect(card.className).not.toMatch(/cursor-grab/);
   });
 });
 

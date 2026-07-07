@@ -15,24 +15,27 @@ import { ChoicePanel } from './components/ChoicePanel';
 import { EncounterPanel } from './components/EncounterPanel';
 import { CaseCompletion } from './components/CaseCompletion';
 import { CaseSelection } from './components/CaseSelection';
+import { InvestigationHalted } from './components/InvestigationHalted';
 import { useStore, useCurrentScene, buildGameState } from './store';
+import { isHaltScene, haltReason } from './engine/haltScenes';
 import type { CaseCompletionResult } from './engine/caseProgression';
 
 type Screen = 'title' | 'character-creation' | 'case-selection' | 'game' | 'load-game' | 'loading' | 'case-complete';
 
 // Maps each archetype to the world flag it sets when its ability is activated
-const ABILITY_FLAGS: Record<string, string> = {
+export const ABILITY_FLAGS: Record<string, string> = {
   deductionist: 'ability-auto-succeed-reason',
   occultist: 'ability-veil-sight-active',
   operator: 'ability-auto-succeed-vigor',
   mesmerist: 'ability-auto-succeed-influence',
 };
 
-function GameContent({ onCompleteCase, reviewSceneId, onDismissReview }: { onCompleteCase: () => void; reviewSceneId: string | null; onDismissReview: () => void }) {
+export function GameContent({ onCompleteCase, onHalt, reviewSceneId, onDismissReview }: { onCompleteCase: () => void; onHalt: () => void; reviewSceneId: string | null; onDismissReview: () => void }) {
   const scene = useCurrentScene();
   const caseData = useStore((s) => s.caseData);
   const reducedMotion = useStore((s) => s.settings.reducedMotion);
-  const isTerminal = scene && scene.choices.length === 0 && !scene.encounter;
+  const halted = isHaltScene(scene);
+  const isTerminal = scene && scene.choices.length === 0 && !scene.encounter && !halted;
 
   // Read-only review mode
   if (reviewSceneId && caseData?.scenes[reviewSceneId]) {
@@ -57,6 +60,12 @@ function GameContent({ onCompleteCase, reviewSceneId, onDismissReview }: { onCom
         <StatusBar />
       </main>
     );
+  }
+
+  // A knockout (0 composure/vitality) routes to a distinct failure screen,
+  // not the "Case Complete" success terminal (F-011).
+  if (halted) {
+    return <InvestigationHalted reason={haltReason(scene) ?? 'composure'} onReturn={onHalt} />;
   }
 
   return (
@@ -159,6 +168,12 @@ export default function App() {
     setScreen('case-complete');
   }, [currentCase, completeCase]);
 
+  // A halted investigation (0 composure/vitality) is a failure, not a
+  // completion — return to the case list without granting faculty bonuses (F-011).
+  const handleHalt = useCallback(() => {
+    setScreen('case-selection');
+  }, []);
+
   if (screen === 'title') {
     return (
       <AccessibilityProvider>
@@ -239,9 +254,18 @@ export default function App() {
     );
   }
 
+  const anyOverlayOpen = isEvidenceBoardOpen || isJournalOpen || isGalleryOpen || isSettingsOpen;
+
   return (
     <AccessibilityProvider>
       <div className="min-h-screen bg-gaslight-ink text-gaslight-fog font-serif flex flex-col">
+        {/* Background is inert while an overlay is open, so focus/pointer/AT
+            cannot reach it behind the modal (F-007). `inert` is presence-based;
+            React 18 passes '' when true and drops the attribute when false. */}
+        <div
+          className="flex flex-col flex-1 min-h-0"
+          {...(anyOverlayOpen ? { inert: '' as unknown as boolean } : {})}
+        >
         <HeaderBar
           onOpenEvidenceBoard={() => setIsEvidenceBoardOpen(true)}
           onOpenJournal={() => setIsJournalOpen(true)}
@@ -257,7 +281,8 @@ export default function App() {
         />
         <AmbientAudio />
 
-        <GameContent onCompleteCase={handleCompleteCase} reviewSceneId={reviewSceneId} onDismissReview={() => setReviewSceneId(null)} />
+        <GameContent onCompleteCase={handleCompleteCase} onHalt={handleHalt} reviewSceneId={reviewSceneId} onDismissReview={() => setReviewSceneId(null)} />
+        </div>
 
         {/* Overlays */}
         {isEvidenceBoardOpen && (

@@ -70,4 +70,49 @@ describe('EvidenceBoard', () => {
     render(<EvidenceBoard onClose={() => {}} />);
     expect(screen.getByRole('dialog')).toBeTruthy();
   });
+
+  // ─── F-002: connection works on click/tap + persistent first-time hint ───────
+
+  it('shows a persistent connection hint when the board opens with clues and no connection in progress', () => {
+    initStore(sampleClues);
+    render(<EvidenceBoard onClose={() => {}} />);
+    // A first-time prompt must be visible before any Space press.
+    expect(screen.getByText(/select two clues to connect/i)).toBeTruthy();
+  });
+
+  it('does not show the connect hint when there are no clues', () => {
+    initStore({});
+    render(<EvidenceBoard onClose={() => {}} />);
+    expect(screen.queryByText(/select two clues to connect/i)).toBeNull();
+  });
+
+  it('clicking two clue cards connects them and marks both connected', () => {
+    initStore(sampleClues);
+    render(<EvidenceBoard onClose={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: /Cipher Note/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Witness Account/i }));
+
+    const state = useStore.getState();
+    expect(state.connections).toContainEqual({ fromId: 'c1', toId: 'c2' });
+    expect(state.clues.c1.status).toBe('connected');
+    expect(state.clues.c2.status).toBe('connected');
+  });
+
+  it('clicking the same card twice cancels the pending connection', () => {
+    initStore(sampleClues);
+    render(<EvidenceBoard onClose={() => {}} />);
+    const first = screen.getByRole('button', { name: /Cipher Note/i });
+    fireEvent.click(first);
+    fireEvent.click(first);
+    expect(useStore.getState().connections).toHaveLength(0);
+  });
+
+  // ─── F-007: focus trap ───────────────────────────────────────────────────────
+
+  it('moves focus inside the dialog on open', () => {
+    initStore(sampleClues);
+    render(<EvidenceBoard onClose={() => {}} />);
+    const dialog = screen.getByRole('dialog');
+    expect(dialog.contains(document.activeElement)).toBe(true);
+  });
 });

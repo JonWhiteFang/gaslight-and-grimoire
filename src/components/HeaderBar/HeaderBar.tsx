@@ -5,6 +5,7 @@
  * NPC Gallery button, Ability button, and Menu button.
  */
 import { useStore, buildGameState } from '../../store';
+import { resolveCaseTitle } from '../../utils/caseTitle';
 import { AbilityButton } from './AbilityButton';
 import { HintButton } from './HintButton';
 
@@ -30,6 +31,7 @@ export function HeaderBar({
   canGoBack = false,
 }: HeaderBarProps) {
   const currentCase = useStore((s) => s.currentCase);
+  const caseTitle = useStore((s) => s.caseData?.meta.title);
   const clues = useStore((s) => s.clues);
   const archetype = useStore((s) => s.investigator.archetype);
   const abilityUsed = useStore((s) => s.investigator.abilityUsed);
@@ -37,6 +39,7 @@ export function HeaderBar({
   const gameState = useStore(buildGameState);
 
   const hasNewClues = Object.values(clues).some((c) => c.status === 'new');
+  const title = resolveCaseTitle(caseTitle, currentCase);
 
   return (
     <header
@@ -50,7 +53,7 @@ export function HeaderBar({
     >
       {/* Case title */}
       <h1 className="text-amber-300 font-bold text-base tracking-wide truncate">
-        {currentCase || 'Gaslight & Grimoire'}
+        {title}
       </h1>
 
       {/* Action buttons */}

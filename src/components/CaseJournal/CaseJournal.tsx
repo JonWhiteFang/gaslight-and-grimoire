@@ -3,6 +3,7 @@
  */
 import { useEffect } from 'react';
 import { useStore } from '../../store';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 const INTERNAL_FLAG_PREFIXES = ['ability-', 'vignette-unlocked-', 'last-critical-faculty'];
 
@@ -66,6 +67,7 @@ export function CaseJournal({ onClose, onReviewScene }: CaseJournalProps) {
   const sceneHistory = useStore((s) => s.sceneHistory);
   const currentScene = useStore((s) => s.currentScene);
   const caseData = useStore((s) => s.caseData);
+  const dialogRef = useFocusTrap<HTMLDivElement>();
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -89,6 +91,7 @@ export function CaseJournal({ onClose, onReviewScene }: CaseJournalProps) {
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-label="Case Journal"

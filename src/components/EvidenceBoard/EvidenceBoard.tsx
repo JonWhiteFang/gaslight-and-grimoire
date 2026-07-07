@@ -3,6 +3,7 @@
  */
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useClues, useDeductions, useConnections, useStore } from '../../store';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { trackActivity } from '../../engine/hintEngine';
 import { ClueCard } from './ClueCard';
 import { ProgressSummary } from './ProgressSummary';
@@ -38,6 +39,7 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
   const [pointsVersion, setPointsVersion] = useState(0);
 
   const boardRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useFocusTrap<HTMLDivElement>();
 
   // Track board visit for hint engine
   useEffect(() => {
@@ -167,6 +169,7 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-label="Evidence Board"
@@ -232,15 +235,24 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
           )}
         </div>
 
-        {connectingFrom && (
+        {connectingFrom ? (
           <div
             role="status"
             aria-live="polite"
             className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-stone-900/90 text-amber-300 text-sm px-4 py-2 rounded-full border border-amber-700"
           >
-            Press <kbd className="font-bold">Space</kbd> on another clue to connect, or{' '}
-            <kbd className="font-bold">Esc</kbd> to cancel
+            Tap another clue to connect, or press <kbd className="font-bold">Esc</kbd> to cancel
           </div>
+        ) : (
+          revealedClues.length > 0 && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-stone-900/90 text-amber-300 text-sm px-4 py-2 rounded-full border border-amber-700"
+            >
+              Select two clues to connect them, then form a deduction
+            </div>
+          )
         )}
       </div>
     </div>

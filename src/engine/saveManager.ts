@@ -51,8 +51,12 @@ export const SaveManager = {
   /**
    * Serialise `state` into a versioned SaveFile and persist it.
    * Updates the save index with a summary entry.
+   *
+   * `caseTitle`, when supplied, is stored as the summary's readable `caseName`
+   * so the Load-game list shows the human title rather than the slug (F-010).
+   * The persisted GameState is unchanged — the title is index-only.
    */
-  save(saveId: string, state: GameState): void {
+  save(saveId: string, state: GameState, caseTitle?: string): void {
     const saveFile: SaveFile = {
       version: CURRENT_SAVE_VERSION,
       timestamp: new Date().toISOString(),
@@ -66,7 +70,7 @@ export const SaveManager = {
     const summary: SaveSummary = {
       id: saveId,
       timestamp: saveFile.timestamp,
-      caseName: state.currentCase,
+      caseName: caseTitle || state.currentCase,
       investigatorName: state.investigator.name,
     };
     const existingIdx = index.findIndex((s) => s.id === saveId);

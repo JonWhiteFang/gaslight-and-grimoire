@@ -123,6 +123,14 @@ export const createNarrativeSlice: StateCreator<
       state.visitedScenes = [];
       state.lastEffectMessages = [];
       state.investigator.abilityUsed = false;
+      // A case is a fresh start: restore composure/vitality to full and clear the
+      // halt flags. Otherwise a knockout (0 composure/vitality → breakdown scene)
+      // would carry over — every subsequent case would re-fire breakdown on load
+      // and brick the investigator across all cases (and poison the autosave).
+      state.investigator.composure = 10;
+      state.investigator.vitality = 10;
+      delete state.flags['breakdown-occurred'];
+      delete state.flags['incapacitated'];
       delete state.flags['ability-auto-succeed-reason'];
       delete state.flags['ability-auto-succeed-vigor'];
       delete state.flags['ability-auto-succeed-influence'];
@@ -173,6 +181,11 @@ export const createNarrativeSlice: StateCreator<
       state.visitedScenes = [];
       state.lastEffectMessages = [];
       state.investigator.abilityUsed = false;
+      // Fresh start: restore meters and clear halt flags (see loadAndStartCase).
+      state.investigator.composure = 10;
+      state.investigator.vitality = 10;
+      delete state.flags['breakdown-occurred'];
+      delete state.flags['incapacitated'];
       delete state.flags['ability-auto-succeed-reason'];
       delete state.flags['ability-auto-succeed-vigor'];
       delete state.flags['ability-auto-succeed-influence'];

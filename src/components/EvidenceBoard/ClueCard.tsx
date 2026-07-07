@@ -26,7 +26,7 @@ const TYPE_ICONS: Record<string, string> = {
 
 export interface ClueCardProps {
   clue: Clue;
-  /** Called when the user initiates a connection from this card (Spacebar). */
+  /** Called when the user initiates a connection from this card (tap/click, Enter, or Space). */
   onInitiateConnection?: (clueId: string) => void;
   /** Whether this card is currently selected as the connection source. */
   isConnecting?: boolean;
@@ -105,7 +105,7 @@ export function ClueCard({
   const cardRef = useRef<HTMLDivElement>(null);
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === ' ' || e.key === 'Spacebar') {
+    if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Enter') {
       e.preventDefault();
       onInitiateConnection?.(clue.id);
     }
@@ -124,7 +124,7 @@ export function ClueCard({
       data-status={clue.status}
       data-clue-id={clue.id}
       className={[
-        'relative cursor-grab active:cursor-grabbing',
+        'relative cursor-pointer',
         'bg-stone-800 border border-stone-600 rounded-lg p-3',
         'min-w-[160px] max-w-[200px]',
         'select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-white',
@@ -135,8 +135,8 @@ export function ClueCard({
       ]
         .filter(Boolean)
         .join(' ')}
+      onClick={() => onInitiateConnection?.(clue.id)}
       onKeyDown={handleKeyDown}
-      draggable
     >
       {/* Status badge / icon */}
       <StatusIndicator status={clue.status} />

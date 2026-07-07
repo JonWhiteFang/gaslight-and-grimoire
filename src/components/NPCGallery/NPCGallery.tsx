@@ -3,6 +3,7 @@
  */
 import { useEffect } from 'react';
 import { useNpcs } from '../../store';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import type { NPCState } from '../../types';
 
 // ── Disposition label ─────────────────────────────────────────────────────────
@@ -87,6 +88,7 @@ export interface NPCGalleryProps {
 export function NPCGallery({ onClose }: NPCGalleryProps) {
   const npcs = useNpcs();
   const accessibleNpcs = Object.values(npcs).filter((n) => n.isAccessible);
+  const dialogRef = useFocusTrap<HTMLDivElement>();
 
   // Escape key closes
   useEffect(() => {
@@ -99,6 +101,7 @@ export function NPCGallery({ onClose }: NPCGalleryProps) {
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-label="NPC Gallery"

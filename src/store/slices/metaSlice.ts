@@ -39,9 +39,10 @@ export const createMetaSlice: StateCreator<
     }),
 
   saveGame: async () => {
-    const gameState = snapshotGameState(get());
+    const s = get();
+    const gameState = snapshotGameState(s);
     const saveId = `save-${Date.now()}`;
-    SaveManager.save(saveId, gameState);
+    SaveManager.save(saveId, gameState, s.caseData?.meta.title);
 
     // Cap manual saves at MAX_MANUAL_SAVES (exclude autosave)
     const all = SaveManager.listSaves();
@@ -58,7 +59,7 @@ export const createMetaSlice: StateCreator<
     const s = get();
     if (!s.currentScene) return;
     try {
-      SaveManager.save('autosave', snapshotGameState(s));
+      SaveManager.save('autosave', snapshotGameState(s), s.caseData?.meta.title);
     } catch {
       // localStorage may be unavailable in tests or private browsing
     }
