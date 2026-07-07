@@ -90,6 +90,7 @@ src/
     slices/                   # Six domain slices (see below)
   engine/
     narrativeEngine.ts        # Content loading, condition eval, scene resolution, choice processing, encounters
+    contentValidation.ts      # Shared content validator (validateBundle) — used by validateContent + the CLI
     diceEngine.ts             # d20 rolls, advantage/disadvantage, modifier calc, outcome tiers
     buildDeduction.ts         # Pure deduction builder from connected clue IDs
     caseProgression.ts        # End-of-case logic, faculty bonuses, vignette unlocks
@@ -182,7 +183,7 @@ Rules:
 
 ### Case Progression (caseProgression.ts)
 - `completeCase` — grants +1 faculty bonus from `last-critical-faculty` flag, checks vignette unlocks, auto-saves.
-- Vignette unlocks triggered by: faction reputation thresholds, NPC disposition ≥ 7, or required flags.
+- Vignette unlocks triggered by: faction reputation thresholds, NPC disposition thresholds, or required (persisted) flags. See `VIGNETTE_CONDITIONS` in `caseProgression.ts` for the live registry.
 
 ### Hints (hintEngine.ts)
 - Stateful singleton tracking board visits, connection attempts, scene dwell time.
@@ -254,7 +255,7 @@ Base faculty score: 8. Bonus points to allocate: 12. Composure and Vitality: 0�
 ### Side Cases (vignettes, 2-act structure)
 - **"A Matter of Shadows"** — 13 scenes, 5 clues, 3 NPCs, 3 endings. Missing Lamplighter courier in Southwark. Unlocks at Lamplighters rep ≥ 2.
 - **"The Rationalist's Dilemma"** — 10 scenes, 5 clues, 2 NPCs, 3 endings. Scientist detects the Veil electromagnetically; Circle wants it buried. Unlocks at Rationalists Circle rep ≥ 2.
-- **"The Debt of Smoke"** — 9 scenes, 4 clues, 2 NPCs, 3 endings. Court of Smoke contact asks for help with a stolen Veil fragment. Unlocks at NPC Sable disposition ≥ 7.
+- **"The Debt of Smoke"** — 9 scenes, 4 clues, 2 NPCs, 3 endings. Court of Smoke contact asks for help with a stolen Veil fragment. Unlocks via the persisted `wc-court-deal-made` flag (set by the Whitechapel Court-of-Smoke ending).
 - **"The Unfinished Case"** — 8 scenes, 4 clues, 2 NPCs, 3 endings. Cold case: the original cipher maker was murdered before the Whitechapel events. Unlocks after completing The Whitechapel Cipher.
 
 ### Content Totals
@@ -265,7 +266,7 @@ Base faculty score: 8. Bonus points to allocate: 12. Composure and Vitality: 0�
 
 ## Known Bugs & Gaps (as of 2026-02-25)
 
-Current state is documented in `docs/status.md`. (Run `npm run test:run` for the live test baseline — 334 tests across 29 files pass as of 2026-07-07.)
+Current state is documented in `docs/status.md`. (Run `npm run test:run` for the live test baseline — 368 tests across 30 files pass as of 2026-07-07.)
 
 ### Critical (blocks core functionality)
 - None remaining. `loadGame` caseData restoration was fixed in Phase A.

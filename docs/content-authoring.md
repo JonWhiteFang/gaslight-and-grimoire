@@ -270,25 +270,37 @@ Successful output:
 All 7 case(s) validated successfully.
 ```
 
-The validator checks (errors fail the run with exit 1):
+Both the CLI (`scripts/validateCase.mjs`, a `vite-node` launcher for
+`scripts/validateCase.ts`) and the runtime `validateContent` delegate to one
+shared module, `src/engine/contentValidation.ts`, so they cannot drift. The
+checks (errors fail the run with exit 1):
 
 - **Broken scene edges** — every choice `outcomes.<tier>` target must be a known
-  scene id (variant ids count as valid targets).
+  scene id (variant + shared `breakdown`/`incapacitation` ids count as valid
+  targets). Recurses into `encounter.rounds[].choices` and `worseAlternative`.
 - **Missing clue references** — `requiresClue`, `advantageIf`,
-  `cluesAvailable[].clueId`, and `onEnter` `discoverClue` targets must be known
-  clue ids.
+  `cluesAvailable[].clueId`, `onEnter` `discoverClue`, and `clue.sceneSource`
+  targets must be known clue/scene ids.
 - **Missing NPC references** — `onEnter` `disposition` / `suspicion` /
-  `setMemoryFlag` targets must be known npc ids.
+  `setMemoryFlag` and any `choice.npcEffect.npcId` (including inside encounter
+  rounds) must be known npc ids.
+- **Condition targets** — every `conditions[]` / `variantCondition` entry must
+  reference a known clue/npc, a real faculty, and a valid `archetypeIs` /
+  `npcSuspicion` / `factionReputation` value. (`hasFlag` with `value:false` is
+  legitimate — it gates on a flag being unset.)
+- **Variant structure** — every variant must have a `variantOf` (pointing at a
+  known base/shared scene) and a `variantCondition`.
 - **Outcome-tier completeness** — a faculty-check choice (has `faculty` **and**
-  `difficulty`) must define all five tiers.
+  `difficulty` **or** `dynamicDifficulty`) must define all five tiers.
 - **`firstScene`** — if `meta.json` names one, it must exist (missing → warning).
 
-It also emits **warnings** (non-fatal) for scenes unreachable from `firstScene`
-and clues no reachable scene can discover.
+It also emits **warnings** (non-fatal, CLI only) for scenes unreachable from
+`firstScene` and clues no reachable scene can discover.
 
-The validator runs in CI — it is a step in `.github/workflows/deploy.yml`
-(`run: node scripts/validateCase.mjs`, after `npm ci`, before the build), so a
-broken reference blocks deployment.
+The validator runs in CI — it is a step in the `test` job of
+`.github/workflows/deploy.yml` (`run: node scripts/validateCase.mjs`, after
+`npm ci`), and `build` → `deploy` depend on that job, so a broken reference
+blocks deployment.
 
 ## Audio asset reference
 
