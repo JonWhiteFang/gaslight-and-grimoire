@@ -19,6 +19,14 @@
 
 ---
 
+## 2026-07-07 — First `/checkpoint`: exercise the loop, enact ADR-0002
+
+- **Goal:** Run the first real end-of-session `/checkpoint` to verify the memory-spine loop works, and enact ADR-0002 now that its follow-up condition is met.
+- **Did:** Doc-drift sweep (scoped to this session's docs) found no drift — STATE/status.md `334/334` + `29 files`, content counts, and the CLAUDE.md hook path all match code/git/config. Flipped **ADR-0002 Accepted→Enacted** (status line annotated with the transition; Follow-up struck through with a dated note — original decision text preserved). Updated the ADR index row to Enacted. Bumped PROJECT_STATE `_Last updated:_` and marked both ADRs Enacted in References. Confirmed the `/checkpoint` skill and `SessionStart` hook load (post `/reload-plugins`: "2 hooks, 1 skill").
+- **Verified:** `npm run test:run` → **334 passed (334)**, 29 files. `node scripts/validateCase.mjs` → all 7 cases clean. Working tree was clean at session start (prior spine work already committed as `04e7485` and pushed).
+- **Open / blockers:** Media assets remain the one open milestone — see PROJECT_STATE Open questions. No blockers.
+- **Memory updated:** STATE ☑ · RUN_LOG ☑ · ADR ☑ (ADR-0002 → Enacted)
+
 ## 2026-07-07 — Stand up the committed memory spine
 
 - **Goal:** Set up the committed, version-controlled project-memory spine (PROJECT_STATE / RUN_LOG / DECISIONS + session-start hook + `/checkpoint` skill), adapted to G&G's real state.

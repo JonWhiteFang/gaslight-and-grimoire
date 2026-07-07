@@ -8,9 +8,9 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-07 (Stood up the committed memory spine — PROJECT_STATE / RUN_LOG / DECISIONS,
-session-start hook, `/checkpoint` skill. Game code is feature-complete through Phase E with 334 tests
-green; the only substantive remaining work is shipping audio/visual media assets.)_
+_Last updated: 2026-07-07 (Memory spine committed + first `/checkpoint` exercised the loop; ADR-0002
+flipped Accepted→Enacted. Game code is feature-complete through Phase E with 334 tests green; the only
+substantive remaining work is shipping audio/visual media assets.)_
 
 ---
 
@@ -61,7 +61,7 @@ These are flagged-but-unresolved. Resolve each via an ADR when decided, then mar
 
 ## References
 
-- Decisions: [`DECISIONS/`](DECISIONS/) — [ADR-0001](DECISIONS/ADR-0001-content-engine-separation.md) (content↔engine separation & bounded state), [ADR-0002](DECISIONS/ADR-0002-committed-memory-spine.md) (this memory spine).
+- Decisions: [`DECISIONS/`](DECISIONS/) — [ADR-0001](DECISIONS/ADR-0001-content-engine-separation.md) (content↔engine separation & bounded state, Enacted), [ADR-0002](DECISIONS/ADR-0002-committed-memory-spine.md) (this memory spine, Enacted).
 - Run history: [`RUN_LOG.md`](RUN_LOG.md).
 - Architecture, invariants, store conventions, content rules, known gaps: [../CLAUDE.md](../CLAUDE.md).
 - Current-state snapshot (content inventory, systems, asset status, test baseline): [status.md](status.md).

@@ -1,6 +1,6 @@
 # ADR-0002: Adopt a committed, version-controlled project-memory spine
 
-- **Status:** Accepted
+- **Status:** Enacted (was Accepted 2026-07-07; the loop was exercised through its first real end-of-session `/checkpoint` on 2026-07-07)
 - **Date:** 2026-07-07
 - **Deciders:** Project maintainer
 - **Phase / stage:** Tooling / process
@@ -37,7 +37,7 @@ G&G is feature-complete rather than a large staged build at risk of scope creep.
 
 - **Positive:** any agent or human resumes from `PROJECT_STATE.md` cold; the session-start hook surfaces state automatically; decisions and history are versioned and reviewed in PRs; the `/checkpoint` doc-drift sweep keeps `CLAUDE.md` / `docs/` honest over time.
 - **Negative / trade-offs:** a per-session discipline cost (run `/checkpoint` at end of session); a `SessionStart` hook now runs on every session (depends on `jq` + `git`, both present); three more docs to keep coherent — mitigated by the "one authority per fact, spine points not restates" rule.
-- **Follow-ups:** flip this ADR to **Enacted** once the loop has been exercised through at least one real end-of-session `/checkpoint`. Revisit adding a scope ledger only if the project re-opens into a large staged build.
+- **Follow-ups:** ~~flip this ADR to **Enacted** once the loop has been exercised through at least one real end-of-session `/checkpoint`.~~ Done 2026-07-07 — first real `/checkpoint` ran; status is now Enacted. Revisit adding a scope ledger only if the project re-opens into a large staged build.
 
 ## Links
 
