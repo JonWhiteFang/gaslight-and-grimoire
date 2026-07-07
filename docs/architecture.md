@@ -174,10 +174,10 @@ $ grep -rnE "Date.now\(\)|Math.random\(\)" \
     src/engine/saveManager.ts src/engine/buildDeduction.ts \
     src/store/slices/metaSlice.ts
 src/engine/diceEngine.ts:23:  return Math.floor(Math.random() * 20) + 1;
-src/engine/buildDeduction.ts:26:    id: `deduction-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-src/engine/hintEngine.ts:41:  sceneEntryTime: Date.now(),
-src/engine/hintEngine.ts:83:  const dwellTrigger = Date.now() - state.sceneEntryTime >= SCENE_DWELL_MS;
-src/engine/hintEngine.ts:145:  state.sceneEntryTime = Date.now();
+src/engine/buildDeduction.ts:24:    id: `deduction-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+src/engine/hintEngine.ts:39:  sceneEntryTime: Date.now(),
+src/engine/hintEngine.ts:81:  const dwellTrigger = Date.now() - state.sceneEntryTime >= SCENE_DWELL_MS;
+src/engine/hintEngine.ts:143:  state.sceneEntryTime = Date.now();
 src/store/slices/metaSlice.ts:43:    const saveId = `save-${Date.now()}`;
 # (saveManager.ts: no match)
 ```
