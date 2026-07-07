@@ -10,5 +10,19 @@
       "Bash(node scripts/validateCase.mjs)",
       "Bash(node scripts/validateCase.mjs :*)"
     ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-preflight.sh\"",
+            "timeout": 15,
+            "statusMessage": "Loading project memory spine…"
+          }
+        ]
+      }
+    ]
   }
 }

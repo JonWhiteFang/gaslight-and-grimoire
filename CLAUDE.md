@@ -15,6 +15,20 @@ Project docs live under `docs/`. Read the relevant one before significant change
 - `docs/status.md` — current state: systems present, content inventory, test baseline
 - `docs/Gaslight_&_Grimoire_design.md` — the original design bible (vision, world, mechanics, narrative intent)
 
+## Project memory — read at session start, update at session end
+
+This repo keeps a **committed, version-controlled memory spine** so progress and decisions survive
+across sessions and machines (unlike a tool's machine-local auto-memory). It does **not** restate the
+architecture or scope rules in this file and `docs/` — it tracks *what's done and what's been decided*:
+
+- **`docs/PROJECT_STATE.md`** — the one-page live snapshot. **Read this first** when resuming work.
+- **`docs/RUN_LOG.md`** — append-only session history (what happened, when).
+- **`docs/DECISIONS/`** — Architecture Decision Records (the *why* behind non-trivial calls).
+
+**Protocol.** Start of work: read `PROJECT_STATE.md` + the latest `RUN_LOG.md` entry. End of session:
+run `/checkpoint`. A `SessionStart` hook (`.claude/hooks/session-preflight.sh`) injects git state + the
+top of `PROJECT_STATE.md` automatically.
+
 ## Architecture
 
 Two strict domains — never mix them:
