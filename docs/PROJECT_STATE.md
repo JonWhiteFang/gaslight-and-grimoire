@@ -29,8 +29,9 @@ baseline **384 → 481** (44 files). Deferred: **#6** (deduction-gated content �
 - **Active gate:** CI enforces it. Every push/PR to `main` runs the validator + `npm run test:run` in the
   `test` job; `build` → `deploy` depend on it, and `deploy` is skipped on PR events. Bar unchanged locally:
   test suite green + validator clean before merge.
-- **Branch focus:** `fix/p1-code-cluster-touch-a11y-halt-titles` off `main` (`2efb40a`) — the P1 code cluster
-  (#7/#8/#9/#10/#12) + the two review fixes. Open PR next. #6 (deduction-gated content) starts from a fresh branch.
+- **Branch focus:** `main` (up to date with origin at `386699a`, **PR #30 merged**) — the P1 code cluster
+  (#7/#8/#9/#10/#12) + the two review fixes landed; issues #7–#10/#12 auto-closed. #6 (deduction-gated content)
+  starts from a fresh branch off `main`.
 - **Verification:** 2026-07-07 — `npm run test:run` → **481 passed (481)** across **44** files (was 384/30);
   `node scripts/validateCase.mjs` → 7 cases clean; `npm run build` (`tsc && vite build`) green. High-contrast
   verified visually via Playwright (before/after: black bg, yellow accents, white text). Adversarial review:
