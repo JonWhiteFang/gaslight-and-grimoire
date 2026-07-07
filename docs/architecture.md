@@ -64,7 +64,7 @@ intersection of the six slice interfaces.
 | Slice | State | Actions |
 |---|---|---|
 | `investigatorSlice` | `investigator` | `initInvestigator`, `updateFaculty`, `adjustComposure`, `adjustVitality`, `useAbility`, `resetAbility` |
-| `narrativeSlice` | `currentScene`, `currentCase`, `sceneHistory`, `lastCheckResult`, `caseData` | `goToScene`, `setCheckResult`, `loadAndStartCase`, `loadAndStartVignette`, `completeCase` |
+| `narrativeSlice` | `currentScene`, `currentCase`, `sceneHistory`, `visitedScenes`, `lastEffectMessages`, `lastCheckResult`, `caseData` | `goToScene`, `setCheckResult`, `loadAndStartCase`, `loadAndStartVignette`, `completeCase` |
 | `evidenceSlice` | `clues`, `deductions`, `connections` | `discoverClue`, `updateClueStatus`, `addDeduction`, `addConnection`, `clearConnections` |
 | `npcSlice` | `npcs` | `adjustDisposition`, `adjustSuspicion`, `setNpcMemoryFlag`, `removeNpc` |
 | `worldSlice` | `flags`, `factionReputation` | `setFlag`, `adjustReputation`, `applyEffects` |
@@ -112,8 +112,9 @@ CaseSelection → loadAndStartCase(id)  (or loadAndStartVignette)
   → set caseData; reset clues/npcs/deductions/connections; clear ability/reward
     flags (ability-auto-succeed-{reason,vigor,influence}, ability-veil-sight-active,
     last-critical-faculty) — other world flags persist across cases
-  → goToScene(firstScene)             push prev scene to sceneHistory
-      → NarrativePanel renders scene, fires worldSlice.applyEffects(onEnter)
+  → goToScene(firstScene)             push prev scene to sceneHistory;
+      apply onEnter effects once per scene (gated on visitedScenes — F-006)
+      → NarrativePanel renders scene (auto-discovers clues; shows lastEffectMessages)
       → ChoicePanel → processChoice(choice, state, actions)
           → diceEngine (resolveDC, performCheck / rollD20)
           → actions.goToScene(nextSceneId) + NPC/effect mutations

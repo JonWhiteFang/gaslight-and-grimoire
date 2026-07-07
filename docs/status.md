@@ -96,7 +96,7 @@ nothing.
 
 As of 2026-07-07, running `npm run test:run`:
 
-- **Tests: 368 passed (368)**
+- **Tests: 384 passed (384)**
 - **Test Files: 30 passed (30)**
 
 The suite includes property-based tests using fast-check (six
