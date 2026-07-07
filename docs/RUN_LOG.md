@@ -19,6 +19,15 @@
 
 ---
 
+## 2026-07-07 — Full Ultracode repo audit + file findings as GitHub issues
+
+- **Goal:** Run a comprehensive read-only, all-angles audit of the repo and produce a report for later remediation; then file the findings as GitHub issues.
+- **Did:** Ran a 13-dimension adversarial audit (110 subagents: one finder per dimension, one independent skeptic re-opening cited files per finding). 97 findings verified, 5 rejected as false positives; deduped to **67 canonical findings** (2 High, ~19 Medium, ~40 Low/Polish). Wrote the report (now at `docs/audits/ULTRACODE_FULL_REPO_ANALYSIS.md` — the user moved it there from repo root). Created priority + category labels and filed **22 grouped GitHub issues** (#1–#22: 5 P0, 7 P1, 7 P2, 3 P3) on `JonWhiteFang/gaslight-and-grimoire`. Independently re-verified the anchor findings (e.g. `npc-sable` max disposition +4 vs unlock threshold 7 → *Debt of Smoke* unreachable; 0 `requiresDeduction`/`hasDeduction` refs in content; `ClueCard` has `draggable` + `onKeyDown` only, no click/touch). Updated PROJECT_STATE to correct the "media is the only remaining work" framing (now false), add an audit + a P0/P1 remediation milestone row, reorder Next actions, and link the report. **No code changed.**
+- **Verified:** `npm run test:run` → **334 passed (334)**, 29 files (unchanged). `node scripts/validateCase.mjs` → 7 cases clean. `npm run build` green (402 KB JS / 125 KB gzip). `npm audit` → 0 vulns. `gh issue list` → 22 open issues. Audit method is read-only; runtime-behaviour findings (encounter escape, onEnter re-fire, touch connect) are confirmed from code+content and flagged in the report for an optional Playwright MCP click-through.
+- **Doc-drift sweep (flagged, NOT auto-fixed — each is now a filed issue, so fixing piecemeal here would make the issue stale on day one):** (1) `CLAUDE.md:197` says save "Current version: 1" but `saveManager.ts:14` is `CURRENT_SAVE_VERSION = 2`; `CLAUDE.md:305` wrongly lists `saveManager` under `Date.now()/Math.random()` users → **issue #17**. (2) `docs/status.md:70`/`CLAUDE.md` present high-contrast as "applied", but the audit found the `.high-contrast` class is consumed by nothing (inert) → **issue #8**. (3) `CLAUDE.md:51` references a `<GameScreen>` component that doesn't exist → **issue #17**. Left these to their issues rather than editing four bundled drifts one at a time. No drift found in the spine itself.
+- **Open / blockers:** 22-issue backlog is the new work queue; P0 issues (#1–#5) are correctness/CI blockers that should precede media assets. No blockers. The relocated report under `docs/audits/` is untracked — surfaced for the user to commit.
+- **Memory updated:** STATE ☑ · RUN_LOG ☑ · ADR ☐ (no new architectural decision — the audit records findings, it doesn't decide a direction)
+
 ## 2026-07-07 — Add Playwright MCP server (project scope)
 
 - **Goal:** Install a browser-driving MCP capability so the running game can be verified end-to-end (the one open milestone, media assets, only shows up at runtime).
