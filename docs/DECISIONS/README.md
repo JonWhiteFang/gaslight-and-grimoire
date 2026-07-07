@@ -24,6 +24,7 @@ guide is the *current rule* and the ADR is the *historical record* — check the
 |---|---|---|---|---|---|---|
 | [ADR-0001](ADR-0001-content-engine-separation.md) | Content ↔ engine separation, single store, bounded state | Enacted | 2026-07-07 | Foundation | none | Content is runtime JSON gated only by `Condition`/`Effect`; engine is pure and store-free; one six-slice Zustand store; all numeric state bounded. |
 | [ADR-0002](ADR-0002-committed-memory-spine.md) | Adopt a committed, version-controlled project-memory spine | Enacted | 2026-07-07 | Tooling | none | STATE + RUN_LOG + DECISIONS + session-start hook + `/checkpoint`; scope-gate tracker/ledger dropped (project is feature-complete). Enacted 2026-07-07 after first real `/checkpoint`. |
+| [ADR-0003](ADR-0003-playwright-mcp-project-scope.md) | Commit the Playwright MCP server at project scope | Enacted | 2026-07-07 | Tooling | pairs with ADR-0002 | Committed `.mcp.json` runs `@playwright/mcp` so any clone can drive the browser game; project scope chosen over local/user for team-shareability. |
 
 ## How to add a new ADR
 

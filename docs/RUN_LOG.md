@@ -19,6 +19,14 @@
 
 ---
 
+## 2026-07-07 — Add Playwright MCP server (project scope)
+
+- **Goal:** Install a browser-driving MCP capability so the running game can be verified end-to-end (the one open milestone, media assets, only shows up at runtime).
+- **Did:** Added `@playwright/mcp` at **project scope** via committed `.mcp.json` (`claude mcp add playwright -s project`). Chose project over local/user scope for team-shareability, consistent with the repo's committed-tooling convention. Recorded the rationale in **ADR-0003** (Enacted) and wired it into the ADR index. Updated PROJECT_STATE: `_Last updated:_`, References (ADR-0003), and Next actions (media-asset steps now note Playwright can verify in-browser).
+- **Verified:** `.mcp.json` valid JSON, registers `playwright`; `npx @playwright/mcp@latest --version` → 0.0.77; Playwright Chromium binary already cached. `claude mcp list` → server registered, `⏸ Pending approval` (expected one-time gate for committed MCP). Ground-truth baseline unchanged: `npm run test:run` → **334 passed (334)**, 29 files; `node scripts/validateCase.mjs` → 7 cases clean. Doc-drift sweep: no doc references MCP/Playwright, so no drift; STATE counts still accurate.
+- **Open / blockers:** Playwright MCP needs one-time approval on next `claude` launch in this repo before its tools go live. Media assets remain the one open milestone. No blockers.
+- **Memory updated:** STATE ☑ · RUN_LOG ☑ · ADR ☑ (ADR-0003)
+
 ## 2026-07-07 — First `/checkpoint`: exercise the loop, enact ADR-0002
 
 - **Goal:** Run the first real end-of-session `/checkpoint` to verify the memory-spine loop works, and enact ADR-0002 now that its follow-up condition is met.

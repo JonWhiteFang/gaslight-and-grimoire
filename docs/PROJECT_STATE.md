@@ -8,9 +8,9 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-07 (Memory spine committed + first `/checkpoint` exercised the loop; ADR-0002
-flipped Accepted→Enacted. Game code is feature-complete through Phase E with 334 tests green; the only
-substantive remaining work is shipping audio/visual media assets.)_
+_Last updated: 2026-07-07 (Added Playwright MCP at project scope (ADR-0003) — a clone can now drive the
+running browser game for runtime verification. Game code is feature-complete through Phase E with 334
+tests green; the only substantive remaining work is shipping audio/visual media assets.)_
 
 ---
 
@@ -46,8 +46,8 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 ## Next actions (explicit order)
 
 1. **Decide the media-assets approach** (the one open question below) before producing any files — sourcing, format, and licensing drive everything downstream.
-2. Once decided: produce the nine SFX `.mp3` files named in [content-authoring.md](content-authoring.md#audio-asset-reference), drop them under `public/`, and confirm Howler loads them in the dev server.
-3. Add scene illustrations / NPC portraits per the same asset reference; verify `SceneIllustration` and `NPCGallery` render them.
+2. Once decided: produce the nine SFX `.mp3` files named in [content-authoring.md](content-authoring.md#audio-asset-reference), drop them under `public/`, and confirm Howler loads them in the dev server (drive the running app via the Playwright MCP server — see ADR-0003).
+3. Add scene illustrations / NPC portraits per the same asset reference; verify `SceneIllustration` and `NPCGallery` render them (Playwright MCP can confirm in-browser).
 
 ---
 
@@ -61,7 +61,7 @@ These are flagged-but-unresolved. Resolve each via an ADR when decided, then mar
 
 ## References
 
-- Decisions: [`DECISIONS/`](DECISIONS/) — [ADR-0001](DECISIONS/ADR-0001-content-engine-separation.md) (content↔engine separation & bounded state, Enacted), [ADR-0002](DECISIONS/ADR-0002-committed-memory-spine.md) (this memory spine, Enacted).
+- Decisions: [`DECISIONS/`](DECISIONS/) — [ADR-0001](DECISIONS/ADR-0001-content-engine-separation.md) (content↔engine separation & bounded state, Enacted), [ADR-0002](DECISIONS/ADR-0002-committed-memory-spine.md) (this memory spine, Enacted), [ADR-0003](DECISIONS/ADR-0003-playwright-mcp-project-scope.md) (Playwright MCP at project scope, Enacted).
 - Run history: [`RUN_LOG.md`](RUN_LOG.md).
 - Architecture, invariants, store conventions, content rules, known gaps: [../CLAUDE.md](../CLAUDE.md).
 - Current-state snapshot (content inventory, systems, asset status, test baseline): [status.md](status.md).
