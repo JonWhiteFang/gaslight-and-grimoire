@@ -292,35 +292,30 @@ describe('checkVignetteUnlocks — all four vignettes are registered', () => {
     expect(CaseProgression.checkVignetteUnlocks(state)).toBe('the-rationalists-dilemma');
   });
 
-  it('unlocks the-debt-of-smoke when npc-sable disposition ≥ 7', () => {
+  // #3 / F-003: the-debt-of-smoke was gated on npc-sable disposition ≥ 7, but
+  // the max attainable disposition in the only case containing Sable is +4, and
+  // npcs reset between cases — so it was permanently unreachable. It is now
+  // gated on the persisted `wc-court-deal-made` flag set by the Whitechapel
+  // Court-of-Smoke ending (flags survive case loads, like wc-case-complete).
+  it('unlocks the-debt-of-smoke when the wc-court-deal-made flag is set', () => {
     const state = makeState({
-      npcs: {
-        'npc-sable': {
-          id: 'npc-sable', name: 'Sable', faction: 'Court of Smoke',
-          disposition: 7, suspicion: 0, memoryFlags: {}, isAlive: true, isAccessible: true,
-        },
-      },
+      flags: { 'wc-court-deal-made': true },
     });
     expect(CaseProgression.checkVignetteUnlocks(state)).toBe('the-debt-of-smoke');
   });
 
+  it('does not unlock the-debt-of-smoke without the wc-court-deal-made flag', () => {
+    const state = makeState({ flags: {} });
+    expect(CaseProgression.checkVignetteUnlocks(state)).toBeNull();
+  });
+
   it('unlocks the-unfinished-case when the wc-case-complete flag is set', () => {
     const state = makeState({
+      // wc-case-complete alone (a non-Court ending) unlocks the-unfinished-case
+      // but NOT the-debt-of-smoke.
       flags: { 'wc-case-complete': true },
     });
     expect(CaseProgression.checkVignetteUnlocks(state)).toBe('the-unfinished-case');
-  });
-
-  it('does not unlock the-debt-of-smoke when npc-sable disposition is below 7', () => {
-    const state = makeState({
-      npcs: {
-        'npc-sable': {
-          id: 'npc-sable', name: 'Sable', faction: 'Court of Smoke',
-          disposition: 6, suspicion: 0, memoryFlags: {}, isAlive: true, isAccessible: true,
-        },
-      },
-    });
-    expect(CaseProgression.checkVignetteUnlocks(state)).toBeNull();
   });
 });
 

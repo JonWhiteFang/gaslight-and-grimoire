@@ -40,7 +40,10 @@ const VIGNETTE_CONDITIONS: VignetteUnlockCondition[] = [
   },
   {
     id: 'the-debt-of-smoke',
-    npcDisposition: { npcId: 'npc-sable', threshold: 7 },
+    // Gated on the persisted flag set by the Whitechapel Court-of-Smoke ending.
+    // (Was npc-sable disposition ≥ 7, which is unattainable — max is +4 — and
+    // NPC state resets between cases. Flags persist, like wc-case-complete.)
+    requiredFlag: 'wc-court-deal-made',
   },
   {
     id: 'the-unfinished-case',

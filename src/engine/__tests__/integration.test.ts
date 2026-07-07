@@ -115,4 +115,28 @@ describe('Condition gating', () => {
       { type: 'npcDisposition', target: 'npc-a', value: 5 },
     ], state)).toBe(false);
   });
+
+  // F-024: `{type:hasFlag, value:false}` is the "flag is not set" gate used by
+  // the case-specific breakdown/incapacitation variants. An unset flag is
+  // `undefined`, so a strict `undefined === false` never matched — the variants
+  // were dead content. hasFlag must compare on truthiness, not identity.
+  it('hasFlag value:false matches an unset flag', () => {
+    expect(evaluateConditions([{ type: 'hasFlag', target: 'never-set', value: false }], makeState())).toBe(true);
+  });
+
+  it('hasFlag value:false matches a flag explicitly set false', () => {
+    const state = makeState({ flags: { 'gate': false } });
+    expect(evaluateConditions([{ type: 'hasFlag', target: 'gate', value: false }], state)).toBe(true);
+  });
+
+  it('hasFlag value:false does NOT match a truthy flag', () => {
+    const state = makeState({ flags: { 'gate': true } });
+    expect(evaluateConditions([{ type: 'hasFlag', target: 'gate', value: false }], state)).toBe(false);
+  });
+
+  it('hasFlag value:true still matches only a truthy flag', () => {
+    expect(evaluateConditions([{ type: 'hasFlag', target: 'gate', value: true }], makeState())).toBe(false);
+    const set = makeState({ flags: { 'gate': true } });
+    expect(evaluateConditions([{ type: 'hasFlag', target: 'gate', value: true }], set)).toBe(true);
+  });
 });
