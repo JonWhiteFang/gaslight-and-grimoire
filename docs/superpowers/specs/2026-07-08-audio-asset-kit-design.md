@@ -156,9 +156,24 @@ touch no engine code.
 - `src/engine/audioManager.ts`, `src/components/AmbientAudio/AmbientAudio.tsx`,
   `src/store/audioSubscription.ts`
 
-## Open questions / follow-ups
+## Decisions & deferred work
 
-- Whether to wire `checkAudioAssets.mjs` into CI (`deploy.yml`) as a non-blocking informational
-  step now, or defer until the audio-complete `--strict` milestone. (Leaning: defer — a
-  non-blocking check adds noise without a gate.)
-- Illustration milestone remains open as a future, separate spec.
+- **CI wiring — deferred.** `checkAudioAssets.mjs` is **not** wired into CI now. The validator
+  stays a local/manual tool until the assets actually exist; revisit wiring it in (likely as
+  the `--strict` gate) once the generated files have landed in `public/audio/`.
+- **Illustration milestone — parked (lowest priority).** No work, no spec, until the user
+  decides to pick it up. Tracked as the lowest-priority future item.
+
+## Sequencing note
+
+This spec is authored now, but **implementation pauses until generated audio assets are
+available**. The natural build order once assets exist:
+
+1. Author `docs/audio-asset-kit.md` (the prompt kit) — can be done any time; it's what the
+   user needs *before* generating.
+2. User generates the 19 files and drops them into `public/audio/`.
+3. Add `scripts/checkAudioAssets.mjs` + its unit test to validate what landed.
+4. Manual QA pass per the kit checklist.
+
+Step 1 (the prompt kit) is the only piece with no dependency on having assets in hand — it's
+the input to generation. Steps 3–4 need the files present to be meaningful.
