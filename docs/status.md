@@ -79,32 +79,36 @@ Each item below corresponds to implemented code. See
 
 ## Assets
 
-The game currently runs **silent and text-only**. The media systems are
-implemented, but no media files ship in the repository.
+The game runs **text-only, with SFX present and ambient audio pending**. The
+media systems are fully implemented; the 9 SFX files now ship, ambient loops and
+illustrations do not yet.
 
 - **Audio** — `AudioManager` (lazy-cached Howler instances) and `AmbientAudio`
   are fully implemented. Nine SFX event types are defined (`dice-roll`,
   `clue-physical`, `clue-testimony`, `clue-occult`, `clue-deduction`,
   `clue-redHerring`, `composure-decrease`, `vitality-decrease`,
-  `scene-transition`), and scenes reference ambient loops via
-  `SceneNode.ambientAudio`. No `.mp3` files exist under `public/`; Howler
-  silently absorbs the missing-file errors. The intended file list is in
-  [content-authoring.md](./content-authoring.md#audio-asset-reference).
+  `scene-transition`). **The 9 SFX `.mp3` files now ship** under
+  `public/audio/sfx/` (AI-generated per [audio-asset-kit.md](../audio-asset-kit.md),
+  loudness-normalized to ~-14 LUFS). SFX urls are base-path-aware
+  (`buildSfxSrc` prefixes `import.meta.env.BASE_URL`). The **10 ambient loops**
+  referenced via `SceneNode.ambientAudio` do **not** exist yet — Howler silently
+  absorbs the missing-file errors, so ambient is quiet. The intended file list is
+  in [content-authoring.md](./content-authoring.md#audio-asset-reference).
 - **Illustrations** — `SceneIllustration` renders an image from
   `scene.illustration`, but no image files exist under `public/`.
 - **NPC portraits** — the `NPCGallery` `Portrait` component renders a
   letter-initial placeholder (the first character of the NPC's name), not an
   image.
 
-A search for `*.mp3`, `*.png`, `*.jpg`, and `*.webp` under `public/` returns
-nothing.
+Under `public/` there are now 9 SFX `*.mp3` files (`public/audio/sfx/`); no
+ambient `*.mp3`, and no `*.png`/`*.jpg`/`*.webp` illustrations yet.
 
 ## Test baseline
 
 As of 2026-07-08, running `npm run test:run`:
 
-- **Tests: 491 passed (491)**
-- **Test Files: 46 passed (46)**
+- **Tests: 495 passed (495)**
+- **Test Files: 47 passed (47)**
 
 The suite includes property-based tests using fast-check (six
 `*.property.test.ts` files covering the dice engine, narrative engine, deduction

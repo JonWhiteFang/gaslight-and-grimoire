@@ -8,14 +8,16 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-08 (**Media assets (#20) — design + prompt kit authored; sourcing question resolved via ADR-0006.**
-Brainstormed the media strategy to a decision: **AI-generate audio only** (illustrations parked at lowest priority — no
-code change to defer), **9 SFX first then 10 ambient loops**, delivered as a **prompt kit the user runs** (no API/keys in
-repo). House style: naturalistic Victorian period ambience, never campy; the supernatural leaks through only at the occult
-stinger and `cellar`/`seance` beds. Wrote the design spec + authored `docs/audio-asset-kit.md` (all 19 prompts, verified
-1:1 against the engine's SFX paths and content's `ambientAudio` names — no typos). Docs only this session; **no code, no
-content, no test change** (baseline stays 491/46). **Next: user generates the 19 files → then build `checkAudioAssets.mjs`
-+ QA pass** (both asset-blocked). Prior session: closed #6 (deduction-gated content, PR #32, `b319f09`).)_
+_Last updated: 2026-07-08 (**Media assets (#20) — 9 SFX landed + in-browser QA caught & fixed two release-blockers.**
+User generated the 9 SFX; I normalized them (ffmpeg, ~-14 LUFS, de-clipped, trimmed) and ran in-browser Playwright QA.
+The QA surfaced **two latent release-blockers no test/validator had caught**: (1) `validateContent` built its bundle
+**without `caseData.recipes`**, so `requiresDeduction` read as "unknown key deduction" and **all 3 main cases threw at
+load in-browser** (a #6 regression — CLI validator passes recipes so it stayed green); (2) `audioManager` used bare
+`/audio/sfx/*.mp3` paths ignoring the Vite base, so **every SFX 404'd in dev AND on GitHub Pages** (extracted pure
+`buildSfxSrc` mirroring AmbientAudio). Both fixed TDD; verified in the real running app (Whitechapel loads clean, SFX
+fetch base-prefixed 200s for scene-transition/clue/dice). Test baseline **491 → 495** (+4; 47 files). Earlier same day:
+media strategy decided (ADR-0006) + prompt kit authored. **Next: ambient loops (10 files) + perceptual SFX QA (needs
+human ears) → then `checkAudioAssets.mjs` + CI.**)_
 
 ---
 
@@ -28,13 +30,15 @@ content, no test change** (baseline stays 491/46). **Next: user generates the 19
 - **Active gate:** CI enforces it. Every push/PR to `main` runs the validator + `npm run test:run` in the
   `test` job; `build` → `deploy` depend on it, and `deploy` is skipped on PR events. Bar unchanged locally:
   test suite green + validator clean before merge.
-- **Branch focus:** `main` — **3 unpushed doc commits** (`f6bc29e` spec, `42de32f` decisions, `19908f9` prompt kit)
-  ahead of origin `b319f09`. Media-asset design landed as docs on `main` (no code branch needed yet; the build work
-  is asset-blocked). Prior: PR #32 merged, #6 auto-closed.
-- **Verification:** 2026-07-08 — docs-only session, **no code/content/test change**; baseline unchanged at
-  **491 passed (491)** across **46** files (last run 2026-07-08, prior session). Prompt-kit asset names verified
-  1:1 by grep against `SFX_PATHS` in `audioManager.ts` (9 SFX) and the distinct `ambientAudio` values in
-  `public/content/**` (10 loops) — exact match, no typos. `checkAudioAssets.mjs` not yet built (asset-blocked).
+- **Branch focus:** `fix/audio-and-deduction-load-blockers` — 2 fix commits (recipes load-validation; SFX base path +
+  9 normalized SFX assets) atop the 4 already-pushed docs commits. Media design + prompt kit already on `origin/main`.
+  Prior: PR #32 merged, #6 auto-closed.
+- **Verification:** 2026-07-08 — `npm run test:run` → **495 passed (495)** across **47** files (was 491/46; +4:
+  validateContent recipes regression 1, buildSfxSrc 3); `node scripts/validateCase.mjs` → 7 cases clean;
+  `npm run build` green. **In-browser E2E via Playwright MCP** against the running app: after the fix, Whitechapel
+  loads with **zero console errors** (previously threw a fatal content-validation error); SFX now fetch
+  base-prefixed URLs returning **200** — confirmed live for `scene-transition`, `clue-physical`, `dice-roll`.
+  SFX loudness-normalized via ffmpeg (spread 34 dB → ~6 dB around -14 LUFS; hard-clip removed).
 
 ---
 
@@ -56,18 +60,18 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 | — | Full Ultracode repo audit + backlog | `[x]` | Report in `docs/audits/`; 67 findings → **22 issues** (5 P0/7 P1/7 P2/3 P3) |
 | Q | Audit remediation — P0 blockers | `[x]` | **5/5 done**: CI gate #1 + quick-wins #11 (PR #24); validators #2 + Debt of Smoke #3 (PR #25); encounter escape #4 + onEnter idempotency #5, +F-022/F-027 (PR #28). |
 | Q2 | Audit remediation — P1 | `[x]` | **Complete.** Code cluster: #7 touch-connect, #8 a11y, #9 halt screen, #10 titles, #12 tests (+2 review fixes). **#6 (deduction-gated content) done — PR #32**: KeyDeduction recipes + gated true endings across all 3 main cases. |
-| M | Media assets — audio (.mp3) + illustrations + NPC portraits | `[~]` | **Strategy set (ADR-0006):** AI-gen **audio only**; design spec + prompt kit (`docs/audio-asset-kit.md`, 19 assets) authored. **Asset-blocked:** user generates files → then `checkAudioAssets.mjs` + QA. **Illustrations parked** (lowest priority). Issues #20 (+ #21/#22). |
+| M | Media assets — audio (.mp3) + illustrations + NPC portraits | `[~]` | **Strategy set (ADR-0006)**; prompt kit authored. **9 SFX shipped + normalized + verified loading in-browser** (fixed 2 blockers found in QA). **Pending:** 10 ambient loops; perceptual SFX QA (human ears); `checkAudioAssets.mjs` + CI. **Illustrations parked** (lowest priority). Issues #20 (+ #21/#22). |
 
 ---
 
 ## Next actions (explicit order)
 
-1. **User generates the 19 audio files** using the prompt kit ([`audio-asset-kit.md`](../audio-asset-kit.md)) — 9 SFX (ElevenLabs SFX) into `public/audio/sfx/`, then 10 ambient loops (Stable Audio/Suno) into `public/audio/ambient/`, exact filenames per the kit. *(Unblocked; this is the user's step.)*
-2. **Build `scripts/checkAudioAssets.mjs`** (presence + content-cross-reference) + a unit test for its cross-reference logic. *(Asset-blocked — needs files present to be meaningful.)*
-3. **Manual QA pass** per the kit checklist (loop seams, SFX-over-bed mix, each trigger fires); verify via dev server + Playwright MCP (ADR-0003). *(Asset-blocked.)*
-4. **Revisit CI wiring** for the checker (likely `--strict`) once files land. Then **#21/#22 polish**.
+1. **Perceptual SFX QA (needs human ears)** — the 9 SFX load & trigger correctly in-browser (Playwright-verified), but whether they *sound* right (grounded/never-campy; occult stinger suitably uncanny) can't be machine-checked. One known duration outlier accepted: `clue-deduction` at 2.62s audible. *(User step.)*
+2. **User generates the 10 ambient loops** (Stable Audio/Suno per [`audio-asset-kit.md`](../audio-asset-kit.md)) into `public/audio/ambient/`, exact filenames. *(Unblocked; user step.)*
+3. **Build `scripts/checkAudioAssets.mjs`** (presence + content-cross-reference) + a unit test. *(Best once ambient files land.)*
+4. **Revisit CI wiring** for the checker (likely `--strict`) once all files land. Then **#21/#22 polish**.
 
-✅ Done: **all P0 (#1–#5, #11) and all P1 (#6, #7, #8, #9, #10, #12).** Media strategy decided (ADR-0006) — design spec + prompt kit authored. The audit backlog is now down to P2/P3 polish (#13–#22) plus finishing the media milestone. **Illustrations parked at lowest priority** (no code change to defer).
+✅ Done: **all P0 (#1–#5, #11) and all P1 (#6, #7, #8, #9, #10, #12).** Media strategy decided (ADR-0006), prompt kit authored, **9 SFX shipped + normalized + in-browser-verified** (QA caught & fixed 2 latent release-blockers: recipes load-validation + SFX base-path 404). The audit backlog is now down to P2/P3 polish (#13–#22) plus finishing the media milestone (ambient + QA). **Illustrations parked at lowest priority.**
 
 ---
 

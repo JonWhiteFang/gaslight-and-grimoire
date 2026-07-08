@@ -55,6 +55,29 @@ describe('validateContent', () => {
     expect(spy).toHaveBeenCalled();
   });
 
+  it('resolves requiresDeduction against caseData.recipes (F: runtime dropped recipes)', () => {
+    // Regression: validateContent built the bundle without caseData.recipes, so
+    // the recipe-id registry was empty and every requiresDeduction reference read
+    // as "unknown key deduction" — throwing at load for all 3 main cases in-browser
+    // even though the CLI validator (which passes recipes) stayed green.
+    const data: CaseData = {
+      ...makeCaseData([
+        scene('start', [
+          { id: 'reckon', text: 'name the culprit', requiresDeduction: 'the-culprit',
+            outcomes: { success: 'end', critical: 'end', partial: 'end', failure: 'end', fumble: 'end' } },
+        ]),
+        scene('end'),
+      ]),
+      clues: { 'clue-a': { id: 'clue-a', title: 'A', description: '', type: 'physical', sceneSource: 'start', tags: [], status: 'new', isRevealed: false } },
+      recipes: [
+        { id: 'the-culprit', requiredClues: ['clue-a'], title: 'The Culprit', description: '', isRedHerring: false },
+      ],
+    };
+    const result = validateContent(data);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
   it('accepts variantOf targets pointing at the injected shared scenes', () => {
     // A breakdown variant references the shared `breakdown` id, which is not in
     // this bundle's scenes — validateContent whitelists the shared ids so this

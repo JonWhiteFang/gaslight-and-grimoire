@@ -13,19 +13,29 @@ export type SfxEvent =
   | 'vitality-decrease'
   | 'scene-transition';
 
-// ─── SFX File Paths ───────────────────────────────────────────────────────────
+// ─── SFX File Names ───────────────────────────────────────────────────────────
 
-const SFX_PATHS: Record<SfxEvent, string> = {
-  'dice-roll': '/audio/sfx/dice-roll.mp3',
-  'clue-physical': '/audio/sfx/clue-physical.mp3',
-  'clue-testimony': '/audio/sfx/clue-testimony.mp3',
-  'clue-occult': '/audio/sfx/clue-occult.mp3',
-  'clue-deduction': '/audio/sfx/clue-deduction.mp3',
-  'clue-redHerring': '/audio/sfx/clue-red-herring.mp3',
-  'composure-decrease': '/audio/sfx/composure-decrease.mp3',
-  'vitality-decrease': '/audio/sfx/vitality-decrease.mp3',
-  'scene-transition': '/audio/sfx/scene-transition.mp3',
+/** Event → filename stem (kebab-case; note `clue-redHerring` → `clue-red-herring`). */
+const SFX_FILES: Record<SfxEvent, string> = {
+  'dice-roll': 'dice-roll',
+  'clue-physical': 'clue-physical',
+  'clue-testimony': 'clue-testimony',
+  'clue-occult': 'clue-occult',
+  'clue-deduction': 'clue-deduction',
+  'clue-redHerring': 'clue-red-herring',
+  'composure-decrease': 'composure-decrease',
+  'vitality-decrease': 'vitality-decrease',
+  'scene-transition': 'scene-transition',
 };
+
+/**
+ * Resolve the served URL for an SFX event under the given Vite base path.
+ * Mirrors AmbientAudio's base handling so SFX resolve correctly under
+ * `/gaslight-and-grimoire/` (GitHub Pages) as well as `/` (root).
+ */
+export function buildSfxSrc(base: string, event: SfxEvent): string {
+  return `${base.replace(/\/$/, '')}/audio/sfx/${SFX_FILES[event]}.mp3`;
+}
 
 // ─── Lazy Howl Cache ──────────────────────────────────────────────────────────
 
@@ -36,7 +46,7 @@ function getSfxHowl(event: SfxEvent): Howl {
     sfxCache.set(
       event,
       new Howl({
-        src: [SFX_PATHS[event]],
+        src: [buildSfxSrc(import.meta.env.BASE_URL ?? '/', event)],
         preload: true,
         html5: false,
       }),
