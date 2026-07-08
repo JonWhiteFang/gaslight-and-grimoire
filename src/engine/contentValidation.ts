@@ -23,6 +23,7 @@ import type {
   NpcSuspicionTier,
   SceneNode,
 } from '../types';
+import { FACTIONS, OUTCOME_TIERS } from './constants';
 
 // ─── Bundle shape ──────────────────────────────────────────────────────────
 
@@ -68,15 +69,6 @@ const ARCHETYPES: ReadonlySet<Archetype> = new Set<Archetype>([
 const SUSPICION_TIERS: ReadonlySet<NpcSuspicionTier> = new Set<NpcSuspicionTier>([
   'normal', 'evasive', 'concealing', 'hostile',
 ]);
-
-const FACTIONS: ReadonlySet<string> = new Set<string>([
-  'Rationalists Circle',
-  'Hermetic Order of the Grey Dawn',
-  'Lamplighters',
-  'Court of Smoke',
-]);
-
-const OUTCOME_TIERS = ['critical', 'success', 'partial', 'failure', 'fumble'] as const;
 
 // ─── Public API ────────────────────────────────────────────────────────────
 
