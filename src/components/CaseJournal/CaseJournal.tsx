@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { useStore } from '../../store';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 
-const INTERNAL_FLAG_PREFIXES = ['ability-', 'vignette-unlocked-', 'last-critical-faculty'];
+const INTERNAL_FLAG_PREFIXES = ['ability-', 'vignette-unlocked-'];
 
 const CLUE_TYPE_ICONS: Record<string, string> = {
   physical: '🔍',
