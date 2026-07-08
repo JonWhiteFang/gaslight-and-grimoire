@@ -42,3 +42,6 @@ test-title-screen.png
 
 # Playwright MCP session artifacts (snapshots/logs from in-browser verification)
 .playwright-mcp/
+
+# Superpowers brainstorm session artifacts
+.superpowers/
