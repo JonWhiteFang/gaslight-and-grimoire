@@ -27,7 +27,8 @@ import type {
 import type { EngineActions } from './engineActions';
 import { performCheck, rollD20, resolveDC } from './diceEngine';
 import { validateBundle } from './contentValidation';
-import { FLAGS, abilityAutoSucceedFlag } from './flags';
+import { abilityAutoSucceedFlag } from './flags';
+import { computeAdvantage } from './advantage';
 
 // ─── Content Loading ──────────────────────────────────────────────────────────
 
@@ -288,11 +289,7 @@ export function computeChoiceResult(
     }
 
     const dc = resolveDC(choice, state.investigator);
-    const clueAdvantage =
-      choice.advantageIf?.some((clueId) => state.clues[clueId]?.isRevealed) ?? false;
-    const veilSightAdvantage =
-      choice.faculty === 'lore' && !!state.flags[FLAGS.veilSight];
-    const hasAdvantage = clueAdvantage || veilSightAdvantage;
+    const hasAdvantage = computeAdvantage(choice, state);
     const result = performCheck(choice.faculty, state.investigator, dc, hasAdvantage, false);
     return {
       nextSceneId: choice.outcomes[result.tier],
@@ -457,20 +454,9 @@ export function processEncounterChoice(
     };
   }
 
-  // Determine Advantage: granted by Occult Fragment clues
-  const hasOccultAdvantage =
-    choice.advantageIf?.some((clueId) => {
-      const clue = state.clues[clueId];
-      return clue?.isRevealed && clue.type === 'occult';
-    }) ?? false;
-
-  // Also check standard advantage from any revealed clue
-  const hasStandardAdvantage =
-    choice.advantageIf?.some((clueId) => state.clues[clueId]?.isRevealed) ?? false;
-
-  const veilSightAdvantage =
-    choice.faculty === 'lore' && !!state.flags[FLAGS.veilSight];
-  const hasAdvantage = hasOccultAdvantage || hasStandardAdvantage || veilSightAdvantage;
+  // Determine Advantage via the shared single source of truth: any revealed
+  // advantageIf clue, or a Lore check with Veil Sight active (F-014).
+  const hasAdvantage = computeAdvantage(choice, state);
 
   let nextSceneId: string;
   let roll: number | undefined;
