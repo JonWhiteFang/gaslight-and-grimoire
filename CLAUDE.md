@@ -276,7 +276,7 @@ Base faculty score: 8. Bonus points to allocate: 12. Composure and Vitality: 0�
 
 `docs/status.md` + `docs/PROJECT_STATE.md` are the live source of truth for current state and the
 open audit backlog; this section is a stable overview and may lag them. (Run `npm run test:run` for
-the live test baseline — 491 tests across 46 files pass as of 2026-07-08.)
+the live test baseline — 495 tests across 47 files pass as of 2026-07-08.)
 
 ### Critical (blocks core functionality)
 - No P0 *release-blockers of the original build*; `loadGame` caseData restoration was fixed in Phase A.
