@@ -3,8 +3,9 @@
  *
  * Sub-task 7.1
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { useStore } from '../../store';
 import { ChoicePanel, isChoiceVisible } from '../ChoicePanel/ChoicePanel';
 import { ChoiceCard } from '../ChoicePanel/ChoiceCard';
 import type { Choice, GameState, Investigator, Clue, Deduction } from '../../types';
@@ -537,5 +538,55 @@ describe('ChoicePanel — visibility filtering', () => {
     render(<ChoicePanel choices={choices} onChoiceSelected={onChoiceSelected} />);
     fireEvent.click(screen.getByText('Look around'));
     expect(onChoiceSelected).toHaveBeenCalledWith('open');
+  });
+});
+
+// ─── ChoicePanel — end-to-end Advantage badge wiring (F-014) ──────────────────
+//
+// Proves that ChoicePanel (the real parent) threads computeAdvantage(choice,
+// gameState) into ChoiceCard's `hasAdvantage` prop — specifically the Veil
+// Sight grant: a Lore check rolls with advantage while the veil-sight flag is
+// active, even with NO clue in inventory. This exercises the parent→prop→badge
+// path, not the pieces in isolation.
+describe('ChoicePanel — Veil Sight advantage badge (parent wiring)', () => {
+  // The mocked store is a shared closure object reachable via getState(); mutate
+  // its flags here and restore afterwards so sibling tests are unaffected.
+  let savedFlags: Record<string, boolean>;
+
+  beforeEach(() => {
+    savedFlags = { ...useStore.getState().flags };
+  });
+
+  afterEach(() => {
+    (useStore.getState() as { flags: Record<string, boolean> }).flags = savedFlags;
+  });
+
+  // A Lore check with no advantageIf clue — advantage can only come from Veil Sight.
+  const loreChoice: Choice = {
+    id: 'lore-check',
+    text: 'Read the sigils',
+    faculty: 'lore',
+    difficulty: 12,
+    outcomes: { critical: 's2', success: 's2', partial: 's2', failure: 's2', fumble: 's2' },
+  };
+
+  it('shows the Advantage badge for a Lore choice when veil-sight flag is active (no clue needed)', () => {
+    (useStore.getState() as { flags: Record<string, boolean> }).flags = {
+      ...savedFlags,
+      'ability-veil-sight-active': true,
+    };
+    render(<ChoicePanel choices={[loreChoice]} />);
+    expect(screen.getByText('Read the sigils')).toBeInTheDocument();
+    expect(screen.getByLabelText(/advantage/i)).toBeInTheDocument();
+  });
+
+  it('does NOT show the Advantage badge for the same Lore choice when veil-sight is inactive and no clue is held', () => {
+    (useStore.getState() as { flags: Record<string, boolean> }).flags = {
+      ...savedFlags,
+      'ability-veil-sight-active': false,
+    };
+    render(<ChoicePanel choices={[loreChoice]} />);
+    expect(screen.getByText('Read the sigils')).toBeInTheDocument();
+    expect(screen.queryByLabelText(/advantage/i)).not.toBeInTheDocument();
   });
 });
