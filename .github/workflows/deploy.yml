@@ -60,7 +60,7 @@ jobs:
       # transitive advisory shouldn't block a docs deploy (F-032).
       - run: npm run build
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
