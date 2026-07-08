@@ -19,7 +19,6 @@ import type {
   GameState,
   KeyDeduction,
   NPCState,
-  NpcSuspicionTier,
   SceneNode,
   ValidationResult,
   VignetteData,
@@ -145,50 +144,49 @@ export function evaluateConditions(
 }
 
 function evaluateCondition(condition: Condition, state: GameState): boolean {
-  const { type, target, value } = condition;
-
-  switch (type) {
+  // `condition` is a discriminated union keyed on `type`; each case below
+  // narrows `target`/`value` to their real shapes — no unchecked casts (F-026).
+  switch (condition.type) {
     case 'hasClue': {
-      const clue = state.clues[target];
+      const clue = state.clues[condition.target];
       return clue !== undefined && clue.isRevealed;
     }
 
     case 'hasDeduction': {
-      return state.deductions[target] !== undefined;
+      return state.deductions[condition.target] !== undefined;
     }
 
     case 'hasFlag': {
       // Compare on truthiness, not identity: an unset flag is `undefined`, so
       // `{value:false}` (the "flag not yet set" gate used by breakdown/
       // incapacitation variants) must match undefined/false alike.
-      const flagValue = state.flags[target];
-      if (value === undefined) return flagValue === true;
-      return Boolean(flagValue) === value;
+      const flagValue = state.flags[condition.target];
+      if (condition.value === undefined) return flagValue === true;
+      return Boolean(flagValue) === condition.value;
     }
 
     case 'facultyMin': {
-      const score = state.investigator.faculties[target as keyof typeof state.investigator.faculties];
+      const score = state.investigator.faculties[condition.target];
       if (score === undefined) return false;
-      return score >= (value as number);
+      return score >= condition.value;
     }
 
     case 'archetypeIs': {
-      return state.investigator.archetype === value;
+      return state.investigator.archetype === condition.value;
     }
 
     case 'npcDisposition': {
-      const npc = state.npcs[target];
+      const npc = state.npcs[condition.target];
       if (!npc) return false;
-      return npc.disposition >= (value as number);
+      return npc.disposition >= condition.value;
     }
 
     case 'npcSuspicion': {
       // Maps suspicion tier names to numeric ranges
-      const npc = state.npcs[target];
+      const npc = state.npcs[condition.target];
       if (!npc) return false;
-      const tier = value as NpcSuspicionTier;
       const s = npc.suspicion;
-      switch (tier) {
+      switch (condition.value) {
         case 'normal':     return s >= 0 && s <= 2;
         case 'evasive':    return s >= 3 && s <= 5;
         case 'concealing': return s >= 6 && s <= 8;
@@ -198,14 +196,14 @@ function evaluateCondition(condition: Condition, state: GameState): boolean {
     }
 
     case 'factionReputation': {
-      const rep = state.factionReputation[target] ?? 0;
-      return rep >= (value as number);
+      const rep = state.factionReputation[condition.target] ?? 0;
+      return rep >= condition.value;
     }
 
     case 'npcMemoryFlag': {
-      const mnpc = state.npcs[target];
+      const mnpc = state.npcs[condition.target];
       if (!mnpc) return false;
-      return !!mnpc.memoryFlags[value as string];
+      return !!mnpc.memoryFlags[condition.value];
     }
 
     // Intentional defensive default: an unknown/unrecognised condition type fails

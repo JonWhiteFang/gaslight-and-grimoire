@@ -13,7 +13,7 @@ import {
   computeMaxDisposition,
   type ContentBundle,
 } from '../contentValidation';
-import type { Choice, Clue, NPCState, SceneNode } from '../../types';
+import type { Choice, Clue, Condition, NPCState, SceneNode } from '../../types';
 
 // ─── Fixture helpers ────────────────────────────────────────────────────────
 
@@ -250,7 +250,9 @@ describe('validateBundle — condition targets', () => {
 
   it('flags a condition archetypeIs with an invalid archetype value', () => {
     const bundle = makeBundle({
-      scenes: [makeScene({ id: 's1', conditions: [{ type: 'archetypeIs', target: '', value: 'wizard' }] })],
+      // Intentionally malformed: content JSON is cast, not type-checked, so an
+      // invalid archetype value can reach the runtime validator. Cast to model that.
+      scenes: [makeScene({ id: 's1', conditions: [{ type: 'archetypeIs', target: '', value: 'wizard' } as unknown as Condition] })],
     });
     const { errors } = validateBundle(bundle);
     expect(errors.some((e) => e.includes('wizard'))).toBe(true);
@@ -259,7 +261,8 @@ describe('validateBundle — condition targets', () => {
   it('flags a condition npcSuspicion with an invalid tier value', () => {
     const bundle = makeBundle({
       npcs: [makeNpc({ id: 'npc-a' })],
-      scenes: [makeScene({ id: 's1', conditions: [{ type: 'npcSuspicion', target: 'npc-a', value: 'furious' }] })],
+      // Intentionally malformed tier value — see archetypeIs note above.
+      scenes: [makeScene({ id: 's1', conditions: [{ type: 'npcSuspicion', target: 'npc-a', value: 'furious' } as unknown as Condition] })],
     });
     const { errors } = validateBundle(bundle);
     expect(errors.some((e) => e.includes('furious'))).toBe(true);
