@@ -80,6 +80,20 @@ export interface Deduction {
   isRedHerring: boolean;
 }
 
+/**
+ * An authored "key deduction" recipe. When the player connects a set of clues
+ * whose ids are a superset of `requiredClues`, the resulting Deduction is stored
+ * under this stable `id` (instead of a random one), so `hasDeduction` /
+ * `requiresDeduction` gates can reference it. Authored in a case's deductions.json.
+ */
+export interface KeyDeduction {
+  id: string;
+  requiredClues: string[];
+  title: string;
+  description: string;
+  isRedHerring: boolean;
+}
+
 // ─── NPC ─────────────────────────────────────────────────────────────────────
 
 export interface NPCState {
@@ -260,6 +274,8 @@ export interface CaseData {
   clues: Record<string, Clue>;
   npcs: Record<string, NPCState>;
   variants: SceneNode[];
+  /** Authored key-deduction recipes (main cases only; optional so vignettes may omit). */
+  recipes?: KeyDeduction[];
 }
 
 export interface VignetteMeta {
