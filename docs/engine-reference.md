@@ -59,7 +59,7 @@ gating, choice processing, and the encounter system.
 **Content loading** (async; fetch JSON under `/content/`, prefixed with `import.meta.env.BASE_URL`)
 
 - `fetchManifest(): Promise<CaseManifest>` — fetches `/content/manifest.json`.
-- `loadCase(caseId: string): Promise<CaseData>` — fetches `meta.json`, `act1/2/3.json`, `clues.json`, `npcs.json`, `variants.json` in parallel; indexes scenes/clues/npcs into `Record<string, T>` by id; injects the shared `breakdown` and `incapacitation` scenes.
+- `loadCase(caseId: string): Promise<CaseData>` — fetches `meta.json`, `act1/2/3.json`, `clues.json`, `npcs.json`, `variants.json` in parallel; indexes scenes/clues/npcs into `Record<string, T>` by id; injects the shared `breakdown` and `incapacitation` scenes. Also fetches the optional `deductions.json` (**outside** the parallel batch, `.catch(() => [])`) into `CaseData.recipes` (`KeyDeduction[]`) — a case without key deductions simply has an empty list.
 - `loadVignette(vignetteId: string): Promise<VignetteData>` — same shape for a two-act vignette (single `scenes.json`), also injecting the shared scenes.
 - (internal `injectSharedScenes` merges `/content/shared/breakdown.json` and `/content/shared/incapacitation.json` into the scene record — not exported.)
 
@@ -88,15 +88,17 @@ gating, choice processing, and the encounter system.
 
 Pure content validator shared by the runtime `validateContent` and the CLI (`scripts/validateCase.ts` via `vite-node`), so the two can't drift. Operates on an in-memory `ContentBundle` (arrays of scenes/variants/clues/npcs + `firstScene` + `sharedSceneIds`), independent of how content was loaded.
 
-- `validateBundle(bundle: ContentBundle, options?: { includeReachability?: boolean }): { errors: string[]; warnings: string[] }` — errors: choice-outcome edges (base/variant/shared ids valid), `requiresClue`/`advantageIf`/`cluesAvailable`/`onEnter` discoverClue clue refs, `onEnter` npc refs, `npcEffect.npcId` (incl. inside encounter rounds and `worseAlternative`), condition targets (clue/npc/faculty/archetype/faction/suspicion-tier allowlists; `hasFlag value:false` allowed), variant `variantOf`+`variantCondition` presence, encounter-round edge + tier recursion, tier completeness (fixed **or** `dynamicDifficulty`), and `clue.sceneSource`. With `includeReachability`, warns on scenes unreachable from `firstScene` and clues no reachable scene can discover.
+- `validateBundle(bundle: ContentBundle, options?: { includeReachability?: boolean }): { errors: string[]; warnings: string[] }` — errors: choice-outcome edges (base/variant/shared ids valid), `requiresClue`/`advantageIf`/`cluesAvailable`/`onEnter` discoverClue clue refs, `onEnter` npc refs, `npcEffect.npcId` (incl. inside encounter rounds and `worseAlternative`), condition targets (clue/npc/faculty/archetype/faction/suspicion-tier allowlists; `hasFlag value:false` allowed), variant `variantOf`+`variantCondition` presence, encounter-round edge + tier recursion, tier completeness (fixed **or** `dynamicDifficulty`), `clue.sceneSource`, and **key-deduction recipes** (`KeyDeduction.requiredClues` clue refs, plus `choice.requiresDeduction` and `hasDeduction`-condition targets against the recipe-id registry — a gate pointing at an undefined recipe is an error). With `includeReachability`, warns on scenes unreachable from `firstScene` and clues no reachable scene can discover.
 - `computeReachableScenes(bundle: ContentBundle): Set<string>` — BFS from `firstScene` over all choice + encounter outcome edges.
 - `computeMaxDisposition(bundle: ContentBundle, npcId: string): number` — start disposition + every positive reachable disposition delta (onEnter + `npcEffect`); used to check whether a disposition-gated vignette threshold is attainable.
 
 ## buildDeduction.ts
 
-Pure builder that constructs a `Deduction` from a set of clue ids.
+Pure builders for `Deduction`s, plus the key-deduction recipe matcher.
 
 - `buildDeduction(clueIds: string[], clues: Record<string, Clue>): Deduction` — sets `isRedHerring: true` if any connected clue is of type `redHerring`. Builds a `description` from clue titles (`"Connection: A ↔ B"`, or `"Questionable connection: ..."` when a red herring; 3+ titles are comma-joined with a trailing "and"). Generates a unique id from `Date.now()` + `Math.random()`.
+- `matchDeduction(connectedIds: string[], recipes: KeyDeduction[]): KeyDeduction | null` — **subset** match: returns the first recipe whose `requiredClues` are all present in `connectedIds` (extra connected clues allowed), else `null`. Empty recipes or empty set → `null` (vignette-safe). Pure.
+- `buildDeductionFromRecipe(recipe: KeyDeduction, _connectedIds: string[]): Deduction` — builds a `Deduction` stored under the recipe's **stable authored id** (so `hasDeduction`/`requiresDeduction` gates resolve), with the recipe's `description`/`isRedHerring` and `clueIds` = the recipe's `requiredClues`. `DeductionButton` prefers this on a successful Reason check when a recipe matches, falling back to `buildDeduction` otherwise.
 
 ## caseProgression.ts
 
