@@ -131,3 +131,42 @@ describe('SaveManager — chained v0 → current migration (F-031)', () => {
     expect(Array.isArray(loaded!.visitedScenes)).toBe(true);
   });
 });
+
+describe('SaveManager — versionless / NaN version save (F-015)', () => {
+  // A legacy or hand-edited save may lack a `version` field entirely. Because
+  // `undefined < N` is always false, every migration step was silently skipped
+  // yet the file got stamped version 3 — leaving factionReputation/sceneHistory/
+  // connections/visitedScenes undefined and crashing downstream. A missing/NaN
+  // version must be treated as 0 so the full v0 → 3 chain runs.
+  function makeVersionlessState() {
+    const base = makeV1StateWithoutNewFields() as Record<string, unknown>;
+    delete base.factionReputation; // legacy save predates faction reputation
+    return { ...base, currentScene: 's', sceneHistory: [] };
+  }
+
+  it('migrates a versionless save through all steps (F-015)', () => {
+    const legacy = {
+      version: undefined as unknown as number,
+      timestamp: 1 as unknown as string,
+      state: makeVersionlessState(),
+    } as unknown as SaveFile;
+    const out = SaveManager.migrate(legacy);
+    expect(out.version).toBe(CURRENT_SAVE_VERSION);
+    expect(out.state.factionReputation).toEqual({});
+    expect(out.state.connections).toEqual([]);
+    expect(out.state.visitedScenes).toBeDefined();
+  });
+
+  it('migrates a NaN-version save through all steps (F-015)', () => {
+    const legacy = {
+      version: NaN,
+      timestamp: 't',
+      state: makeVersionlessState(),
+    } as unknown as SaveFile;
+    const out = SaveManager.migrate(legacy);
+    expect(out.version).toBe(CURRENT_SAVE_VERSION);
+    expect(out.state.factionReputation).toEqual({});
+    expect(out.state.connections).toEqual([]);
+    expect(out.state.visitedScenes).toBeDefined();
+  });
+});
