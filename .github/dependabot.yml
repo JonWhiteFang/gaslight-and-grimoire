@@ -1,0 +1,35 @@
+version: 2
+updates:
+  # npm dependencies — grouped so the 13+ stale majors get a weekly cadence and
+  # a safety net (CI gate runs on every Dependabot PR) rather than drifting
+  # untouched (F-039).
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '08:00'
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    groups:
+      # Patch/minor bumps batched into one PR to cut review churn.
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+      # Majors grouped separately so breaking changes are reviewed together,
+      # apart from the low-risk minor/patch batch.
+      major:
+        update-types:
+          - major
+
+  # GitHub Actions — keep the pinned action SHAs (e.g. Dependency-Check in
+  # security.yml) current.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '08:00'
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5

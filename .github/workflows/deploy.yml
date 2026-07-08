@@ -28,10 +28,13 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
           cache: npm
 
       - run: npm ci
+
+      - name: Lint
+        run: npm run lint
 
       - name: Validate case content
         run: node scripts/validateCase.mjs
@@ -47,14 +50,14 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
           cache: npm
 
       - run: npm ci
 
-      - name: Audit dependencies
-        run: npm audit --audit-level=high
-
+      # Dependency auditing lives in security.yml (npm audit + OWASP
+      # Dependency-Check on every PR), not on the deploy critical path — a new
+      # transitive advisory shouldn't block a docs deploy (F-032).
       - run: npm run build
 
       - uses: actions/upload-pages-artifact@v3

@@ -446,20 +446,25 @@ vi.mock('../../store', () => {
     selector ? selector(storeState) : storeState;
   useStoreFn.getState = () => storeState;
 
+  const snapshot = (s: typeof storeState) => ({
+    investigator: s.investigator,
+    currentScene: s.currentScene,
+    currentCase: s.currentCase,
+    clues: s.clues,
+    deductions: s.deductions,
+    npcs: s.npcs,
+    flags: s.flags,
+    factionReputation: s.factionReputation,
+    sceneHistory: s.sceneHistory,
+    settings: s.settings,
+  });
+
   return {
     useStore: useStoreFn,
-    buildGameState: (s: typeof storeState) => ({
-      investigator: s.investigator,
-      currentScene: s.currentScene,
-      currentCase: s.currentCase,
-      clues: s.clues,
-      deductions: s.deductions,
-      npcs: s.npcs,
-      flags: s.flags,
-      factionReputation: s.factionReputation,
-      sceneHistory: s.sceneHistory,
-      settings: s.settings,
-    }),
+    buildGameState: snapshot,
+    // Reactive snapshot hook (F-042) — in the mock it resolves against the
+    // static store state, same shape as buildGameState.
+    useGameState: () => snapshot(storeState),
   };
 });
 

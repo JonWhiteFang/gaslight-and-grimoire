@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { useShallow } from 'zustand/react/shallow';
 import type { GameStore } from './types';
 import type { SceneNode } from '../types';
 import { snapshotGameState } from '../utils/gameState';
@@ -98,11 +99,24 @@ export const useMetaActions = () =>
 /** Builds a GameState snapshot from the store (for engine functions). */
 export const buildGameState = snapshotGameState;
 
+/**
+ * Subscribes to a GameState snapshot with shallow equality (F-042).
+ *
+ * `snapshotGameState` returns a fresh object every call, so using it as a bare
+ * Zustand selector (`useStore(buildGameState)`) would re-render on *every* store
+ * mutation — effectively a full-store subscription. The snapshot's fields are
+ * stable store references, so `useShallow` compares them field-by-field and only
+ * re-renders when one actually changes. Use this instead of `useStore(buildGameState)`
+ * anywhere a component needs the reactive snapshot.
+ */
+export const useGameState = (): ReturnType<typeof snapshotGameState> =>
+  useStore(useShallow(buildGameState));
+
 /** Resolves the current SceneNode from loaded caseData, or null if unavailable. */
 export function useCurrentScene(): SceneNode | null {
   const currentScene = useStore((s) => s.currentScene);
   const caseData = useStore((s) => s.caseData);
-  const gameState = useStore(buildGameState);
+  const gameState = useGameState();
 
   if (!currentScene || !caseData) return null;
   try {
