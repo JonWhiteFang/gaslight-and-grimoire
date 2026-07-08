@@ -45,6 +45,39 @@ function writeIndex(index: SaveSummary[]): void {
   localStorage.setItem(INDEX_KEY, JSON.stringify(index));
 }
 
+function isPlainObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
+
+/**
+ * Structural guard for a deserialised GameState (F-036).
+ *
+ * A truncated, malformed, or hand-edited save must not be written wholesale into
+ * the store — a missing `investigator` or a `clues` that isn't an object crashes
+ * rendering. This checks the *required* fields exist with the right broad shape;
+ * `migrate` backfills the optional ones (`connections`/`visitedScenes`), so it
+ * runs after migration. It is intentionally shallow — it defends against garbage,
+ * not against a determined cheat editing a well-formed save.
+ */
+export function isValidGameState(state: unknown): state is GameState {
+  if (!isPlainObject(state)) return false;
+
+  if (!isPlainObject(state.investigator)) return false;
+  if (!isPlainObject((state.investigator as Record<string, unknown>).faculties)) return false;
+
+  if (typeof state.currentScene !== 'string') return false;
+  if (typeof state.currentCase !== 'string') return false;
+
+  // The normalised record maps and history/settings must be present and correctly typed.
+  for (const key of ['clues', 'deductions', 'npcs', 'flags', 'factionReputation'] as const) {
+    if (!isPlainObject(state[key])) return false;
+  }
+  if (!Array.isArray(state.sceneHistory)) return false;
+  if (!isPlainObject(state.settings)) return false;
+
+  return true;
+}
+
 // ─── SaveManager ─────────────────────────────────────────────────────────────
 
 export const SaveManager = {
@@ -92,14 +125,22 @@ export const SaveManager = {
     const raw = localStorage.getItem(saveKey(saveId));
     if (!raw) return null;
 
-    let saveFile: SaveFile;
+    let parsed: unknown;
     try {
-      saveFile = JSON.parse(raw) as SaveFile;
+      parsed = JSON.parse(raw);
     } catch {
       return null;
     }
 
-    const migrated = SaveManager.migrate(saveFile);
+    // Guard the envelope before migrating: a scalar/array/null blob (truncated or
+    // hand-edited) would otherwise crash `migrate`'s `...state` spread (F-036).
+    if (!isPlainObject(parsed) || !isPlainObject(parsed.state)) return null;
+
+    const migrated = SaveManager.migrate(parsed as unknown as SaveFile);
+    // Reject a structurally-invalid save rather than committing garbage to the
+    // store (F-036). Migration backfills optional fields; this checks the
+    // required ones survived.
+    if (!isValidGameState(migrated.state)) return null;
     return migrated.state;
   },
 

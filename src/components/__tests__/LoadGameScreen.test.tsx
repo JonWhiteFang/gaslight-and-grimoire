@@ -7,7 +7,7 @@
  * title and must pass through unchanged.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { LoadGameScreen } from '../TitleScreen/LoadGameScreen';
 
 function makeLocalStorageMock() {
@@ -44,5 +44,31 @@ describe('LoadGameScreen — readable case titles', () => {
     seedIndex([{ id: 'save-new', caseName: 'The Mayfair Séance', investigatorName: 'Ada' }]);
     render(<LoadGameScreen onLoad={() => {}} onBack={() => {}} />);
     expect(screen.getByText('The Mayfair Séance')).toBeTruthy();
+  });
+});
+
+describe('LoadGameScreen — delete requires confirmation (F-054)', () => {
+  it('does not delete on the first tap; arms a Confirm? button instead', () => {
+    seedIndex([{ id: 'save-1', caseName: 'The Mayfair Séance', investigatorName: 'Ada' }]);
+    render(<LoadGameScreen onLoad={() => {}} onBack={() => {}} />);
+
+    fireEvent.click(screen.getByLabelText('Delete save: Ada'));
+
+    // Save still present; a confirm affordance has appeared.
+    expect(screen.getByText('The Mayfair Séance')).toBeTruthy();
+    expect(screen.getByLabelText('Confirm deletion of save: Ada')).toBeTruthy();
+    expect(localStorage.getItem('gg_save_save-1')).toBeNull(); // never written, but the index entry survives
+    expect(JSON.parse(localStorage.getItem('gg_save_index')!)).toHaveLength(1);
+  });
+
+  it('deletes only after the second (confirm) tap', () => {
+    seedIndex([{ id: 'save-1', caseName: 'The Mayfair Séance', investigatorName: 'Ada' }]);
+    render(<LoadGameScreen onLoad={() => {}} onBack={() => {}} />);
+
+    fireEvent.click(screen.getByLabelText('Delete save: Ada'));
+    fireEvent.click(screen.getByLabelText('Confirm deletion of save: Ada'));
+
+    expect(screen.queryByText('The Mayfair Séance')).toBeNull();
+    expect(JSON.parse(localStorage.getItem('gg_save_index')!)).toHaveLength(0);
   });
 });

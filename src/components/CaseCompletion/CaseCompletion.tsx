@@ -6,7 +6,8 @@ import type { Faculty } from '../../types';
 
 export interface CaseCompletionProps {
   facultyBonusGranted: Faculty | null;
-  vignetteUnlocked: string | null;
+  /** Every vignette newly unlocked by this completion (F-057 — was a single id). */
+  vignettesUnlocked: string[];
   endingNarrative?: string | null;
   onContinue: () => void;
 }
@@ -20,7 +21,8 @@ const FACULTY_LABELS: Record<Faculty, string> = {
   lore: 'Lore',
 };
 
-export function CaseCompletion({ facultyBonusGranted, vignetteUnlocked, endingNarrative, onContinue }: CaseCompletionProps) {
+export function CaseCompletion({ facultyBonusGranted, vignettesUnlocked, endingNarrative, onContinue }: CaseCompletionProps) {
+  const anyVignetteUnlocked = vignettesUnlocked.length > 0;
   return (
     <main className="min-h-screen bg-gaslight-ink text-gaslight-fog font-serif flex items-center justify-center p-4">
       <div className="max-w-lg w-full text-center space-y-8">
@@ -44,16 +46,20 @@ export function CaseCompletion({ facultyBonusGranted, vignetteUnlocked, endingNa
             </div>
           )}
 
-          {vignetteUnlocked && (
+          {anyVignetteUnlocked && (
             <div className="bg-stone-900/80 border border-gaslight-gold/30 rounded-lg p-4">
-              <p className="text-xs text-gaslight-gold uppercase tracking-widest mb-1">New Lead Discovered</p>
+              <p className="text-xs text-gaslight-gold uppercase tracking-widest mb-1">
+                {vignettesUnlocked.length > 1 ? 'New Leads Discovered' : 'New Lead Discovered'}
+              </p>
               <p className="text-lg text-gaslight-fog">
-                A new investigation has become available.
+                {vignettesUnlocked.length > 1
+                  ? `${vignettesUnlocked.length} new investigations have become available.`
+                  : 'A new investigation has become available.'}
               </p>
             </div>
           )}
 
-          {!facultyBonusGranted && !vignetteUnlocked && (
+          {!facultyBonusGranted && !anyVignetteUnlocked && (
             <p className="text-stone-400 italic">
               The case is closed, but London's mysteries are far from over.
             </p>

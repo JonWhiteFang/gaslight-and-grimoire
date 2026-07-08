@@ -10,7 +10,8 @@ import { vignetteUnlockedFlag } from './flags';
 
 export interface CaseCompletionResult {
   facultyBonusGranted: Faculty | null;
-  vignetteUnlocked: string | null;
+  /** Every vignette newly unlocked by this completion (F-057 — was a single id). */
+  vignettesUnlocked: string[];
 }
 
 // ─── Vignette registry ────────────────────────────────────────────────────────
@@ -70,26 +71,31 @@ export const CaseProgression = {
       facultyBonusGranted = criticalFaculty;
     }
 
-    // 2. Check vignette unlocks
-    const vignetteUnlocked = CaseProgression.checkVignetteUnlocks(state);
+    // 2. Check vignette unlocks — set a flag for EVERY newly-satisfied vignette,
+    // not just the first (F-057).
+    const vignettesUnlocked = CaseProgression.checkVignetteUnlocks(state);
 
-    if (vignetteUnlocked) {
-      actions.setFlag(vignetteUnlockedFlag(vignetteUnlocked), true);
+    for (const id of vignettesUnlocked) {
+      actions.setFlag(vignetteUnlockedFlag(id), true);
     }
 
-    return { facultyBonusGranted, vignetteUnlocked };
+    return { facultyBonusGranted, vignettesUnlocked };
   },
 
   /**
    * Checks all vignette unlock conditions against the current state.
-   * Returns the ID of the first unlocked vignette, or null.
+   * Returns the IDs of every not-yet-unlocked vignette whose condition is met
+   * (F-057 — previously returned only the first, starving simultaneously-earned
+   * unlocks).
    *
    * Conditions:
    *   - faction reputation reaches a threshold
    *   - NPC Disposition ≥ 7
    *   - unresolved prior-Case thread flag exists
    */
-  checkVignetteUnlocks(state: GameState): string | null {
+  checkVignetteUnlocks(state: GameState): string[] {
+    const unlocked: string[] = [];
+
     for (const vignette of VIGNETTE_CONDITIONS) {
       // Skip already-unlocked vignettes
       if (state.flags[vignetteUnlockedFlag(vignette.id)]) continue;
@@ -97,21 +103,30 @@ export const CaseProgression = {
       if (vignette.factionReputation) {
         const { faction, threshold } = vignette.factionReputation;
         const rep = state.factionReputation[faction] ?? 0;
-        if (rep >= threshold) return vignette.id;
+        if (rep >= threshold) {
+          unlocked.push(vignette.id);
+          continue;
+        }
       }
 
       if (vignette.npcDisposition) {
         const { npcId, threshold } = vignette.npcDisposition;
         const npc = state.npcs[npcId];
-        if (npc && npc.disposition >= threshold) return vignette.id;
+        if (npc && npc.disposition >= threshold) {
+          unlocked.push(vignette.id);
+          continue;
+        }
       }
 
       if (vignette.requiredFlag) {
-        if (state.flags[vignette.requiredFlag]) return vignette.id;
+        if (state.flags[vignette.requiredFlag]) {
+          unlocked.push(vignette.id);
+          continue;
+        }
       }
     }
 
-    return null;
+    return unlocked;
   },
 
   /**
