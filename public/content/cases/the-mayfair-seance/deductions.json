@@ -1,0 +1,11 @@
+{
+  "deductions": [
+    {
+      "id": "ms-deduction-fraud-and-breach",
+      "requiredClues": ["ms-clue-hidden-mechanism", "ms-clue-vesper-journal", "ms-clue-grey-dawn-sigil"],
+      "title": "The Fraud That Woke Something Real",
+      "description": "The hidden mechanism proves the seance was staged. But Vesper's journal and the Grey Dawn sigil prove the other half: the counterfeit ritual, performed in earnest by frightened people, drew a genuine presence. Both truths are true at once — the fraud is what opened the door.",
+      "isRedHerring": false
+    }
+  ]
+}
