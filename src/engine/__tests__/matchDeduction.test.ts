@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { matchDeduction, buildDeductionFromRecipe } from '../buildDeduction';
-import type { KeyDeduction, Clue } from '../../types';
+import type { KeyDeduction } from '../../types';
 
 const recipes: KeyDeduction[] = [
   {
