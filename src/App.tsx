@@ -59,10 +59,10 @@ export function GameContent({ onCompleteCase, onHalt, reviewSceneId, onDismissRe
   if (reviewSceneId && caseData?.scenes[reviewSceneId]) {
     const reviewScene = caseData.scenes[reviewSceneId];
     return (
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main id="main-content" tabIndex={-1} className="flex-1 flex flex-col overflow-hidden focus:outline-none">
         <div className="flex-1 overflow-y-auto">
           <section className="flex flex-col gap-4 p-4 max-w-2xl mx-auto">
-            <div className="flex items-center gap-2 text-xs text-stone-500 uppercase tracking-wide">
+            <div className="flex items-center gap-2 text-xs text-stone-400 uppercase tracking-wide">
               <span>📖 Reviewing previous scene</span>
             </div>
             <SceneText text={reviewScene.narrative} textSpeed="instant" reducedMotion={reducedMotion} />
@@ -87,7 +87,7 @@ export function GameContent({ onCompleteCase, onHalt, reviewSceneId, onDismissRe
   }
 
   return (
-    <main className="flex-1 flex flex-col overflow-hidden">
+    <main id="main-content" tabIndex={-1} className="flex-1 flex flex-col overflow-hidden focus:outline-none">
       <div className="flex-1 overflow-y-auto">
         <NarrativePanel />
         {isTerminal ? (
@@ -314,6 +314,14 @@ export default function App() {
           className="flex flex-col flex-1 min-h-0"
           {...(anyOverlayOpen ? { inert: '' as unknown as boolean } : {})}
         >
+        {/* Skip-to-content link (F-051): visually hidden until focused, so
+            keyboard users can jump past the 8-button header to the scene. */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-gaslight-amber focus:text-gaslight-ink focus:rounded focus:font-semibold focus:outline-none focus:ring-2 focus:ring-white"
+        >
+          Skip to scene
+        </a>
         <HeaderBar
           onOpenEvidenceBoard={() => setIsEvidenceBoardOpen(true)}
           onOpenJournal={() => setIsJournalOpen(true)}

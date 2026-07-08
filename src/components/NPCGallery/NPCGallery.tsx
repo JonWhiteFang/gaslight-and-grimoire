@@ -132,7 +132,7 @@ export function NPCGallery({ onClose }: NPCGalleryProps) {
         {/* NPC list */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {accessibleNpcs.length === 0 ? (
-            <p className="text-stone-500 italic text-center mt-12">
+            <p className="text-stone-400 italic text-center mt-12">
               No suspects encountered yet.
             </p>
           ) : (

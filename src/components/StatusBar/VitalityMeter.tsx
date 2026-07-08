@@ -2,7 +2,7 @@
  * VitalityMeter — animated physical health bar (0–10).
  */
 import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 
 export interface VitalityMeterProps {
   value: number;
@@ -95,7 +95,7 @@ export function VitalityMeter({
       </div>
 
       <div className="relative h-3 w-full rounded-full bg-white/10 overflow-hidden">
-        <motion.div
+        <m.div
           className={`h-full rounded-full ${barClass} ${criticalPulse ? 'animate-pulse' : ''}`}
           animate={{ width: `${pct}%` }}
           transition={reducedMotion ? { duration: 0 } : { duration: 0.4, ease: 'easeOut' }}
@@ -104,7 +104,7 @@ export function VitalityMeter({
       </div>
 
       {descriptor && !reducedMotion && (
-        <motion.span
+        <m.span
           key={descriptor + value}
           className="text-xs text-center"
           style={{ color: pulseState === 'decrease' ? '#f87171' : '#fbbf24' }}
@@ -115,7 +115,7 @@ export function VitalityMeter({
           aria-live="polite"
         >
           {descriptor}
-        </motion.span>
+        </m.span>
       )}
     </div>
   );

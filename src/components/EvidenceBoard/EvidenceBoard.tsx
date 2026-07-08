@@ -2,7 +2,7 @@
  * EvidenceBoard — full-screen corkboard overlay.
  */
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
-import { useClues, useDeductions, useConnections, useStore } from '../../store';
+import { useClues, useDeductions, useConnections, useSettings, useStore } from '../../store';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { trackActivity } from '../../engine/hintEngine';
 import { ClueCard } from './ClueCard';
@@ -28,6 +28,7 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
   const clues = useClues();
   const deductions = useDeductions();
   const storeConnections = useConnections();
+  const reducedMotion = useSettings().reducedMotion;
   const updateClueStatus = useStore((s) => s.updateClueStatus);
   const addConnection = useStore((s) => s.addConnection);
   const clearConnections = useStore((s) => s.clearConnections);
@@ -76,10 +77,20 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
   useEffect(() => {
     const board = boardRef.current;
     if (!board) return;
-    function recompute() { setPointsVersion((v) => v + 1); }
+    // rAF-throttle: scroll/resize can fire many times per frame; coalesce them
+    // into a single recompute per animation frame (F-044).
+    let rafId: number | null = null;
+    function recompute() {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        setPointsVersion((v) => v + 1);
+      });
+    }
     board.addEventListener('scroll', recompute);
     window.addEventListener('resize', recompute);
     return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
       board.removeEventListener('scroll', recompute);
       window.removeEventListener('resize', recompute);
     };
@@ -106,13 +117,25 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
       setMousePos(null);
       return;
     }
+    // rAF-throttle the ghost-thread position so a fast mousemove does at most
+    // one getBoundingClientRect + state update per frame (F-044).
+    let rafId: number | null = null;
+    let lastEvent: MouseEvent | null = null;
     function handleMouseMove(e: MouseEvent) {
-      if (!boardRef.current) return;
-      const rect = boardRef.current.getBoundingClientRect();
-      setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+      lastEvent = e;
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        if (!boardRef.current || !lastEvent) return;
+        const rect = boardRef.current.getBoundingClientRect();
+        setMousePos({ x: lastEvent.clientX - rect.left, y: lastEvent.clientY - rect.top });
+      });
     }
     window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
   }, [connectingFrom]);
 
   // Spacebar connection logic
@@ -214,6 +237,7 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
             connections={[...connections, ...slackConnections]}
             ghostFrom={ghostFrom}
             ghostTo={mousePos ?? undefined}
+            reducedMotion={reducedMotion}
           />
           {revealedClues.length === 0 ? (
             <p className="text-amber-700 text-center mt-20 text-lg italic">

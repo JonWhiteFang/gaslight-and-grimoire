@@ -96,7 +96,7 @@ function StatusIndicator({ status }: { status: Clue['status'] }) {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function ClueCard({
+function ClueCardComponent({
   clue,
   onInitiateConnection,
   isConnecting = false,
@@ -158,3 +158,7 @@ export function ClueCard({
     </div>
   );
 }
+
+// Memoised so re-rendering the board (e.g. a scroll-driven thread recompute)
+// doesn't re-render every card — only those whose props change (F-045).
+export const ClueCard = React.memo(ClueCardComponent);

@@ -112,7 +112,7 @@ export function EncounterPanel({ sceneId, rounds, isSupernatural, onComplete }: 
       )}
 
       {/* Round indicator */}
-      <div className="text-center text-xs text-stone-500 uppercase tracking-widest">
+      <div className="text-center text-xs text-stone-400 uppercase tracking-widest">
         Round {currentRound.roundNumber} of {encounterState.rounds.length}
       </div>
 

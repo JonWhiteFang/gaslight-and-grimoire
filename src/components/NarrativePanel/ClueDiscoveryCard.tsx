@@ -1,7 +1,7 @@
 /**
  * ClueDiscoveryCard — slide-in notification when a clue is discovered.
  */
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import type { Clue } from '../../types';
 
 const CLUE_TYPE_ICONS: Record<string, string> = {
@@ -28,7 +28,7 @@ export function ClueDiscoveryCard({ clue, visible = false, reducedMotion = false
   return (
     <AnimatePresence>
       {visible && clue && (
-        <motion.div
+        <m.div
           role="status"
           aria-live="polite"
           aria-label={`${header}: ${clue.title}`}
@@ -60,7 +60,7 @@ export function ClueDiscoveryCard({ clue, visible = false, reducedMotion = false
               </button>
             )}
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

@@ -46,7 +46,7 @@ function JournalSection({
         {title}
       </h3>
       {empty ? (
-        <p className="text-stone-500 italic text-sm">Nothing recorded yet.</p>
+        <p className="text-stone-400 italic text-sm">Nothing recorded yet.</p>
       ) : (
         children
       )}

@@ -3,7 +3,7 @@
  * Auto-dismisses after 6 seconds. Respects reducedMotion.
  */
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 
 export interface EffectFeedbackProps {
   messages: string[];
@@ -28,7 +28,7 @@ export function EffectFeedback({ messages, reducedMotion = false }: EffectFeedba
     <div aria-live="polite" className="flex flex-col gap-1.5">
       <AnimatePresence>
         {messages.map((msg, i) => (
-          <motion.p
+          <m.p
             key={`${msg}-${i}`}
             role="status"
             className="pl-4 py-1.5 border-l-2 border-gaslight-amber/40 italic font-serif text-sm text-gaslight-fog/70"
@@ -38,7 +38,7 @@ export function EffectFeedback({ messages, reducedMotion = false }: EffectFeedba
             transition={reducedMotion ? { duration: 0 } : { duration: 0.3, delay: i * 0.15 }}
           >
             {msg}
-          </motion.p>
+          </m.p>
         ))}
       </AnimatePresence>
     </div>

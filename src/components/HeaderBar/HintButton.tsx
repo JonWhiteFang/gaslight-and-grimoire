@@ -5,7 +5,7 @@
  * hint level in a small popover below the button.
  */
 import { useState, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { useSettings } from '../../store';
 import {
   shouldShowHint,
@@ -53,7 +53,7 @@ export function HintButton({ gameState }: HintButtonProps) {
   return (
     <div className="relative">
       {/* Hint trigger button */}
-      <motion.button
+      <m.button
         type="button"
         aria-label="Show hint"
         onClick={handleClick}
@@ -68,12 +68,12 @@ export function HintButton({ gameState }: HintButtonProps) {
         "
       >
         💡
-      </motion.button>
+      </m.button>
 
       {/* Hint popover */}
       <AnimatePresence>
         {activeHint && (
-          <motion.div
+          <m.div
             role="status"
             aria-live="polite"
             aria-label={`Hint level ${activeHint.level}`}
@@ -108,7 +108,7 @@ export function HintButton({ gameState }: HintButtonProps) {
                 ✕
               </button>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

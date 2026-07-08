@@ -29,13 +29,38 @@ export async function fetchManifest(): Promise<CaseManifest> {
 }
 
 
-/** Loads shared scenes (breakdown, incapacitation) and injects them into a scenes record. */
-async function injectSharedScenes(scenes: Record<string, SceneNode>): Promise<Record<string, SceneNode>> {
-  const [breakdown, incapacitation] = await Promise.all([
-    fetchJson<SceneNode>("/content/shared/breakdown.json"),
-    fetchJson<SceneNode>("/content/shared/incapacitation.json"),
-  ]);
-  return { ...scenes, [breakdown.id]: breakdown, [incapacitation.id]: incapacitation };
+/**
+ * The shared breakdown/incapacitation scenes are identical across every case and
+ * never change at runtime, so fetch them at most once and reuse the result on
+ * subsequent case/vignette loads (F-047). The cached promise is shared so
+ * concurrent loads don't double-fetch.
+ */
+let sharedScenesPromise: Promise<SceneNode[]> | null = null;
+
+/** Test hook: clear the shared-scenes cache so a fresh `fetch` stub is honoured. */
+export function _resetSharedScenesCache(): void {
+  sharedScenesPromise = null;
+}
+
+function loadSharedScenes(): Promise<SceneNode[]> {
+  if (!sharedScenesPromise) {
+    sharedScenesPromise = Promise.all([
+      fetchJson<SceneNode>('/content/shared/breakdown.json'),
+      fetchJson<SceneNode>('/content/shared/incapacitation.json'),
+    ]).catch((err) => {
+      // Don't cache a failure — allow a later load to retry.
+      sharedScenesPromise = null;
+      throw err;
+    });
+  }
+  return sharedScenesPromise;
+}
+
+/** Merges already-loaded shared scenes into a scenes record (pure). */
+function mergeSharedScenes(scenes: Record<string, SceneNode>, shared: SceneNode[]): Record<string, SceneNode> {
+  const merged = { ...scenes };
+  for (const scene of shared) merged[scene.id] = scene;
+  return merged;
 }
 
 /**
@@ -43,6 +68,10 @@ async function injectSharedScenes(scenes: Record<string, SceneNode>): Promise<Re
  */
 export async function loadCase(caseId: string): Promise<CaseData> {
   const base = `/content/cases/${caseId}`;
+
+  // Kick off the (cached) shared-scene fetch alongside the main batch so the
+  // first load doesn't pay for it sequentially (F-047).
+  const sharedPromise = loadSharedScenes();
 
   const [meta, act1, act2, act3, cluesFile, npcsFile, variantsFile] =
     await Promise.all([
@@ -61,7 +90,7 @@ export async function loadCase(caseId: string): Promise<CaseData> {
     .catch(() => [] as KeyDeduction[]);
 
   const allScenes = [...act1.scenes, ...act2.scenes, ...act3.scenes];
-  const scenes = await injectSharedScenes(indexById(allScenes));
+  const scenes = mergeSharedScenes(indexById(allScenes), await sharedPromise);
   const clues = indexById(cluesFile.clues);
   const npcs = indexById(npcsFile.npcs);
 
@@ -74,6 +103,8 @@ export async function loadCase(caseId: string): Promise<CaseData> {
 export async function loadVignette(vignetteId: string): Promise<VignetteData> {
   const base = `/content/side-cases/${vignetteId}`;
 
+  const sharedPromise = loadSharedScenes();
+
   const [meta, scenesFile, cluesFile, npcsFile] = await Promise.all([
     fetchJson<VignetteMeta>(`${base}/meta.json`),
     fetchJson<{ scenes: SceneNode[] }>(`${base}/scenes.json`),
@@ -81,7 +112,7 @@ export async function loadVignette(vignetteId: string): Promise<VignetteData> {
     fetchJson<{ npcs: NPCState[] }>(`${base}/npcs.json`),
   ]);
 
-  const scenes = await injectSharedScenes(indexById(scenesFile.scenes));
+  const scenes = mergeSharedScenes(indexById(scenesFile.scenes), await sharedPromise);
   const clues = indexById(cluesFile.clues);
   const npcs = indexById(npcsFile.npcs);
 
