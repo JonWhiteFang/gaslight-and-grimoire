@@ -8,7 +8,8 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
-import App, { ABILITY_FLAGS } from '../../App';
+import App from '../../App';
+import { ARCHETYPE_ABILITY_FLAG } from '../../engine/flags';
 import { useStore } from '../../store';
 import type { Archetype } from '../../types';
 
@@ -38,7 +39,7 @@ describe('App — ability flag mapping (F-020)', () => {
       operator: 'ability-auto-succeed-vigor',
       mesmerist: 'ability-auto-succeed-influence',
     };
-    expect(ABILITY_FLAGS).toEqual(expected);
+    expect(ARCHETYPE_ABILITY_FLAG).toEqual(expected);
   });
 });
 

@@ -1,4 +1,5 @@
 import type { Archetype, Faculty, Investigator, OutcomeTier, Choice } from '../types';
+import { primaryFacultyOf } from '../data/archetypes';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -46,16 +47,9 @@ export function calculateModifier(facultyScore: number): number {
 
 // ─── Trained Bonus ────────────────────────────────────────────────────────────
 
-const PRIMARY_FACULTY: Record<Archetype, Faculty> = {
-  deductionist: 'reason',
-  occultist: 'lore',
-  operator: 'vigor',
-  mesmerist: 'influence',
-};
-
 /** Returns +1 if the faculty is the archetype's primary, 0 otherwise. */
 export function getTrainedBonus(faculty: Faculty, archetype: Archetype): number {
-  return PRIMARY_FACULTY[archetype] === faculty ? 1 : 0;
+  return primaryFacultyOf(archetype) === faculty ? 1 : 0;
 }
 
 // ─── Outcome Resolution ───────────────────────────────────────────────────────

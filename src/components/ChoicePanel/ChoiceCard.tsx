@@ -48,6 +48,12 @@ export interface ChoiceCardProps {
   revealedClueIds: Set<string>;
   /** Deduction IDs the investigator has formed */
   deductionIds: Set<string>;
+  /**
+   * Whether this choice's faculty check rolls with advantage. Computed by the
+   * parent via the shared `computeAdvantage` (clue advantage OR Lore + Veil
+   * Sight), so the badge always matches the engine's roll (F-014).
+   */
+  hasAdvantage: boolean;
   onSelect: (choiceId: string) => void;
 }
 
@@ -58,12 +64,9 @@ export function ChoiceCard({
   investigator,
   revealedClueIds,
   deductionIds,
+  hasAdvantage,
   onSelect,
 }: ChoiceCardProps) {
-  const hasAdvantage =
-    choice.advantageIf !== undefined &&
-    choice.advantageIf.some((clueId) => revealedClueIds.has(clueId));
-
   const isUnlockedByPreparation =
     (choice.requiresClue !== undefined && revealedClueIds.has(choice.requiresClue)) ||
     (choice.requiresDeduction !== undefined && deductionIds.has(choice.requiresDeduction));
@@ -120,11 +123,11 @@ export function ChoiceCard({
             </span>
           )}
 
-          {/* Advantage indicator */}
+          {/* Advantage indicator — clue-based or Veil Sight on a Lore check */}
           {hasAdvantage && (
             <span
-              aria-label="Advantage: you hold a relevant clue"
-              title="Advantage: you hold a relevant clue"
+              aria-label="Advantage on this check"
+              title="Advantage on this check"
               className="text-green-400 text-sm"
             >
               ◈

@@ -329,6 +329,40 @@ describe('processEncounterChoice — dual-axis damage', () => {
   });
 });
 
+// ─── Test 2a: Guard undefined navigation in non-check branch (F-022) ───────────
+
+describe('processEncounterChoice — undefined navigation guard (F-022)', () => {
+  it('throws when a non-check choice has no success/critical outcome', () => {
+    // A non-escape choice with no faculty/difficulty AND no success/critical
+    // outcome would otherwise assign nextSceneId = undefined and later crash
+    // resolveScene with an opaque error. Guard fails loudly at the source.
+    const malformedChoice = makeChoice({
+      id: 'no-destination',
+      faculty: undefined,
+      difficulty: undefined,
+      // Malformed content: no success/critical destination for a non-check choice.
+      outcomes: {
+        partial: 'scene-partial',
+        failure: 'scene-lose',
+        fumble: 'scene-lose',
+      } as any,
+    });
+    const round = makeRound([malformedChoice], false);
+    const encounterState = {
+      id: 'enc-1',
+      rounds: [round],
+      currentRound: 0,
+      isComplete: false,
+      reactionCheckPassed: null,
+    };
+    const state = makeGameState();
+
+    expect(() =>
+      processEncounterChoice(malformedChoice, encounterState, state, mockActions),
+    ).toThrow(/nowhere to navigate/i);
+  });
+});
+
 // ─── Test 2b: Escape path terminates the encounter immediately (F-004) ─────────
 
 describe('processEncounterChoice — escape path is terminal', () => {

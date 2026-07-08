@@ -9,8 +9,9 @@ import {
   processEncounterChoice,
   getEncounterChoices,
 } from '../../engine/narrativeEngine';
+import { computeAdvantage } from '../../engine/advantage';
 import { ChoiceCard } from '../ChoicePanel/ChoiceCard';
-import type { Choice, EncounterRound, EncounterState, GameState } from '../../types';
+import type { Choice, EncounterRound, EncounterState } from '../../types';
 
 export interface EncounterPanelProps {
   sceneId: string;
@@ -124,6 +125,7 @@ export function EncounterPanel({ sceneId, rounds, isSupernatural, onComplete }: 
             investigator={investigator}
             revealedClueIds={revealedClueIds}
             deductionIds={deductionIds}
+            hasAdvantage={computeAdvantage(choice, gameState)}
             onSelect={handleChoiceSelect}
           />
         ))}

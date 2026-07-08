@@ -150,7 +150,7 @@ describe('narrativeSlice.goToScene — onEnter effects are idempotent per scene 
   });
 });
 
-describe('narrativeSlice.loadAndStartCase — last-critical-faculty is cleared', () => {
+describe('narrativeSlice.loadAndStartCase — lastCriticalFaculty is reset (F-013)', () => {
   beforeEach(() => {
     resetNarrative();
     stubFetchWithFixture();
@@ -159,16 +159,16 @@ describe('narrativeSlice.loadAndStartCase — last-critical-faculty is cleared',
     vi.unstubAllGlobals();
   });
 
-  it('clears a leftover last-critical-faculty flag from a previous case', async () => {
+  it('resets a leftover investigator.lastCriticalFaculty from a previous case', async () => {
     // Simulate a critical success earned in a prior case.
     useStore.setState((s) => ({
-      flags: { ...s.flags, 'last-critical-faculty': 'lore' as unknown as boolean },
+      investigator: { ...s.investigator, lastCriticalFaculty: 'lore' },
     }));
-    expect(useStore.getState().flags['last-critical-faculty']).toBe('lore');
+    expect(useStore.getState().investigator.lastCriticalFaculty).toBe('lore');
 
     await useStore.getState().loadAndStartCase('test-case');
 
-    expect(useStore.getState().flags['last-critical-faculty']).toBeUndefined();
+    expect(useStore.getState().investigator.lastCriticalFaculty).toBeUndefined();
   });
 });
 

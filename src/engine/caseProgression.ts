@@ -5,6 +5,7 @@
 import type { Faculty, GameState } from '../types';
 import type { EngineActions } from './engineActions';
 import { SaveManager } from './saveManager';
+import { vignetteUnlockedFlag } from './flags';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -57,15 +58,15 @@ export const CaseProgression = {
   /**
    * Called when a Case ends.
    * 1. Persists flags, faction reputation, and NPC state via auto-save.
-   * 2. Grants +1 to the Faculty stored in the `last-critical-faculty` flag.
+   * 2. Grants +1 to the Faculty stored in the `investigator.lastCriticalFaculty` field.
    * 3. Checks vignette unlock conditions.
    */
   completeCase(caseId: string, state: GameState, actions: EngineActions): CaseCompletionResult {
     // 1. Grant faculty bonus from critical success moment
-    const criticalFaculty = state.flags['last-critical-faculty'] as unknown as Faculty | undefined;
+    const criticalFaculty = state.investigator.lastCriticalFaculty;
     let facultyBonusGranted: Faculty | null = null;
 
-    if (criticalFaculty && isValidFaculty(criticalFaculty)) {
+    if (criticalFaculty) {
       CaseProgression.grantFacultyBonus(criticalFaculty, actions);
       facultyBonusGranted = criticalFaculty;
     }
@@ -74,7 +75,7 @@ export const CaseProgression = {
     const vignetteUnlocked = CaseProgression.checkVignetteUnlocks(state);
 
     if (vignetteUnlocked) {
-      actions.setFlag(`vignette-unlocked-${vignetteUnlocked}`, true);
+      actions.setFlag(vignetteUnlockedFlag(vignetteUnlocked), true);
     }
 
     return { facultyBonusGranted, vignetteUnlocked };
@@ -92,7 +93,7 @@ export const CaseProgression = {
   checkVignetteUnlocks(state: GameState): string | null {
     for (const vignette of VIGNETTE_CONDITIONS) {
       // Skip already-unlocked vignettes
-      if (state.flags[`vignette-unlocked-${vignette.id}`]) continue;
+      if (state.flags[vignetteUnlockedFlag(vignette.id)]) continue;
 
       if (vignette.factionReputation) {
         const { faction, threshold } = vignette.factionReputation;
@@ -123,13 +124,3 @@ export const CaseProgression = {
     actions.updateFaculty(faculty, newValue);
   },
 };
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const VALID_FACULTIES: Faculty[] = [
-  'reason', 'perception', 'nerve', 'vigor', 'influence', 'lore',
-];
-
-function isValidFaculty(value: unknown): value is Faculty {
-  return VALID_FACULTIES.includes(value as Faculty);
-}

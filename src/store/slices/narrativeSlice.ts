@@ -1,10 +1,65 @@
 import type { StateCreator } from 'zustand';
+import type { WritableDraft } from 'immer';
 import type { GameStore } from '../types';
-import type { CaseData, OutcomeTier } from '../../types';
+import type { CaseData, OutcomeTier, VignetteData } from '../../types';
 import { CaseProgression, type CaseCompletionResult } from '../../engine/caseProgression';
 import { loadCase, loadVignette, resolveScene, validateContent } from '../../engine/narrativeEngine';
+import { CASE_LOAD_CLEARED_FLAGS } from '../../engine/flags';
 import { generateEffectMessages } from '../../engine/effectMessages';
 import { snapshotGameState } from '../../utils/gameState';
+
+/**
+ * Adapts a loaded {@link VignetteData} into the {@link CaseData} shape the store
+ * and engine operate on. Vignettes are a 2-act subset with no faculty
+ * distribution and no cross-case variants. Shared by `loadAndStartVignette` and
+ * `metaSlice.loadGame` (F-066) — keep the single source of truth here.
+ */
+export function vignetteToCaseData(data: VignetteData): CaseData {
+  return { ...data, meta: { ...data.meta, acts: 2, facultyDistribution: {} }, variants: [] };
+}
+
+/**
+ * Performs the shared "fresh start" reset for a new case/vignette on an Immer
+ * draft: restores meters, clears the pending faculty reward and halt/ability
+ * flags, wipes stale case-scoped state, and re-populates clues/NPCs from the
+ * loaded data. Extracted from `loadAndStartCase`/`loadAndStartVignette` (F-063)
+ * so the reset semantics live in exactly one place.
+ */
+export function resetForNewCase(state: WritableDraft<GameStore>, data: CaseData): void {
+  state.caseData = data;
+  state.currentCase = data.meta.id;
+  state.sceneHistory = [];
+  state.visitedScenes = [];
+  state.lastEffectMessages = [];
+  state.investigator.abilityUsed = false;
+  // A case is a fresh start: restore composure/vitality to full and clear the
+  // halt flags. Otherwise a knockout (0 composure/vitality → breakdown scene)
+  // would carry over — every subsequent case would re-fire breakdown on load
+  // and brick the investigator across all cases (and poison the autosave).
+  state.investigator.composure = 10;
+  state.investigator.vitality = 10;
+  // Clear the pending critical-success faculty reward so a critical earned in a
+  // previous case can't grant a bonus here (F-013 — was the last-critical-faculty flag).
+  state.investigator.lastCriticalFaculty = undefined;
+  // Clears breakdown/incapacitation halt flags and ability auto-succeed/veil-sight
+  // flags so nothing earned in a previous case leaks into this one.
+  for (const f of CASE_LOAD_CLEARED_FLAGS) delete state.flags[f];
+
+  // Clear stale state from previous case
+  state.clues = {};
+  state.npcs = {};
+  state.deductions = {};
+  state.connections = [];
+  state.lastCheckResult = null;
+
+  // Populate clues and NPCs from loaded case data
+  for (const [id, clue] of Object.entries(data.clues)) {
+    state.clues[id] = clue;
+  }
+  for (const [id, npc] of Object.entries(data.npcs)) {
+    state.npcs[id] = npc;
+  }
+}
 
 export interface CheckResult {
   roll: number;
@@ -117,42 +172,7 @@ export const createNarrativeSlice: StateCreator<
     })();
 
     set((state) => {
-      state.caseData = data;
-      state.currentCase = data.meta.id;
-      state.sceneHistory = [];
-      state.visitedScenes = [];
-      state.lastEffectMessages = [];
-      state.investigator.abilityUsed = false;
-      // A case is a fresh start: restore composure/vitality to full and clear the
-      // halt flags. Otherwise a knockout (0 composure/vitality → breakdown scene)
-      // would carry over — every subsequent case would re-fire breakdown on load
-      // and brick the investigator across all cases (and poison the autosave).
-      state.investigator.composure = 10;
-      state.investigator.vitality = 10;
-      delete state.flags['breakdown-occurred'];
-      delete state.flags['incapacitated'];
-      delete state.flags['ability-auto-succeed-reason'];
-      delete state.flags['ability-auto-succeed-vigor'];
-      delete state.flags['ability-auto-succeed-influence'];
-      delete state.flags['ability-veil-sight-active'];
-      // Clear the pending critical-success faculty reward so a bonus earned in a
-      // previous case cannot leak into this one (granted at completeCase time).
-      delete state.flags['last-critical-faculty'];
-
-      // Clear stale state from previous case
-      state.clues = {};
-      state.npcs = {};
-      state.deductions = {};
-      state.connections = [];
-      state.lastCheckResult = null;
-
-      // Populate clues and NPCs from loaded case data
-      for (const [id, clue] of Object.entries(data.clues)) {
-        state.clues[id] = clue;
-      }
-      for (const [id, npc] of Object.entries(data.npcs)) {
-        state.npcs[id] = npc;
-      }
+      resetForNewCase(state, data);
     });
 
     // Navigate to first scene (triggers scene-transition SFX via goToScene)
@@ -164,7 +184,7 @@ export const createNarrativeSlice: StateCreator<
    */
   loadAndStartVignette: async (vignetteId) => {
     const data = await loadVignette(vignetteId);
-    const asCaseData = { ...data, meta: { ...data.meta, acts: 2, facultyDistribution: {} }, variants: [] };
+    const asCaseData = vignetteToCaseData(data);
     const validation = validateContent(asCaseData);
     if (!validation.valid) {
       throw new Error('[NarrativeEngine] Content validation failed:\n' + validation.errors.join('\n'));
@@ -175,33 +195,7 @@ export const createNarrativeSlice: StateCreator<
     })();
 
     set((state) => {
-      state.caseData = asCaseData;
-      state.currentCase = data.meta.id;
-      state.sceneHistory = [];
-      state.visitedScenes = [];
-      state.lastEffectMessages = [];
-      state.investigator.abilityUsed = false;
-      // Fresh start: restore meters and clear halt flags (see loadAndStartCase).
-      state.investigator.composure = 10;
-      state.investigator.vitality = 10;
-      delete state.flags['breakdown-occurred'];
-      delete state.flags['incapacitated'];
-      delete state.flags['ability-auto-succeed-reason'];
-      delete state.flags['ability-auto-succeed-vigor'];
-      delete state.flags['ability-auto-succeed-influence'];
-      delete state.flags['ability-veil-sight-active'];
-      delete state.flags['last-critical-faculty'];
-      state.clues = {};
-      state.npcs = {};
-      state.deductions = {};
-      state.connections = [];
-      state.lastCheckResult = null;
-      for (const [id, clue] of Object.entries(data.clues)) {
-        state.clues[id] = clue;
-      }
-      for (const [id, npc] of Object.entries(data.npcs)) {
-        state.npcs[id] = npc;
-      }
+      resetForNewCase(state, asCaseData);
     });
 
     get().goToScene(firstSceneId);

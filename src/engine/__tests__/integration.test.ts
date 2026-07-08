@@ -34,6 +34,7 @@ const mockActions: EngineActions = {
   adjustReputation: vi.fn(),
   discoverClue: vi.fn(),
   updateFaculty: vi.fn(),
+  setLastCriticalFaculty: vi.fn(),
   investigator: mockInvestigator,
 };
 
@@ -74,14 +75,14 @@ describe('Choice → Navigation → Effect pipeline', () => {
     expect(mockActions.goToScene).toHaveBeenCalledWith('s-ok');
   });
 
-  it('processChoice sets last-critical-faculty flag on critical', () => {
+  it('processChoice records the critical faculty via the typed setter', () => {
     mockPerformCheck.mockReturnValue({ roll: 20, modifier: 1, total: 21, tier: 'critical' });
     const choice: Choice = {
       id: 'c1', text: 'Test', faculty: 'reason', difficulty: 12,
       outcomes: { critical: 's-crit', success: 's-ok', partial: 's-part', failure: 's-fail', fumble: 's-fumble' },
     };
     processChoice(choice, makeState(), mockActions);
-    expect(mockActions.setFlag).toHaveBeenCalledWith('last-critical-faculty', 'reason');
+    expect(mockActions.setLastCriticalFaculty).toHaveBeenCalledWith('reason');
   });
 
   it('non-check choice navigates to success outcome without dice', () => {

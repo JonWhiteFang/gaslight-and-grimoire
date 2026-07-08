@@ -4,6 +4,7 @@
 import React, { useCallback } from 'react';
 import { useStore, buildGameState } from '../../store';
 import { evaluateConditions, processChoice } from '../../engine/narrativeEngine';
+import { computeAdvantage } from '../../engine/advantage';
 import { ChoiceCard } from './ChoiceCard';
 import type { Choice, GameState } from '../../types';
 
@@ -107,6 +108,7 @@ export function ChoicePanel({ choices, onChoiceSelected }: ChoicePanelProps) {
           investigator={investigator}
           revealedClueIds={revealedClueIds}
           deductionIds={deductionIds}
+          hasAdvantage={computeAdvantage(choice, gameState)}
           onSelect={handleSelect}
         />
       ))}

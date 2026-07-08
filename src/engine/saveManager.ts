@@ -138,7 +138,10 @@ export const SaveManager = {
     }
 
     let { state } = saveFile;
-    let version = saveFile.version;
+    // A legacy or hand-edited save may lack a `version` (or carry a NaN). Coerce
+    // that to 0 so the full v0 → current chain runs; otherwise `undefined < N` is
+    // false, every step is skipped, and the file is wrongly stamped current (F-015).
+    let version = Number.isFinite(saveFile.version) ? saveFile.version : 0;
 
     // v0 → v1
     if (version < 1) {

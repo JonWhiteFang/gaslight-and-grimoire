@@ -1,7 +1,7 @@
 /**
  * Unit tests for CaseProgression.
  *
- * 1. completeCase grants +1 to the faculty stored in `last-critical-faculty` flag
+ * 1. completeCase grants +1 to the faculty stored in the `investigator.lastCriticalFaculty` field
  * 2. checkVignetteUnlocks returns 'a-matter-of-shadows' when Lamplighters rep ≥ 2
  * 3. checkVignetteUnlocks returns null when Lamplighters rep < 2
  * 4. grantFacultyBonus caps faculty at 20
@@ -104,26 +104,12 @@ beforeEach(() => {
 
 // ─── Test 1: completeCase grants faculty bonus ────────────────────────────────
 
-describe('completeCase — faculty bonus from last-critical-faculty flag', () => {
-  it('grants +1 to the faculty stored in last-critical-faculty', () => {
+describe('completeCase — faculty bonus from investigator.lastCriticalFaculty', () => {
+  it('grants +1 to the faculty stored in lastCriticalFaculty', () => {
     const faculty: Faculty = 'reason';
     const initialScore = 12;
 
-    // Set up store with the critical faculty flag
-    useStore.getState().setFlag('last-critical-faculty', true);
-    // The flag value needs to be the faculty name — use a string flag workaround:
-    // flags are Record<string, boolean>, so we store the faculty in a dedicated flag key
-    // The implementation reads flags['last-critical-faculty'] as a Faculty string.
-    // We need to set it as a string value — but the store only supports boolean flags.
-    // Per the design, we use a separate flag key per faculty: last-critical-faculty: 'reason'
-    // The store's setFlag only accepts boolean. We'll set the state directly.
-    useStore.setState((state) => ({
-      ...state,
-      flags: { ...state.flags, 'last-critical-faculty': faculty as unknown as boolean },
-    }));
-
     const state = makeState({
-      flags: { 'last-critical-faculty': faculty as unknown as boolean },
       investigator: {
         name: 'Holmes',
         archetype: 'deductionist',
@@ -138,6 +124,7 @@ describe('completeCase — faculty bonus from last-critical-faculty flag', () =>
         composure: 10,
         vitality: 10,
         abilityUsed: false,
+        lastCriticalFaculty: faculty,
       },
     });
 
@@ -145,7 +132,6 @@ describe('completeCase — faculty bonus from last-critical-faculty flag', () =>
     useStore.setState((s) => ({
       ...s,
       investigator: state.investigator,
-      flags: state.flags,
     }));
 
     const result = CaseProgression.completeCase('the-whitechapel-cipher', state, useStore.getState());
@@ -154,12 +140,11 @@ describe('completeCase — faculty bonus from last-critical-faculty flag', () =>
     expect(useStore.getState().investigator.faculties[faculty]).toBe(initialScore + 1);
   });
 
-  it('grants +1 to influence when last-critical-faculty is influence', () => {
+  it('grants +1 to influence when lastCriticalFaculty is influence', () => {
     const faculty: Faculty = 'influence';
     const initialScore = 14;
 
     const state = makeState({
-      flags: { 'last-critical-faculty': faculty as unknown as boolean },
       investigator: {
         name: 'Holmes',
         archetype: 'deductionist',
@@ -174,13 +159,13 @@ describe('completeCase — faculty bonus from last-critical-faculty flag', () =>
         composure: 10,
         vitality: 10,
         abilityUsed: false,
+        lastCriticalFaculty: faculty,
       },
     });
 
     useStore.setState((s) => ({
       ...s,
       investigator: state.investigator,
-      flags: state.flags,
     }));
 
     const result = CaseProgression.completeCase('the-whitechapel-cipher', state, useStore.getState());
@@ -189,18 +174,8 @@ describe('completeCase — faculty bonus from last-critical-faculty flag', () =>
     expect(useStore.getState().investigator.faculties[faculty]).toBe(initialScore + 1);
   });
 
-  it('returns facultyBonusGranted: null when no last-critical-faculty flag is set', () => {
-    const state = makeState({ flags: {} });
-
-    const result = CaseProgression.completeCase('the-whitechapel-cipher', state, useStore.getState());
-
-    expect(result.facultyBonusGranted).toBeNull();
-  });
-
-  it('returns facultyBonusGranted: null when last-critical-faculty is an invalid value', () => {
-    const state = makeState({
-      flags: { 'last-critical-faculty': 'notafaculty' as unknown as boolean },
-    });
+  it('returns facultyBonusGranted: null when lastCriticalFaculty is unset', () => {
+    const state = makeState();
 
     const result = CaseProgression.completeCase('the-whitechapel-cipher', state, useStore.getState());
 
@@ -262,7 +237,7 @@ describe('checkVignetteUnlocks — a-matter-of-shadows', () => {
   it('returns null when vignette is already unlocked', () => {
     const state = makeState({
       factionReputation: { Lamplighters: 5 },
-      flags: { 'vignette-unlocked-a-matter-of-shadows': true as unknown as boolean },
+      flags: { 'vignette-unlocked-a-matter-of-shadows': true },
     });
 
     expect(CaseProgression.checkVignetteUnlocks(state)).toBeNull();

@@ -23,6 +23,7 @@ import type {
   NpcSuspicionTier,
   SceneNode,
 } from '../types';
+import { FACTIONS, OUTCOME_TIERS } from './constants';
 
 // ─── Bundle shape ──────────────────────────────────────────────────────────
 
@@ -68,15 +69,6 @@ const ARCHETYPES: ReadonlySet<Archetype> = new Set<Archetype>([
 const SUSPICION_TIERS: ReadonlySet<NpcSuspicionTier> = new Set<NpcSuspicionTier>([
   'normal', 'evasive', 'concealing', 'hostile',
 ]);
-
-const FACTIONS: ReadonlySet<string> = new Set<string>([
-  'Rationalists Circle',
-  'Hermetic Order of the Grey Dawn',
-  'Lamplighters',
-  'Court of Smoke',
-]);
-
-const OUTCOME_TIERS = ['critical', 'success', 'partial', 'failure', 'fumble'] as const;
 
 // ─── Public API ────────────────────────────────────────────────────────────
 
@@ -327,40 +319,40 @@ function validateEffect(effect: Effect, where: string, ctx: Ctx): void {
 }
 
 function validateCondition(condition: Condition, where: string, ctx: Ctx): void {
-  const { type, target, value } = condition;
-  switch (type) {
+  // Discriminated union: each case narrows `target`/`value` to its real shape.
+  switch (condition.type) {
     case 'hasClue':
-      if (!ctx.clueIds.has(target)) {
-        ctx.errors.push(`${where} -> hasClue references unknown clue "${target}"`);
+      if (!ctx.clueIds.has(condition.target)) {
+        ctx.errors.push(`${where} -> hasClue references unknown clue "${condition.target}"`);
       }
       break;
     case 'npcDisposition':
     case 'npcMemoryFlag':
-      if (!ctx.npcIds.has(target)) {
-        ctx.errors.push(`${where} -> ${type} references unknown npc "${target}"`);
+      if (!ctx.npcIds.has(condition.target)) {
+        ctx.errors.push(`${where} -> ${condition.type} references unknown npc "${condition.target}"`);
       }
       break;
     case 'npcSuspicion':
-      if (!ctx.npcIds.has(target)) {
-        ctx.errors.push(`${where} -> npcSuspicion references unknown npc "${target}"`);
+      if (!ctx.npcIds.has(condition.target)) {
+        ctx.errors.push(`${where} -> npcSuspicion references unknown npc "${condition.target}"`);
       }
-      if (!SUSPICION_TIERS.has(value as NpcSuspicionTier)) {
-        ctx.errors.push(`${where} -> npcSuspicion has invalid tier value "${String(value)}"`);
+      if (!SUSPICION_TIERS.has(condition.value)) {
+        ctx.errors.push(`${where} -> npcSuspicion has invalid tier value "${String(condition.value)}"`);
       }
       break;
     case 'facultyMin':
-      if (!FACULTIES.has(target as Faculty)) {
-        ctx.errors.push(`${where} -> facultyMin references invalid faculty "${target}"`);
+      if (!FACULTIES.has(condition.target)) {
+        ctx.errors.push(`${where} -> facultyMin references invalid faculty "${condition.target}"`);
       }
       break;
     case 'archetypeIs':
-      if (!ARCHETYPES.has(value as Archetype)) {
-        ctx.errors.push(`${where} -> archetypeIs has invalid archetype value "${String(value)}"`);
+      if (!ARCHETYPES.has(condition.value)) {
+        ctx.errors.push(`${where} -> archetypeIs has invalid archetype value "${String(condition.value)}"`);
       }
       break;
     case 'factionReputation':
-      if (!FACTIONS.has(target)) {
-        ctx.errors.push(`${where} -> factionReputation references unknown faction "${target}"`);
+      if (!FACTIONS.has(condition.target)) {
+        ctx.errors.push(`${where} -> factionReputation references unknown faction "${condition.target}"`);
       }
       break;
     case 'hasFlag':
@@ -368,8 +360,8 @@ function validateCondition(condition: Condition, where: string, ctx: Ctx): void 
       break;
     case 'hasDeduction':
       // hasDeduction targets are authored recipe ids, so they must resolve.
-      if (!ctx.recipeIds.has(target)) {
-        ctx.errors.push(`${where} -> hasDeduction references unknown key deduction "${target}"`);
+      if (!ctx.recipeIds.has(condition.target)) {
+        ctx.errors.push(`${where} -> hasDeduction references unknown key deduction "${condition.target}"`);
       }
       break;
     default:

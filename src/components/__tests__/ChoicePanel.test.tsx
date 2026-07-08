@@ -3,8 +3,9 @@
  *
  * Sub-task 7.1
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { useStore } from '../../store';
 import { ChoicePanel, isChoiceVisible } from '../ChoicePanel/ChoicePanel';
 import { ChoiceCard } from '../ChoicePanel/ChoiceCard';
 import type { Choice, GameState, Investigator, Clue, Deduction } from '../../types';
@@ -197,52 +198,59 @@ describe('ChoiceCard — Advantage indicator', () => {
     advantageIf: ['clue-bloodstain', 'clue-footprint'],
   };
 
-  it('does not show Advantage indicator when no relevant clues are held', () => {
+  // The badge is now driven purely by the `hasAdvantage` prop, which parents
+  // compute via the shared `computeAdvantage` (clue advantage OR Lore + Veil
+  // Sight). ChoiceCard no longer derives advantage from clues itself (F-014).
+  it('does not show Advantage indicator when hasAdvantage is false', () => {
     render(
       <ChoiceCard
         choice={choiceWithAdvantage}
         investigator={baseInvestigator}
         revealedClueIds={new Set()}
         deductionIds={new Set()}
+        hasAdvantage={false}
         onSelect={() => {}}
       />,
     );
     expect(screen.queryByLabelText(/advantage/i)).not.toBeInTheDocument();
   });
 
-  it('shows Advantage indicator when investigator holds one of the relevant clues', () => {
+  it('shows Advantage indicator when hasAdvantage is true', () => {
     render(
       <ChoiceCard
         choice={choiceWithAdvantage}
         investigator={baseInvestigator}
         revealedClueIds={new Set(['clue-bloodstain'])}
         deductionIds={new Set()}
+        hasAdvantage={true}
         onSelect={() => {}}
       />,
     );
-    expect(screen.getByLabelText(/advantage.*relevant clue/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/advantage/i)).toBeInTheDocument();
   });
 
-  it('shows Advantage indicator when investigator holds a different relevant clue', () => {
+  it('shows Advantage indicator regardless of a specific clue (e.g. Veil Sight)', () => {
     render(
       <ChoiceCard
-        choice={choiceWithAdvantage}
+        choice={unconditionalChoice}
         investigator={baseInvestigator}
-        revealedClueIds={new Set(['clue-footprint'])}
+        revealedClueIds={new Set()}
         deductionIds={new Set()}
+        hasAdvantage={true}
         onSelect={() => {}}
       />,
     );
-    expect(screen.getByLabelText(/advantage.*relevant clue/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/advantage/i)).toBeInTheDocument();
   });
 
-  it('does not show Advantage indicator for a choice with no advantageIf', () => {
+  it('does not show Advantage indicator when hasAdvantage is false and no advantageIf', () => {
     render(
       <ChoiceCard
         choice={unconditionalChoice}
         investigator={baseInvestigator}
         revealedClueIds={new Set(['clue-bloodstain'])}
         deductionIds={new Set()}
+        hasAdvantage={false}
         onSelect={() => {}}
       />,
     );
@@ -265,6 +273,7 @@ describe('ChoiceCard — key icon for preparation-unlocked choices', () => {
         investigator={baseInvestigator}
         revealedClueIds={new Set(['clue-cipher'])}
         deductionIds={new Set()}
+        hasAdvantage={false}
         onSelect={() => {}}
       />,
     );
@@ -283,6 +292,7 @@ describe('ChoiceCard — key icon for preparation-unlocked choices', () => {
         investigator={baseInvestigator}
         revealedClueIds={new Set()}
         deductionIds={new Set(['deduction-motive'])}
+        hasAdvantage={false}
         onSelect={() => {}}
       />,
     );
@@ -307,6 +317,7 @@ describe('ChoiceCard — Faculty tag', () => {
         investigator={baseInvestigator}
         revealedClueIds={new Set()}
         deductionIds={new Set()}
+        hasAdvantage={false}
         onSelect={() => {}}
       />,
     );
@@ -328,6 +339,7 @@ describe('ChoiceCard — Faculty tag', () => {
         investigator={baseInvestigator}
         revealedClueIds={new Set()}
         deductionIds={new Set()}
+        hasAdvantage={false}
         onSelect={() => {}}
       />,
     );
@@ -347,6 +359,7 @@ describe('ChoiceCard — Faculty tag', () => {
         investigator={baseInvestigator}
         revealedClueIds={new Set()}
         deductionIds={new Set()}
+        hasAdvantage={false}
         onSelect={() => {}}
       />,
     );
@@ -360,6 +373,7 @@ describe('ChoiceCard — Faculty tag', () => {
         investigator={baseInvestigator}
         revealedClueIds={new Set()}
         deductionIds={new Set()}
+        hasAdvantage={false}
         onSelect={() => {}}
       />,
     );
@@ -524,5 +538,55 @@ describe('ChoicePanel — visibility filtering', () => {
     render(<ChoicePanel choices={choices} onChoiceSelected={onChoiceSelected} />);
     fireEvent.click(screen.getByText('Look around'));
     expect(onChoiceSelected).toHaveBeenCalledWith('open');
+  });
+});
+
+// ─── ChoicePanel — end-to-end Advantage badge wiring (F-014) ──────────────────
+//
+// Proves that ChoicePanel (the real parent) threads computeAdvantage(choice,
+// gameState) into ChoiceCard's `hasAdvantage` prop — specifically the Veil
+// Sight grant: a Lore check rolls with advantage while the veil-sight flag is
+// active, even with NO clue in inventory. This exercises the parent→prop→badge
+// path, not the pieces in isolation.
+describe('ChoicePanel — Veil Sight advantage badge (parent wiring)', () => {
+  // The mocked store is a shared closure object reachable via getState(); mutate
+  // its flags here and restore afterwards so sibling tests are unaffected.
+  let savedFlags: Record<string, boolean>;
+
+  beforeEach(() => {
+    savedFlags = { ...useStore.getState().flags };
+  });
+
+  afterEach(() => {
+    (useStore.getState() as { flags: Record<string, boolean> }).flags = savedFlags;
+  });
+
+  // A Lore check with no advantageIf clue — advantage can only come from Veil Sight.
+  const loreChoice: Choice = {
+    id: 'lore-check',
+    text: 'Read the sigils',
+    faculty: 'lore',
+    difficulty: 12,
+    outcomes: { critical: 's2', success: 's2', partial: 's2', failure: 's2', fumble: 's2' },
+  };
+
+  it('shows the Advantage badge for a Lore choice when veil-sight flag is active (no clue needed)', () => {
+    (useStore.getState() as { flags: Record<string, boolean> }).flags = {
+      ...savedFlags,
+      'ability-veil-sight-active': true,
+    };
+    render(<ChoicePanel choices={[loreChoice]} />);
+    expect(screen.getByText('Read the sigils')).toBeInTheDocument();
+    expect(screen.getByLabelText(/advantage/i)).toBeInTheDocument();
+  });
+
+  it('does NOT show the Advantage badge for the same Lore choice when veil-sight is inactive and no clue is held', () => {
+    (useStore.getState() as { flags: Record<string, boolean> }).flags = {
+      ...savedFlags,
+      'ability-veil-sight-active': false,
+    };
+    render(<ChoicePanel choices={[loreChoice]} />);
+    expect(screen.getByText('Read the sigils')).toBeInTheDocument();
+    expect(screen.queryByLabelText(/advantage/i)).not.toBeInTheDocument();
   });
 });

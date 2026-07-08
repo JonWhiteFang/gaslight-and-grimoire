@@ -1,4 +1,4 @@
-import type { ArchetypeDefinition } from '../types';
+import type { Archetype, ArchetypeDefinition, Faculty } from '../types';
 
 export const ARCHETYPES: ArchetypeDefinition[] = [
   {
@@ -7,6 +7,7 @@ export const ARCHETYPES: ArchetypeDefinition[] = [
     description:
       'A master of logical inference who reads crime scenes like open books. Where others see chaos, you see patterns.',
     bonuses: { reason: 3, perception: 1 },
+    primaryFaculty: 'reason',
     ability: {
       name: 'Elementary',
       description: 'Automatically succeed on a Reason check to connect two clues.',
@@ -20,6 +21,7 @@ export const ARCHETYPES: ArchetypeDefinition[] = [
     description:
       'A scholar of forbidden knowledge who walks the boundary between the rational and the arcane.',
     bonuses: { lore: 3, perception: 1 },
+    primaryFaculty: 'lore',
     ability: {
       name: 'Veil Sight',
       description: 'Reveal hidden supernatural elements in the current scene.',
@@ -33,6 +35,7 @@ export const ARCHETYPES: ArchetypeDefinition[] = [
     description:
       'A street-hardened survivor who relies on physical prowess and underworld connections to get results.',
     bonuses: { vigor: 3, nerve: 1 },
+    primaryFaculty: 'vigor',
     ability: {
       name: 'Street Survivor',
       description: 'Automatically succeed on a Vigor check to escape a dangerous situation.',
@@ -46,6 +49,7 @@ export const ARCHETYPES: ArchetypeDefinition[] = [
     description:
       'A silver-tongued manipulator who bends minds and reads people with uncanny precision.',
     bonuses: { influence: 3, nerve: 1 },
+    primaryFaculty: 'influence',
     ability: {
       name: 'Silver Tongue',
       description: 'Automatically succeed on an Influence check during interrogation or negotiation.',
@@ -54,6 +58,11 @@ export const ARCHETYPES: ArchetypeDefinition[] = [
     },
   },
 ];
+
+/** Returns the primary faculty for an archetype from the ARCHETYPES table (single source of truth). */
+export function primaryFacultyOf(id: Archetype): Faculty {
+  return ARCHETYPES.find((a) => a.id === id)!.primaryFaculty;
+}
 
 export const FACULTY_LABELS: Record<string, string> = {
   reason: 'Reason',

@@ -41,6 +41,13 @@ export interface Investigator {
   composure: number; // 0–10
   vitality: number; // 0–10
   abilityUsed: boolean;
+  /**
+   * The faculty of the most recent critical-success check this case. Read by
+   * caseProgression.completeCase to grant the +1 end-of-case faculty bonus.
+   * Reset to undefined on case/vignette load. Optional so it round-trips safely
+   * through older saves (absent → no bonus). (F-013)
+   */
+  lastCriticalFaculty?: Faculty;
 }
 
 export interface ArchetypeDefinition {
@@ -48,6 +55,8 @@ export interface ArchetypeDefinition {
   name: string;
   description: string;
   bonuses: Partial<Record<Faculty, number>>;
+  /** The archetype's primary faculty — must match its +3 bonus faculty. Single source of truth for the dice trained bonus. */
+  primaryFaculty: Faculty;
   ability: {
     name: string;
     description: string;
@@ -111,20 +120,26 @@ export interface NPCState {
 
 export type NpcSuspicionTier = 'normal' | 'evasive' | 'concealing' | 'hostile';
 
-export interface Condition {
-  type:
-    | 'hasClue'
-    | 'hasDeduction'
-    | 'hasFlag'
-    | 'facultyMin'
-    | 'archetypeIs'
-    | 'npcDisposition'
-    | 'npcSuspicion'
-    | 'factionReputation'
-    | 'npcMemoryFlag';
-  target: string;
-  value?: number | boolean | string | NpcSuspicionTier;
-}
+/**
+ * A gate over game state. Discriminated union keyed on `type`: each variant
+ * carries exactly the `target`/`value` shape its evaluator branch reads (F-026).
+ * This lets `evaluateCondition` narrow `value` per-case without unchecked casts.
+ *
+ * Note on `target`:
+ *   - `facultyMin` uses `target` as a Faculty key into investigator.faculties.
+ *   - `archetypeIs` ignores `target` at eval time (it compares `value` to the
+ *     investigator archetype); content authors set both, so it stays `string`.
+ */
+export type Condition =
+  | { type: 'hasClue'; target: string }
+  | { type: 'hasDeduction'; target: string }
+  | { type: 'hasFlag'; target: string; value?: boolean }
+  | { type: 'facultyMin'; target: Faculty; value: number }
+  | { type: 'archetypeIs'; target: string; value: Archetype }
+  | { type: 'npcDisposition'; target: string; value: number }
+  | { type: 'npcSuspicion'; target: string; value: NpcSuspicionTier }
+  | { type: 'factionReputation'; target: string; value: number }
+  | { type: 'npcMemoryFlag'; target: string; value: string };
 
 export interface Effect {
   type:
