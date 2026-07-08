@@ -1,0 +1,11 @@
+{
+  "deductions": [
+    {
+      "id": "lw-deduction-croke-court-murder",
+      "requiredClues": ["lw-clue-locked-room-key", "lw-clue-poison-vial", "lw-clue-court-manifest", "lw-clue-croke-testimony"],
+      "title": "The Locked Room, Unlocked",
+      "description": "The missing key explains how the room was sealed from outside — pocketed and hidden, never dropped. The vial explains how Marsh died: nightshade, administered, never drunk. The Court's shipping records explain why — Marsh's surveillance threatened a trafficking operation worth killing to protect. And Croke's confession names the hand that paid for it. Marsh was poisoned and the locked room staged so the Court of Smoke could bury the Veil-fragment trafficking before his report was ever filed.",
+      "isRedHerring": false
+    }
+  ]
+}

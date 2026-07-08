@@ -17,7 +17,7 @@
 
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
-import type { Clue, NPCState, SceneNode } from '../src/types';
+import type { Clue, KeyDeduction, NPCState, SceneNode } from '../src/types';
 import { validateBundle, type ContentBundle } from '../src/engine/contentValidation';
 
 const SHARED_SCENE_IDS = ['breakdown', 'incapacitation'];
@@ -49,9 +49,12 @@ function loadBundle(dir: string): ContentBundle {
   const npcs = existsSync(join(dir, 'npcs.json'))
     ? readJson<{ npcs: NPCState[] }>(join(dir, 'npcs.json')).npcs
     : [];
+  const recipes = existsSync(join(dir, 'deductions.json'))
+    ? readJson<{ deductions: KeyDeduction[] }>(join(dir, 'deductions.json')).deductions
+    : [];
   const meta = readJson<{ firstScene?: string }>(join(dir, 'meta.json'));
 
-  return { scenes, variants, clues, npcs, firstScene: meta.firstScene, sharedSceneIds: SHARED_SCENE_IDS };
+  return { scenes, variants, clues, npcs, recipes, firstScene: meta.firstScene, sharedSceneIds: SHARED_SCENE_IDS };
 }
 
 function validateUnit(dir: string): { errors: string[]; warnings: string[]; sceneCount: number; clueCount: number } {

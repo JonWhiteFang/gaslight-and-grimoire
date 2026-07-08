@@ -18,6 +18,7 @@ import type {
   Condition,
   Effect,
   Faculty,
+  KeyDeduction,
   NPCState,
   NpcSuspicionTier,
   SceneNode,
@@ -32,6 +33,8 @@ export interface ContentBundle {
   variants: SceneNode[];
   clues: Clue[];
   npcs: NPCState[];
+  /** Authored key-deduction recipes; their ids form the hasDeduction/requiresDeduction registry. */
+  recipes?: KeyDeduction[];
   /** Entry scene id for reachability analysis. */
   firstScene?: string;
   /**
@@ -99,8 +102,9 @@ export function validateBundle(
 
   const clueIds = new Set(bundle.clues.map((c) => c.id));
   const npcIds = new Set(bundle.npcs.map((n) => n.id));
+  const recipeIds = new Set((bundle.recipes ?? []).map((r) => r.id));
 
-  const ctx: Ctx = { edgeTargetIds, clueIds, npcIds, errors };
+  const ctx: Ctx = { edgeTargetIds, clueIds, npcIds, recipeIds, errors };
 
   // Scenes + their conditions/onEnter/choices/encounters.
   for (const scene of bundle.scenes) {
@@ -127,6 +131,15 @@ export function validateBundle(
   for (const clue of bundle.clues) {
     if (clue.sceneSource && !baseOrSharedIds.has(clue.sceneSource) && !variantIds.has(clue.sceneSource)) {
       errors.push(`Clue "${clue.id}" -> sceneSource references unknown scene "${clue.sceneSource}"`);
+    }
+  }
+
+  // Key-deduction recipes: every required clue must exist.
+  for (const recipe of bundle.recipes ?? []) {
+    for (const clueId of recipe.requiredClues) {
+      if (!clueIds.has(clueId)) {
+        errors.push(`KeyDeduction "${recipe.id}" -> requiredClues references unknown clue "${clueId}"`);
+      }
     }
   }
 
@@ -212,6 +225,7 @@ interface Ctx {
   edgeTargetIds: Set<string>;
   clueIds: Set<string>;
   npcIds: Set<string>;
+  recipeIds: Set<string>;
   errors: string[];
 }
 
@@ -256,6 +270,10 @@ function validateChoice(choice: Choice, where: string, ctx: Ctx): void {
 
   if (choice.requiresClue && !ctx.clueIds.has(choice.requiresClue)) {
     ctx.errors.push(`${at} -> requiresClue references unknown clue "${choice.requiresClue}"`);
+  }
+
+  if (choice.requiresDeduction && !ctx.recipeIds.has(choice.requiresDeduction)) {
+    ctx.errors.push(`${at} -> requiresDeduction references unknown key deduction "${choice.requiresDeduction}"`);
   }
 
   if (choice.advantageIf) {
@@ -346,9 +364,13 @@ function validateCondition(condition: Condition, where: string, ctx: Ctx): void 
       }
       break;
     case 'hasFlag':
-    case 'hasDeduction':
       // hasFlag targets are free-form and value:false is legitimate ("flag unset").
-      // hasDeduction targets are runtime-derived, so there is no authored registry.
+      break;
+    case 'hasDeduction':
+      // hasDeduction targets are authored recipe ids, so they must resolve.
+      if (!ctx.recipeIds.has(target)) {
+        ctx.errors.push(`${where} -> hasDeduction references unknown key deduction "${target}"`);
+      }
       break;
     default:
       break;

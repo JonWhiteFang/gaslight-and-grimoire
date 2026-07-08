@@ -102,6 +102,21 @@
             "failure": "ms-act3-ending-compromise",
             "fumble": "ms-act3-ending-compromise"
           }
+        },
+        {
+          "id": "ms-choice-full-account",
+          "text": "Give the whole truth, not half of it: the séance was staged — and the fraud is precisely what opened the door to what came through it.",
+          "requiresDeduction": "ms-deduction-fraud-and-breach",
+          "faculty": "reason",
+          "difficulty": 12,
+          "advantageIf": ["ms-clue-guest-testimony"],
+          "outcomes": {
+            "critical": "ms-act3-ending-true-account",
+            "success": "ms-act3-ending-true-account",
+            "partial": "ms-act3-ending-true-account",
+            "failure": "ms-act3-ending-exposure",
+            "fumble": "ms-act3-ending-exposure"
+          }
         }
       ],
       "onEnter": []
@@ -360,6 +375,19 @@
           "delta": 3,
           "description": "Needle considers you a valuable business partner"
         }
+      ]
+    },
+    {
+      "id": "ms-act3-ending-true-account",
+      "act": 3,
+      "narrative": "You do not choose between the two explanations, because the truth needs both. Lady Ashworth and Lord Pemberton rigged the table — the mechanism under the boards, the confederate in the dark, every cheap miracle accounted for. And then you show them the rest: the sigil copied into their stage-dressing without understanding what it truly was — and the words in Vesper's journal, spoken in earnest over a lie. The fraud was the key, and something on the far side of the Veil turned it. The guests leave believing neither a comfortable ghost story nor a tidy swindle, but the far worse thing — that both were real, and that the one summoned the other.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        { "type": "flag", "target": "ms-case-complete", "value": true },
+        { "type": "flag", "target": "ms-full-truth-told", "value": true },
+        { "type": "reputation", "target": "Hermetic Order of the Grey Dawn", "delta": 2 },
+        { "type": "reputation", "target": "Rationalists Circle", "delta": -1 }
       ]
     }
   ]

@@ -5,7 +5,7 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { performCheck } from '../../engine/diceEngine';
 import { useStore, useInvestigator } from '../../store';
-import { buildDeduction } from '../../engine/buildDeduction';
+import { buildDeduction, buildDeductionFromRecipe, matchDeduction } from '../../engine/buildDeduction';
 
 interface DeductionButtonProps {
   connectedClueIds: string[];
@@ -21,6 +21,7 @@ export function DeductionButton({ connectedClueIds, onResult }: DeductionButtonP
   const investigator = useInvestigator();
   const clues = useStore((s) => s.clues);
   const addDeduction = useStore((s) => s.addDeduction);
+  const recipes = useStore((s) => s.caseData?.recipes ?? []);
   const updateClueStatus = useStore((s) => s.updateClueStatus);
 
   const [phase, setPhase] = useState<Phase>('idle');
@@ -38,8 +39,12 @@ export function DeductionButton({ connectedClueIds, onResult }: DeductionButtonP
     setLastTier(result.tier);
 
     if (result.tier === 'success' || result.tier === 'critical') {
-      // Build and store the deduction
-      const deduction = buildDeduction(connectedClueIds, clues);
+      // Prefer a named key-deduction recipe (stored under its stable authored id
+      // so hasDeduction gates resolve); otherwise fall back to a generic deduction.
+      const recipe = matchDeduction(connectedClueIds, recipes);
+      const deduction = recipe
+        ? buildDeductionFromRecipe(recipe, connectedClueIds)
+        : buildDeduction(connectedClueIds, clues);
       addDeduction(deduction);
       connectedClueIds.forEach((id) => updateClueStatus(id, 'deduced'));
       setPhase('success');

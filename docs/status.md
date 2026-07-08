@@ -101,10 +101,10 @@ nothing.
 
 ## Test baseline
 
-As of 2026-07-07, running `npm run test:run`:
+As of 2026-07-08, running `npm run test:run`:
 
-- **Tests: 481 passed (481)**
-- **Test Files: 44 passed (44)**
+- **Tests: 491 passed (491)**
+- **Test Files: 46 passed (46)**
 
 The suite includes property-based tests using fast-check (six
 `*.property.test.ts` files covering the dice engine, narrative engine, deduction

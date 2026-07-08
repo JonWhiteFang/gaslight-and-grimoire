@@ -39,3 +39,6 @@ test-title-screen.png
 
 # Claude Code — commit shared settings.json + commands/, ignore personal overrides
 .claude/settings.local.json
+
+# Playwright MCP session artifacts (snapshots/logs from in-browser verification)
+.playwright-mcp/

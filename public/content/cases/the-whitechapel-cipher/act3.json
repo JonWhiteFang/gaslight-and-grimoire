@@ -94,6 +94,21 @@
             "failure": "wc-act3-cellar-encounter",
             "fumble": "wc-act3-cellar-encounter"
           }
+        },
+        {
+          "id": "wc-choice-name-harland",
+          "text": "You are a clerk taking dictation, Aldgate. I can name the man who wrote your orders — Deputy Commissioner Harland — and the office that shielded him. Give me that, and you are a witness, not the murderer.",
+          "requiresDeduction": "wc-deduction-harland-mastermind",
+          "faculty": "reason",
+          "difficulty": 12,
+          "advantageIf": ["wc-clue-harland-memo"],
+          "outcomes": {
+            "critical": "wc-act3-ending-true-exposure",
+            "success": "wc-act3-ending-true-exposure",
+            "partial": "wc-act3-ending-true-exposure",
+            "failure": "wc-act3-ending-negotiate",
+            "fumble": "wc-act3-ending-negotiate"
+          }
         }
       ],
       "onEnter": []
@@ -356,6 +371,20 @@
           "delta": 3,
           "description": "Sable considers you a valuable asset — a dangerous compliment"
         }
+      ]
+    },
+    {
+      "id": "wc-act3-ending-true-exposure",
+      "act": 3,
+      "narrative": "You lay it out the way the cipher itself was built — piece by piece, until the pattern is undeniable. Aldgate breaks first, then the paper trail does the rest: Harland's suppression order, the requisitioned printshop, the names struck from three case files by the same hand. When Graves arrives you give him not a frightened clerk but the Deputy Commissioner of the Metropolitan Police himself. It is not a quiet victory. Careers end. Some of them belonged to men who shook your hand. But the cover-up does not survive the morning, and for once the rot is cut out at the root rather than the branch.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        { "type": "flag", "target": "wc-case-complete", "value": true },
+        { "type": "flag", "target": "wc-harland-exposed", "value": true },
+        { "type": "disposition", "target": "npc-graves", "delta": 3 },
+        { "type": "reputation", "target": "Rationalists Circle", "delta": -2 },
+        { "type": "reputation", "target": "Lamplighters", "delta": 2 }
       ]
     }
   ]
