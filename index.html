@@ -3,10 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <!--
-      Content-Security-Policy (F-037). Delivered as a <meta> tag because GitHub
-      Pages serves static files and cannot set real response headers — which
-      also means `frame-ancestors` (clickjacking defence) is unavailable here;
-      that residual is accepted for a static, credential-free game.
+      Content-Security-Policy (F-037). In production the authoritative CSP is a
+      real response header set by the Cloudflare Worker via `public/_headers`
+      (issue #47) — that header additionally carries `frame-ancestors 'none'`
+      (clickjacking defence), which a <meta> CSP cannot express. This <meta> tag
+      is kept as the CSP for local `vite dev`/`preview` (no Worker there) and as
+      defence-in-depth; keep the two directive strings in sync.
 
       `style-src` keeps 'unsafe-inline' deliberately: framer-motion writes
       per-frame inline `transform`/`opacity` styles (~9 animated components) and

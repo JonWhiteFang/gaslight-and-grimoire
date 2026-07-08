@@ -1,4 +1,9 @@
-name: Deploy to GitHub Pages
+name: CI
+
+# Deployment moved to a Cloudflare assets-only Worker (issue #47), which builds
+# from `main` on push Cloudflare-side (see wrangler.jsonc). This workflow keeps
+# the merge gate: lint + content validation + Vitest, then a build-compiles
+# check. It no longer publishes anywhere.
 
 on:
   push:
@@ -9,18 +14,14 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
-  # GitHub recommends `false` for Pages so a rapid second push doesn't abort a
-  # live deployment mid-flight.
+  group: ci-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  # Correctness gate: content validation + full test suite. `build` (and
-  # therefore `deploy`) depends on this, so a failing test blocks the deploy.
+  # Correctness gate: lint + content validation + full test suite. `build`
+  # depends on this, so a failing check blocks the merge gate.
   test:
     runs-on: ubuntu-latest
     steps:
@@ -46,6 +47,8 @@ jobs:
       - name: Run test suite
         run: npm run test:run
 
+  # Build-compiles check. The actual deploy build runs Cloudflare-side from
+  # wrangler.jsonc; this just proves `main` builds green as part of the gate.
   build:
     needs: test
     runs-on: ubuntu-latest
@@ -63,19 +66,3 @@ jobs:
       # Dependency-Check on every PR), not on the deploy critical path — a new
       # transitive advisory shouldn't block a docs deploy (F-032).
       - run: npm run build
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-  deploy:
-    needs: build
-    # Deploy only on pushes to main / manual dispatch — never from a PR build.
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/deploy-pages@v4
-        id: deployment

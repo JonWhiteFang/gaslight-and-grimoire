@@ -1,0 +1,16 @@
+{
+  // Assets-only Cloudflare Worker (no Worker script) — serves the static Vite
+  // build. Git-connected to this repo by the site owner; Cloudflare runs the
+  // build command below on push to `main`, exactly like the retired Pages flow.
+  //
+  // The Worker is routed at `holodeck.jonwhitefang.uk/gaslight-and-grimoire/*`
+  // (route + DNS + root redirect are configured Cloudflare-side, not here), so
+  // the Vite `base: '/gaslight-and-grimoire/'` prefix is exactly right and stays
+  // unchanged. Response headers (incl. the CSP with `frame-ancestors 'none'`)
+  // come from `public/_headers`, which Vite copies into `dist/`.
+  "name": "gaslight-and-grimoire",
+  "compatibility_date": "2025-06-05",
+  "assets": {
+    "directory": "./dist"
+  }
+}

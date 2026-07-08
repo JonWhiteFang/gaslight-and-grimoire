@@ -1,0 +1,14 @@
+# Cloudflare Workers static-assets custom headers (issue #47).
+#
+# Vite copies public/ into dist/, so this file ships with the build and the
+# Worker applies these rules to every asset response. This is the real-header
+# home of the Content-Security-Policy that index.html also carries as a <meta>
+# tag — real headers can additionally carry `frame-ancestors 'none'` (a
+# clickjacking defence the <meta> CSP cannot express).
+#
+# style-src keeps 'unsafe-inline': framer-motion writes per-frame inline
+# transform/opacity styles and several components set dynamic style={{…}}
+# (meters, gradients, evidence threads) that can't be hash/nonce-pinned. All
+# other directives stay locked to 'self'; script-src has NO 'unsafe-inline'.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'
