@@ -48,6 +48,8 @@ export interface ArchetypeDefinition {
   name: string;
   description: string;
   bonuses: Partial<Record<Faculty, number>>;
+  /** The archetype's primary faculty — must match its +3 bonus faculty. Single source of truth for the dice trained bonus. */
+  primaryFaculty: Faculty;
   ability: {
     name: string;
     description: string;
