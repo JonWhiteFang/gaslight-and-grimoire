@@ -4,7 +4,7 @@
  * Shows the roll value, modifier, and total after a Faculty_Check.
  * When reducedMotion is true, skips animation and shows result directly.
  */
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 
 export interface DiceRollOverlayProps {
   roll?: number;
@@ -28,7 +28,7 @@ export function DiceRollOverlay({
 
   return (
     <AnimatePresence>
-      <motion.div
+      <m.div
         key="dice-overlay"
         role="status"
         aria-live="polite"
@@ -40,14 +40,14 @@ export function DiceRollOverlay({
         transition={reducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 300, damping: 20 }}
       >
         {/* D20 face */}
-        <motion.div
+        <m.div
           className="text-5xl select-none"
           aria-hidden="true"
           animate={reducedMotion ? {} : { rotate: [0, -15, 15, -10, 10, 0] }}
           transition={reducedMotion ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }}
         >
           🎲
-        </motion.div>
+        </m.div>
 
         {/* Roll breakdown */}
         <div className="flex items-center gap-2 text-sm font-mono text-gaslight-fog">
@@ -69,7 +69,7 @@ export function DiceRollOverlay({
         <p className="text-xs text-gaslight-fog/50 sr-only">
           Roll {roll}, modifier {modifierLabel}, total {total}
         </p>
-      </motion.div>
+      </m.div>
     </AnimatePresence>
   );
 }

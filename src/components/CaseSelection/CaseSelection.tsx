@@ -91,7 +91,7 @@ export function CaseSelection({ onSelectCase, onBack }: CaseSelectionProps) {
         {/* Vignettes */}
         {vignettes.length > 0 && (
           <section aria-label="Side investigations" className="space-y-3">
-            <h2 className="font-serif text-sm uppercase tracking-widest text-stone-500">
+            <h2 className="font-serif text-sm uppercase tracking-widest text-stone-400">
               Side Investigations
             </h2>
             {vignettes.map((entry) => {
@@ -116,7 +116,7 @@ export function CaseSelection({ onSelectCase, onBack }: CaseSelectionProps) {
                   </div>
                   <p className="mt-1 text-sm text-stone-400 leading-snug">{entry.synopsis}</p>
                   {!unlocked && (
-                    <p className="mt-1 text-xs text-stone-600 italic">Requires further reputation in London's factions.</p>
+                    <p className="mt-1 text-xs text-stone-300 italic">Requires further reputation in London's factions.</p>
                   )}
                 </button>
               );

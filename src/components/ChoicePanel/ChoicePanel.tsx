@@ -1,7 +1,7 @@
 /**
  * ChoicePanel — filters and renders available choices for the current scene.
  */
-import React, { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useStore, useGameState, buildGameState } from '../../store';
 import { evaluateConditions, processChoice } from '../../engine/narrativeEngine';
 import { computeAdvantage } from '../../engine/advantage';
@@ -53,13 +53,14 @@ export function ChoicePanel({ choices, onChoiceSelected }: ChoicePanelProps) {
   const setCheckResult = useStore((s) => s.setCheckResult);
   const gameState = useGameState();
 
-  const revealedClueIds = new Set(
-    Object.values(clues)
-      .filter((c) => c.isRevealed)
-      .map((c) => c.id),
+  // Memoise the derived Sets so `React.memo`-wrapped ChoiceCards get a stable
+  // reference and only re-render when clues/deductions actually change (F-045).
+  const revealedClueIds = useMemo(
+    () => new Set(Object.values(clues).filter((c) => c.isRevealed).map((c) => c.id)),
+    [clues],
   );
 
-  const deductionIds = new Set(Object.keys(deductions));
+  const deductionIds = useMemo(() => new Set(Object.keys(deductions)), [deductions]);
 
   const visibleChoices = choices.filter((c) => isChoiceVisible(c, gameState));
 

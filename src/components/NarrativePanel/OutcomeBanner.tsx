@@ -12,7 +12,7 @@
  *   fumble   → deep red + ☠ skull
  */
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import type { OutcomeTier } from '../../types';
 
 export interface OutcomeBannerProps {
@@ -130,7 +130,7 @@ export function OutcomeBanner({
   return (
     <AnimatePresence>
       {shown && (
-        <motion.div
+        <m.div
           key={`outcome-${tier}`}
           role="status"
           aria-live="assertive"
@@ -145,7 +145,7 @@ export function OutcomeBanner({
             {config.icon}
           </span>
           <span>{config.label}</span>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

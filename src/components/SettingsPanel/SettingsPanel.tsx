@@ -167,7 +167,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
                 aria-label="Custom font size in pixels"
                 className="w-full h-11 accent-amber-400 cursor-pointer"
               />
-              <div className="flex justify-between text-xs text-stone-500 mt-1">
+              <div className="flex justify-between text-xs text-stone-400 mt-1">
                 <span>12px</span>
                 <span>32px</span>
               </div>
@@ -235,7 +235,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
             />
             <span className="text-sm">
               Reduced motion
-              <span className="block text-xs text-stone-500">
+              <span className="block text-xs text-stone-400">
                 Disables animations, typewriter effect, and screen shake
               </span>
             </span>
@@ -363,7 +363,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
             />
             <span className="text-sm">
               Enable hints
-              <span className="block text-xs text-stone-500">
+              <span className="block text-xs text-stone-400">
                 Shows contextual guidance when you appear stuck
               </span>
             </span>

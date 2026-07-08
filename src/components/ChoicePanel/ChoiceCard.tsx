@@ -59,7 +59,7 @@ export interface ChoiceCardProps {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function ChoiceCard({
+function ChoiceCardComponent({
   choice,
   investigator,
   revealedClueIds,
@@ -145,3 +145,8 @@ export function ChoiceCard({
     </button>
   );
 }
+
+// Memoised so a choice list only re-renders the cards whose props actually
+// changed. The parent memoises the `revealedClueIds`/`deductionIds` Sets and the
+// `onSelect` callback, so shallow prop comparison is stable (F-045).
+export const ChoiceCard = React.memo(ChoiceCardComponent);

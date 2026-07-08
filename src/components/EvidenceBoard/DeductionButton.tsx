@@ -1,10 +1,10 @@
 /**
  * DeductionButton — triggers a Reason Faculty_Check to form a Deduction.
  */
-import React, { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef } from 'react';
+import { m, AnimatePresence } from 'framer-motion';
 import { performCheck } from '../../engine/diceEngine';
-import { useStore, useInvestigator } from '../../store';
+import { useStore, useInvestigator, useSettings } from '../../store';
 import { buildDeduction, buildDeductionFromRecipe, matchDeduction } from '../../engine/buildDeduction';
 
 interface DeductionButtonProps {
@@ -19,6 +19,7 @@ const DEDUCTION_DC = 14;
 
 export function DeductionButton({ connectedClueIds, onResult }: DeductionButtonProps) {
   const investigator = useInvestigator();
+  const reducedMotion = useSettings().reducedMotion;
   const clues = useStore((s) => s.clues);
   const addDeduction = useStore((s) => s.addDeduction);
   const recipes = useStore((s) => s.caseData?.recipes ?? []);
@@ -71,12 +72,12 @@ export function DeductionButton({ connectedClueIds, onResult }: DeductionButtonP
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <motion.button
+      <m.button
         type="button"
         onClick={handleAttempt}
         disabled={phase === 'rolling' || phase === 'success'}
         aria-label="Attempt Deduction — perform a Reason check to connect these clues"
-        whileTap={{ scale: 0.96 }}
+        whileTap={reducedMotion ? undefined : { scale: 0.96 }}
         className={[
           'px-5 py-2.5 rounded-lg font-semibold text-sm tracking-wide',
           'border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white',
@@ -94,15 +95,15 @@ export function DeductionButton({ connectedClueIds, onResult }: DeductionButtonP
             : phase === 'failure'
               ? '🔴 Attempt Failed'
               : '🧠 Attempt Deduction'}
-      </motion.button>
+      </m.button>
 
       <AnimatePresence>
         {lastTier && phase !== 'idle' && (
-          <motion.p
+          <m.p
             key={lastTier}
-            initial={{ opacity: 0, y: 4 }}
+            initial={reducedMotion ? false : { opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
+            exit={reducedMotion ? { opacity: 1 } : { opacity: 0 }}
             className={[
               'text-xs font-medium',
               phase === 'success' ? 'text-green-400' : 'text-red-400',
@@ -110,7 +111,7 @@ export function DeductionButton({ connectedClueIds, onResult }: DeductionButtonP
             aria-live="polite"
           >
             {tierLabel[lastTier] ?? lastTier}
-          </motion.p>
+          </m.p>
         )}
       </AnimatePresence>
     </div>

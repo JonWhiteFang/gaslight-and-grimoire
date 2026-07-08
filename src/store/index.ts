@@ -28,12 +28,18 @@ export const useStore = create<GameStore>()(
 // ─── Per-slice selector hooks ─────────────────────────────────────────────────
 
 export const useInvestigator = () => useStore((s) => s.investigator);
+// Object-returning selectors are wrapped in `useShallow` so they only trigger a
+// re-render when one of the selected fields actually changes — a bare object
+// selector returns a fresh object every store update and re-renders on any
+// mutation (F-045).
 export const useNarrative = () =>
-  useStore((s) => ({
-    currentScene: s.currentScene,
-    currentCase: s.currentCase,
-    sceneHistory: s.sceneHistory,
-  }));
+  useStore(
+    useShallow((s) => ({
+      currentScene: s.currentScene,
+      currentCase: s.currentCase,
+      sceneHistory: s.sceneHistory,
+    })),
+  );
 export const useClues = () => useStore((s) => s.clues);
 export const useDeductions = () => useStore((s) => s.deductions);
 export const useConnections = () => useStore((s) => s.connections);
@@ -45,54 +51,69 @@ export const useCaseData = () => useStore((s) => s.caseData);
 
 // ─── Action selectors ─────────────────────────────────────────────────────────
 
+// Action selectors return objects of stable store-function references; wrapping
+// in `useShallow` means the consuming component never re-renders from these
+// (the refs never change) instead of re-rendering on every store update (F-045).
 export const useInvestigatorActions = () =>
-  useStore((s) => ({
-    initInvestigator: s.initInvestigator,
-    updateFaculty: s.updateFaculty,
-    adjustComposure: s.adjustComposure,
-    adjustVitality: s.adjustVitality,
-    useAbility: s.useAbility,
-    resetAbility: s.resetAbility,
-  }));
+  useStore(
+    useShallow((s) => ({
+      initInvestigator: s.initInvestigator,
+      updateFaculty: s.updateFaculty,
+      adjustComposure: s.adjustComposure,
+      adjustVitality: s.adjustVitality,
+      useAbility: s.useAbility,
+      resetAbility: s.resetAbility,
+    })),
+  );
 
 export const useNarrativeActions = () =>
-  useStore((s) => ({
-    goToScene: s.goToScene,
-    loadAndStartCase: s.loadAndStartCase,
-    loadAndStartVignette: s.loadAndStartVignette,
-  }));
+  useStore(
+    useShallow((s) => ({
+      goToScene: s.goToScene,
+      loadAndStartCase: s.loadAndStartCase,
+      loadAndStartVignette: s.loadAndStartVignette,
+    })),
+  );
 
 export const useEvidenceActions = () =>
-  useStore((s) => ({
-    discoverClue: s.discoverClue,
-    updateClueStatus: s.updateClueStatus,
-    addDeduction: s.addDeduction,
-    addConnection: s.addConnection,
-    clearConnections: s.clearConnections,
-  }));
+  useStore(
+    useShallow((s) => ({
+      discoverClue: s.discoverClue,
+      updateClueStatus: s.updateClueStatus,
+      addDeduction: s.addDeduction,
+      addConnection: s.addConnection,
+      clearConnections: s.clearConnections,
+    })),
+  );
 
 export const useNpcActions = () =>
-  useStore((s) => ({
-    adjustDisposition: s.adjustDisposition,
-    adjustSuspicion: s.adjustSuspicion,
-    setNpcMemoryFlag: s.setNpcMemoryFlag,
-    removeNpc: s.removeNpc,
-  }));
+  useStore(
+    useShallow((s) => ({
+      adjustDisposition: s.adjustDisposition,
+      adjustSuspicion: s.adjustSuspicion,
+      setNpcMemoryFlag: s.setNpcMemoryFlag,
+      removeNpc: s.removeNpc,
+    })),
+  );
 
 export const useWorldActions = () =>
-  useStore((s) => ({
-    setFlag: s.setFlag,
-    adjustReputation: s.adjustReputation,
-    applyEffects: s.applyEffects,
-  }));
+  useStore(
+    useShallow((s) => ({
+      setFlag: s.setFlag,
+      adjustReputation: s.adjustReputation,
+      applyEffects: s.applyEffects,
+    })),
+  );
 
 export const useMetaActions = () =>
-  useStore((s) => ({
-    updateSettings: s.updateSettings,
-    saveGame: s.saveGame,
-    autoSave: s.autoSave,
-    loadGame: s.loadGame,
-  }));
+  useStore(
+    useShallow((s) => ({
+      updateSettings: s.updateSettings,
+      saveGame: s.saveGame,
+      autoSave: s.autoSave,
+      loadGame: s.loadGame,
+    })),
+  );
 
 // ─── Derived selectors ────────────────────────────────────────────────────────
 

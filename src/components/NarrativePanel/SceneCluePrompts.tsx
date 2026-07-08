@@ -137,7 +137,7 @@ export function SceneCluePrompts({
       {failedPrompts.map((d) => (
         <p
           key={d.clueId}
-          className="pl-4 py-2 border-l-2 border-stone-600/40 italic font-serif text-stone-500 text-sm"
+          className="pl-4 py-2 border-l-2 border-stone-600/40 italic font-serif text-stone-400 text-sm"
           role="status"
         >
           You sense something significant here, but it eludes your grasp.
