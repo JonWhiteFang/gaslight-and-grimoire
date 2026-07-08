@@ -194,8 +194,8 @@ Rules:
 - `getEncounterChoices` — filters choices by conditions, always includes escape paths. (Advantage is applied on the roll in `processEncounterChoice`, not annotated here.)
 
 ### Case Progression (caseProgression.ts)
-- `completeCase` — grants +1 faculty bonus from `last-critical-faculty` flag, checks vignette unlocks, auto-saves.
-- Vignette unlocks triggered by: faction reputation thresholds, NPC disposition thresholds, or required (persisted) flags. See `VIGNETTE_CONDITIONS` in `caseProgression.ts` for the live registry.
+- `completeCase` — grants +1 faculty bonus from the typed `investigator.lastCriticalFaculty` field (F-013), checks vignette unlocks, auto-saves.
+- Vignette unlocks triggered by: faction reputation thresholds, NPC disposition thresholds, or required (persisted) flags. `checkVignetteUnlocks` returns **every** satisfied vignette (F-057), so simultaneously-earned unlocks all fire. See `VIGNETTE_CONDITIONS` in `caseProgression.ts` for the live registry.
 
 ### Hints (hintEngine.ts)
 - Stateful singleton tracking board visits, connection attempts, scene dwell time.
@@ -210,6 +210,7 @@ Rules:
 - Migration pipeline: v0→v1 adds `factionReputation`; v1→v2 backfills `sceneHistory` + `connections`; v2→v3 backfills `visitedScenes` (from `sceneHistory + currentScene`, so reloads don't re-fire `onEnter` — F-006). Current version: 3 (`CURRENT_SAVE_VERSION`).
 - `saveGame` generates unique IDs (`save-{timestamp}`), capped at 10 manual saves.
 - `autoSave` writes to the `'autosave'` slot, triggered by `goToScene` (scene frequency) or ChoicePanel (choice frequency) based on `autoSaveFrequency` setting.
+- `load` guards the deserialised blob: a non-object envelope or a state failing the `isValidGameState` shape check (missing `investigator`/`clues`/… or wrong types) returns `null` rather than corrupting the store (F-036).
 - `loadGame` restores all `GameState` fields and re-fetches `caseData` via `loadCase(currentCase)`.
 
 ### Audio (audioManager.ts)

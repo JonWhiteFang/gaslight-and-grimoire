@@ -8,15 +8,15 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-08 (**Closed the remaining P2 backlog — #15/#16/#17 — in one cluster commit (`2171185`, not yet pushed).**
-#15 tooling: ESLint 9 flat config + `npm run lint` + CI lint step, Node pinned (`.nvmrc` + `engines`), dropped unused
-`@testing-library/user-event`, moved `npm audit` off the deploy path (kept in security.yml), added Dependabot. #16 perf:
-new `useGameState` hook wraps the snapshot selector in `useShallow` (F-042 — stops full-store re-renders on every
-composure tick / flag set); React.lazy the 4 overlays + CaseCompletion behind Suspense + vendor `manualChunks` (F-043 —
-entry chunk 410 KB → 92 KB). #17 docs: fixed CLAUDE.md save-version/Date-usage/`<GameScreen>`/store-table drift, added
-root `README.md`, trimmed the stale Known-Bugs changelog. ESLint surfaced + fixed a rules-of-hooks trap and dead imports.
-Test baseline **522 → 524** (+2; 53 files). Reviewed via parallel finder agent → no correctness bugs (one import-ordering
-nit fixed). **Next: push + PR. Remaining backlog: P3 #20 (media — ambient loops + QA, partly user-blocked)/#21/#22.**)_
+_Last updated: 2026-07-08 (**Closed P3 #21 hardening — PR #45 merged (`d57b41a`).** Behavioral: F-057
+`checkVignetteUnlocks` now returns **all** satisfied vignettes, not just the first (`vignetteUnlocked` → `vignettesUnlocked: string[]`);
+F-036 `SaveManager.load` guards the blob envelope + `isValidGameState` shape so a corrupt save returns null instead of
+poisoning the store. Save/UX: F-052 save-success toast + eviction warning, F-054 two-tap delete confirm, F-055 loading
+screen while a save loads. Storage/CI: F-037 CSP residuals documented (style-src unsafe-inline load-bearing; no
+frame-ancestors on Pages), F-038 `npm ci --ignore-scripts` in all CI jobs. Reviewed via finder agent → no bugs (one toast-timer
+nit fixed). Test baseline **524 → 547** (+23; 55 files). **Earlier same day:** engine-reference doc rewrite for the
+narrativeEngine split (PR #44); P2 #15/#16/#17 cluster (PR #37). **Remaining backlog: P3 #20 (media — ambient loops + QA,
+partly user-blocked) and #22 (perf + a11y polish).**)_
 
 ---
 
@@ -25,17 +25,16 @@ nit fixed). **Next: push + PR. Remaining backlog: P3 #20 (media — ambient loop
 - **Stage:** Phases A–E complete and the game is playable end-to-end (7 cases, 198 scenes). Audit P0 backlog
   **fully cleared** (#1–#5, #11). P1 backlog **fully cleared** — the code cluster (#7, #8, #9, #10, #12) plus
   **#6 (deduction-gated content, PR #32)**, the last open P1. The deduction mechanic is now load-bearing.
-  **Only remaining pre-1.0 milestone: media assets (#20 + #21/#22 polish).**
-- **Active gate:** CI enforces it. Every push/PR to `main` runs the validator + `npm run test:run` in the
-  `test` job; `build` → `deploy` depend on it, and `deploy` is skipped on PR events. Bar unchanged locally:
-  test suite green + validator clean before merge.
-- **Branch focus:** `p2/tooling-perf-docs-cluster` (commit `2171185`, **not yet pushed**) — P2 #15/#16/#17 closed;
-  branched off `main` at `760f182`. Next: push + open PR. Prior same day: PR #35 (#13/#14/#18/#19), PR #34 (SFX), PR #32 (#6).
-- **Verification:** 2026-07-08 — `npm run test:run` → **524 passed (524)** across **53** files (was 522/52; +2 for the
-  new `useGameState` selector-stability suite); `npm run lint` → clean (new ESLint gate); `node scripts/validateCase.mjs`
-  → 7 cases clean; `npm run build` green with **split chunks** (entry 92 KB, react/motion/audio vendor chunks, lazy
-  overlay chunks); `npx tsc --noEmit` clean. Reviewed via a parallel correctness-finder agent → no bugs; one
-  import-ordering nit fixed before commit.
+  **The entire P0/P1/P2 audit backlog plus P3 #21 is cleared** — only P3 **#20 (media)** and **#22 (perf + a11y polish)** remain.
+- **Active gate:** CI enforces it. Every push/PR to `main` runs `npm run lint` + the validator + `npm run test:run` in
+  the `test` job; `build` → `deploy` depend on it, and `deploy` is skipped on PR events. CI installs run
+  `npm ci --ignore-scripts` (F-038). Bar unchanged locally: lint + test suite green + validator clean before merge.
+- **Branch focus:** `main` (at `d57b41a`, **PR #45 merged**) — P3 #21 hardening closed. Next work starts from a fresh
+  branch off `main`. Prior same day: PR #44 (engine-reference doc rewrite), PR #37 (P2 #15/#16/#17), PR #35 (#13/#14/#18/#19).
+- **Verification:** 2026-07-08 — `npm run test:run` → **547 passed (547)** across **55** files (was 524/53; +23 for the
+  new saveValidation + metaSlice.saveGame suites and expanded caseProgression/LoadGameScreen); `npm run lint` → clean;
+  `node scripts/validateCase.mjs` → 7 cases clean; `npm run build` green (chunks split); `npx tsc --noEmit` clean.
+  Reviewed via a correctness-finder agent → no bugs; one cosmetic toast-timer nit fixed before commit. CI green on PR #45.
 
 ---
 
@@ -58,8 +57,11 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 | Q | Audit remediation — P0 blockers | `[x]` | **5/5 done**: CI gate #1 + quick-wins #11 (PR #24); validators #2 + Debt of Smoke #3 (PR #25); encounter escape #4 + onEnter idempotency #5, +F-022/F-027 (PR #28). |
 | Q2 | Audit remediation — P1 | `[x]` | **Complete.** Code cluster: #7 touch-connect, #8 a11y, #9 halt screen, #10 titles, #12 tests (+2 review fixes). **#6 (deduction-gated content) done — PR #32**: KeyDeduction recipes + gated true endings across all 3 main cases. |
 | Q3 | Audit remediation — P2 refactor cluster | `[x]` | **Complete — PR #35** (`760f182`). #13/#14/#18/#19: flags/constants/advantage SoT modules, `narrativeEngine` split (barrel), discriminated `Condition`, typed `lastCriticalFaculty`, save-migration + encounter-nav fixes, de-dup + `assertNever` guard. 15 findings; 495→522 tests. |
-| Q3′ | Audit remediation — remaining P2 | `[x]` | **Complete — commit `2171185`** (not yet pushed). #15 (ESLint + lint CI, Node pin, dep drop, audit off deploy, Dependabot), #16 (`useGameState`/`useShallow` selector fix + lazy overlays + vendor chunks; entry 410→92 KB), #17 (CLAUDE.md drift + root README). 522→524 tests. |
-| M | Media assets — audio (.mp3) + illustrations + NPC portraits | `[~]` | **Strategy set (ADR-0006)**; prompt kit authored. **9 SFX shipped + normalized + verified loading in-browser** (fixed 2 blockers found in QA). **Pending:** 10 ambient loops; perceptual SFX QA (human ears); `checkAudioAssets.mjs` + CI. **Illustrations parked** (lowest priority). Issues #20 (+ #21/#22). |
+| Q3′ | Audit remediation — remaining P2 | `[x]` | **Complete — PR #37** (`dd53816`). #15 (ESLint + lint CI, Node pin, dep drop, audit off deploy, Dependabot), #16 (`useGameState`/`useShallow` selector fix + lazy overlays + vendor chunks; entry 410→92 KB), #17 (CLAUDE.md drift + root README). +2 tests. |
+| Q4 | Audit remediation — P3 #21 hardening | `[x]` | **Complete — PR #45** (`d57b41a`). F-057 (all vignettes unlock, not just first), F-036 (save-load shape guard), F-052 (save toast + eviction warn), F-054 (two-tap delete confirm), F-055 (load indicator), F-037 (CSP residuals documented), F-038 (`--ignore-scripts` in CI). 524→547 tests. |
+| — | Docs — engine-reference rewrite for narrativeEngine split | `[x]` | **PR #44** (`472ef32`). Documents the 4 split modules + advantage/flags/constants/haltScenes; fixed save-version/`lastCriticalFaculty`/`save()`-signature drift. Cleared the last flagged doc item. |
+| M | Media assets — audio (.mp3) + illustrations + NPC portraits | `[~]` | **Strategy set (ADR-0006)**; prompt kit authored. **9 SFX shipped + normalized + verified loading in-browser** (fixed 2 blockers found in QA). **Pending:** 10 ambient loops; perceptual SFX QA (human ears); `checkAudioAssets.mjs` + CI. **Illustrations parked** (lowest priority). Issue #20. |
+| P | Audit remediation — P3 #22 polish (perf + a11y) | `[ ]` | Open: F-044..F-051 — EvidenceBoard scroll throttling, `useShallow`/memo on list items, LazyMotion, reduced-motion gaps, WCAG contrast, skip-link, focusable typewriter skip. |
 
 ---
 
@@ -71,9 +73,9 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 3. **Build `scripts/checkAudioAssets.mjs`** (presence + content-cross-reference) + a unit test, then revisit CI wiring (likely `--strict`) once all files land. *(Best once ambient files land.)*
 
 **Code track:**
-4. **Push `p2/tooling-perf-docs-cluster` + open a PR** (commit `2171185`), let CI run the new lint gate, merge, close #15/#16/#17. Then only **P3 #21/#22** polish remain on the code side.
+4. **P3 #22 (perf + a11y polish)** is the only remaining code-actionable audit issue — EvidenceBoard scroll throttling (rAF + cached rects), `useShallow`/`React.memo` on `ChoiceCard`/`ClueCard` list items, `LazyMotion`+`m` for framer, reduced-motion gating on `ConnectionThread`/`DeductionButton`, WCAG-AA contrast on helper text, a skip-to-content link, and a focusable/keyboard typewriter-skip control. Verify with `jest-axe` + Profiler.
 
-✅ Done: **all P0 (#1–#5, #11), all P1 (#6–#10, #12), the P2 refactor cluster (#13/#14/#18/#19 — PR #35), and the remaining P2 (#15/#16/#17 — commit `2171185`, pending push).** Media strategy decided (ADR-0006), prompt kit authored, **9 SFX shipped + normalized + in-browser-verified** (QA caught & fixed 2 latent release-blockers). Remaining audit backlog: **P3 #21/#22**, plus the media milestone (#20 — ambient + QA). **Illustrations parked at lowest priority.**
+✅ Done: **all P0 (#1–#5, #11), all P1 (#6–#10, #12), all P2 (#13–#19 — PRs #35/#37), P3 #21 hardening (PR #45), and the engine-reference doc rewrite (PR #44).** Media strategy decided (ADR-0006), prompt kit authored, **9 SFX shipped + normalized + in-browser-verified** (QA caught & fixed 2 latent release-blockers). Remaining audit backlog: **P3 #22** (polish), plus the media milestone (#20 — ambient + QA). **Illustrations parked at lowest priority.**
 
 ---
 

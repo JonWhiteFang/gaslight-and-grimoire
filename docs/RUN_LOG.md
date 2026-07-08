@@ -19,6 +19,19 @@
 
 ---
 
+## 2026-07-08 — P3 #21 hardening: save/UX safety + storage/CSP (PR #45) + engine-reference doc rewrite (PR #44)
+
+- **Goal:** Continue the P3 batch. First cleared the doc item flagged for two checkpoints (engine-reference still described `narrativeEngine.ts` as one module — PR #44), then took the **#21 hardening** batch (7 findings) over #20 (user-blocked media) and #22 (polish), because #21 contains a real logic bug and data-loss risks.
+- **Did (PR #44, docs):** Rewrote `docs/engine-reference.md` — `narrativeEngine.ts` documented as a barrel; its 4 split modules (`contentLoader`/`conditions`/`choiceResolution`/`encounters`) each get a `##` section; added `advantage`/`flags`/`constants`/`haltScenes` (18 non-barrel modules, one section each); fixed `last-critical-faculty` flag → typed field, `CURRENT_SAVE_VERSION` 2→3, missing `save()` `caseTitle?` param. Docs-only, CI green, merged `472ef32`.
+- **Did (PR #45, #21):** Branch `p3/hardening-save-ux-safety`, single commit `15f6cc0`. **F-057** (logic bug) — `checkVignetteUnlocks` returned only the first satisfied vignette; now returns `string[]` (all), `completeCase` flags each; `CaseCompletionResult.vignetteUnlocked` → `vignettesUnlocked: string[]`; completion screen shows singular/plural. **F-036** — `SaveManager.load` added an envelope guard (reject non-object blob/state *before* `migrate`, protecting its `...state` spread) + `isValidGameState` shape guard after migration → corrupt save returns null. **F-052** — `saveGame` returns `{ evicted }`; App shows a nonce-keyed toast (success + eviction warning). **F-054** — two-tap delete confirm (arm → "Confirm?", onBlur disarm). **F-055** — loading screen during a save's async content fetch. **F-037** — documented CSP residuals (style-src unsafe-inline load-bearing for framer per-frame + dynamic `style={{}}`; no frame-ancestors via `<meta>` on Pages). **F-038** — `npm ci --ignore-scripts` in all 3 CI jobs (only esbuild has an install script, verified no-op for build/test/audit).
+- **Review:** TDD for the two logic changes (F-057, F-036 — RED tests written first, watched fail, then GREEN). One correctness-finder subagent over the whole diff → **no bugs**; flagged one cosmetic toast-timer nit (identical repeat message didn't reset the 3s dismiss) → fixed with a monotonic nonce on the toast object.
+- **Verified:** `npm run lint` clean; `npx tsc --noEmit` clean; `node scripts/validateCase.mjs` → 7 clean; `npm run test:run` → **547 passed (547)**, 55 files (was 524/53; +23: saveValidation, metaSlice.saveGame, expanded caseProgression/LoadGameScreen). `npm run build` green. CI green on PR #45 (test incl. `--ignore-scripts` install + lint, build, OWASP; deploy skipped on PR). **`Closes #21` auto-closed the issue on merge** — first use of the auto-close keyword after saving that to memory; no manual `gh issue close` needed.
+- **Doc-drift sweep (auto-fixed):** test baseline **524→547 / 53→55** in `docs/status.md`; corrected two CLAUDE.md drifts in the touched area — `completeCase` "last-critical-faculty flag" → typed field + noted F-057 all-unlocks behavior, and added the F-036 `load` shape-guard bullet to the Save System section.
+- **Open / blockers:** Only **P3 #22** (perf + a11y polish) remains code-actionable; **#20** (media — ambient loops + perceptual QA) stays partly user-blocked. `engine-reference.md` module-split item is now DONE.
+- **Memory updated:** STATE ☑ · RUN_LOG ☑ · ADR ☐ (no non-trivial architectural decision — hardening + docs executing the audit backlog).
+
+---
+
 ## 2026-07-08 — Remaining P2 backlog (#15/#16/#17): tooling, perf, docs
 
 - **Goal:** Close the last three open P2 audit issues — #15 (tooling/CI hygiene), #16 (perf), #17 (docs drift) — in one session. They touch disjoint concerns but overlap slightly on `App.tsx`, so worked as one branch/commit.
