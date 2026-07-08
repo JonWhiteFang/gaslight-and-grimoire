@@ -367,6 +367,7 @@ function validateCondition(condition: Condition, where: string, ctx: Ctx): void 
       // hasFlag targets are free-form and value:false is legitimate ("flag unset").
       break;
     case 'hasDeduction':
+      // hasDeduction targets are authored recipe ids, so they must resolve.
       if (!ctx.recipeIds.has(target)) {
         ctx.errors.push(`${where} -> hasDeduction references unknown key deduction "${target}"`);
       }
