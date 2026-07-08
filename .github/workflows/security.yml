@@ -24,7 +24,9 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
-      - run: npm ci
+      # --ignore-scripts: skip dependency lifecycle scripts under the CI token
+      # (F-038). npm audit reads the tree/lockfile and needs no build artifacts.
+      - run: npm ci --ignore-scripts
 
       # Fail on high/critical severity vulnerabilities
       - name: Run npm audit

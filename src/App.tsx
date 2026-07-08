@@ -1,4 +1,4 @@
-import { useState, useCallback, lazy, Suspense } from 'react';
+import { useState, useCallback, useEffect, lazy, Suspense } from 'react';
 import { CharacterCreation } from './components/CharacterCreation';
 import { HeaderBar } from './components/HeaderBar';
 import { AccessibilityProvider } from './components/AccessibilityProvider/AccessibilityProvider';
@@ -134,6 +134,9 @@ export default function App() {
   const loadAndStartVignette = useStore((s) => s.loadAndStartVignette);
   const saveGame = useStore((s) => s.saveGame);
   const [loadError, setLoadError] = useState<string | null>(null);
+  // Carries a monotonic `nonce` so two identical consecutive toast messages
+  // still re-trigger the auto-dismiss effect (setState bails on an equal value).
+  const [saveToast, setSaveToast] = useState<{ message: string; nonce: number } | null>(null);
   const [completionResult, setCompletionResult] = useState<CaseCompletionResult | null>(null);
   const [endingNarrative, setEndingNarrative] = useState<string | null>(null);
   const completeCase = useStore((s) => s.completeCase);
@@ -146,8 +149,31 @@ export default function App() {
     if (flag) setFlag(flag, true);
   }, [abilityUsed, archetype, activateAbility, setFlag]);
 
+  // Manual save: confirm success and warn when the 10-save cap evicted the
+  // oldest save(s), so a save is never silently lost (F-052).
+  const handleSaveGame = useCallback(async () => {
+    const { evicted } = await saveGame();
+    const message =
+      evicted > 0
+        ? `Game saved — oldest save${evicted > 1 ? 's' : ''} removed (10-save limit reached)`
+        : 'Game saved';
+    setSaveToast((prev) => ({ message, nonce: (prev?.nonce ?? 0) + 1 }));
+  }, [saveGame]);
+
+  // Auto-dismiss the save toast after a few seconds. `saveToast` is a fresh
+  // object on every save (monotonic `nonce`), so even an identical repeat
+  // message is a new reference here and restarts the timer.
+  useEffect(() => {
+    if (!saveToast) return;
+    const id = setTimeout(() => setSaveToast(null), 3000);
+    return () => clearTimeout(id);
+  }, [saveToast]);
+
   const handleLoadSave = useCallback(
     async (saveId: string) => {
+      // Show the loading screen during the async content fetch (F-055) so the
+      // Load-game list doesn't sit frozen while the case JSON downloads.
+      setScreen('loading');
       const ok = await loadGame(saveId);
       if (!ok) {
         setLoadError('This save could not be loaded — it may be corrupted or from an incompatible version.');
@@ -238,7 +264,7 @@ export default function App() {
         <Suspense fallback={<OverlayFallback />}>
           <CaseCompletion
             facultyBonusGranted={completionResult.facultyBonusGranted}
-            vignetteUnlocked={completionResult.vignetteUnlocked}
+            vignettesUnlocked={completionResult.vignettesUnlocked}
             endingNarrative={endingNarrative}
             onContinue={() => {
               setCompletionResult(null);
@@ -294,7 +320,7 @@ export default function App() {
           onOpenNPCGallery={() => setIsGalleryOpen(true)}
           onActivateAbility={handleActivateAbility}
           onOpenSettings={() => setIsSettingsOpen(true)}
-          onSaveGame={saveGame}
+          onSaveGame={handleSaveGame}
           onReviewPrevious={() => {
             const history = useStore.getState().sceneHistory;
             if (history.length > 0) setReviewSceneId(history[history.length - 1]);
@@ -321,6 +347,17 @@ export default function App() {
             <SettingsPanel onClose={() => setIsSettingsOpen(false)} />
           )}
         </Suspense>
+
+        {/* Save-confirmation toast (F-052). aria-live so it's announced. */}
+        {saveToast && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-stone-800 border border-gaslight-amber/40 rounded px-4 py-2 text-sm text-gaslight-fog shadow-lg z-50"
+          >
+            {saveToast.message}
+          </div>
+        )}
       </div>
     </AccessibilityProvider>
   );

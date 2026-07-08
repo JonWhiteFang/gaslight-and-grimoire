@@ -8,10 +8,15 @@ import { vignetteToCaseData } from './narrativeSlice';
 
 const MAX_MANUAL_SAVES = 10;
 
+/** Result of a manual save — how many old saves the 10-cap evicted (F-052). */
+export interface SaveResult {
+  evicted: number;
+}
+
 export interface MetaSlice {
   settings: GameSettings;
   updateSettings: (partial: Partial<GameSettings>) => void;
-  saveGame: () => Promise<void>;
+  saveGame: () => Promise<SaveResult>;
   autoSave: () => void;
   loadGame: (saveId: string) => Promise<boolean>;
 }
@@ -39,7 +44,7 @@ export const createMetaSlice: StateCreator<
       Object.assign(state.settings, partial);
     }),
 
-  saveGame: async () => {
+  saveGame: async (): Promise<SaveResult> => {
     const s = get();
     const gameState = snapshotGameState(s);
     const saveId = `save-${Date.now()}`;
@@ -48,12 +53,15 @@ export const createMetaSlice: StateCreator<
     // Cap manual saves at MAX_MANUAL_SAVES (exclude autosave)
     const all = SaveManager.listSaves();
     const manual = all.filter((s) => s.id !== 'autosave');
+    let evicted = 0;
     if (manual.length > MAX_MANUAL_SAVES) {
       // Delete oldest (list is sorted newest-first)
       for (const old of manual.slice(MAX_MANUAL_SAVES)) {
         SaveManager.deleteSave(old.id);
+        evicted += 1;
       }
     }
+    return { evicted };
   },
 
   autoSave: () => {

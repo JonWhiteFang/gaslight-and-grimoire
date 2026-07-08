@@ -186,61 +186,61 @@ describe('completeCase — faculty bonus from investigator.lastCriticalFaculty',
 // ─── Test 2 & 3: checkVignetteUnlocks ────────────────────────────────────────
 
 describe('checkVignetteUnlocks — a-matter-of-shadows', () => {
-  it('returns "a-matter-of-shadows" when Lamplighters reputation is exactly 2', () => {
+  it('returns ["a-matter-of-shadows"] when Lamplighters reputation is exactly 2', () => {
     const state = makeState({
       factionReputation: { Lamplighters: 2 },
     });
 
-    expect(CaseProgression.checkVignetteUnlocks(state)).toBe('a-matter-of-shadows');
+    expect(CaseProgression.checkVignetteUnlocks(state)).toEqual(['a-matter-of-shadows']);
   });
 
-  it('returns "a-matter-of-shadows" when Lamplighters reputation exceeds 2', () => {
+  it('returns ["a-matter-of-shadows"] when Lamplighters reputation exceeds 2', () => {
     const state = makeState({
       factionReputation: { Lamplighters: 5 },
     });
 
-    expect(CaseProgression.checkVignetteUnlocks(state)).toBe('a-matter-of-shadows');
+    expect(CaseProgression.checkVignetteUnlocks(state)).toEqual(['a-matter-of-shadows']);
   });
 
-  it('returns null when Lamplighters reputation is 1', () => {
+  it('returns [] when Lamplighters reputation is 1', () => {
     const state = makeState({
       factionReputation: { Lamplighters: 1 },
     });
 
-    expect(CaseProgression.checkVignetteUnlocks(state)).toBeNull();
+    expect(CaseProgression.checkVignetteUnlocks(state)).toEqual([]);
   });
 
-  it('returns null when Lamplighters reputation is 0', () => {
+  it('returns [] when Lamplighters reputation is 0', () => {
     const state = makeState({
       factionReputation: { Lamplighters: 0 },
     });
 
-    expect(CaseProgression.checkVignetteUnlocks(state)).toBeNull();
+    expect(CaseProgression.checkVignetteUnlocks(state)).toEqual([]);
   });
 
-  it('returns null when Lamplighters reputation is negative', () => {
+  it('returns [] when Lamplighters reputation is negative', () => {
     const state = makeState({
       factionReputation: { Lamplighters: -3 },
     });
 
-    expect(CaseProgression.checkVignetteUnlocks(state)).toBeNull();
+    expect(CaseProgression.checkVignetteUnlocks(state)).toEqual([]);
   });
 
-  it('returns null when factionReputation has no Lamplighters entry', () => {
+  it('returns [] when factionReputation has no Lamplighters entry', () => {
     const state = makeState({
       factionReputation: { Rationalists: 10 },
     });
 
-    expect(CaseProgression.checkVignetteUnlocks(state)).toBeNull();
+    expect(CaseProgression.checkVignetteUnlocks(state)).toEqual([]);
   });
 
-  it('returns null when vignette is already unlocked', () => {
+  it('does not re-list an already-unlocked vignette', () => {
     const state = makeState({
       factionReputation: { Lamplighters: 5 },
       flags: { 'vignette-unlocked-a-matter-of-shadows': true },
     });
 
-    expect(CaseProgression.checkVignetteUnlocks(state)).toBeNull();
+    expect(CaseProgression.checkVignetteUnlocks(state)).toEqual([]);
   });
 
   it('sets the vignette-unlocked flag in the store when unlocked via completeCase', () => {
@@ -264,7 +264,7 @@ describe('checkVignetteUnlocks — a-matter-of-shadows', () => {
 describe('checkVignetteUnlocks — all four vignettes are registered', () => {
   it('unlocks the-rationalists-dilemma at Rationalists Circle reputation ≥ 2', () => {
     const state = makeState({ factionReputation: { 'Rationalists Circle': 2 } });
-    expect(CaseProgression.checkVignetteUnlocks(state)).toBe('the-rationalists-dilemma');
+    expect(CaseProgression.checkVignetteUnlocks(state)).toEqual(['the-rationalists-dilemma']);
   });
 
   // #3 / F-003: the-debt-of-smoke was gated on npc-sable disposition ≥ 7, but
@@ -276,12 +276,12 @@ describe('checkVignetteUnlocks — all four vignettes are registered', () => {
     const state = makeState({
       flags: { 'wc-court-deal-made': true },
     });
-    expect(CaseProgression.checkVignetteUnlocks(state)).toBe('the-debt-of-smoke');
+    expect(CaseProgression.checkVignetteUnlocks(state)).toEqual(['the-debt-of-smoke']);
   });
 
   it('does not unlock the-debt-of-smoke without the wc-court-deal-made flag', () => {
     const state = makeState({ flags: {} });
-    expect(CaseProgression.checkVignetteUnlocks(state)).toBeNull();
+    expect(CaseProgression.checkVignetteUnlocks(state)).toEqual([]);
   });
 
   it('unlocks the-unfinished-case when the wc-case-complete flag is set', () => {
@@ -290,7 +290,50 @@ describe('checkVignetteUnlocks — all four vignettes are registered', () => {
       // but NOT the-debt-of-smoke.
       flags: { 'wc-case-complete': true },
     });
-    expect(CaseProgression.checkVignetteUnlocks(state)).toBe('the-unfinished-case');
+    expect(CaseProgression.checkVignetteUnlocks(state)).toEqual(['the-unfinished-case']);
+  });
+});
+
+// ─── F-057: multiple vignettes unlock simultaneously ─────────────────────────
+
+describe('checkVignetteUnlocks — multiple simultaneous unlocks (F-057)', () => {
+  it('returns every satisfied vignette when two reputation thresholds are met at once', () => {
+    const state = makeState({
+      factionReputation: { Lamplighters: 3, 'Rationalists Circle': 4 },
+    });
+
+    const unlocked = CaseProgression.checkVignetteUnlocks(state);
+    expect(unlocked).toContain('a-matter-of-shadows');
+    expect(unlocked).toContain('the-rationalists-dilemma');
+    expect(unlocked).toHaveLength(2);
+  });
+
+  it('returns every satisfied vignette when two flags are set at once', () => {
+    const state = makeState({
+      flags: { 'wc-court-deal-made': true, 'wc-case-complete': true },
+    });
+
+    const unlocked = CaseProgression.checkVignetteUnlocks(state);
+    expect(unlocked).toContain('the-debt-of-smoke');
+    expect(unlocked).toContain('the-unfinished-case');
+    expect(unlocked).toHaveLength(2);
+  });
+
+  it('completeCase sets a flag for every simultaneously-unlocked vignette', () => {
+    const state = makeState({
+      factionReputation: { Lamplighters: 3, 'Rationalists Circle': 4 },
+    });
+    useStore.setState((s) => ({
+      ...s,
+      factionReputation: { Lamplighters: 3, 'Rationalists Circle': 4 },
+    }));
+
+    const result = CaseProgression.completeCase('the-whitechapel-cipher', state, useStore.getState());
+
+    expect(result.vignettesUnlocked).toContain('a-matter-of-shadows');
+    expect(result.vignettesUnlocked).toContain('the-rationalists-dilemma');
+    expect(useStore.getState().flags['vignette-unlocked-a-matter-of-shadows']).toBe(true);
+    expect(useStore.getState().flags['vignette-unlocked-the-rationalists-dilemma']).toBe(true);
   });
 });
 

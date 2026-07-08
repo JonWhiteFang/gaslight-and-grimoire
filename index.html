@@ -2,6 +2,19 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!--
+      Content-Security-Policy (F-037). Delivered as a <meta> tag because GitHub
+      Pages serves static files and cannot set real response headers — which
+      also means `frame-ancestors` (clickjacking defence) is unavailable here;
+      that residual is accepted for a static, credential-free game.
+
+      `style-src` keeps 'unsafe-inline' deliberately: framer-motion writes
+      per-frame inline `transform`/`opacity` styles (~9 animated components) and
+      several components use dynamic `style={{…}}` (meters, gradients, evidence
+      threads). Those can't be hash/nonce-pinned (values change every frame), so
+      dropping 'unsafe-inline' would break animation and dynamic styling. All
+      other directives stay locked to 'self'; `script-src` has NO 'unsafe-inline'.
+    -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'none';" />
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

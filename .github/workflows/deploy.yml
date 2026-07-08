@@ -31,7 +31,11 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
-      - run: npm ci
+      # --ignore-scripts: don't run dependency lifecycle scripts under the CI
+      # token (F-038). Only esbuild ships an install script and it's a no-op
+      # (its binary comes via an optional platform package), so build/test are
+      # unaffected.
+      - run: npm ci --ignore-scripts
 
       - name: Lint
         run: npm run lint
@@ -53,7 +57,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --ignore-scripts
 
       # Dependency auditing lives in security.yml (npm audit + OWASP
       # Dependency-Check on every PR), not on the deploy critical path — a new

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { SaveManager } from '../../engine/saveManager';
 import type { SaveSummary } from '../../engine/saveManager';
 import { deslugifyCaseId } from '../../utils/caseTitle';
@@ -35,10 +35,20 @@ function formatTimestamp(iso: string): string {
 
 export function LoadGameScreen({ onLoad, onBack }: LoadGameScreenProps) {
   const [saves, setSaves] = useState<SaveSummary[]>(() => SaveManager.listSaves());
+  // Two-tap delete confirmation (F-054): the first tap arms a save for deletion
+  // (button becomes "Confirm?"), a second tap deletes it. Arming a different
+  // save, or the auto-disarm timeout, cancels — so one accidental tap can't
+  // destroy a playthrough.
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
-  function handleDelete(saveId: string) {
-    SaveManager.deleteSave(saveId);
-    setSaves(SaveManager.listSaves());
+  function handleDeleteClick(saveId: string) {
+    if (pendingDeleteId === saveId) {
+      SaveManager.deleteSave(saveId);
+      setSaves(SaveManager.listSaves());
+      setPendingDeleteId(null);
+    } else {
+      setPendingDeleteId(saveId);
+    }
   }
 
   return (
@@ -93,14 +103,27 @@ export function LoadGameScreen({ onLoad, onBack }: LoadGameScreenProps) {
                     {displayCaseName(save.caseName)}
                   </div>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(save.id)}
-                  aria-label={`Delete save: ${save.investigatorName}`}
-                  className="w-11 h-11 flex items-center justify-center rounded text-stone-500 hover:text-red-400 hover:bg-stone-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400 self-center"
-                >
-                  ✕
-                </button>
+                {pendingDeleteId === save.id ? (
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteClick(save.id)}
+                    onBlur={() => setPendingDeleteId(null)}
+                    aria-label={`Confirm deletion of save: ${save.investigatorName}`}
+                    autoFocus
+                    className="min-w-[44px] h-11 px-2 flex items-center justify-center rounded bg-red-900 text-red-100 text-xs font-serif hover:bg-red-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400 self-center"
+                  >
+                    Confirm?
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteClick(save.id)}
+                    aria-label={`Delete save: ${save.investigatorName}`}
+                    className="w-11 h-11 flex items-center justify-center rounded text-stone-500 hover:text-red-400 hover:bg-stone-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400 self-center"
+                  >
+                    ✕
+                  </button>
+                )}
               </li>
             ))}
           </ul>
