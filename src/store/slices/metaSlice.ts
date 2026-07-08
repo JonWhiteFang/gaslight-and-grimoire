@@ -4,6 +4,7 @@ import type { GameSettings } from '../../types';
 import { SaveManager } from '../../engine/saveManager';
 import { fetchManifest, loadCase, loadVignette } from '../../engine/narrativeEngine';
 import { snapshotGameState } from '../../utils/gameState';
+import { vignetteToCaseData } from './narrativeSlice';
 
 const MAX_MANUAL_SAVES = 10;
 
@@ -79,7 +80,7 @@ export const createMetaSlice: StateCreator<
         const entry = manifest.cases.find((c) => c.id === gameState.currentCase);
         if (entry?.type === 'vignette') {
           const data = await loadVignette(gameState.currentCase);
-          caseData = { ...data, meta: { ...data.meta, acts: 2, facultyDistribution: {} }, variants: [] };
+          caseData = vignetteToCaseData(data);
         } else {
           caseData = await loadCase(gameState.currentCase);
         }
