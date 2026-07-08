@@ -1,0 +1,11 @@
+{
+  "deductions": [
+    {
+      "id": "wc-deduction-harland-mastermind",
+      "requiredClues": ["wc-clue-cipher-note", "wc-clue-aldgate-letters", "wc-clue-harland-memo"],
+      "title": "The Hand Behind the Cipher",
+      "description": "The cipher notes, Aldgate's correspondence, and Harland's suppression order line up into a single fact: Aldgate is a clerk following orders. Superintendent Harland is the architect, and the trail runs past him to the Deputy Commissioner.",
+      "isRedHerring": false
+    }
+  ]
+}
