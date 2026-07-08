@@ -494,7 +494,16 @@ export function processEncounterChoice(
     tier = result.tier;
     nextSceneId = choice.outcomes[result.tier];
   } else {
-    nextSceneId = choice.outcomes['success'] ?? choice.outcomes['critical'];
+    const fallbackScene = choice.outcomes['success'] ?? choice.outcomes['critical'];
+    if (!fallbackScene) {
+      // A non-check encounter choice must always name a destination. Without this
+      // guard, navigation to `undefined` yields a blank scene (resolveScene throws,
+      // useCurrentScene swallows it). Fail loudly at the source instead (F-022).
+      throw new Error(
+        `[NarrativeEngine] Encounter choice "${choice.id}" has no dice check and no "success"/"critical" outcome — nowhere to navigate.`,
+      );
+    }
+    nextSceneId = fallbackScene;
     tier = 'success';
   }
 
