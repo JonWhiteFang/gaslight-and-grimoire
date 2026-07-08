@@ -209,6 +209,9 @@ function evaluateCondition(condition: Condition, state: GameState): boolean {
       return !!mnpc.memoryFlags[value as string];
     }
 
+    // Intentional defensive default: an unknown/unrecognised condition type fails
+    // closed (returns false) rather than throwing. No assertNever here — that would
+    // turn defensive-false into a hard throw on unexpected content.
     default:
       return false;
   }

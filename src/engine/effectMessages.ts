@@ -60,6 +60,10 @@ export function generateEffectMessage(
         : `${name} seems to relax`) + suffix;
     case 'reputation':
       return `Your standing with ${target ?? 'a faction'} shifts` + suffix;
+    // Intentional PARTIAL handler, not an exhaustiveness gap: only 5 of 8 Effect
+    // types produce messages. flag/discoverClue/setMemoryFlag are short-circuited
+    // to null earlier (see the guard above), so no assertNever here — it would
+    // throw on the deliberately-unhandled types.
     default:
       return null;
   }

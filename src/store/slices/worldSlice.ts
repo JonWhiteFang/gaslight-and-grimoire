@@ -1,6 +1,7 @@
 import type { StateCreator } from 'zustand';
 import type { GameStore } from '../types';
 import type { Effect } from '../../types';
+import { assertNever } from '../../engine/constants';
 
 export interface WorldSlice {
   flags: Record<string, boolean>;
@@ -60,6 +61,11 @@ export const createWorldSlice: StateCreator<
           if (effect.target !== undefined && effect.value !== undefined)
             store.setNpcMemoryFlag(effect.target, effect.value as string, true);
           break;
+        default:
+          // Compile-time exhaustiveness guard: if a new Effect['type'] is added
+          // without a case above, tsc fails here (effect.type is no longer `never`).
+          // Prevents new effect types from being silently ignored (F-064).
+          assertNever(effect.type as never);
       }
     }
   },
