@@ -77,8 +77,9 @@
         },
         {
           "id": "lw-choice-name-croke",
-          "text": "Name it plainly: the Court of Smoke had Marsh poisoned and the room sealed with the pocketed key — and Croke's confession names the hand that paid for it — all to bury the trafficking before the report was ever filed.",
+          "text": "Lay it out plainly: name the Court of Smoke as the architect, and Croke as the hand that took its coin.",
           "requiresDeduction": "lw-deduction-croke-court-murder",
+          "conditions": [{ "type": "hasFlag", "target": "lw-bell-alliance" }],
           "faculty": "reason",
           "difficulty": 12,
           "advantageIf": ["lw-clue-marsh-final-message"],
@@ -318,12 +319,13 @@
     {
       "id": "lw-act3-ending-true-reckoning",
       "act": 3,
-      "narrative": "Inspector Bell wanted a tidy arrest and a sealed breach. You give him the whole ledger instead. The key that was never missing, only pocketed and hidden beneath the floorboards. The vial matched to the nightshade that never touched Marsh's lips. The Court's own manifests, and Foreman Croke's confession folding in on itself the moment the three are laid side by side. Marsh did not die in a locked room by misadventure — he was murdered to keep a shipment quiet, and the room was theatre. Croke did not wield the poison, but his testimony names the hand that paid for it, and the Court of Smoke stands exposed as more than a rumour on a foreman's dock. Bell's constables take Croke as accomplice and witness both, and this time the paperwork reaches past the man who looked away to the people who bought his blindness. Marsh's final message finally means something: not a warning that failed, but a case that closed.",
+      "narrative": "Inspector Bell wanted a tidy arrest and a sealed breach. You give him the whole ledger instead. The key that was never missing, only pocketed and hidden beneath the floorboards. The vial matched to the nightshade that never touched Marsh's lips. The Court's own manifests, and Foreman Croke's confession folding in on itself the moment the three are laid side by side. Marsh did not die in a locked room by misadventure — he was murdered to keep a shipment quiet, and the room was theatre. Bell's constables reach the vault as the renegade makes the final gesture; the half-formed breach collapses inward when the ritual is broken, and the Veil Key's fragments are bagged as evidence alongside the renegade himself. Croke did not wield the poison, but his testimony names the hand that paid for it, and the Court of Smoke stands exposed as more than a rumour on a foreman's dock. Bell's constables take Croke as accomplice and witness both, and this time the paperwork reaches past the man who looked away to the people who bought his blindness. Marsh's final message finally means something: not a warning that failed, but a case that closed.",
       "cluesAvailable": [],
       "choices": [],
       "onEnter": [
         { "type": "flag", "target": "lw-case-complete", "value": true },
         { "type": "flag", "target": "lw-croke-convicted", "value": true },
+        { "type": "flag", "target": "lw-key-in-yard-custody", "value": true },
         { "type": "reputation", "target": "Court of Smoke", "delta": -2 },
         { "type": "reputation", "target": "Lamplighters", "delta": 2 }
       ]
