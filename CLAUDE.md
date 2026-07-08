@@ -90,7 +90,14 @@ src/
     types.ts                  # GameStore = intersection of all slices
     slices/                   # Six domain slices (see below)
   engine/
-    narrativeEngine.ts        # Content loading, condition eval, scene resolution, choice processing, encounters
+    narrativeEngine.ts        # Barrel: re-exports contentLoader/conditions/choiceResolution/encounters (import path unchanged)
+    contentLoader.ts          # fetchManifest, loadCase, loadVignette, validateContent (+ injectSharedScenes, fetchJson, indexById)
+    conditions.ts             # evaluateConditions, evaluateCondition, resolveScene, canDiscoverClue
+    choiceResolution.ts       # computeChoiceResult, processChoice
+    encounters.ts             # startEncounter, processEncounterChoice, getEncounterChoices
+    advantage.ts              # computeAdvantage — single source for check advantage (clue OR lore+Veil Sight); used by checks, encounters, ChoiceCard badge
+    flags.ts                  # Single source of truth for ability/progression flag string keys (FLAGS, abilityAutoSucceedFlag, CASE_LOAD_CLEARED_FLAGS)
+    constants.ts              # FACTIONS, OUTCOME_TIERS, assertNever exhaustiveness guard
     contentValidation.ts      # Shared content validator (validateBundle) — used by validateContent + the CLI
     engineActions.ts          # EngineActions interface — the store-facing seam that keeps engine free of store imports
     diceEngine.ts             # d20 rolls, advantage/disadvantage, modifier calc, outcome tiers
@@ -276,7 +283,7 @@ Base faculty score: 8. Bonus points to allocate: 12. Composure and Vitality: 0�
 
 `docs/status.md` + `docs/PROJECT_STATE.md` are the live source of truth for current state and the
 open audit backlog; this section is a stable overview and may lag them. (Run `npm run test:run` for
-the live test baseline — 495 tests across 47 files pass as of 2026-07-08.)
+the live test baseline — 522 tests across 52 files pass as of 2026-07-08.)
 
 ### Critical (blocks core functionality)
 - No P0 *release-blockers of the original build*; `loadGame` caseData restoration was fixed in Phase A.
