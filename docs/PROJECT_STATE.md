@@ -8,15 +8,14 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-08 (**Closed P3 #21 hardening — PR #45 merged (`d57b41a`).** Behavioral: F-057
-`checkVignetteUnlocks` now returns **all** satisfied vignettes, not just the first (`vignetteUnlocked` → `vignettesUnlocked: string[]`);
-F-036 `SaveManager.load` guards the blob envelope + `isValidGameState` shape so a corrupt save returns null instead of
-poisoning the store. Save/UX: F-052 save-success toast + eviction warning, F-054 two-tap delete confirm, F-055 loading
-screen while a save loads. Storage/CI: F-037 CSP residuals documented (style-src unsafe-inline load-bearing; no
-frame-ancestors on Pages), F-038 `npm ci --ignore-scripts` in all CI jobs. Reviewed via finder agent → no bugs (one toast-timer
-nit fixed). Test baseline **524 → 547** (+23; 55 files). **Earlier same day:** engine-reference doc rewrite for the
-narrativeEngine split (PR #44); P2 #15/#16/#17 cluster (PR #37). **Remaining backlog: P3 #20 (media — ambient loops + QA,
-partly user-blocked) and #22 (perf + a11y polish).**)_
+_Last updated: 2026-07-08 (**Closed P3 #22 polish — PR #46 merged (`1ac3c09`).** Perf: F-044 rAF-throttle
+EvidenceBoard scroll/resize/mousemove; F-045 `useShallow` on object selectors + `React.memo` ChoiceCard/ClueCard + memoized
+Sets; F-046 LazyMotion + `m` (motion chunk 121.85 KB → 79.13 KB); F-047 cache shared scenes across loads. A11y: F-048
+reduced-motion gating on ConnectionThread/DeductionButton, F-049 focusable typewriter-skip + state-driven sr-only region
+(no aria-live spam), F-050 WCAG-AA helper-text contrast, F-051 skip-to-content link. Reviewed via finder agent → no bugs
+(one a11y double-announce nit fixed). Test baseline **547 → 554** (+7; 56 files). **The entire audit backlog (P0–P3) is now
+cleared except #20 (media).** Earlier same day: P3 #21 hardening (PR #45), engine-reference rewrite (PR #44), P2
+#15/#16/#17 (PR #37). **Remaining: only #20 (media — ambient loops + perceptual QA, partly user-blocked).**)_
 
 ---
 
@@ -25,16 +24,16 @@ partly user-blocked) and #22 (perf + a11y polish).**)_
 - **Stage:** Phases A–E complete and the game is playable end-to-end (7 cases, 198 scenes). Audit P0 backlog
   **fully cleared** (#1–#5, #11). P1 backlog **fully cleared** — the code cluster (#7, #8, #9, #10, #12) plus
   **#6 (deduction-gated content, PR #32)**, the last open P1. The deduction mechanic is now load-bearing.
-  **The entire P0/P1/P2 audit backlog plus P3 #21 is cleared** — only P3 **#20 (media)** and **#22 (perf + a11y polish)** remain.
+  **The entire P0–P3 audit backlog is cleared** except **#20 (media assets)**, which is partly user-blocked (needs generated audio).
 - **Active gate:** CI enforces it. Every push/PR to `main` runs `npm run lint` + the validator + `npm run test:run` in
   the `test` job; `build` → `deploy` depend on it, and `deploy` is skipped on PR events. CI installs run
   `npm ci --ignore-scripts` (F-038). Bar unchanged locally: lint + test suite green + validator clean before merge.
-- **Branch focus:** `main` (at `d57b41a`, **PR #45 merged**) — P3 #21 hardening closed. Next work starts from a fresh
-  branch off `main`. Prior same day: PR #44 (engine-reference doc rewrite), PR #37 (P2 #15/#16/#17), PR #35 (#13/#14/#18/#19).
-- **Verification:** 2026-07-08 — `npm run test:run` → **547 passed (547)** across **55** files (was 524/53; +23 for the
-  new saveValidation + metaSlice.saveGame suites and expanded caseProgression/LoadGameScreen); `npm run lint` → clean;
-  `node scripts/validateCase.mjs` → 7 cases clean; `npm run build` green (chunks split); `npx tsc --noEmit` clean.
-  Reviewed via a correctness-finder agent → no bugs; one cosmetic toast-timer nit fixed before commit. CI green on PR #45.
+- **Branch focus:** `main` (at `1ac3c09`, **PR #46 merged**) — P3 #22 polish closed. Next work starts from a fresh
+  branch off `main`. Prior same day: PR #45 (P3 #21), PR #44 (engine-reference rewrite), PR #37 (P2 #15/#16/#17).
+- **Verification:** 2026-07-08 — `npm run test:run` → **554 passed (554)** across **56** files (was 547/55; +7 for the
+  new sharedSceneCache suite + expanded SceneText); `npm run lint` → clean; `node scripts/validateCase.mjs` → 7 cases clean;
+  `npm run build` green (motion vendor chunk 121.85 KB → 79.13 KB via LazyMotion); `npx tsc --noEmit` clean. Reviewed via
+  a correctness-finder agent → no bugs; one a11y double-announce nit fixed before commit. CI green on PR #46.
 
 ---
 
@@ -61,7 +60,7 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 | Q4 | Audit remediation — P3 #21 hardening | `[x]` | **Complete — PR #45** (`d57b41a`). F-057 (all vignettes unlock, not just first), F-036 (save-load shape guard), F-052 (save toast + eviction warn), F-054 (two-tap delete confirm), F-055 (load indicator), F-037 (CSP residuals documented), F-038 (`--ignore-scripts` in CI). 524→547 tests. |
 | — | Docs — engine-reference rewrite for narrativeEngine split | `[x]` | **PR #44** (`472ef32`). Documents the 4 split modules + advantage/flags/constants/haltScenes; fixed save-version/`lastCriticalFaculty`/`save()`-signature drift. Cleared the last flagged doc item. |
 | M | Media assets — audio (.mp3) + illustrations + NPC portraits | `[~]` | **Strategy set (ADR-0006)**; prompt kit authored. **9 SFX shipped + normalized + verified loading in-browser** (fixed 2 blockers found in QA). **Pending:** 10 ambient loops; perceptual SFX QA (human ears); `checkAudioAssets.mjs` + CI. **Illustrations parked** (lowest priority). Issue #20. |
-| P | Audit remediation — P3 #22 polish (perf + a11y) | `[ ]` | Open: F-044..F-051 — EvidenceBoard scroll throttling, `useShallow`/memo on list items, LazyMotion, reduced-motion gaps, WCAG contrast, skip-link, focusable typewriter skip. |
+| P | Audit remediation — P3 #22 polish (perf + a11y) | `[x]` | **Complete — PR #46** (`1ac3c09`). F-044 rAF-throttle EvidenceBoard, F-045 `useShallow`+`React.memo` list items, F-046 LazyMotion (motion chunk 121.85→79.13 KB), F-047 shared-scene cache, F-048 reduced-motion gating, F-049 focusable typewriter-skip + sr-region, F-050 WCAG contrast, F-051 skip-link. 547→554 tests. |
 
 ---
 
@@ -73,9 +72,9 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 3. **Build `scripts/checkAudioAssets.mjs`** (presence + content-cross-reference) + a unit test, then revisit CI wiring (likely `--strict`) once all files land. *(Best once ambient files land.)*
 
 **Code track:**
-4. **P3 #22 (perf + a11y polish)** is the only remaining code-actionable audit issue — EvidenceBoard scroll throttling (rAF + cached rects), `useShallow`/`React.memo` on `ChoiceCard`/`ClueCard` list items, `LazyMotion`+`m` for framer, reduced-motion gating on `ConnectionThread`/`DeductionButton`, WCAG-AA contrast on helper text, a skip-to-content link, and a focusable/keyboard typewriter-skip control. Verify with `jest-axe` + Profiler.
+4. **Nothing left in the audit backlog.** All code/perf/a11y/docs issues (P0–P3, #1–#22 except the media milestone) are shipped. The only remaining pre-1.0 work is the media milestone (#20), which is a user step.
 
-✅ Done: **all P0 (#1–#5, #11), all P1 (#6–#10, #12), all P2 (#13–#19 — PRs #35/#37), P3 #21 hardening (PR #45), and the engine-reference doc rewrite (PR #44).** Media strategy decided (ADR-0006), prompt kit authored, **9 SFX shipped + normalized + in-browser-verified** (QA caught & fixed 2 latent release-blockers). Remaining audit backlog: **P3 #22** (polish), plus the media milestone (#20 — ambient + QA). **Illustrations parked at lowest priority.**
+✅ Done: **the entire Ultracode audit backlog #1–#22 except #20** — all P0 (#1–#5, #11), all P1 (#6–#10, #12), all P2 (#13–#19 — PRs #35/#37), **P3 #21 hardening (PR #45) and #22 polish (PR #46)**, plus the engine-reference doc rewrite (PR #44). Media strategy decided (ADR-0006), prompt kit authored, **9 SFX shipped + normalized + in-browser-verified**. Remaining: **the media milestone (#20 — ambient loops + perceptual QA)**. **Illustrations parked at lowest priority.**
 
 ---
 

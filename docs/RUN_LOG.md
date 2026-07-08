@@ -19,6 +19,18 @@
 
 ---
 
+## 2026-07-08 — P3 #22 polish: performance + accessibility (PR #46)
+
+- **Goal:** Close the last code-actionable audit issue — #22, the perf + a11y polish batch (8 findings, F-044..F-051). After this the whole Ultracode backlog is done except the user-blocked media milestone (#20).
+- **Did:** Branch `p3/perf-a11y-polish`, single commit `1d120f5`, **PR #46 merged (`1ac3c09`)**. **Perf:** F-044 rAF-throttle the EvidenceBoard scroll/resize/mousemove handlers (coalesce to one recompute/getBoundingClientRect per frame, cancelAnimationFrame on cleanup); F-045 wrap all object-returning selector hooks in `useShallow`, memoize ChoicePanel's `revealedClueIds`/`deductionIds` Sets, `React.memo` ChoiceCard + ClueCard; F-046 adopt `LazyMotion` + `m` (domAnimation) across all 9 `motion.*` sites with the provider at the app root — **motion vendor chunk 121.85 KB → 79.13 KB** (gzip 40.3 → 28.1); F-047 module-cache the shared breakdown/incapacitation scenes and fetch them alongside the main `Promise.all` (was a 2nd sequential fetch per load) + `_resetSharedScenesCache` test hook. **A11y:** F-048 gate ConnectionThread/DeductionButton framer animations on `reducedMotion` (JS-driven, so the CSS reduced-motion rule can't reach them); F-049 typewriter-skip is now a real focusable `<button>`, visible text is `aria-hidden`, and a **state-driven** sr-only region announces the full narrative once on completion (no per-tick aria-live spam); F-050 informational helper text off `text-stone-500` (fails WCAG AA) → stone-400/300 (HC mode already whitens all stone shades); F-051 visually-hidden skip-to-content link + `id=main-content`/`tabIndex=-1` on the game `<main>`.
+- **Review:** spike-first on F-046 (converted OutcomeBanner, ran its test in isolation to confirm `m` renders without a `LazyMotion` ancestor before doing the other 8). One correctness-finder subagent over the whole diff → **no hard bugs**; flagged one PLAUSIBLE a11y timing nit (SceneText reused across scene changes could briefly leak the new full text to the sr region before `animating` flipped, risking a double-announce) → fixed by making the sr region **state-driven** (`srText` set only at completion points, blanked at animation start) instead of reading `animating` at render.
+- **Verified:** `npm run lint` clean; `npx tsc --noEmit` clean; `node scripts/validateCase.mjs` → 7 clean; `npm run test:run` → **554 passed (554)**, 56 files (was 547/55; +7: sharedSceneCache +3, SceneText +4). `npm run build` green, motion chunk shrunk. CI green on PR #46. **`Closes #22` auto-closed the issue on merge.**
+- **Doc-drift sweep (auto-fixed):** test baseline **547→554 / 55→56** in `docs/status.md`; `injectSharedScenes` → `loadSharedScenes`/`mergeSharedScenes` rename reflected in `CLAUDE.md` (contentLoader line) and `docs/engine-reference.md` (with the F-047 cache note). Audit/plan docs left as point-in-time records.
+- **Open / blockers:** **The entire audit backlog #1–#22 is closed except #20 (media assets)** — ambient loops + perceptual SFX QA, a user step (generate audio per the prompt kit). No code-actionable audit work remains.
+- **Memory updated:** STATE ☑ · RUN_LOG ☑ · ADR ☐ (no non-trivial architectural decision — polish executing the backlog).
+
+---
+
 ## 2026-07-08 — P3 #21 hardening: save/UX safety + storage/CSP (PR #45) + engine-reference doc rewrite (PR #44)
 
 - **Goal:** Continue the P3 batch. First cleared the doc item flagged for two checkpoints (engine-reference still described `narrativeEngine.ts` as one module — PR #44), then took the **#21 hardening** batch (7 findings) over #20 (user-blocked media) and #22 (polish), because #21 contains a real logic bug and data-loss risks.

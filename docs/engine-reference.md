@@ -69,7 +69,7 @@ Async JSON content loading (under `/content/`, prefixed with
 - `loadCase(caseId: string): Promise<CaseData>` — fetches `meta.json`, `act1/2/3.json`, `clues.json`, `npcs.json`, `variants.json` in parallel; indexes scenes/clues/npcs into `Record<string, T>` by id; injects the shared `breakdown` and `incapacitation` scenes. Also fetches the optional `deductions.json` (**outside** the parallel batch, `.catch(() => [])`) into `CaseData.recipes` (`KeyDeduction[]`) — a case without key deductions simply has an empty list.
 - `loadVignette(vignetteId: string): Promise<VignetteData>` — same shape for a two-act vignette (single `scenes.json`), also injecting the shared scenes.
 - `validateContent(caseData: CaseData): ValidationResult` — delegates to the shared `contentValidation.validateBundle` (errors only; reachability is CLI-only). Checks scene-graph edges, clue/npc references, condition targets, variant structure, `npcEffect` refs, encounter-round edges, and tier completeness (incl. `dynamicDifficulty`). Logs each error via `console.error`; returns `{ valid, errors }`. See the `contentValidation.ts` section below.
-- (internal `injectSharedScenes`, `fetchJson`, `indexById` are not exported.)
+- (internal `loadSharedScenes` — module-cached, so the breakdown/incapacitation scenes are fetched at most once and reused across loads, F-047 — plus `mergeSharedScenes`, `fetchJson`, `indexById` are not exported. A `_resetSharedScenesCache` test hook clears the cache.)
 
 ## conditions.ts
 

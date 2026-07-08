@@ -92,7 +92,7 @@ src/
     slices/                   # Six domain slices (see below)
   engine/
     narrativeEngine.ts        # Barrel: re-exports contentLoader/conditions/choiceResolution/encounters (import path unchanged)
-    contentLoader.ts          # fetchManifest, loadCase, loadVignette, validateContent (+ injectSharedScenes, fetchJson, indexById)
+    contentLoader.ts          # fetchManifest, loadCase, loadVignette, validateContent (+ cached loadSharedScenes/mergeSharedScenes, fetchJson, indexById)
     conditions.ts             # evaluateConditions, evaluateCondition, resolveScene, canDiscoverClue
     choiceResolution.ts       # computeChoiceResult, processChoice
     encounters.ts             # startEncounter, processEncounterChoice, getEncounterChoices
