@@ -3,6 +3,7 @@ import type { GameStore } from '../types';
 import type { CaseData, OutcomeTier } from '../../types';
 import { CaseProgression, type CaseCompletionResult } from '../../engine/caseProgression';
 import { loadCase, loadVignette, resolveScene, validateContent } from '../../engine/narrativeEngine';
+import { CASE_LOAD_CLEARED_FLAGS } from '../../engine/flags';
 import { generateEffectMessages } from '../../engine/effectMessages';
 import { snapshotGameState } from '../../utils/gameState';
 
@@ -129,15 +130,10 @@ export const createNarrativeSlice: StateCreator<
       // and brick the investigator across all cases (and poison the autosave).
       state.investigator.composure = 10;
       state.investigator.vitality = 10;
-      delete state.flags['breakdown-occurred'];
-      delete state.flags['incapacitated'];
-      delete state.flags['ability-auto-succeed-reason'];
-      delete state.flags['ability-auto-succeed-vigor'];
-      delete state.flags['ability-auto-succeed-influence'];
-      delete state.flags['ability-veil-sight-active'];
-      // Clear the pending critical-success faculty reward so a bonus earned in a
-      // previous case cannot leak into this one (granted at completeCase time).
-      delete state.flags['last-critical-faculty'];
+      // Clears breakdown/incapacitation halt flags, ability auto-succeed/veil-sight
+      // flags, and the pending critical-success faculty reward (last-critical-faculty)
+      // so nothing earned in a previous case leaks into this one.
+      for (const f of CASE_LOAD_CLEARED_FLAGS) delete state.flags[f];
 
       // Clear stale state from previous case
       state.clues = {};
@@ -184,13 +180,7 @@ export const createNarrativeSlice: StateCreator<
       // Fresh start: restore meters and clear halt flags (see loadAndStartCase).
       state.investigator.composure = 10;
       state.investigator.vitality = 10;
-      delete state.flags['breakdown-occurred'];
-      delete state.flags['incapacitated'];
-      delete state.flags['ability-auto-succeed-reason'];
-      delete state.flags['ability-auto-succeed-vigor'];
-      delete state.flags['ability-auto-succeed-influence'];
-      delete state.flags['ability-veil-sight-active'];
-      delete state.flags['last-critical-faculty'];
+      for (const f of CASE_LOAD_CLEARED_FLAGS) delete state.flags[f];
       state.clues = {};
       state.npcs = {};
       state.deductions = {};

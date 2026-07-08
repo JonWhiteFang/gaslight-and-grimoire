@@ -5,6 +5,7 @@
 import type { Faculty, GameState } from '../types';
 import type { EngineActions } from './engineActions';
 import { SaveManager } from './saveManager';
+import { FLAGS, vignetteUnlockedFlag } from './flags';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -62,7 +63,7 @@ export const CaseProgression = {
    */
   completeCase(caseId: string, state: GameState, actions: EngineActions): CaseCompletionResult {
     // 1. Grant faculty bonus from critical success moment
-    const criticalFaculty = state.flags['last-critical-faculty'] as unknown as Faculty | undefined;
+    const criticalFaculty = state.flags[FLAGS.lastCriticalFaculty] as unknown as Faculty | undefined;
     let facultyBonusGranted: Faculty | null = null;
 
     if (criticalFaculty && isValidFaculty(criticalFaculty)) {
@@ -74,7 +75,7 @@ export const CaseProgression = {
     const vignetteUnlocked = CaseProgression.checkVignetteUnlocks(state);
 
     if (vignetteUnlocked) {
-      actions.setFlag(`vignette-unlocked-${vignetteUnlocked}`, true);
+      actions.setFlag(vignetteUnlockedFlag(vignetteUnlocked), true);
     }
 
     return { facultyBonusGranted, vignetteUnlocked };
@@ -92,7 +93,7 @@ export const CaseProgression = {
   checkVignetteUnlocks(state: GameState): string | null {
     for (const vignette of VIGNETTE_CONDITIONS) {
       // Skip already-unlocked vignettes
-      if (state.flags[`vignette-unlocked-${vignette.id}`]) continue;
+      if (state.flags[vignetteUnlockedFlag(vignette.id)]) continue;
 
       if (vignette.factionReputation) {
         const { faction, threshold } = vignette.factionReputation;

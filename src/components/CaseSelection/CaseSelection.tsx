@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { CaseManifest, CaseManifestEntry } from '../../types';
 import { fetchManifest } from '../../engine/narrativeEngine';
+import { vignetteUnlockedFlag } from '../../engine/flags';
 import { useStore } from '../../store';
 
 export interface CaseSelectionProps {
@@ -57,7 +58,7 @@ export function CaseSelection({ onSelectCase, onBack }: CaseSelectionProps) {
 
   function isUnlocked(entry: CaseManifestEntry): boolean {
     if (entry.type === 'case') return true;
-    return !!flags[`vignette-unlocked-${entry.id}`];
+    return !!flags[vignetteUnlockedFlag(entry.id)];
   }
 
   return (

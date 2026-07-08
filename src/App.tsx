@@ -18,17 +18,10 @@ import { CaseSelection } from './components/CaseSelection';
 import { InvestigationHalted } from './components/InvestigationHalted';
 import { useStore, useCurrentScene, buildGameState } from './store';
 import { isHaltScene, haltReason } from './engine/haltScenes';
+import { ARCHETYPE_ABILITY_FLAG } from './engine/flags';
 import type { CaseCompletionResult } from './engine/caseProgression';
 
 type Screen = 'title' | 'character-creation' | 'case-selection' | 'game' | 'load-game' | 'loading' | 'case-complete';
-
-// Maps each archetype to the world flag it sets when its ability is activated
-export const ABILITY_FLAGS: Record<string, string> = {
-  deductionist: 'ability-auto-succeed-reason',
-  occultist: 'ability-veil-sight-active',
-  operator: 'ability-auto-succeed-vigor',
-  mesmerist: 'ability-auto-succeed-influence',
-};
 
 export function GameContent({ onCompleteCase, onHalt, reviewSceneId, onDismissReview }: { onCompleteCase: () => void; onHalt: () => void; reviewSceneId: string | null; onDismissReview: () => void }) {
   const scene = useCurrentScene();
@@ -124,7 +117,7 @@ export default function App() {
   const handleActivateAbility = useCallback(() => {
     if (abilityUsed) return;
     useAbility();
-    const flag = ABILITY_FLAGS[archetype];
+    const flag = ARCHETYPE_ABILITY_FLAG[archetype];
     if (flag) setFlag(flag, true);
   }, [abilityUsed, archetype, useAbility, setFlag]);
 

@@ -29,6 +29,7 @@ import type {
 import type { EngineActions } from './engineActions';
 import { performCheck, rollD20, resolveDC } from './diceEngine';
 import { validateBundle } from './contentValidation';
+import { FLAGS, abilityAutoSucceedFlag } from './flags';
 
 // ─── Content Loading ──────────────────────────────────────────────────────────
 
@@ -270,14 +271,6 @@ export function canDiscoverClue(
   return true;
 }
 
-// ─── Ability Auto-Succeed Flags ───────────────────────────────────────────────
-
-const ABILITY_AUTO_SUCCEED_FLAGS: Partial<Record<Faculty, string>> = {
-  reason: 'ability-auto-succeed-reason',
-  vigor: 'ability-auto-succeed-vigor',
-  influence: 'ability-auto-succeed-influence',
-};
-
 // ─── Choice Processing ────────────────────────────────────────────────────────
 
 /**
@@ -289,7 +282,7 @@ export function computeChoiceResult(
   state: GameState,
 ): ChoiceResult {
   if (choice.faculty && (choice.difficulty !== undefined || choice.dynamicDifficulty)) {
-    const abilityFlag = ABILITY_AUTO_SUCCEED_FLAGS[choice.faculty];
+    const abilityFlag = abilityAutoSucceedFlag(choice.faculty);
     if (abilityFlag && state.flags[abilityFlag]) {
       return { nextSceneId: choice.outcomes['critical'], tier: 'critical' };
     }
@@ -298,7 +291,7 @@ export function computeChoiceResult(
     const clueAdvantage =
       choice.advantageIf?.some((clueId) => state.clues[clueId]?.isRevealed) ?? false;
     const veilSightAdvantage =
-      choice.faculty === 'lore' && !!state.flags['ability-veil-sight-active'];
+      choice.faculty === 'lore' && !!state.flags[FLAGS.veilSight];
     const hasAdvantage = clueAdvantage || veilSightAdvantage;
     const result = performCheck(choice.faculty, state.investigator, dc, hasAdvantage, false);
     return {
@@ -337,7 +330,7 @@ export function processChoice(
   const result = computeChoiceResult(choice, state);
 
   if (result.tier === 'critical' && choice.faculty) {
-    actions.setFlag('last-critical-faculty', choice.faculty as unknown as boolean);
+    actions.setFlag(FLAGS.lastCriticalFaculty, choice.faculty as unknown as boolean);
   }
 
   if (choice.npcEffect) {
@@ -476,7 +469,7 @@ export function processEncounterChoice(
     choice.advantageIf?.some((clueId) => state.clues[clueId]?.isRevealed) ?? false;
 
   const veilSightAdvantage =
-    choice.faculty === 'lore' && !!state.flags['ability-veil-sight-active'];
+    choice.faculty === 'lore' && !!state.flags[FLAGS.veilSight];
   const hasAdvantage = hasOccultAdvantage || hasStandardAdvantage || veilSightAdvantage;
 
   let nextSceneId: string;
@@ -504,7 +497,7 @@ export function processEncounterChoice(
   }
 
   if (tier === 'critical' && choice.faculty) {
-    actions.setFlag('last-critical-faculty', choice.faculty as unknown as boolean);
+    actions.setFlag(FLAGS.lastCriticalFaculty, choice.faculty as unknown as boolean);
   }
 
   // Apply damage effects
