@@ -1,8 +1,16 @@
 # Engine Reference
 
 Per-module API reference for `src/engine/`. Every signature and behaviour claim
-below is drawn from the current source. Ten non-test modules are documented, one
-`##` section each, plus a Determinism note.
+below is drawn from the current source. Each non-test module gets one `##`
+section, plus a Determinism note.
+
+> **`narrativeEngine.ts` is a barrel, not a module (F-019).** It was split into
+> four focused modules — `contentLoader`, `conditions`, `choiceResolution`, and
+> `encounters` — and now only re-exports their full surface
+> (`export * from './contentLoader'`, etc.), so every existing
+> `import { X } from '.../narrativeEngine'` continues to resolve unchanged. The
+> four sections below document those modules directly; import from either the
+> barrel or the specific module.
 
 See [architecture.md](./architecture.md) for the engine↔store boundary, the
 store slices, data flow, bounded-state clamping, and the full determinism
@@ -51,38 +59,48 @@ Pure dice math: d20 rolls, faculty modifiers, DC resolution, and outcome tiers.
 - `resolveDC(choice: Choice, investigator: Investigator): number` — the effective DC. If `choice.dynamicDifficulty` is set, returns `highDC` when the investigator's `scaleFaculty` score `>= highThreshold`, else `baseDC`. Otherwise `choice.difficulty ?? 12`.
 - `performCheck(faculty: Faculty, investigator: Investigator, dc: number, hasAdvantage: boolean, hasDisadvantage: boolean): CheckResult` — the full pipeline. Advantage and disadvantage cancel (if both true, a straight `rollD20`); otherwise rolls with the active edge. Modifier is `calculateModifier(score) + getTrainedBonus(...)`. Returns the roll, modifier, total, `dc`, and resolved `tier`.
 
-## narrativeEngine.ts
+## contentLoader.ts
 
-Content loading, condition evaluation, scene/variant resolution, clue-discovery
-gating, choice processing, and the encounter system.
-
-**Content loading** (async; fetch JSON under `/content/`, prefixed with `import.meta.env.BASE_URL`)
+Async JSON content loading (under `/content/`, prefixed with
+`import.meta.env.BASE_URL`) plus load-time validation. Re-exported by the
+`narrativeEngine` barrel.
 
 - `fetchManifest(): Promise<CaseManifest>` — fetches `/content/manifest.json`.
 - `loadCase(caseId: string): Promise<CaseData>` — fetches `meta.json`, `act1/2/3.json`, `clues.json`, `npcs.json`, `variants.json` in parallel; indexes scenes/clues/npcs into `Record<string, T>` by id; injects the shared `breakdown` and `incapacitation` scenes. Also fetches the optional `deductions.json` (**outside** the parallel batch, `.catch(() => [])`) into `CaseData.recipes` (`KeyDeduction[]`) — a case without key deductions simply has an empty list.
 - `loadVignette(vignetteId: string): Promise<VignetteData>` — same shape for a two-act vignette (single `scenes.json`), also injecting the shared scenes.
-- (internal `injectSharedScenes` merges `/content/shared/breakdown.json` and `/content/shared/incapacitation.json` into the scene record — not exported.)
-
-**Validation**
-
 - `validateContent(caseData: CaseData): ValidationResult` — delegates to the shared `contentValidation.validateBundle` (errors only; reachability is CLI-only). Checks scene-graph edges, clue/npc references, condition targets, variant structure, `npcEffect` refs, encounter-round edges, and tier completeness (incl. `dynamicDifficulty`). Logs each error via `console.error`; returns `{ valid, errors }`. See the `contentValidation.ts` section below.
+- (internal `injectSharedScenes`, `fetchJson`, `indexById` are not exported.)
 
-**Conditions & scene resolution** (pure)
+## conditions.ts
+
+Pure condition evaluation, scene/variant resolution, and clue-discovery gating.
+Re-exported by the `narrativeEngine` barrel.
 
 - `evaluateConditions(conditions: Condition[], state: GameState): boolean` — AND logic; empty array is `true`. Supports `hasClue` (must be revealed), `hasDeduction`, `hasFlag` (bare = flag is truthy; with `value`, compares `Boolean(flag) === value`, so `value:false` matches an unset flag), `facultyMin`, `archetypeIs`, `npcDisposition` (`>=`), `npcSuspicion` (tier→range: normal 0–2, evasive 3–5, concealing 6–8, hostile 9–10), `factionReputation` (`>=`), `npcMemoryFlag`.
+- `evaluateCondition(condition: Condition, state: GameState): boolean` — the single-condition primitive `evaluateConditions` folds over (exported for reuse). `Condition` is a discriminated union on `type`, so the switch is exhaustive (F-026).
 - `resolveScene(sceneId: string, state: GameState, caseData: CaseData): SceneNode` — returns the first variant whose `variantOf === sceneId` and whose `variantCondition` is met, else the base scene. Throws if the base scene is missing.
 - `canDiscoverClue(discovery: ClueDiscovery, state: GameState): boolean` — pure gate: `requiresFaculty` (score `>=` minimum) and `requiresDeduction` (deduction must exist) must both pass.
 
-**Choice processing**
+## choiceResolution.ts
 
-- `computeChoiceResult(choice: Choice, state: GameState): ChoiceResult` — **pure**, no store access. For a faculty check with a difficulty: if the archetype ability auto-succeed flag for that faculty is set (`ability-auto-succeed-{reason,vigor,influence}`), returns `critical` with no roll; otherwise resolves the DC (`resolveDC`), grants advantage from a revealed `advantageIf` clue or from active Veil Sight on a `lore` check (`ability-veil-sight-active`), runs `performCheck`, and returns the tier's next scene plus roll data. Non-check choices return the `success` (fallback `critical`) outcome at tier `success`; a non-check choice with **neither** `success` nor `critical` throws (nowhere to navigate — F-022).
-- `processChoice(choice: Choice, state: GameState, actions: EngineActions): ChoiceResult` — impure wrapper over `computeChoiceResult`. On a `critical` faculty result, sets the `last-critical-faculty` flag. Applies `choice.npcEffect` (`adjustDisposition`/`adjustSuspicion`). **Calls `actions.goToScene(result.nextSceneId)` before returning** — see the callout above.
+Pure choice-outcome computation plus the impure `processChoice` action.
+Re-exported by the `narrativeEngine` barrel.
 
-**Encounters**
+- `computeChoiceResult(choice: Choice, state: GameState): ChoiceResult` — **pure**, no store access. For a faculty check with a difficulty: if the archetype ability auto-succeed flag for that faculty is set (`abilityAutoSucceedFlag(faculty)` → `ability-auto-succeed-{reason,vigor,influence}`), returns `critical` with no roll; otherwise resolves the DC (`resolveDC`), grants advantage via `computeAdvantage` (a revealed `advantageIf` clue, or active Veil Sight on a `lore` check), runs `performCheck`, and returns the tier's next scene plus roll data. Non-check choices return the `success` (fallback `critical`) outcome at tier `success`; a non-check choice with **neither** `success` nor `critical` throws (nowhere to navigate — F-022).
+- `processChoice(choice: Choice, state: GameState, actions: EngineActions): ChoiceResult` — impure wrapper over `computeChoiceResult`. On a `critical` faculty result, calls `actions.setLastCriticalFaculty(choice.faculty)` (the reward faculty is the typed `investigator.lastCriticalFaculty` field, not a flag — F-013). Applies `choice.npcEffect` (`adjustDisposition`/`adjustSuspicion`). **Calls `actions.goToScene(result.nextSceneId)` before returning** — see the callout above.
+
+## encounters.ts
+
+Multi-round encounter setup and processing. Re-exported by the `narrativeEngine`
+barrel.
 
 - `startEncounter(encounterId: string, rounds: EncounterRound[], isSupernatural: boolean, state: GameState, actions: EngineActions): EncounterState` — for supernatural encounters, performs a reaction check at DC 12 using the higher of Nerve or Lore (Nerve on a tie). On failure, reduces composure by 1–2 and replaces round 1's first choice with its `worseAlternative` (when present). Returns an `EncounterState` (`currentRound: 0`, `reactionCheckPassed` = `null` for mundane).
-- `processEncounterChoice(choice: Choice, encounterState: EncounterState, state: GameState, actions: EngineActions): { encounterState: EncounterState; result: ChoiceResult }` — **escape paths (`isEscapePath`) are terminal**: they navigate to their `success`/`critical` outcome and mark the encounter `isComplete` immediately, before the round-advance logic, applying no damage (F-004). Otherwise runs the choice's faculty check (advantage from a revealed occult-type `advantageIf` clue, any revealed `advantageIf` clue, or active Veil Sight on a `lore` check). On failure/fumble applies `choice.encounterDamage`: **supernatural = dual-axis** (both composure and vitality); **mundane = single axis** (composure if set, else vitality). Sets `last-critical-faculty` on critical, applies `npcEffect`, advances `currentRound`, marks `isComplete` when rounds are exhausted, and calls `goToScene` once complete.
+- `processEncounterChoice(choice: Choice, encounterState: EncounterState, state: GameState, actions: EngineActions): { encounterState: EncounterState; result: ChoiceResult }` — **escape paths (`isEscapePath`) are terminal**: they navigate to their `success`/`critical` outcome and mark the encounter `isComplete` immediately, before the round-advance logic, applying no damage (F-004). Otherwise runs the choice's faculty check (advantage via `computeAdvantage` — a revealed `advantageIf` clue or active Veil Sight on a `lore` check). On failure/fumble applies `choice.encounterDamage`: **supernatural = dual-axis** (both composure and vitality); **mundane = single axis** (composure if set, else vitality). Calls `actions.setLastCriticalFaculty` on critical, applies `npcEffect`, advances `currentRound`, marks `isComplete` when rounds are exhausted, and calls `goToScene` once complete.
 - `getEncounterChoices(round: EncounterRound, state: GameState): Choice[]` — filters a round's choices by their derived conditions (`requiresClue`/`requiresDeduction`/`requiresFlag`/`requiresFaculty`); escape-path choices (`isEscapePath`) are included whenever their conditions are met. (Advantage is applied where it matters — the roll in `processEncounterChoice`; the former no-consumer `_hasAdvantage` annotation was removed — F-027.)
+
+## advantage.ts
+
+- `computeAdvantage(choice: Choice, state: GameState): boolean` — the **single source of truth** for whether a check rolls with advantage (F-014). Two grants OR'd together: any of the choice's `advantageIf` clue IDs is revealed, **or** a `lore` check while the Veil Sight flag (`FLAGS.veilSight`) is active. Used by regular checks (`computeChoiceResult`), encounter checks (`processEncounterChoice`), and the UI Advantage badge (via the parents that hold `GameState`), so all three agree.
 
 ## contentValidation.ts
 
@@ -105,7 +123,7 @@ Pure builders for `Deduction`s, plus the key-deduction recipe matcher.
 End-of-case logic: faculty bonus and vignette unlocks.
 
 - `interface CaseCompletionResult { facultyBonusGranted: Faculty | null; vignetteUnlocked: string | null }`.
-- `CaseProgression.completeCase(caseId: string, state: GameState, actions: EngineActions): CaseCompletionResult` — grants `+1` to the faculty stored in the `last-critical-faculty` flag (when it names a valid faculty), then checks vignette unlocks and, if one unlocks, sets the `vignette-unlocked-{id}` flag. Returns what was granted/unlocked.
+- `CaseProgression.completeCase(caseId: string, state: GameState, actions: EngineActions): CaseCompletionResult` — grants `+1` to the faculty stored in the typed `investigator.lastCriticalFaculty` field (F-013; when set), then checks vignette unlocks and, if one unlocks, sets the `vignette-unlocked-{id}` flag (`vignetteUnlockedFlag(id)` from `flags.ts`). Returns what was granted/unlocked.
 - `CaseProgression.checkVignetteUnlocks(state: GameState): string | null` — returns the id of the first not-yet-unlocked vignette whose condition is met. Registered conditions: `a-matter-of-shadows` (Lamplighters reputation ≥ 2), `the-rationalists-dilemma` (Rationalists Circle reputation ≥ 2), `the-debt-of-smoke` (persisted flag `wc-court-deal-made`), `the-unfinished-case` (flag `wc-case-complete`).
 - `CaseProgression.grantFacultyBonus(faculty: Faculty, actions: EngineActions): void` — `actions.updateFaculty(faculty, min(20, current + 1))`.
 
@@ -140,9 +158,9 @@ index at `gg_save_index` (array of `SaveSummary`, sorted by timestamp desc).
 > calls neither `Date.now()` nor `Math.random()`; the save id is generated in
 > `metaSlice`.
 
-- `const CURRENT_SAVE_VERSION = 2`.
+- `const CURRENT_SAVE_VERSION = 3`.
 - `interface SaveSummary { id: string; timestamp: string; caseName: string; investigatorName: string }`.
-- `SaveManager.save(saveId: string, state: GameState): void` — wraps `state` in a `SaveFile` (`version`, ISO `timestamp`, `state`), writes it, and upserts the index entry (re-sorted desc).
+- `SaveManager.save(saveId: string, state: GameState, caseTitle?: string): void` — wraps `state` in a `SaveFile` (`version`, ISO `timestamp`, `state`), writes it, and upserts the index entry (re-sorted desc). `caseTitle`, when supplied, becomes the summary's readable `caseName` (else it falls back to `state.currentCase`).
 - `SaveManager.load(saveId: string): GameState | null` — reads and parses the save, runs `migrate`, returns the migrated `state` (or `null` if missing/unparseable).
 - `SaveManager.listSaves(): SaveSummary[]` — returns the index.
 - `SaveManager.deleteSave(saveId: string): void` — removes the save and its index entry.
@@ -170,10 +188,37 @@ Pure conversion of `Effect` objects into player-facing feedback strings
 - `generateEffectMessage(effect: Effect, npcs: Record<string, NPCState>): string | null` — returns `null` for `flag`, `discoverClue`, and `setMemoryFlag` (which surface their own feedback) and for effects with no `delta`. Otherwise appends a mechanical suffix (`(Composure +2)`, etc.). When `effect.description` is authored, it is used as the message text with the mechanical suffix still appended; otherwise an atmospheric message is generated per type (composure, vitality, disposition, suspicion, reputation), resolving NPC names from `npcs`.
 - `generateEffectMessages(effects: Effect[], npcs: Record<string, NPCState>): string[]` — maps over the effects and drops the `null` results.
 
+## flags.ts
+
+Single source of truth for engine/progression flag string keys (F-018), so no
+flag literal is duplicated across the engine and store.
+
+- `const FLAGS` — the named engine flags: `breakdownOccurred` (`'breakdown-occurred'`), `incapacitated` (`'incapacitated'`), `veilSight` (`'ability-veil-sight-active'`).
+- `abilityAutoSucceedFlag(faculty: Faculty): string | undefined` — the auto-succeed flag for a faculty, or `undefined` if that faculty has no ability (only `reason`/`vigor`/`influence` do).
+- `vignetteUnlockedFlag(vignetteId: string): string` — `` `vignette-unlocked-${vignetteId}` ``.
+- `const CASE_LOAD_CLEARED_FLAGS: readonly string[]` — the flags wiped when a new case/vignette starts (breakdown/incapacitation, the three auto-succeed flags, veil sight). The former `last-critical-faculty` flag is **gone** — the reward is now the typed `investigator.lastCriticalFaculty` field, reset directly in the load actions (F-013).
+- `const ARCHETYPE_ABILITY_FLAG: Record<Archetype, string>` — each archetype's ability flag (deductionist→auto-succeed-reason, occultist→veil-sight, operator→auto-succeed-vigor, mesmerist→auto-succeed-influence). Set by `App` when the once-per-case ability is activated.
+
+## constants.ts
+
+- `const FACTIONS: ReadonlySet<string>` — the four faction names (Rationalists Circle, Hermetic Order of the Grey Dawn, Lamplighters, Court of Smoke); used for validation allowlists.
+- `const OUTCOME_TIERS` — `['critical', 'success', 'partial', 'failure', 'fumble']`, typed `satisfies readonly OutcomeTier[]`.
+- `assertNever(x: never): never` — compile-time exhaustiveness guard for `switch` statements (throws at runtime if reached).
+
+## haltScenes.ts
+
+Identifies the shared "investigation halted" terminal scenes so a knockout
+(0 Composure/Vitality) is not mislabelled "Case Complete" (F-011, issue #9).
+
+- `type HaltReason = 'composure' | 'vitality'`.
+- `const HALT_SCENE_IDS = ['breakdown', 'incapacitation']` — the canonical shared halt-scene ids.
+- `isHaltScene(scene: SceneNode | null | undefined): boolean` — true when the scene is a breakdown/incapacitation scene, resolving case-specific variants via `variantOf` (e.g. `wc-breakdown` → `breakdown`).
+- `haltReason(scene): HaltReason | null` — `breakdown` → `composure`, `incapacitation` → `vitality`, else `null`.
+
 ## engineActions.ts
 
 The action interface that impure engine functions receive instead of importing
 the store — this is what breaks the engine→store circular dependency (see
 [architecture.md](./architecture.md)).
 
-- `interface EngineActions` declares: `adjustComposure(delta)`, `adjustVitality(delta)`, `setFlag(key, value: boolean | string)`, `adjustDisposition(npcId, delta)`, `adjustSuspicion(npcId, delta)`, `adjustReputation(faction, delta)`, `discoverClue(clueId)`, `goToScene(sceneId)`, `updateFaculty(faculty, value)`, and a read-only `investigator: Investigator`. The store's slice actions satisfy this shape at call sites.
+- `interface EngineActions` declares: `adjustComposure(delta)`, `adjustVitality(delta)`, `setFlag(key, value: boolean | string)`, `setLastCriticalFaculty(faculty: Faculty)` (writes the typed `investigator.lastCriticalFaculty` reward field — F-013), `adjustDisposition(npcId, delta)`, `adjustSuspicion(npcId, delta)`, `adjustReputation(faction, delta)`, `discoverClue(clueId)`, `goToScene(sceneId)`, `updateFaculty(faculty, value)`, and a read-only `investigator: Investigator`. The store's slice actions satisfy this shape at call sites.
