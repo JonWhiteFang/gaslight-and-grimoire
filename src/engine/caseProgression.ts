@@ -4,7 +4,6 @@
 
 import type { Faculty, GameState } from '../types';
 import type { EngineActions } from './engineActions';
-import { SaveManager } from './saveManager';
 import { vignetteUnlockedFlag } from './flags';
 
 // ─── Types ────────────────────────────────────────────────────────────────────

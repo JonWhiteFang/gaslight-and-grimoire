@@ -4,7 +4,7 @@
  * Contains the case title, Evidence Board toggle, Journal button,
  * NPC Gallery button, Ability button, and Menu button.
  */
-import { useStore, buildGameState } from '../../store';
+import { useStore, useGameState } from '../../store';
 import { resolveCaseTitle } from '../../utils/caseTitle';
 import { AbilityButton } from './AbilityButton';
 import { HintButton } from './HintButton';
@@ -36,7 +36,7 @@ export function HeaderBar({
   const archetype = useStore((s) => s.investigator.archetype);
   const abilityUsed = useStore((s) => s.investigator.abilityUsed);
 
-  const gameState = useStore(buildGameState);
+  const gameState = useGameState();
 
   const hasNewClues = Object.values(clues).some((c) => c.status === 'new');
   const title = resolveCaseTitle(caseTitle, currentCase);

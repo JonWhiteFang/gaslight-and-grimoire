@@ -2,7 +2,7 @@
  * ChoicePanel — filters and renders available choices for the current scene.
  */
 import React, { useCallback } from 'react';
-import { useStore, buildGameState } from '../../store';
+import { useStore, useGameState, buildGameState } from '../../store';
 import { evaluateConditions, processChoice } from '../../engine/narrativeEngine';
 import { computeAdvantage } from '../../engine/advantage';
 import { ChoiceCard } from './ChoiceCard';
@@ -51,7 +51,7 @@ export function ChoicePanel({ choices, onChoiceSelected }: ChoicePanelProps) {
   const clues = useStore((s) => s.clues);
   const deductions = useStore((s) => s.deductions);
   const setCheckResult = useStore((s) => s.setCheckResult);
-  const gameState = useStore(buildGameState);
+  const gameState = useGameState();
 
   const revealedClueIds = new Set(
     Object.values(clues)

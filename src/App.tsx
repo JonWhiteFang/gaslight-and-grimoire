@@ -1,11 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback, lazy, Suspense } from 'react';
 import { CharacterCreation } from './components/CharacterCreation';
 import { HeaderBar } from './components/HeaderBar';
-import { EvidenceBoard } from './components/EvidenceBoard';
-import { CaseJournal } from './components/CaseJournal';
-import { NPCGallery } from './components/NPCGallery';
 import { AccessibilityProvider } from './components/AccessibilityProvider/AccessibilityProvider';
-import { SettingsPanel } from './components/SettingsPanel/SettingsPanel';
 import { AmbientAudio } from './components/AmbientAudio/AmbientAudio';
 import { TitleScreen } from './components/TitleScreen/TitleScreen';
 import { LoadGameScreen } from './components/TitleScreen/LoadGameScreen';
@@ -13,13 +9,42 @@ import { NarrativePanel, SceneText } from './components/NarrativePanel';
 import { StatusBar } from './components/StatusBar';
 import { ChoicePanel } from './components/ChoicePanel';
 import { EncounterPanel } from './components/EncounterPanel';
-import { CaseCompletion } from './components/CaseCompletion';
 import { CaseSelection } from './components/CaseSelection';
 import { InvestigationHalted } from './components/InvestigationHalted';
-import { useStore, useCurrentScene, buildGameState } from './store';
+import { useStore, useCurrentScene } from './store';
 import { isHaltScene, haltReason } from './engine/haltScenes';
 import { ARCHETYPE_ABILITY_FLAG } from './engine/flags';
 import type { CaseCompletionResult } from './engine/caseProgression';
+
+// Overlays + the case-completion screen are off the first-paint path — a
+// Title-screen visitor shouldn't download the Evidence Board, Journal, NPC
+// Gallery, or Settings before the game even starts (F-043). Lazy-load them
+// behind a Suspense boundary. The barrels export named symbols, so map each to
+// a default for React.lazy.
+const EvidenceBoard = lazy(() =>
+  import('./components/EvidenceBoard').then((m) => ({ default: m.EvidenceBoard })),
+);
+const CaseJournal = lazy(() =>
+  import('./components/CaseJournal').then((m) => ({ default: m.CaseJournal })),
+);
+const NPCGallery = lazy(() =>
+  import('./components/NPCGallery').then((m) => ({ default: m.NPCGallery })),
+);
+const SettingsPanel = lazy(() =>
+  import('./components/SettingsPanel/SettingsPanel').then((m) => ({ default: m.SettingsPanel })),
+);
+const CaseCompletion = lazy(() =>
+  import('./components/CaseCompletion').then((m) => ({ default: m.CaseCompletion })),
+);
+
+/** Brief fallback shown while a lazy overlay/screen chunk loads. */
+function OverlayFallback() {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gaslight-ink/80">
+      <p className="text-gaslight-amber text-lg animate-pulse font-serif">Loading…</p>
+    </div>
+  );
+}
 
 type Screen = 'title' | 'character-creation' | 'case-selection' | 'game' | 'load-game' | 'loading' | 'case-complete';
 
@@ -102,7 +127,7 @@ export default function App() {
 
   const archetype = useStore((s) => s.investigator.archetype);
   const abilityUsed = useStore((s) => s.investigator.abilityUsed);
-  const useAbility = useStore((s) => s.useAbility);
+  const activateAbility = useStore((s) => s.useAbility);
   const setFlag = useStore((s) => s.setFlag);
   const loadGame = useStore((s) => s.loadGame);
   const loadAndStartCase = useStore((s) => s.loadAndStartCase);
@@ -116,10 +141,10 @@ export default function App() {
 
   const handleActivateAbility = useCallback(() => {
     if (abilityUsed) return;
-    useAbility();
+    activateAbility();
     const flag = ARCHETYPE_ABILITY_FLAG[archetype];
     if (flag) setFlag(flag, true);
-  }, [abilityUsed, archetype, useAbility, setFlag]);
+  }, [abilityUsed, archetype, activateAbility, setFlag]);
 
   const handleLoadSave = useCallback(
     async (saveId: string) => {
@@ -177,9 +202,11 @@ export default function App() {
           loadError={loadError}
           onDismissError={() => setLoadError(null)}
         />
-        {isSettingsOpen && (
-          <SettingsPanel onClose={() => setIsSettingsOpen(false)} />
-        )}
+        <Suspense fallback={<OverlayFallback />}>
+          {isSettingsOpen && (
+            <SettingsPanel onClose={() => setIsSettingsOpen(false)} />
+          )}
+        </Suspense>
       </AccessibilityProvider>
     );
   }
@@ -208,16 +235,18 @@ export default function App() {
   if (screen === 'case-complete' && completionResult) {
     return (
       <AccessibilityProvider>
-        <CaseCompletion
-          facultyBonusGranted={completionResult.facultyBonusGranted}
-          vignetteUnlocked={completionResult.vignetteUnlocked}
-          endingNarrative={endingNarrative}
-          onContinue={() => {
-            setCompletionResult(null);
-            setEndingNarrative(null);
-            setScreen('case-selection');
-          }}
-        />
+        <Suspense fallback={<OverlayFallback />}>
+          <CaseCompletion
+            facultyBonusGranted={completionResult.facultyBonusGranted}
+            vignetteUnlocked={completionResult.vignetteUnlocked}
+            endingNarrative={endingNarrative}
+            onContinue={() => {
+              setCompletionResult(null);
+              setEndingNarrative(null);
+              setScreen('case-selection');
+            }}
+          />
+        </Suspense>
       </AccessibilityProvider>
     );
   }
@@ -277,19 +306,21 @@ export default function App() {
         <GameContent onCompleteCase={handleCompleteCase} onHalt={handleHalt} reviewSceneId={reviewSceneId} onDismissReview={() => setReviewSceneId(null)} />
         </div>
 
-        {/* Overlays */}
-        {isEvidenceBoardOpen && (
-          <EvidenceBoard onClose={() => setIsEvidenceBoardOpen(false)} />
-        )}
-        {isJournalOpen && (
-          <CaseJournal onClose={() => setIsJournalOpen(false)} onReviewScene={(id) => setReviewSceneId(id)} />
-        )}
-        {isGalleryOpen && (
-          <NPCGallery onClose={() => setIsGalleryOpen(false)} />
-        )}
-        {isSettingsOpen && (
-          <SettingsPanel onClose={() => setIsSettingsOpen(false)} />
-        )}
+        {/* Overlays — lazy-loaded (F-043), behind a Suspense boundary. */}
+        <Suspense fallback={<OverlayFallback />}>
+          {isEvidenceBoardOpen && (
+            <EvidenceBoard onClose={() => setIsEvidenceBoardOpen(false)} />
+          )}
+          {isJournalOpen && (
+            <CaseJournal onClose={() => setIsJournalOpen(false)} onReviewScene={(id) => setReviewSceneId(id)} />
+          )}
+          {isGalleryOpen && (
+            <NPCGallery onClose={() => setIsGalleryOpen(false)} />
+          )}
+          {isSettingsOpen && (
+            <SettingsPanel onClose={() => setIsSettingsOpen(false)} />
+          )}
+        </Suspense>
       </div>
     </AccessibilityProvider>
   );

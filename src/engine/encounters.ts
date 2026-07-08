@@ -38,7 +38,7 @@ export function startEncounter(
 ): EncounterState {
 
   let reactionCheckPassed: boolean | null = null;
-  let processedRounds = rounds.map((r) => ({ ...r, choices: [...r.choices] }));
+  const processedRounds = rounds.map((r) => ({ ...r, choices: [...r.choices] }));
 
   if (isSupernatural && rounds.length > 0) {
     // Use the higher of Nerve or Lore, with Nerve as tiebreaker
