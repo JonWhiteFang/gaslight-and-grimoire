@@ -18,6 +18,7 @@ import type {
   EncounterState,
   Faculty,
   GameState,
+  KeyDeduction,
   NPCState,
   NpcSuspicionTier,
   SceneNode,
@@ -65,12 +66,17 @@ export async function loadCase(caseId: string): Promise<CaseData> {
       fetchJson<{ variants: SceneNode[] }>(`${base}/variants.json`),
     ]);
 
+  // deductions.json is optional — a case without key deductions simply has none.
+  const recipes = await fetchJson<{ deductions: KeyDeduction[] }>(`${base}/deductions.json`)
+    .then((f) => f.deductions)
+    .catch(() => [] as KeyDeduction[]);
+
   const allScenes = [...act1.scenes, ...act2.scenes, ...act3.scenes];
   const scenes = await injectSharedScenes(indexById(allScenes));
   const clues = indexById(cluesFile.clues);
   const npcs = indexById(npcsFile.npcs);
 
-  return { meta, scenes, clues, npcs, variants: variantsFile.variants };
+  return { meta, scenes, clues, npcs, variants: variantsFile.variants, recipes };
 }
 
 /**
