@@ -130,9 +130,11 @@ export const createNarrativeSlice: StateCreator<
       // and brick the investigator across all cases (and poison the autosave).
       state.investigator.composure = 10;
       state.investigator.vitality = 10;
-      // Clears breakdown/incapacitation halt flags, ability auto-succeed/veil-sight
-      // flags, and the pending critical-success faculty reward (last-critical-faculty)
-      // so nothing earned in a previous case leaks into this one.
+      // Clear the pending critical-success faculty reward so a critical earned in a
+      // previous case can't grant a bonus here (F-013 — was the last-critical-faculty flag).
+      state.investigator.lastCriticalFaculty = undefined;
+      // Clears breakdown/incapacitation halt flags and ability auto-succeed/veil-sight
+      // flags so nothing earned in a previous case leaks into this one.
       for (const f of CASE_LOAD_CLEARED_FLAGS) delete state.flags[f];
 
       // Clear stale state from previous case
@@ -177,9 +179,11 @@ export const createNarrativeSlice: StateCreator<
       state.visitedScenes = [];
       state.lastEffectMessages = [];
       state.investigator.abilityUsed = false;
-      // Fresh start: restore meters and clear halt flags (see loadAndStartCase).
+      // Fresh start: restore meters, clear the faculty reward, and clear halt flags
+      // (see loadAndStartCase).
       state.investigator.composure = 10;
       state.investigator.vitality = 10;
+      state.investigator.lastCriticalFaculty = undefined;
       for (const f of CASE_LOAD_CLEARED_FLAGS) delete state.flags[f];
       state.clues = {};
       state.npcs = {};

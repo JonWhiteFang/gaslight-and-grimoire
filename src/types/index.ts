@@ -41,6 +41,13 @@ export interface Investigator {
   composure: number; // 0–10
   vitality: number; // 0–10
   abilityUsed: boolean;
+  /**
+   * The faculty of the most recent critical-success check this case. Read by
+   * caseProgression.completeCase to grant the +1 end-of-case faculty bonus.
+   * Reset to undefined on case/vignette load. Optional so it round-trips safely
+   * through older saves (absent → no bonus). (F-013)
+   */
+  lastCriticalFaculty?: Faculty;
 }
 
 export interface ArchetypeDefinition {

@@ -14,5 +14,6 @@ export interface EngineActions {
   discoverClue: (clueId: string) => void;
   goToScene: (sceneId: string) => void;
   updateFaculty: (faculty: Faculty, value: number) => void;
+  setLastCriticalFaculty: (faculty: Faculty) => void;
   investigator: Investigator;
 }

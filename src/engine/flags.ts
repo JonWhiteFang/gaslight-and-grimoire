@@ -5,7 +5,6 @@ export const FLAGS = {
   breakdownOccurred: 'breakdown-occurred',
   incapacitated: 'incapacitated',
   veilSight: 'ability-veil-sight-active',
-  lastCriticalFaculty: 'last-critical-faculty',
 } as const;
 
 const ABILITY_AUTO_SUCCEED: Partial<Record<Faculty, string>> = {
@@ -22,7 +21,12 @@ export function vignetteUnlockedFlag(vignetteId: string): string {
   return `vignette-unlocked-${vignetteId}`;
 }
 
-/** Flags wiped when a new case/vignette starts (see narrativeSlice load actions). */
+/**
+ * Flags wiped when a new case/vignette starts (see narrativeSlice load actions).
+ * NOTE: the former `last-critical-faculty` flag is gone — the critical-success
+ * faculty reward is now the typed `investigator.lastCriticalFaculty` field,
+ * reset directly in the load actions (F-013).
+ */
 export const CASE_LOAD_CLEARED_FLAGS: readonly string[] = [
   FLAGS.breakdownOccurred,
   FLAGS.incapacitated,
@@ -30,7 +34,6 @@ export const CASE_LOAD_CLEARED_FLAGS: readonly string[] = [
   ABILITY_AUTO_SUCCEED.vigor!,
   ABILITY_AUTO_SUCCEED.influence!,
   FLAGS.veilSight,
-  FLAGS.lastCriticalFaculty,
 ];
 
 /** Archetype → its ability flag (superset of auto-succeed; includes veil sight). */

@@ -10,6 +10,7 @@ export interface InvestigatorSlice {
   adjustVitality: (delta: number) => void;
   useAbility: () => void;
   resetAbility: () => void;
+  setLastCriticalFaculty: (faculty: Faculty) => void;
 }
 
 const defaultInvestigator: Investigator = {
@@ -70,5 +71,10 @@ export const createInvestigatorSlice: StateCreator<
   resetAbility: () =>
     set((state) => {
       state.investigator.abilityUsed = false;
+    }),
+
+  setLastCriticalFaculty: (faculty) =>
+    set((state) => {
+      state.investigator.lastCriticalFaculty = faculty;
     }),
 });

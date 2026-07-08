@@ -5,7 +5,7 @@
 import type { Faculty, GameState } from '../types';
 import type { EngineActions } from './engineActions';
 import { SaveManager } from './saveManager';
-import { FLAGS, vignetteUnlockedFlag } from './flags';
+import { vignetteUnlockedFlag } from './flags';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -63,10 +63,10 @@ export const CaseProgression = {
    */
   completeCase(caseId: string, state: GameState, actions: EngineActions): CaseCompletionResult {
     // 1. Grant faculty bonus from critical success moment
-    const criticalFaculty = state.flags[FLAGS.lastCriticalFaculty] as unknown as Faculty | undefined;
+    const criticalFaculty = state.investigator.lastCriticalFaculty;
     let facultyBonusGranted: Faculty | null = null;
 
-    if (criticalFaculty && isValidFaculty(criticalFaculty)) {
+    if (criticalFaculty) {
       CaseProgression.grantFacultyBonus(criticalFaculty, actions);
       facultyBonusGranted = criticalFaculty;
     }
@@ -124,13 +124,3 @@ export const CaseProgression = {
     actions.updateFaculty(faculty, newValue);
   },
 };
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const VALID_FACULTIES: Faculty[] = [
-  'reason', 'perception', 'nerve', 'vigor', 'influence', 'lore',
-];
-
-function isValidFaculty(value: unknown): value is Faculty {
-  return VALID_FACULTIES.includes(value as Faculty);
-}

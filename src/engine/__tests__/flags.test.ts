@@ -7,9 +7,8 @@ describe('FLAGS', () => {
     expect(abilityAutoSucceedFlag('vigor')).toBe('ability-auto-succeed-vigor');
     expect(abilityAutoSucceedFlag('influence')).toBe('ability-auto-succeed-influence');
   });
-  it('exposes veil sight and last-critical-faculty', () => {
+  it('exposes veil sight', () => {
     expect(FLAGS.veilSight).toBe('ability-veil-sight-active');
-    expect(FLAGS.lastCriticalFaculty).toBe('last-critical-faculty');
   });
   it('builds the vignette-unlocked flag for an id', () => {
     expect(vignetteUnlockedFlag('a-matter-of-shadows')).toBe('vignette-unlocked-a-matter-of-shadows');
@@ -19,7 +18,6 @@ describe('FLAGS', () => {
       'breakdown-occurred', 'incapacitated',
       'ability-auto-succeed-reason', 'ability-auto-succeed-vigor',
       'ability-auto-succeed-influence', 'ability-veil-sight-active',
-      'last-critical-faculty',
     ]));
   });
 });

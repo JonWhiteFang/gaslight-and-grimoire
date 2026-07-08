@@ -16,7 +16,6 @@ import type {
   Condition,
   EncounterRound,
   EncounterState,
-  Faculty,
   GameState,
   KeyDeduction,
   NPCState,
@@ -333,7 +332,7 @@ export function processChoice(
   const result = computeChoiceResult(choice, state);
 
   if (result.tier === 'critical' && choice.faculty) {
-    actions.setFlag(FLAGS.lastCriticalFaculty, choice.faculty as unknown as boolean);
+    actions.setLastCriticalFaculty(choice.faculty);
   }
 
   if (choice.npcEffect) {
@@ -500,7 +499,7 @@ export function processEncounterChoice(
   }
 
   if (tier === 'critical' && choice.faculty) {
-    actions.setFlag(FLAGS.lastCriticalFaculty, choice.faculty as unknown as boolean);
+    actions.setLastCriticalFaculty(choice.faculty);
   }
 
   // Apply damage effects
