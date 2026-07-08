@@ -113,6 +113,9 @@ export function validateContent(caseData: CaseData): ValidationResult {
     variants: caseData.variants,
     clues: Object.values(caseData.clues),
     npcs: Object.values(caseData.npcs),
+    // Key-deduction recipes form the requiresDeduction/hasDeduction registry — must
+    // be passed or every such reference reads as "unknown" and load-validation throws.
+    recipes: caseData.recipes,
     // breakdown/incapacitation are injected into caseData.scenes as base scenes,
     // but declare them shared too so variantOf targets resolve if injection changes.
     sharedSceneIds: ['breakdown', 'incapacitation'],
