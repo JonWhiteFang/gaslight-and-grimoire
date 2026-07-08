@@ -1,4 +1,4 @@
-import type { Faculty } from '../types';
+import type { Archetype, Faculty } from '../types';
 
 /** Single source of truth for engine/progression flag string keys. */
 export const FLAGS = {
@@ -26,17 +26,17 @@ export function vignetteUnlockedFlag(vignetteId: string): string {
 export const CASE_LOAD_CLEARED_FLAGS: readonly string[] = [
   FLAGS.breakdownOccurred,
   FLAGS.incapacitated,
-  'ability-auto-succeed-reason',
-  'ability-auto-succeed-vigor',
-  'ability-auto-succeed-influence',
+  ABILITY_AUTO_SUCCEED.reason!,
+  ABILITY_AUTO_SUCCEED.vigor!,
+  ABILITY_AUTO_SUCCEED.influence!,
   FLAGS.veilSight,
   FLAGS.lastCriticalFaculty,
 ];
 
 /** Archetype → its ability flag (superset of auto-succeed; includes veil sight). */
-export const ARCHETYPE_ABILITY_FLAG: Record<string, string> = {
-  deductionist: 'ability-auto-succeed-reason',
+export const ARCHETYPE_ABILITY_FLAG: Record<Archetype, string> = {
+  deductionist: ABILITY_AUTO_SUCCEED.reason!,
   occultist: FLAGS.veilSight,
-  operator: 'ability-auto-succeed-vigor',
-  mesmerist: 'ability-auto-succeed-influence',
+  operator: ABILITY_AUTO_SUCCEED.vigor!,
+  mesmerist: ABILITY_AUTO_SUCCEED.influence!,
 };
