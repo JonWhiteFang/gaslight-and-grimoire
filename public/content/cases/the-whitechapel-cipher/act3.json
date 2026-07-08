@@ -97,7 +97,7 @@
         },
         {
           "id": "wc-choice-name-harland",
-          "text": "You are a clerk taking dictation, Aldgate. I can name the man who wrote your orders — Superintendent Harland — and the desk above his. Give me that, and you are a witness, not the murderer.",
+          "text": "You are a clerk taking dictation, Aldgate. I can name the man who wrote your orders — Deputy Commissioner Harland — and the office that shielded him. Give me that, and you are a witness, not the murderer.",
           "requiresDeduction": "wc-deduction-harland-mastermind",
           "faculty": "reason",
           "difficulty": 12,
@@ -376,7 +376,7 @@
     {
       "id": "wc-act3-ending-true-exposure",
       "act": 3,
-      "narrative": "You lay it out the way the cipher itself was built — piece by piece, until the pattern is undeniable. Aldgate breaks first, then the paper trail does the rest: Harland's suppression order, the requisitioned printshop, the names struck from three case files by the same hand. When Graves arrives you give him not a frightened clerk but a superintendent of the Metropolitan Police and the Deputy Commissioner standing behind him. It is not a quiet victory. Careers end. Some of them belonged to men who shook your hand. But the cover-up does not survive the morning, and for once the rot is cut out at the root rather than the branch.",
+      "narrative": "You lay it out the way the cipher itself was built — piece by piece, until the pattern is undeniable. Aldgate breaks first, then the paper trail does the rest: Harland's suppression order, the requisitioned printshop, the names struck from three case files by the same hand. When Graves arrives you give him not a frightened clerk but the Deputy Commissioner of the Metropolitan Police himself. It is not a quiet victory. Careers end. Some of them belonged to men who shook your hand. But the cover-up does not survive the morning, and for once the rot is cut out at the root rather than the branch.",
       "cluesAvailable": [],
       "choices": [],
       "onEnter": [
