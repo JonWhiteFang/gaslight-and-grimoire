@@ -58,7 +58,7 @@ export const CaseProgression = {
   /**
    * Called when a Case ends.
    * 1. Persists flags, faction reputation, and NPC state via auto-save.
-   * 2. Grants +1 to the Faculty stored in the `last-critical-faculty` flag.
+   * 2. Grants +1 to the Faculty stored in the `investigator.lastCriticalFaculty` field.
    * 3. Checks vignette unlock conditions.
    */
   completeCase(caseId: string, state: GameState, actions: EngineActions): CaseCompletionResult {

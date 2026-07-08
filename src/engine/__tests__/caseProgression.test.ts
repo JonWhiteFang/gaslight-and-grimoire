@@ -1,7 +1,7 @@
 /**
  * Unit tests for CaseProgression.
  *
- * 1. completeCase grants +1 to the faculty stored in `last-critical-faculty` flag
+ * 1. completeCase grants +1 to the faculty stored in the `investigator.lastCriticalFaculty` field
  * 2. checkVignetteUnlocks returns 'a-matter-of-shadows' when Lamplighters rep ≥ 2
  * 3. checkVignetteUnlocks returns null when Lamplighters rep < 2
  * 4. grantFacultyBonus caps faculty at 20
