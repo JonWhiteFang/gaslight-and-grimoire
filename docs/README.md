@@ -5,7 +5,8 @@ Victorian London where magic exists beneath the rational world. Players
 investigate branching mysteries that blend Sherlock Holmes-style deduction with
 D&D-style faculty checks and d20 dice mechanics. It is built with React 18, a
 single Zustand store (Immer), Tailwind CSS, Framer Motion, and Howler.js, and
-deployed to GitHub Pages.
+deployed as a Cloudflare static-assets Worker at
+`holodeck.jonwhitefang.uk/gaslight-and-grimoire/`.
 
 ## Documentation map
 

@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A browser-based choose-your-own-adventure game set in Victorian London where magic exists beneath the rational world. Players investigate branching mysteries blending Sherlock Holmes-style deduction with D&D-style faculty checks and dice mechanics. Built with React 18, Zustand, Tailwind CSS, Framer Motion, and Howler.js. Deployed to GitHub Pages.
+A browser-based choose-your-own-adventure game set in Victorian London where magic exists beneath the rational world. Players investigate branching mysteries blending Sherlock Holmes-style deduction with D&D-style faculty checks and dice mechanics. Built with React 18, Zustand, Tailwind CSS, Framer Motion, and Howler.js. Deployed as a Cloudflare static-assets Worker at `holodeck.jonwhitefang.uk/gaslight-and-grimoire/`.
 
 ## Documentation (docs/)
 
@@ -117,7 +117,7 @@ scripts/
   validateCase.ts             # The real validator; imports shared src/engine/contentValidation (edit logic HERE, not the .mjs shim)
 
 .github/workflows/
-  deploy.yml                  # Test-gated build + deploy to GitHub Pages (push/PR to main)
+  deploy.yml                  # CI gate: lint + validator + tests + build-compiles check (push/PR to main). Deploy is Cloudflare-side (wrangler.jsonc)
   security.yml                # OWASP Dependency-Check + npm audit (weekly + on PR)
 ```
 
@@ -245,16 +245,23 @@ Custom colour palette under `gaslight-*`:
 
 ## CI/CD
 
-- `deploy.yml` — on push to main, PR to main, or manual dispatch. Three jobs:
+- **Deployment (issue #47):** a **Cloudflare static-assets Worker** at
+  `holodeck.jonwhitefang.uk/gaslight-and-grimoire/*` (retired GitHub Pages). Config is `wrangler.jsonc`
+  (assets-only, no Worker script; `assets.directory` → `./dist`); Cloudflare git-connects this repo and
+  runs `npm run build` on push to `main`. `public/_headers` carries real response headers (the CSP,
+  incl. `frame-ancestors 'none'` which the `<meta>` CSP can't). `scripts/nest-for-cloudflare.mjs` is a
+  postbuild step that nests `dist/*` under `dist/gaslight-and-grimoire/` (except `_headers`) so the
+  Worker's 1:1 path→file mapping matches the routed prefix. Cloudflare-side setup (Worker, route, DNS,
+  root redirect) is owner-managed, out of repo scope.
+- `deploy.yml` (workflow name: `CI`) — on push to main, PR to main, or manual dispatch. Two jobs:
   `test` (`npm run lint` + validator `node scripts/validateCase.mjs` + `npm run test:run`) →
-  `build` (`npm run build`) → `deploy`. `build` needs `test`, so a failing lint/validator/test
-  blocks the merge gate. Dependency auditing is **not** on the deploy path — it lives in
-  `security.yml` (F-032), so a new transitive advisory can't block a docs deploy. `deploy` is
-  skipped on PR events (`if: github.event_name != 'pull_request'`). `concurrency: cancel-in-progress: false`.
-  Node pinned via `.nvmrc` (`node-version-file`).
+  `build` (`npm run build`, build-compiles check only — no publish). `build` needs `test`, so a failing
+  lint/validator/test blocks the merge gate. It no longer publishes anywhere (deploy is Cloudflare-side).
+  Dependency auditing is **not** here — it lives in `security.yml` (F-032). `concurrency:
+  cancel-in-progress: false`. Node pinned via `.nvmrc` (`node-version-file`).
 - `security.yml` — on PR to main + weekly Monday 08:00 UTC: npm audit + OWASP Dependency-Check (fail on CVSS ≥ 7).
 - `.github/dependabot.yml` — weekly grouped npm + github-actions updates (F-039).
-- Vite base path: `/gaslight-and-grimoire/`.
+- Vite base path: `/gaslight-and-grimoire/` (matches the Worker route prefix — keep unchanged).
 
 ## Character System
 

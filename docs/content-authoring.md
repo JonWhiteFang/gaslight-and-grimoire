@@ -14,8 +14,8 @@ clue discovery are evaluated.
 ## Content layout
 
 `public/content/` is served at the site root by Vite, so the engine fetches
-these files at runtime as `/content/...` (base-path prefixed for GitHub Pages —
-see architecture.md's data-flow section).
+these files at runtime as `/content/...` (base-path prefixed for the
+`/gaslight-and-grimoire/` Worker route — see architecture.md's data-flow section).
 
 ```
 public/content/
