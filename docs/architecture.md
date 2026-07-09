@@ -4,13 +4,14 @@
 
 Gaslight & Grimoire is a browser-based choose-your-own-adventure game built with
 React 18, a single Zustand store (Immer middleware), Tailwind CSS, Framer Motion,
-and Howler.js, deployed to GitHub Pages. The system enforces a strict split
-between two domains:
+and Howler.js, deployed as a Cloudflare static-assets Worker at
+`holodeck.jonwhitefang.uk/gaslight-and-grimoire/`. The system enforces a strict
+split between two domains:
 
 - **`public/content/`** — narrative data as JSON (manifest, cases, side-cases,
   shared scenes). Vite serves `public/` at the site root, so the engine fetches
   these at runtime as `/content/...` (prefixed with `import.meta.env.BASE_URL`
-  for the GitHub Pages base path).
+  for the `/gaslight-and-grimoire/` base path — the Worker's routed prefix).
 - **`src/engine/`** — game logic, written as pure functions where possible, with
   no imports of the store.
 

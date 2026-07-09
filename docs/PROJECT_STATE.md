@@ -8,14 +8,16 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-08 (**Closed P3 #22 polish — PR #46 merged (`1ac3c09`).** Perf: F-044 rAF-throttle
-EvidenceBoard scroll/resize/mousemove; F-045 `useShallow` on object selectors + `React.memo` ChoiceCard/ClueCard + memoized
-Sets; F-046 LazyMotion + `m` (motion chunk 121.85 KB → 79.13 KB); F-047 cache shared scenes across loads. A11y: F-048
-reduced-motion gating on ConnectionThread/DeductionButton, F-049 focusable typewriter-skip + state-driven sr-only region
-(no aria-live spam), F-050 WCAG-AA helper-text contrast, F-051 skip-to-content link. Reviewed via finder agent → no bugs
-(one a11y double-announce nit fixed). Test baseline **547 → 554** (+7; 56 files). **The entire audit backlog (P0–P3) is now
-cleared except #20 (media).** Earlier same day: P3 #21 hardening (PR #45), engine-reference rewrite (PR #44), P2
-#15/#16/#17 (PR #37). **Remaining: only #20 (media — ambient loops + perceptual QA, partly user-blocked).**)_
+_Last updated: 2026-07-09 (**Closed #47 — migrated deployment from GitHub Pages to a Cloudflare
+static-assets Worker at `holodeck.jonwhitefang.uk/gaslight-and-grimoire/`.** PR #48 (`2e539fa`): `wrangler.jsonc`
+(assets-only), `public/_headers` (real CSP header + `frame-ancestors 'none'`), `deploy.yml` → CI gate only (no publish).
+PR #49 (`7144d34`): `scripts/nest-for-cloudflare.mjs` postbuild — nests `dist/*` under `dist/gaslight-and-grimoire/`
+(except `_headers`) so the Worker's 1:1 path→file mapping matches the routed prefix (fixed the live 404 the owner found).
+Owner re-verified live: 200 + correct CSP, content loads, deep-links, character-creation works end-to-end. GitHub Pages
+unpublished via API. Decision recorded in **ADR-0007** (Enacted). Doc-drift sweep fixed all "GitHub Pages" deploy refs
+across CLAUDE.md + docs/. Test baseline **554** (unchanged; 56 files). **Now: the entire audit backlog is cleared except
+#20 (media — ambient loops + perceptual QA, partly user-blocked).** Prior day (2026-07-08): P3 #22 polish (PR #46), #21
+hardening (PR #45), engine-reference rewrite (PR #44).)_
 
 ---
 
@@ -25,15 +27,20 @@ cleared except #20 (media).** Earlier same day: P3 #21 hardening (PR #45), engin
   **fully cleared** (#1–#5, #11). P1 backlog **fully cleared** — the code cluster (#7, #8, #9, #10, #12) plus
   **#6 (deduction-gated content, PR #32)**, the last open P1. The deduction mechanic is now load-bearing.
   **The entire P0–P3 audit backlog is cleared** except **#20 (media assets)**, which is partly user-blocked (needs generated audio).
+- **Deployment:** **Cloudflare static-assets Worker** at `holodeck.jonwhitefang.uk/gaslight-and-grimoire/*` (GitHub
+  Pages retired, ADR-0007). Config in-repo: `wrangler.jsonc` (assets-only), `public/_headers` (real CSP header incl.
+  `frame-ancestors 'none'`), `scripts/nest-for-cloudflare.mjs` (postbuild nests `dist/*` under the route prefix, keeps
+  `_headers` at root). Cloudflare git-connects the repo and builds `main` on push; Cloudflare-side setup is owner-managed.
 - **Active gate:** CI enforces it. Every push/PR to `main` runs `npm run lint` + the validator + `npm run test:run` in
-  the `test` job; `build` → `deploy` depend on it, and `deploy` is skipped on PR events. CI installs run
+  the `test` job; `build` (build-compiles check, **no publish** now) depends on it. CI installs run
   `npm ci --ignore-scripts` (F-038). Bar unchanged locally: lint + test suite green + validator clean before merge.
-- **Branch focus:** `main` (at `1ac3c09`, **PR #46 merged**) — P3 #22 polish closed. Next work starts from a fresh
-  branch off `main`. Prior same day: PR #45 (P3 #21), PR #44 (engine-reference rewrite), PR #37 (P2 #15/#16/#17).
-- **Verification:** 2026-07-08 — `npm run test:run` → **554 passed (554)** across **56** files (was 547/55; +7 for the
-  new sharedSceneCache suite + expanded SceneText); `npm run lint` → clean; `node scripts/validateCase.mjs` → 7 cases clean;
-  `npm run build` green (motion vendor chunk 121.85 KB → 79.13 KB via LazyMotion); `npx tsc --noEmit` clean. Reviewed via
-  a correctness-finder agent → no bugs; one a11y double-announce nit fixed before commit. CI green on PR #46.
+- **Branch focus:** `main` (at `7144d34`, **PR #49 merged**) — #47 deploy migration closed. Next work starts from a fresh
+  branch off `main`. Prior: PR #48 (#47 config), and 2026-07-08 PRs #46/#45/#44/#37.
+- **Verification:** 2026-07-09 — `npm run test:run` → **554 passed (554)** across **56** files (unchanged; one flaky fail
+  in a resource-starved background run did not reproduce on a clean re-run); `npm run build` green and emits
+  `dist/gaslight-and-grimoire/` + `dist/_headers` (nesting verified). **Live (owner-verified):** `curl -sI
+  .../gaslight-and-grimoire/` → 200 with CSP incl. `frame-ancestors 'none'`; content/deep-link/character-creation work in a
+  real browser. CI green on PR #48 + #49 (Cloudflare Workers Build check passed on #49).
 
 ---
 
@@ -61,6 +68,7 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 | — | Docs — engine-reference rewrite for narrativeEngine split | `[x]` | **PR #44** (`472ef32`). Documents the 4 split modules + advantage/flags/constants/haltScenes; fixed save-version/`lastCriticalFaculty`/`save()`-signature drift. Cleared the last flagged doc item. |
 | M | Media assets — audio (.mp3) + illustrations + NPC portraits | `[~]` | **Strategy set (ADR-0006)**; prompt kit authored. **9 SFX shipped + normalized + verified loading in-browser** (fixed 2 blockers found in QA). **Pending:** 10 ambient loops; perceptual SFX QA (human ears); `checkAudioAssets.mjs` + CI. **Illustrations parked** (lowest priority). Issue #20. |
 | P | Audit remediation — P3 #22 polish (perf + a11y) | `[x]` | **Complete — PR #46** (`1ac3c09`). F-044 rAF-throttle EvidenceBoard, F-045 `useShallow`+`React.memo` list items, F-046 LazyMotion (motion chunk 121.85→79.13 KB), F-047 shared-scene cache, F-048 reduced-motion gating, F-049 focusable typewriter-skip + sr-region, F-050 WCAG contrast, F-051 skip-link. 547→554 tests. |
+| — | Deployment — Cloudflare Worker migration (retire GitHub Pages) | `[x]` | **Complete — issue #47, ADR-0007.** PR #48 (`2e539fa`): `wrangler.jsonc` + `public/_headers` (real CSP + `frame-ancestors 'none'`) + `deploy.yml` → CI-gate-only. PR #49 (`7144d34`): `scripts/nest-for-cloudflare.mjs` postbuild nesting (fixed live 404). Owner-verified live; Pages unpublished. |
 
 ---
 
@@ -89,7 +97,7 @@ These are flagged-but-unresolved. Resolve each via an ADR when decided, then mar
 
 ## References
 
-- Decisions: [`DECISIONS/`](DECISIONS/) — [ADR-0001](DECISIONS/ADR-0001-content-engine-separation.md) (content↔engine separation & bounded state, Enacted), [ADR-0002](DECISIONS/ADR-0002-committed-memory-spine.md) (this memory spine, Enacted), [ADR-0003](DECISIONS/ADR-0003-playwright-mcp-project-scope.md) (Playwright MCP at project scope, Enacted), [ADR-0004](DECISIONS/ADR-0004-content-authoring-automation-layer.md) (content-authoring automation layer, Enacted), [ADR-0005](DECISIONS/ADR-0005-key-deduction-recipes.md) (stable deduction identity via key-deduction recipes, Enacted), [ADR-0006](DECISIONS/ADR-0006-media-asset-strategy.md) (media asset strategy — AI-generated audio, prompt-kit pipeline, illustrations parked, Accepted).
+- Decisions: [`DECISIONS/`](DECISIONS/) — [ADR-0001](DECISIONS/ADR-0001-content-engine-separation.md) (content↔engine separation & bounded state, Enacted), [ADR-0002](DECISIONS/ADR-0002-committed-memory-spine.md) (this memory spine, Enacted), [ADR-0003](DECISIONS/ADR-0003-playwright-mcp-project-scope.md) (Playwright MCP at project scope, Enacted), [ADR-0004](DECISIONS/ADR-0004-content-authoring-automation-layer.md) (content-authoring automation layer, Enacted), [ADR-0005](DECISIONS/ADR-0005-key-deduction-recipes.md) (stable deduction identity via key-deduction recipes, Enacted), [ADR-0006](DECISIONS/ADR-0006-media-asset-strategy.md) (media asset strategy — AI-generated audio, prompt-kit pipeline, illustrations parked, Accepted), [ADR-0007](DECISIONS/ADR-0007-cloudflare-worker-deploy.md) (Cloudflare static-assets Worker deploy, retire GitHub Pages, Enacted).
 - Media: [audio asset prompt kit](../audio-asset-kit.md) · [design spec](superpowers/specs/2026-07-08-audio-asset-kit-design.md).
 - Run history: [`RUN_LOG.md`](RUN_LOG.md).
 - Audit: [`audits/ULTRACODE_FULL_REPO_ANALYSIS.md`](audits/ULTRACODE_FULL_REPO_ANALYSIS.md) (2026-07-07, 67 findings) → GitHub issues #1–#22.
