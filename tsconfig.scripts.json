@@ -1,0 +1,27 @@
+{
+  // Type-checks the build/CI tooling that the main `tsconfig.json` (`include:
+  // ["src"]`) leaves ungated: the content-validator source (`scripts/`, itself a
+  // CI correctness gate) and `vite.config.ts`. A type regression here previously
+  // only surfaced at runtime via the vite-node shim (F-123).
+  //
+  // Deliberately NON-composite + `noEmit`: `tsconfig.node.json` is `composite`
+  // for the Vite project-reference and so cannot set `noEmit` (TS6310). This
+  // project is checked with a plain `tsc -p` (never `tsc -b`), so it can — and
+  // emits nothing, avoiding the `vite.config.js`/`.d.ts` litter PR #61 had to
+  // gitignore. `lib: ES2023` gives Node tooling `String.includes` etc. (the root
+  // cause of the `tsc -b` TS2550 on `vite.config.ts` — the composite reference
+  // has no `lib`).
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["scripts/**/*.ts", "vite.config.ts"]
+}

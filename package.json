@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && node scripts/nest-for-cloudflare.mjs",
+    "build": "tsc && npm run typecheck:scripts && vite build && node scripts/nest-for-cloudflare.mjs",
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "typecheck:scripts": "tsc -p tsconfig.scripts.json"
   },
   "engines": {
     "node": ">=20.19"
@@ -28,6 +29,7 @@
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^16.3.2",
     "@types/howler": "^2.2.13",
+    "@types/node": "^20.19.43",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",

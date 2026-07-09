@@ -47,8 +47,11 @@ jobs:
       - name: Run test suite
         run: npm run test:run
 
-  # Build-compiles check. The actual deploy build runs Cloudflare-side from
-  # wrangler.jsonc; this just proves `main` builds green as part of the gate.
+  # Build-compiles check. `npm run build` runs `tsc` (src/) + `tsc -p
+  # tsconfig.scripts.json` (scripts/ + vite.config.ts — the tooling the main
+  # tsconfig leaves ungated, incl. the validator source; F-123) + vite build.
+  # The actual deploy build runs Cloudflare-side from wrangler.jsonc; this just
+  # proves `main` builds green as part of the gate.
   build:
     needs: test
     runs-on: ubuntu-latest
