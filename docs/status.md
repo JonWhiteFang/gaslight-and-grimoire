@@ -18,14 +18,14 @@ from each case's `npcs.json`.
 
 | Case | Type | Scenes | Clues | NPCs |
 |---|---|---|---|---|
-| The Whitechapel Cipher | main (3-act) | 66 | 14 | 7 |
-| The Mayfair Séance | main (3-act) | 49 | 13 | 7 |
-| The Lamplighter's Wake | main (3-act) | 43 | 13 | 7 |
+| The Whitechapel Cipher | main (3-act) | 67 | 14 | 7 |
+| The Mayfair Séance | main (3-act) | 50 | 13 | 7 |
+| The Lamplighter's Wake | main (3-act) | 44 | 13 | 7 |
 | A Matter of Shadows | vignette (2-act) | 13 | 5 | 3 |
 | The Rationalist's Dilemma | vignette (2-act) | 10 | 5 | 2 |
 | The Debt of Smoke | vignette (2-act) | 9 | 4 | 2 |
 | The Unfinished Case | vignette (2-act) | 8 | 4 | 2 |
-| **Total** | **7 cases** | **198** | **58** | **30** |
+| **Total** | **7 cases** | **201** | **58** | **30** |
 
 All four factions appear in the content: Rationalists Circle, Hermetic Order of
 the Grey Dawn, Lamplighters, and Court of Smoke. Archetype-exclusive scenes

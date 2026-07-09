@@ -31,6 +31,12 @@ pnpm-debug.log*
 
 # TypeScript
 *.tsbuildinfo
+# tsc build-mode (`tsc -b`, e.g. from an IDE) emits these from the composite
+# vite.config project reference (tsconfig.node.json). The plain `tsc` in
+# `npm run build` doesn't, and the reference can't use `noEmit` (composite
+# projects forbid it — TS6310), so ignore the artifacts here.
+vite.config.js
+vite.config.d.ts
 
 # Test coverage
 coverage/

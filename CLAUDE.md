@@ -276,9 +276,9 @@ Base faculty score: 8. Bonus points to allocate: 12. Composure and Vitality: 0�
 ## Current Content
 
 ### Main Cases (3-act structure)
-- **"The Whitechapel Cipher"** — 66 scenes, 14 clues, 7 NPCs, 6 variants, 4 endings. Cipher murders in Whitechapel, conspiracy reaching Scotland Yard. Court of Smoke underworld path, archetype-exclusive scenes.
-- **"The Mayfair Séance"** — 49 scenes, 13 clues, 7 NPCs, 6 variants, 4 endings. Society séance turns deadly, fraud meets genuine supernatural. Court of Smoke ritual supplier path.
-- **"The Lamplighter's Wake"** — 43 scenes, 13 clues, 7 NPCs, 3 variants, 4 endings. Dead Lamplighter agent, locked room, Gasworks Veil fragment trafficking. Court of Smoke as primary antagonist.
+- **"The Whitechapel Cipher"** — 67 scenes, 14 clues, 7 NPCs, 6 variants, 4 endings. Cipher murders in Whitechapel, conspiracy reaching Scotland Yard. Court of Smoke underworld path, archetype-exclusive scenes.
+- **"The Mayfair Séance"** — 50 scenes, 13 clues, 7 NPCs, 6 variants, 4 endings. Society séance turns deadly, fraud meets genuine supernatural. Court of Smoke ritual supplier path.
+- **"The Lamplighter's Wake"** — 44 scenes, 13 clues, 7 NPCs, 3 variants, 4 endings. Dead Lamplighter agent, locked room, Gasworks Veil fragment trafficking. Court of Smoke as primary antagonist.
 
 ### Side Cases (vignettes, 2-act structure)
 - **"A Matter of Shadows"** — 13 scenes, 5 clues, 3 NPCs, 3 endings. Missing Lamplighter courier in Southwark. Unlocks at Lamplighters rep ≥ 2.
@@ -287,10 +287,10 @@ Base faculty score: 8. Bonus points to allocate: 12. Composure and Vitality: 0�
 - **"The Unfinished Case"** — 8 scenes, 4 clues, 2 NPCs, 3 endings. Cold case: the original cipher maker was murdered before the Whitechapel events. Unlocks after completing The Whitechapel Cipher.
 
 ### Content Totals
-- 198 scenes, 58 clues, 30 NPCs across 7 cases
+- 201 scenes, 58 clues, 30 NPCs across 7 cases (scene count per `node scripts/validateCase.mjs` — base + variants, incl. the injected shared scenes)
 - All 4 factions active: Rationalists Circle, Hermetic Order of the Grey Dawn, Lamplighters, Court of Smoke
 - Archetype-exclusive scenes in all 3 main cases (Deductionist, Occultist, Operator, Mesmerist)
-- Average 2.0+ choices per scene across all content
+- ~1.77 choices per scene across all content (2.14 among choice-bearing scenes, i.e. excluding terminal endings and encounter scenes)
 
 ## Known Bugs & Gaps
 
