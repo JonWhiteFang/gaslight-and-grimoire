@@ -8,7 +8,10 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-09 (**Audit-2 P3 #60 FIXED — CI type-checks scripts/ + vite.config.ts (PR #68, merged). ENTIRE audit-2 code backlog (#53–#60) CLEAR.**)
+_Last updated: 2026-07-09 (**Full-doc-drift sweep + audit-file relocation — docs-only, uncommitted. 21 verified drift fixes across 8 docs; moved `2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md` → `docs/audits/`. Test baseline unchanged 611; no code touched.**)
+**This session (doc sweep):** ran a fan-out audit (9 per-doc auditors + historical link-check, each finding adversarially verified against source) → **21 CONFIRMED drift fixes**, all applied. Highlights: engine-reference `CaseCompletionResult.vignettesUnlocked: string[]` + `checkVignetteUnlocks(): string[]` (were singular/nullable — F-057 drift); the "no audio ships / silent" claim corrected in **4 docs** (9 SFX now ship); CLAUDE.md scene-count parenthetical fixed (201 = base+variants **excl.** shared; 215 at runtime), `haltScenes.ts` added to the engine list, `CaseCompletion`/`InvestigationHalted` added to the component hierarchy; content-JSON described as wrapped objects not bare arrays; a dead `build→deploy` CI ref, two stale `file:line`s in architecture.md, `66→67` validator example, doc-map missing `audio-asset-kit.md`, and several stale audio-status lines. **Also moved** the 2026-07-09 audit report from repo root into `docs/audits/` (via `git mv`, history preserved) beside the 2026-07-07 audit; repointed the 4 live PROJECT_STATE links (`../` → `audits/`) + the RUN_LOG history href (annotated, not rewritten). All 85 internal doc links resolve; validator clean (7 cases). — Prior (below): #60 CI type-check (PR #68).
+
+_Prior update: 2026-07-09 (**Audit-2 P3 #60 FIXED — CI type-checks scripts/ + vite.config.ts (PR #68, merged). ENTIRE audit-2 code backlog (#53–#60) CLEAR.**)
 **#60 (F-123):** the build gate's `tsc` had `include: ["src"]`, so `scripts/` — incl. `scripts/validateCase.ts`, the
 content-validator source that is itself a CI correctness gate — was in no tsconfig; a type regression there passed the build
 and only surfaced at runtime via the vite-node shim. `vite.config.ts` was nominally covered by `tsconfig.node.json` but that
@@ -96,7 +99,7 @@ Second full Ultracode repo audit — analysis only, no code changed. Ran the
 command battery (all green — 554 tests, lint, validator, build, 0 npm vulns) then an orchestrated 13-dimension
 adversarial fan-out (71 agents) + lead verification. 37 raw → **23 root-cause-deduped verified findings** (new IDs
 **F-101…F-123**, distinct from the prior F-001…F-067); 4 rejected as false positives. Report:
-[`2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md`](../2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md) (repo root). Overall
+[`2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md`](audits/2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md) (`docs/audits/`). Overall
 risk **Medium**. Filed **8 grouped GitHub issues (#53–#60)**: two **P0** gameplay blockers — **#53** archetype
 auto-succeed ability never consumed (auto-crits every same-faculty check all case; F-101/F-107) and **#54** Mayfair
 true ending RNG-locked behind two nat-20s (F-102) — plus P1 save/reload safety (#55), scene-transition state hygiene
@@ -135,7 +138,9 @@ build artifacts (`vite.config.js`/`.d.ts`) `tsconfig.node.json`'s `composite:tru
 - **Verification:** 2026-07-09 — on merged `main`: `npm run test:run` → **611 passed (611)** across **58** files;
   `npm run lint` clean, validator clean (7 cases), `npm ci --ignore-scripts` + `npm run build` green (build now also
   type-checks `scripts/` + `vite.config.ts`; emits `dist/gaslight-and-grimoire/` + `dist/_headers`). **CI green on PR #68**
-  (and #62–#67) — all six checks pass on each, including the **Cloudflare Workers Build**.
+  (and #62–#67) — all six checks pass on each, including the **Cloudflare Workers Build**. This session's doc sweep +
+  audit-file move are **docs-only, uncommitted** — no code touched, so the 611/58 baseline holds unchanged; re-verified
+  `node scripts/validateCase.mjs` → 7 cases clean and **all 85 internal doc links resolve (0 broken)** post-move.
 
 ---
 
@@ -164,7 +169,7 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 | M | Media assets — audio (.mp3) + illustrations + NPC portraits | `[~]` | **Strategy set (ADR-0006)**; prompt kit authored. **9 SFX shipped + normalized + verified loading in-browser** (fixed 2 blockers found in QA). **Pending:** 10 ambient loops; perceptual SFX QA (human ears); `checkAudioAssets.mjs` + CI. **Illustrations parked** (lowest priority). Issue #20. |
 | P | Audit remediation — P3 #22 polish (perf + a11y) | `[x]` | **Complete — PR #46** (`1ac3c09`). F-044 rAF-throttle EvidenceBoard, F-045 `useShallow`+`React.memo` list items, F-046 LazyMotion (motion chunk 121.85→79.13 KB), F-047 shared-scene cache, F-048 reduced-motion gating, F-049 focusable typewriter-skip + sr-region, F-050 WCAG contrast, F-051 skip-link. 547→554 tests. |
 | — | Deployment — Cloudflare Worker migration (retire GitHub Pages) | `[x]` | **Complete — issue #47, ADR-0007.** PR #48 (`2e539fa`): `wrangler.jsonc` + `public/_headers` (real CSP + `frame-ancestors 'none'`) + `deploy.yml` → CI-gate-only. PR #49 (`7144d34`): `scripts/nest-for-cloudflare.mjs` postbuild nesting (fixed live 404). Owner-verified live; Pages unpublished. |
-| — | Second full Ultracode repo audit (analysis only) | `[x]` | **2026-07-09.** Report at repo root (`2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md`); 71-agent fan-out + lead verification → **23 findings (F-101…F-123)**, 4 rejected, overall risk Medium. Filed **8 grouped issues #53–#60**. No code changed. |
+| — | Second full Ultracode repo audit (analysis only) | `[x]` | **2026-07-09.** Report at [`audits/2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md`](audits/2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md); 71-agent fan-out + lead verification → **23 findings (F-101…F-123)**, 4 rejected, overall risk Medium. Filed **8 grouped issues #53–#60**. No code changed. |
 | R | Audit-2 remediation — P0 gameplay blockers | `[x]` | **Both done.** **#53 — PR #62:** auto-succeed ability consumed once via shared `resolveCheckOutcome` (F-101); encounters route through the same unit (F-107). **#54 — PR #63:** Mayfair true ending de-crit-gated by dual-sourcing 2 clues (F-102) + a validator guard against crit-gated deduction clues. 554→564 tests. |
 | R2 | Audit-2 remediation — P1 (code) | `[x]` | **Complete.** **#55 — PR #65:** save/reload safety — `saveGame` try/catch + error toast (F-103), persisted `encounterState` (v3→v4) so reload doesn't re-roll the reaction check (F-105); 569→577. **#56 — PR #64:** scene-transition hygiene (F-118/F-104/F-106/F-108); 564→569. **#57 — PR #66:** a11y/errors — React-19 `inert={bool}` (F-007 regression), ErrorBoundary auto-save claim gated, loading fallbacks `role=status`, + `evaluateCondition` own-property guard (fixed a pre-existing flaky determinism test); 577→588. |
 | R2′ | Audit-2 remediation — P1 (docs #58) | `[x]` | **Done — PR #61 (`3dc49aa`).** F-119 `architecture.md` onEnter anti-pattern (+ F-013 flag drift); F-120 scene counts → 201; F-121 component count 16→17; F-122 choices/scene → ~1.77. Also closed the `.gitignore` `vite.config` emit-litter gap. Docs-only. |
@@ -198,7 +203,7 @@ These are flagged-but-unresolved. Resolve each via an ADR when decided, then mar
 
 - ~~**How do we source and license media assets?**~~ **RESOLVED 2026-07-08 → [ADR-0006](DECISIONS/ADR-0006-media-asset-strategy.md).** AI-generate **audio only** via a prompt kit the user runs (no API in repo); illustrations parked at lowest priority. Naturalistic never-campy house style. Prompt kit authored: [`audio-asset-kit.md`](audio-asset-kit.md).
 - **Audit-1 backlog** — 22 issues from the first Ultracode audit ([report](audits/ULTRACODE_FULL_REPO_ANALYSIS.md)); all cleared except #20 (media). 5 findings rejected by adversarial verification — don't re-file.
-- **Audit-2 backlog (2026-07-09)** — 8 issues #53–#60 ([report](../2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md), F-101…F-123). **All done (PRs #62–#68 merged).** 4 findings **rejected** by adversarial verification (report's *Rejected findings* section) — don't re-file.
+- **Audit-2 backlog (2026-07-09)** — 8 issues #53–#60 ([report](audits/2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md), F-101…F-123). **All done (PRs #62–#68 merged).** 4 findings **rejected** by adversarial verification (report's *Rejected findings* section) — don't re-file.
 - ~~**`.gitignore` gap:** `tsc -b` emitted `vite.config.js`/`.d.ts` from the composite `tsconfig.node.json` reference.~~ **RESOLVED 2026-07-09 → PR #61 (`3dc49aa`).** Gitignored the two artifacts. `noEmit` was ruled out — composite projects forbid it (TS6310, breaks `npm run build`); the plain `tsc` in the build path never emits them anyway, only `tsc -b` (IDE/build-mode) does.
 
 ---
@@ -208,7 +213,7 @@ These are flagged-but-unresolved. Resolve each via an ADR when decided, then mar
 - Decisions: [`DECISIONS/`](DECISIONS/) — [ADR-0001](DECISIONS/ADR-0001-content-engine-separation.md) (content↔engine separation & bounded state, Enacted), [ADR-0002](DECISIONS/ADR-0002-committed-memory-spine.md) (this memory spine, Enacted), [ADR-0003](DECISIONS/ADR-0003-playwright-mcp-project-scope.md) (Playwright MCP at project scope, Enacted), [ADR-0004](DECISIONS/ADR-0004-content-authoring-automation-layer.md) (content-authoring automation layer, Enacted), [ADR-0005](DECISIONS/ADR-0005-key-deduction-recipes.md) (stable deduction identity via key-deduction recipes, Enacted), [ADR-0006](DECISIONS/ADR-0006-media-asset-strategy.md) (media asset strategy — AI-generated audio, prompt-kit pipeline, illustrations parked, Accepted), [ADR-0007](DECISIONS/ADR-0007-cloudflare-worker-deploy.md) (Cloudflare static-assets Worker deploy, retire GitHub Pages, Enacted), [ADR-0008](DECISIONS/ADR-0008-dependency-major-migration-strategy.md) (clustered major-dependency migration, defer TypeScript 7, Enacted).
 - Media: [audio asset prompt kit](audio-asset-kit.md) · [design spec](superpowers/specs/2026-07-08-audio-asset-kit-design.md).
 - Run history: [`RUN_LOG.md`](RUN_LOG.md).
-- Audits: [`audits/ULTRACODE_FULL_REPO_ANALYSIS.md`](audits/ULTRACODE_FULL_REPO_ANALYSIS.md) (2026-07-07, 67 findings) → issues #1–#22; [`../2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md`](../2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md) (2026-07-09, 23 findings F-101…F-123) → issues #53–#60.
+- Audits: [`audits/ULTRACODE_FULL_REPO_ANALYSIS.md`](audits/ULTRACODE_FULL_REPO_ANALYSIS.md) (2026-07-07, 67 findings) → issues #1–#22; [`audits/2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md`](audits/2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md) (2026-07-09, 23 findings F-101…F-123) → issues #53–#60.
 - Architecture, invariants, store conventions, content rules, known gaps: [../CLAUDE.md](../CLAUDE.md).
 - Current-state snapshot (content inventory, systems, asset status, test baseline): [status.md](status.md).
 - Doc map: [README.md](README.md).

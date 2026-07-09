@@ -6,7 +6,7 @@
 >
 > **Design spec:** [`docs/superpowers/specs/2026-07-08-audio-asset-kit-design.md`](superpowers/specs/2026-07-08-audio-asset-kit-design.md)
 >
-> **Status:** prompt kit authored; asset generation pending. Illustrations parked (see spec).
+> **Status:** prompt kit authored; 9 SFX shipped (`public/audio/sfx/`); 10 ambient loops pending. Illustrations parked (see spec).
 
 ---
 

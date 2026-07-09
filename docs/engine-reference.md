@@ -77,7 +77,7 @@ Pure condition evaluation, scene/variant resolution, and clue-discovery gating.
 Re-exported by the `narrativeEngine` barrel.
 
 - `evaluateConditions(conditions: Condition[], state: GameState): boolean` — AND logic; empty array is `true`. Supports `hasClue` (must be revealed), `hasDeduction`, `hasFlag` (bare = flag is truthy; with `value`, compares `Boolean(flag) === value`, so `value:false` matches an unset flag), `facultyMin`, `archetypeIs`, `npcDisposition` (`>=`), `npcSuspicion` (tier→range: normal 0–2, evasive 3–5, concealing 6–8, hostile 9–10), `factionReputation` (`>=`), `npcMemoryFlag`.
-- `evaluateCondition(condition: Condition, state: GameState): boolean` — the single-condition primitive `evaluateConditions` folds over (exported for reuse). `Condition` is a discriminated union on `type`, so the switch is exhaustive (F-026).
+- `evaluateCondition(condition: Condition, state: GameState): boolean` — the single-condition primitive `evaluateConditions` folds over (a module-internal helper; `evaluateConditions` is the exported entry point). `Condition` is a discriminated union on `type`, so the switch is exhaustive (F-026).
 - `resolveScene(sceneId: string, state: GameState, caseData: CaseData): SceneNode` — returns the first variant whose `variantOf === sceneId` and whose `variantCondition` is met, else the base scene. Throws if the base scene is missing.
 - `canDiscoverClue(discovery: ClueDiscovery, state: GameState): boolean` — pure gate: `requiresFaculty` (score `>=` minimum) and `requiresDeduction` (deduction must exist) must both pass.
 
@@ -124,9 +124,9 @@ Pure builders for `Deduction`s, plus the key-deduction recipe matcher.
 
 End-of-case logic: faculty bonus and vignette unlocks.
 
-- `interface CaseCompletionResult { facultyBonusGranted: Faculty | null; vignetteUnlocked: string | null }`.
-- `CaseProgression.completeCase(caseId: string, state: GameState, actions: EngineActions): CaseCompletionResult` — grants `+1` to the faculty stored in the typed `investigator.lastCriticalFaculty` field (F-013; when set), then checks vignette unlocks and, if one unlocks, sets the `vignette-unlocked-{id}` flag (`vignetteUnlockedFlag(id)` from `flags.ts`). Returns what was granted/unlocked.
-- `CaseProgression.checkVignetteUnlocks(state: GameState): string | null` — returns the id of the first not-yet-unlocked vignette whose condition is met. Registered conditions: `a-matter-of-shadows` (Lamplighters reputation ≥ 2), `the-rationalists-dilemma` (Rationalists Circle reputation ≥ 2), `the-debt-of-smoke` (persisted flag `wc-court-deal-made`), `the-unfinished-case` (flag `wc-case-complete`).
+- `interface CaseCompletionResult { facultyBonusGranted: Faculty | null; vignettesUnlocked: string[] }`.
+- `CaseProgression.completeCase(caseId: string, state: GameState, actions: EngineActions): CaseCompletionResult` — grants `+1` to the faculty stored in the typed `investigator.lastCriticalFaculty` field (F-013; when set), then checks vignette unlocks and sets the `vignette-unlocked-{id}` flag (`vignetteUnlockedFlag(id)` from `flags.ts`) for **every** newly-unlocked vignette (F-057). Returns what was granted/unlocked.
+- `CaseProgression.checkVignetteUnlocks(state: GameState): string[]` — returns the ids of **every** not-yet-unlocked vignette whose condition is met (F-057, so simultaneously-earned unlocks all fire). Registered conditions: `a-matter-of-shadows` (Lamplighters reputation ≥ 2), `the-rationalists-dilemma` (Rationalists Circle reputation ≥ 2), `the-debt-of-smoke` (persisted flag `wc-court-deal-made`), `the-unfinished-case` (flag `wc-case-complete`).
 - `CaseProgression.grantFacultyBonus(faculty: Faculty, actions: EngineActions): void` — `actions.updateFaculty(faculty, min(20, current + 1))`.
 
 ## hintEngine.ts
@@ -173,7 +173,7 @@ index at `gg_save_index` (array of `SaveSummary`, sorted by timestamp desc).
 Howler.js SFX playback with lazily-cached `Howl` instances per event.
 
 - `type SfxEvent` — one of: `'dice-roll'`, `'clue-physical'`, `'clue-testimony'`, `'clue-occult'`, `'clue-deduction'`, `'clue-redHerring'`, `'composure-decrease'`, `'vitality-decrease'`, `'scene-transition'`.
-- `AudioManager.playSfx(event: SfxEvent, volume: number): void` — lazily creates/caches the `Howl` for the event, clamps volume to `[0, 1]`, and plays. Howler handles missing files silently (no assets ship in the repo).
+- `AudioManager.playSfx(event: SfxEvent, volume: number): void` — lazily creates/caches the `Howl` for the event, clamps volume to `[0, 1]`, and plays. Howler handles missing files silently; the 9 SFX assets ship under `public/audio/sfx/` (ambient loops and illustrations remain pending).
 - `AudioManager.setMasterSfxVolume(volume: number): void` — sets clamped `[0, 1]` volume on every cached `Howl`.
 
 ## cluePrompts.ts

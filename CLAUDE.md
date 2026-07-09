@@ -48,13 +48,15 @@ Components live in `src/components/[Name]/` with `index.ts` barrel exports. Stat
       ├── <LoadGameScreen />        # Save list with delete buttons
       ├── <CharacterCreation />     # Archetype selection + faculty point allocation
       ├── <CaseSelection />         # Case browser: main cases + unlocked vignettes
+      ├── <CaseCompletion />        # End-of-case screen (faculty bonus, vignette unlocks) — App renders on the `case-complete` screen
       └── (game screen — a <div>, not a component; App switches on `screen` state)
           ├── <HeaderBar />         # Ability button, hint button, overlay toggles
           ├── <AmbientAudio />      # Non-rendering: ambient track from scene.ambientAudio
-          ├── <GameContent>         # NarrativePanel + (ChoicePanel | EncounterPanel | Case-Complete btn) + StatusBar
+          ├── <GameContent>         # NarrativePanel + StatusBar + one body: ChoicePanel | EncounterPanel | Case-Complete btn — OR swaps entirely to <InvestigationHalted /> on a knockout (composure/vitality = 0)
           │   ├── <NarrativePanel />  # Scene text, illustration, dice roll overlay, clue discovery card, active clue prompts
           │   ├── <ChoicePanel />     # Choice cards rendered from current SceneNode.choices
           │   ├── <EncounterPanel />  # Multi-round encounter UI (when scene has encounter field)
+          │   ├── <InvestigationHalted /> # Full-screen swap when composure or vitality hits 0 (haltScenes)
           │   └── <StatusBar />       # Vitality meter, composure meter
           └── <Suspense>            # Overlays are React.lazy-loaded (F-043):
               ├── <EvidenceBoard />   # Overlay: clue cards, connection threads, deduction button
@@ -73,14 +75,14 @@ public/content/                 # served at runtime as /content/
     incapacitation.json         # Shared incapacitation scene (vitality=0), injected into all cases
   cases/[case-name]/          # Main cases (3-act structure)
     meta.json                 # CaseMeta: id, title, synopsis, acts, firstScene, facultyDistribution
-    act1.json, act2.json, act3.json  # SceneNode[] per act
-    clues.json                # Array of Clue objects
-    npcs.json                 # Array of NPCState objects
-    variants.json             # SceneNode[] triggered by cross-case flags
-    deductions.json           # KeyDeduction[] recipes (optional) — stable ids for hasDeduction gates
+    act1.json, act2.json, act3.json  # { "scenes": SceneNode[] } per act (wrapped, not a bare array)
+    clues.json                # { "clues": Clue[] }
+    npcs.json                 # { "npcs": NPCState[] }
+    variants.json             # { "variants": SceneNode[] } triggered by cross-case flags
+    deductions.json           # { "deductions": KeyDeduction[] } recipes (optional) — stable ids for hasDeduction gates
   side-cases/[vignette-name]/ # Side vignettes (2-act structure)
     meta.json                 # VignetteMeta (optional triggerCondition)
-    scenes.json, clues.json, npcs.json
+    scenes.json ({ "scenes": … }), clues.json, npcs.json
 
 src/
   types/index.ts              # ALL type definitions live here
@@ -104,6 +106,7 @@ src/
     diceEngine.ts             # d20 rolls, advantage/disadvantage, modifier calc, outcome tiers
     buildDeduction.ts         # Pure deduction builder + key-deduction recipe matcher (matchDeduction/buildDeductionFromRecipe)
     caseProgression.ts        # End-of-case logic, faculty bonuses, vignette unlocks
+    haltScenes.ts             # Classifies the shared halt scenes (breakdown/incapacitation); HALT_SCENE_IDS, isHaltScene, haltReason (App uses these for the InvestigationHalted screen)
     hintEngine.ts             # Stateful hint system (3 escalating levels)
     saveManager.ts            # localStorage persistence with versioned migrations, multi-save support
     audioManager.ts           # Howler.js SFX management (lazy-cached Howl instances)
@@ -294,7 +297,7 @@ Base faculty score: 8. Bonus points to allocate: 12. Composure and Vitality: 0�
 - **"The Unfinished Case"** — 8 scenes, 4 clues, 2 NPCs, 3 endings. Cold case: the original cipher maker was murdered before the Whitechapel events. Unlocks after completing The Whitechapel Cipher.
 
 ### Content Totals
-- 201 scenes, 58 clues, 30 NPCs across 7 cases (scene count per `node scripts/validateCase.mjs` — base + variants, incl. the injected shared scenes)
+- 201 scenes, 58 clues, 30 NPCs across 7 cases (scene count per `node scripts/validateCase.mjs` — base + variants, **excl.** the injected shared scenes; 215 at runtime once the 14 injected shared scenes — breakdown + incapacitation × 7 cases — are counted)
 - All 4 factions active: Rationalists Circle, Hermetic Order of the Grey Dawn, Lamplighters, Court of Smoke
 - Archetype-exclusive scenes in all 3 main cases (Deductionist, Occultist, Operator, Mesmerist)
 - ~1.77 choices per scene across all content (2.14 among choice-bearing scenes, i.e. excluding terminal endings and encounter scenes)
@@ -322,7 +325,7 @@ Things to be aware of when making changes:
 - **`adjustDisposition` has a hidden cross-slice call** — After updating NPC disposition, it calls `get().adjustReputation(faction, delta * 0.5)` for faction-aligned NPCs. This coupling is in `src/store/slices/npcSlice.ts`.
 - **Faction reputation is clamped** — Disposition [-10,+10], suspicion [0,10], composure/vitality [0,10], faction reputation [-10,+10]. All numeric state is now bounded.
 - **`Object.keys(data.scenes)[0]` is the fallback for first scene** — In `loadAndStartCase`. Used only when `meta.json` lacks a `firstScene` field. All cases now have `firstScene` set explicitly.
-- **No audio files in repo** — The audio system is fully coded but silent. Howler silently handles missing files. SFX is triggered via a store subscription in `src/store/audioSubscription.ts` (initialized in `main.tsx`), not from slice actions.
+- **9 SFX ship; ambient loops & illustrations pending** — The 9 SFX `.mp3`s live in `public/audio/sfx/` (git-tracked). Howler silently handles the still-missing ambient loops and illustrations. SFX is triggered via a store subscription in `src/store/audioSubscription.ts` (initialized in `main.tsx`), not from slice actions.
 - **`Date.now()` and `Math.random()` used directly** — In `diceEngine.rollD20()`, `hintEngine`, `metaSlice.saveGame` (save ID), `buildDeduction`. Not injectable. Tests work around this. (`saveManager` uses neither `Date.now()` nor `Math.random()`; it stamps a save's `timestamp` with `new Date().toISOString()`.)
 
 ## Implementation Roadmap
