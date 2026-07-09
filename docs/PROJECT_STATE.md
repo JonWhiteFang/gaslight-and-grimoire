@@ -8,18 +8,18 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-09 (**Audit-2 P0 #53 FIXED — auto-succeed ability now consumed once + check pipelines unified (PR #62).**)
-The archetype once-per-case auto-succeed ability (F-101) was set-and-never-cleared, so it auto-crit **every** subsequent
-same-faculty choice-check for the rest of the case; its mirror (F-107) left the same ability dead inside encounters (a
-parallel check pipeline that ignored the flag + `dynamicDifficulty`). Fix: extracted a single pure
-`resolveCheckOutcome(choice, state, label)` in `choiceResolution.ts` that BOTH `computeChoiceResult` and
-`processEncounterChoice` call (so the two paths can't drift again); both now **consume** the flag on use via
-`actions.setFlag(flag, false)`. TDD (RED watched). Also replaced the two self-fulfilling `setState`-simulation guard tests
-in `AbilityButton.test.tsx` with ones driving the real `resetForNewCase`. Test baseline **554→558**; lint + validator +
-build green; **all six CI checks pass on PR #62**. Doc-drift sweep fixed `status.md` baseline 554→558 and the
-`processChoice`/`computeChoiceResult`/`processEncounterChoice` behaviour lines in `CLAUDE.md` + `engine-reference.md`
-(added `resolveCheckOutcome` + flag-consumption). **Audit-2 code backlog remaining: #54 (P0), #55/#56/#57 (P1),
-#59/#60 (P2/P3).** — Prior this session (below): audit-2 #58 doc-drift (PR #61); the audit itself.
+_Last updated: 2026-07-09 (**Both audit-2 P0 gameplay blockers FIXED — #53 (PR #62) + #54 (PR #63), both merged.**)
+**#54 (F-102):** the Mayfair true ending was gated behind a key deduction whose 3 clues were only gatherable via two
+nat-20 rolls (~0.25%) — an RNG lottery. Fix dual-sources the two crit-gated clues onto non-critical sibling scenes
+(`ms-clue-vesper-journal` → `ms-act2-occult-partial`; `ms-clue-hidden-mechanism` → `ms-act1-room-partial`, perception≥11
+check) so a skilled no-crit occult run forms the deduction (verified by simulation + the content-integrity reviewer, clean).
+Added a **validator guard** (per-tier reachability: every clue a *gated* recipe needs must be obtainable off the
+non-critical scene graph — errored on Mayfair pre-fix; the follow-up the audit asked for). **#53 (F-101/F-107, PR #62):**
+archetype auto-succeed ability now consumed once via a shared `resolveCheckOutcome` both check paths call. TDD throughout
+(RED watched). Test baseline **554→564**; lint + validator (7 cases) + build green; all six CI checks passed on both PRs.
+Doc-drift sweep: `status.md` baseline 558→564 + validator-check list; `content-authoring.md` key-deduction rule (F-102
+now validator-enforced); engine-reference/CLAUDE.md `resolveCheckOutcome` (from #53). **Audit-2 code backlog remaining:
+#55/#56/#57 (P1), #59 (P2), #60 (P3) — no P0 left.** — Prior (below): #58 doc-drift (PR #61); the audit itself.
 Second full Ultracode repo audit — analysis only, no code changed. Ran the
 command battery (all green — 554 tests, lint, validator, build, 0 npm vulns) then an orchestrated 13-dimension
 adversarial fan-out (71 agents) + lead verification. 37 raw → **23 root-cause-deduped verified findings** (new IDs
@@ -41,9 +41,9 @@ build artifacts (`vite.config.js`/`.d.ts`) `tsconfig.node.json`'s `composite:tru
 
 - **Stage:** Phases A–E complete and the game is playable end-to-end (7 cases). The **first** audit's backlog
   (#1–#22, findings F-001…F-067) is fully cleared except **#20 (media assets)**. **Second audit (2026-07-09) backlog
-  #53–#60 (F-101…F-123): #53 (P0 auto-succeed) FIXED (PR #62), #58 (P1 docs) done (PR #61).** Remaining: **#54 (P0
-  Mayfair true ending RNG-locked)** — do this next — plus #55/#56/#57 (P1) and #59/#60 (P2/P3). See the audit report +
-  the issues.
+  #53–#60 (F-101…F-123): both P0 gameplay blockers now FIXED — #53 auto-succeed (PR #62) + #54 Mayfair true ending
+  (PR #63); #58 (P1 docs) done (PR #61).** Remaining: **#55/#56/#57 (P1), #59 (P2), #60 (P3) — no P0 left.** See the
+  audit report + the issues.
 - **Deployment:** **Cloudflare static-assets Worker** at `holodeck.jonwhitefang.uk/gaslight-and-grimoire/*` (GitHub
   Pages retired, ADR-0007). Config in-repo: `wrangler.jsonc` (assets-only), `public/_headers` (real CSP header incl.
   `frame-ancestors 'none'`), `scripts/nest-for-cloudflare.mjs` (postbuild nests `dist/*` under the route prefix, keeps
@@ -55,11 +55,11 @@ build artifacts (`vite.config.js`/`.d.ts`) `tsconfig.node.json`'s `composite:tru
   drops its `<6.1.0` peer cap). Runtime: React 19, framer-motion 12, zustand 5, immer 11. Toolchain: Vite 8 (Rolldown),
   Vitest 4, jsdom 29, Tailwind 4 (CSS-first `@theme`), ESLint 10. See ADR-0008 + [[dependabot-major-group-migration]] for
   the clustering approach and the emnapi lockfile gotcha.
-- **Branch focus:** `fix/53-ability-auto-succeed` (**PR #62 open, all six CI checks green**) — awaiting merge. Next work
-  (#54) starts from a fresh branch off `main` once #62 lands. Prior: PR #61 (#58 docs), PR #51 (deps), PRs #48/#49 (#47 deploy).
-- **Verification:** 2026-07-09 — on `fix/53-ability-auto-succeed`: `npm run test:run` → **558 passed (558)** across **56**
-  files; `npm run lint` clean, validator clean (7 cases), `npm run build` green (emits `dist/gaslight-and-grimoire/` +
-  `dist/_headers`). **CI green on PR #62** — all six checks pass, including the **Cloudflare Workers Build** (deploy preview).
+- **Branch focus:** `main` (at `6b96b28`, **PRs #62 + #63 merged**) — both P0 blockers cleared. Next work (P1 #55/#56/#57)
+  starts from a fresh branch off `main`. Prior: PR #61 (#58 docs), PR #51 (deps), PRs #48/#49 (#47 deploy).
+- **Verification:** 2026-07-09 — on merged `main`: `npm run test:run` → **564 passed (564)** across **56** files;
+  `npm run lint` clean, validator clean (7 cases), `npm run build` green (emits `dist/gaslight-and-grimoire/` +
+  `dist/_headers`). **CI green on PRs #62 + #63** — all six checks pass on each, including the **Cloudflare Workers Build**.
 
 ---
 
@@ -89,7 +89,7 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 | P | Audit remediation — P3 #22 polish (perf + a11y) | `[x]` | **Complete — PR #46** (`1ac3c09`). F-044 rAF-throttle EvidenceBoard, F-045 `useShallow`+`React.memo` list items, F-046 LazyMotion (motion chunk 121.85→79.13 KB), F-047 shared-scene cache, F-048 reduced-motion gating, F-049 focusable typewriter-skip + sr-region, F-050 WCAG contrast, F-051 skip-link. 547→554 tests. |
 | — | Deployment — Cloudflare Worker migration (retire GitHub Pages) | `[x]` | **Complete — issue #47, ADR-0007.** PR #48 (`2e539fa`): `wrangler.jsonc` + `public/_headers` (real CSP + `frame-ancestors 'none'`) + `deploy.yml` → CI-gate-only. PR #49 (`7144d34`): `scripts/nest-for-cloudflare.mjs` postbuild nesting (fixed live 404). Owner-verified live; Pages unpublished. |
 | — | Second full Ultracode repo audit (analysis only) | `[x]` | **2026-07-09.** Report at repo root (`2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md`); 71-agent fan-out + lead verification → **23 findings (F-101…F-123)**, 4 rejected, overall risk Medium. Filed **8 grouped issues #53–#60**. No code changed. |
-| R | Audit-2 remediation — P0 gameplay blockers | `[~]` | **#53 DONE — PR #62.** Auto-succeed ability now consumed once via shared `resolveCheckOutcome` (F-101); encounters route through the same unit so the ability works there too (F-107). 554→558 tests. **#54** (Mayfair true ending RNG-locked, F-102) — still open, next. |
+| R | Audit-2 remediation — P0 gameplay blockers | `[x]` | **Both done.** **#53 — PR #62:** auto-succeed ability consumed once via shared `resolveCheckOutcome` (F-101); encounters route through the same unit (F-107). **#54 — PR #63:** Mayfair true ending de-crit-gated by dual-sourcing 2 clues (F-102) + a validator guard against crit-gated deduction clues. 554→564 tests. |
 | R2 | Audit-2 remediation — P1 (code) | `[ ]` | **#55** save/reload safety (F-103/F-105); **#56** scene-transition state hygiene (F-118/F-104/F-106/F-108); **#57** a11y+errors incl. React-19 `inert` regression. Not started. |
 | R2′ | Audit-2 remediation — P1 (docs #58) | `[x]` | **Done — PR #61 (`3dc49aa`).** F-119 `architecture.md` onEnter anti-pattern (+ F-013 flag drift); F-120 scene counts → 201; F-121 component count 16→17; F-122 choices/scene → ~1.77. Also closed the `.gitignore` `vite.config` emit-litter gap. Docs-only. |
 | R3 | Audit-2 remediation — P2/P3 | `[ ]` | **#59** test-quality (F-112–F-116); **#60** CI type-check `scripts/` (F-123). Not started. |
@@ -104,19 +104,21 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 3. **Build `scripts/checkAudioAssets.mjs`** (presence + content-cross-reference) + a unit test, then revisit CI wiring (likely `--strict`) once all files land. *(Best once ambient files land.)*
 
 **Code track — Audit-2 backlog (new, from the 2026-07-09 report):**
-4. **~~#53 auto-succeed~~ DONE — PR #62** (shared `resolveCheckOutcome`; F-101/F-107). **Next: #54** (Mayfair true
-   ending; F-102): dual-source `ms-clue-vesper-journal` (+ the second clue) onto a non-critical tier so the best ending
-   is reachable through skilled play. Last P0 gameplay release-blocker before serious playtesting.
-5. **Then P1 (code) — #55/#56/#57.** #56 (scene-transition state hygiene) groups four defects that all touch
-   `goToScene`/`resetForNewCase`, so one PR. (**#58 — the P1 docs-drift — is done: PR #61.**)
+4. **~~#53 auto-succeed (PR #62)~~ + ~~#54 Mayfair true ending (PR #63)~~ DONE — both P0 blockers cleared.** No P0 left.
+5. **Next: P1 (code) — #55/#56/#57.** Recommended order: **#56** first (scene-transition state hygiene) — it groups
+   four defects (F-118 variant onEnter drop, F-104 currentScene leak, F-106 overlay leak, F-108 stale back button) that
+   all touch `goToScene`/`resetForNewCase`, so one focused PR. Then **#55** (save/reload safety: F-103 silent manual-save
+   failure + F-105 encounter reaction re-roll) and **#57** (a11y+errors incl. the React-19 `inert=''` regression).
+   (**#58 — the P1 docs-drift — is done: PR #61.**)
 6. **Then P2/P3 — #59** (test quality — several suites test copies-of-logic, not the real unit; note #53's PR already
-   fixed the two self-fulfilling AbilityButton guard tests) and **#60** (CI type-checks `scripts/`; note its `tsc -b` also
-   surfaces pre-existing `TS2550` errors on `vite.config.ts`).
+   fixed the two self-fulfilling AbilityButton guard tests, and #54 added a real per-tier reachability validator rule) and
+   **#60** (CI type-checks `scripts/`; note its `tsc -b` also surfaces pre-existing `TS2550` errors on `vite.config.ts`).
 
 **Media track (partly user-blocked, unchanged):** ambient loops + perceptual SFX QA remain a user step (#20). See items 1–3 above.
 
 **Notes for whoever picks this up:** the audit's 4 rejected false positives are recorded in the report's *Rejected findings*
-section — don't re-file them. The follow-up "per-tier reachability mode for the validator" would have caught #54 mechanically.
+section — don't re-file them. The follow-up "per-tier reachability mode for the validator" is now **implemented** (PR #63,
+`contentValidation.ts`) — it errors when a gated key-deduction clue is only obtainable on a `critical` tier.
 
 ---
 

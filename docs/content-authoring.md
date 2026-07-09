@@ -254,7 +254,10 @@ Authoring rules:
   arbitrary set).
 - Gate the **true/best resolution** behind a key deduction, but keep the case
   completable without it (leave other endings reachable) — never single-gate
-  critical progress.
+  critical progress. Every clue a *gated* recipe requires must be obtainable
+  without relying on a `critical` roll: the CLI validator errors if a required
+  clue's only source sits on a `critical`-tier scene edge (F-102), so the gated
+  ending can't become an RNG lottery.
 
 ## NPCState (`npcs.json`)
 

@@ -107,7 +107,7 @@ ambient `*.mp3`, and no `*.png`/`*.jpg`/`*.webp` illustrations yet.
 
 As of 2026-07-09, running `npm run test:run`:
 
-- **Tests: 558 passed (558)**
+- **Tests: 564 passed (564)**
 - **Test Files: 56 passed (56)**
 
 The suite includes property-based tests using fast-check (six
@@ -117,4 +117,5 @@ by `node scripts/validateCase.mjs`, which delegates to the shared
 `src/engine/contentValidation.ts` module (the same one the runtime
 `validateContent` uses) — checking scene-graph edges, clue references, condition
 targets, variant structure, `npcEffect` refs, encounter-round edges, and (CLI
-only) reachability across all seven cases.
+only) reachability across all seven cases — including that every clue required by
+a *gated* key deduction is obtainable without a critical roll (F-102).
