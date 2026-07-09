@@ -8,7 +8,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
-import App from '../../App';
+import App, { OverlayFallback } from '../../App';
 import { ARCHETYPE_ABILITY_FLAG } from '../../engine/flags';
 import { useStore } from '../../store';
 import { SaveManager } from '../../engine/saveManager';
@@ -157,6 +157,81 @@ describe('App — review-previous button reactivity (F-108)', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /review previous scene/i })).not.toBeDisabled();
+    });
+  });
+});
+
+// #57: the modal-background isolation (F-007) must actually apply under React 19.
+// App set `inert: ''`, which React 18 treated as truthy-present but React 19
+// treats as a falsy boolean → react-dom calls removeAttribute, silently defeating
+// the isolation. 3 of 4 overlays have no independent Tab trap and rely on it.
+describe('App — modal background is inert while an overlay is open (#57)', () => {
+  afterEach(() => { vi.unstubAllGlobals(); vi.stubGlobal('localStorage', makeLocalStorageMock()); });
+
+  it('does NOT mark the background inert when no overlay is open', async () => {
+    stubCaseFetch();
+    render(<App />);
+    await reachGameScreen();
+
+    const background = screen.getByRole('banner').parentElement!;
+    expect(background.hasAttribute('inert')).toBe(false);
+  });
+
+  it('marks the background inert when the Evidence Board overlay opens', async () => {
+    stubCaseFetch();
+    render(<App />);
+    await reachGameScreen();
+
+    fireEvent.click(screen.getByRole('button', { name: /open evidence board/i }));
+
+    await waitFor(() => {
+      const background = screen.getByRole('banner').parentElement!;
+      expect(background.hasAttribute('inert')).toBe(true);
+    });
+  });
+});
+
+// #57: the loading fallbacks are visual-only (animate-pulse text). Screen-reader
+// users get no feedback during async content/overlay loads. Both must be a
+// polite live status region.
+describe('App — loading fallbacks are announced to screen readers (#57)', () => {
+  afterEach(() => { vi.unstubAllGlobals(); vi.stubGlobal('localStorage', makeLocalStorageMock()); });
+
+  it('OverlayFallback is a polite live status region', () => {
+    render(<OverlayFallback />);
+    const status = screen.getByRole('status');
+    expect(status.getAttribute('aria-live')).toBe('polite');
+    expect(status.textContent).toMatch(/loading/i);
+  });
+
+  it('the full-screen "Loading case…" screen is a polite live status region', async () => {
+    // Resolve the manifest (so the case button renders) but hang the case-content
+    // fetch, so the 'loading' screen persists for the assertion.
+    vi.stubGlobal('fetch', vi.fn((url: string) => {
+      if (String(url).endsWith('content/manifest.json')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ cases: [{ id: 'test-case', type: 'case', title: 'Test Case', synopsis: 's', status: 'available' }] }),
+        } as Response);
+      }
+      return new Promise<Response>(() => {});
+    }));
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: NEW_GAME }));
+    fireEvent.click(screen.getByRole('radio', { name: /deductionist/i }));
+    for (let i = 0; i < 12; i++) {
+      fireEvent.click(screen.getByRole('button', { name: /Increase Reason/i }));
+    }
+    fireEvent.change(screen.getByLabelText(/investigator name/i), { target: { value: 'Holmes' } });
+    fireEvent.click(screen.getByRole('button', { name: /begin investigation/i }));
+    // CharacterCreation → case-selection; pick a case → 'loading' screen (fetch hangs).
+    const caseBtn = await screen.findByRole('button', { name: /test case/i });
+    fireEvent.click(caseBtn);
+
+    await waitFor(() => {
+      const status = screen.getByRole('status');
+      expect(status.getAttribute('aria-live')).toBe('polite');
+      expect(status.textContent).toMatch(/loading case/i);
     });
   });
 });

@@ -15,6 +15,24 @@ import type {
 // ─── Condition Evaluation ─────────────────────────────────────────────────────
 
 /**
+ * Own-property guard for the normalised `Record<string, T>` state maps.
+ *
+ * Conditions look their target up by bracket index (`state.flags[target]`). A
+ * target that happens to name an `Object.prototype` member (`toString`,
+ * `valueOf`, `constructor`, …) would otherwise resolve to the *inherited*
+ * property — so a `hasFlag: {target:"toString", value:true}` gate would pass on
+ * any plain-object state, and the result would flip depending on whether the map
+ * was built as a plain `{}` or a null-prototype object. Restricting lookups to
+ * OWN keys closes that footgun and makes evaluation deterministic across map
+ * prototypes. No authored content uses such names, so this only removes the trap.
+ */
+function ownValue<T>(record: Record<string, T>, key: string): T | undefined {
+  return Object.prototype.hasOwnProperty.call(record, key)
+    ? record[key]
+    : undefined;
+}
+
+/**
  * Evaluates an array of conditions against the current game state.
  * All conditions must be satisfied (AND logic).
  * This is a pure function — no side effects, no store access.
@@ -33,24 +51,27 @@ function evaluateCondition(condition: Condition, state: GameState): boolean {
   // narrows `target`/`value` to their real shapes — no unchecked casts (F-026).
   switch (condition.type) {
     case 'hasClue': {
-      const clue = state.clues[condition.target];
+      const clue = ownValue(state.clues, condition.target);
       return clue !== undefined && clue.isRevealed;
     }
 
     case 'hasDeduction': {
-      return state.deductions[condition.target] !== undefined;
+      return ownValue(state.deductions, condition.target) !== undefined;
     }
 
     case 'hasFlag': {
       // Compare on truthiness, not identity: an unset flag is `undefined`, so
       // `{value:false}` (the "flag not yet set" gate used by breakdown/
       // incapacitation variants) must match undefined/false alike.
-      const flagValue = state.flags[condition.target];
+      const flagValue = ownValue(state.flags, condition.target);
       if (condition.value === undefined) return flagValue === true;
       return Boolean(flagValue) === condition.value;
     }
 
     case 'facultyMin': {
+      // `faculties` is a fixed-key Faculty record, and `target` is the typed
+      // Faculty union — no arbitrary/reserved-name exposure, so a direct index
+      // is safe here.
       const score = state.investigator.faculties[condition.target];
       if (score === undefined) return false;
       return score >= condition.value;
@@ -61,14 +82,14 @@ function evaluateCondition(condition: Condition, state: GameState): boolean {
     }
 
     case 'npcDisposition': {
-      const npc = state.npcs[condition.target];
+      const npc = ownValue(state.npcs, condition.target);
       if (!npc) return false;
       return npc.disposition >= condition.value;
     }
 
     case 'npcSuspicion': {
       // Maps suspicion tier names to numeric ranges
-      const npc = state.npcs[condition.target];
+      const npc = ownValue(state.npcs, condition.target);
       if (!npc) return false;
       const s = npc.suspicion;
       switch (condition.value) {
@@ -81,14 +102,14 @@ function evaluateCondition(condition: Condition, state: GameState): boolean {
     }
 
     case 'factionReputation': {
-      const rep = state.factionReputation[condition.target] ?? 0;
+      const rep = ownValue(state.factionReputation, condition.target) ?? 0;
       return rep >= condition.value;
     }
 
     case 'npcMemoryFlag': {
-      const mnpc = state.npcs[condition.target];
+      const mnpc = ownValue(state.npcs, condition.target);
       if (!mnpc) return false;
-      return !!mnpc.memoryFlags[condition.value];
+      return !!ownValue(mnpc.memoryFlags, condition.value);
     }
 
     // Intentional defensive default: an unknown/unrecognised condition type fails

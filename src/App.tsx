@@ -38,9 +38,13 @@ const CaseCompletion = lazy(() =>
 );
 
 /** Brief fallback shown while a lazy overlay/screen chunk loads. */
-function OverlayFallback() {
+export function OverlayFallback() {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gaslight-ink/80">
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-gaslight-ink/80"
+    >
       <p className="text-gaslight-amber text-lg animate-pulse font-serif">Loading…</p>
     </div>
   );
@@ -258,7 +262,11 @@ export default function App() {
   if (screen === 'loading') {
     return (
       <AccessibilityProvider>
-        <div className="min-h-screen bg-gaslight-ink text-gaslight-fog font-serif flex items-center justify-center">
+        <div
+          role="status"
+          aria-live="polite"
+          className="min-h-screen bg-gaslight-ink text-gaslight-fog font-serif flex items-center justify-center"
+        >
           <p className="text-gaslight-amber text-xl animate-pulse">Loading case…</p>
         </div>
       </AccessibilityProvider>
@@ -315,11 +323,14 @@ export default function App() {
     <AccessibilityProvider>
       <div className="min-h-screen bg-gaslight-ink text-gaslight-fog font-serif flex flex-col">
         {/* Background is inert while an overlay is open, so focus/pointer/AT
-            cannot reach it behind the modal (F-007). `inert` is presence-based;
-            React 18 passes '' when true and drops the attribute when false. */}
+            cannot reach it behind the modal (F-007). Pass the real boolean:
+            React 19 treats `inert` as a genuine boolean attribute and sets it
+            via setAttribute("inert", "") when true / removeAttribute when false.
+            An empty string reads as falsy here and would be stripped (#57), so
+            the React-18 `inert=''` idiom silently defeats the isolation. */}
         <div
           className="flex flex-col flex-1 min-h-0"
-          {...(anyOverlayOpen ? { inert: '' as unknown as boolean } : {})}
+          inert={anyOverlayOpen}
         >
         {/* Skip-to-content link (F-051): visually hidden until focused, so
             keyboard users can jump past the 8-button header to the scene. */}

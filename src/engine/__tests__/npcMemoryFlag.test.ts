@@ -114,3 +114,52 @@ describe('evaluateCondition — per-variant behavior lock (F-026)', () => {
     expect(evaluateConditions([{ type: 'factionReputation', target: 'Lamplighters', value: 5 }], state)).toBe(true);
   });
 });
+
+// A gate target must match only OWN keys of the state record, never an inherited
+// Object.prototype member. Bracket-index lookups (`state.flags[target]`) otherwise
+// read the inherited `toString`/`valueOf`/`constructor` function for those target
+// names, so a `hasFlag: {target:"toString", value:true}` gate would pass on ANY
+// plain-object state — and the result flips depending on whether `flags` was built
+// as a plain `{}` or a null-prototype object. No authored content uses such names,
+// but the lookup is a latent correctness/determinism footgun. (Found via the
+// determinism property test's null-proto counterexample.)
+describe('evaluateCondition — inherited Object.prototype keys never satisfy a gate', () => {
+  const RESERVED = ['toString', 'valueOf', 'constructor', 'hasOwnProperty'] as const;
+
+  it('hasFlag: an inherited prototype method name is not a set flag', () => {
+    for (const name of RESERVED) {
+      expect(evaluateConditions([{ type: 'hasFlag', target: name, value: true }], makeState())).toBe(false);
+      // value:false ("flag not set") must still hold for these names.
+      expect(evaluateConditions([{ type: 'hasFlag', target: name, value: false }], makeState())).toBe(true);
+    }
+  });
+
+  it('hasDeduction: an inherited prototype method name is not a present deduction', () => {
+    for (const name of RESERVED) {
+      expect(evaluateConditions([{ type: 'hasDeduction', target: name }], makeState())).toBe(false);
+    }
+  });
+
+  it('hasClue: an inherited prototype method name is not a revealed clue', () => {
+    for (const name of RESERVED) {
+      expect(evaluateConditions([{ type: 'hasClue', target: name }], makeState())).toBe(false);
+    }
+  });
+
+  it('npcDisposition / npcMemoryFlag: an inherited prototype method name is not an NPC', () => {
+    for (const name of RESERVED) {
+      expect(evaluateConditions([{ type: 'npcDisposition', target: name, value: 0 }], makeState())).toBe(false);
+      expect(evaluateConditions([{ type: 'npcMemoryFlag', target: name, value: 'x' }], makeState())).toBe(false);
+    }
+  });
+
+  it('is deterministic whether the state record is a plain {} or a null-prototype object', () => {
+    const nullProtoFlags = Object.assign(Object.create(null), {}) as Record<string, boolean>;
+    const plain = makeState({ flags: {} });
+    const nullProto = makeState({ flags: nullProtoFlags });
+    for (const name of RESERVED) {
+      const cond: Condition[] = [{ type: 'hasFlag', target: name, value: false }];
+      expect(evaluateConditions(cond, plain)).toBe(evaluateConditions(cond, nullProto));
+    }
+  });
+});
