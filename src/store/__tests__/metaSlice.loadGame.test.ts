@@ -114,6 +114,31 @@ describe('metaSlice.loadGame — result signalling', () => {
     expect(ok).toBe(true);
     expect(useStore.getState().visitedScenes).toContain('s1');
   });
+
+  // F-105: mid-encounter progress (currentRound + the already-performed reaction
+  // check) must survive save/reload, so reloading doesn't restart the fight or
+  // re-roll/re-apply the reaction damage.
+  it('restores in-progress encounterState so a reload does not restart the encounter (F-105)', async () => {
+    const fetched2 = stubFetch();
+    void fetched2;
+    const encounterState = {
+      id: 's1', rounds: [{ roundNumber: 1, isSupernatural: true, choices: [] }],
+      currentRound: 1, isComplete: false, reactionCheckPassed: false,
+    };
+    useStore.setState({
+      investigator: baseInvestigator(), currentScene: 's1', currentCase: 'test-case',
+      clues: {}, deductions: {}, npcs: {}, flags: {}, factionReputation: {},
+      sceneHistory: [], connections: [], visitedScenes: ['s1'],
+      encounterState,
+    });
+    SaveManager.save('enc', snapshotGameState(useStore.getState()));
+
+    useStore.setState({ encounterState: null });
+    const ok = await useStore.getState().loadGame('enc');
+    expect(ok).toBe(true);
+    expect(useStore.getState().encounterState?.currentRound).toBe(1);
+    expect(useStore.getState().encounterState?.reactionCheckPassed).toBe(false);
+  });
 });
 
 describe('metaSlice.loadGame — vignette save restoration', () => {

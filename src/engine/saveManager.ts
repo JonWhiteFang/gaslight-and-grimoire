@@ -11,7 +11,7 @@ import type { GameState, SaveFile } from '../types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-export const CURRENT_SAVE_VERSION = 3;
+export const CURRENT_SAVE_VERSION = 4;
 
 const KEY_PREFIX = 'gg_save_';
 const INDEX_KEY = 'gg_save_index';
@@ -172,6 +172,8 @@ export const SaveManager = {
    *   2 → 3: backfill `visitedScenes` from the scenes the player has already
    *          seen (`sceneHistory` + `currentScene`), so reloading a pre-v3 save
    *          does not re-fire onEnter effects on scenes already passed (F-006).
+   *   3 → 4: default `encounterState` to null — pre-v4 saves have no persisted
+   *          encounter progress, so they resume as "not in an encounter" (F-105).
    */
   migrate(saveFile: SaveFile): SaveFile {
     if (saveFile.version === CURRENT_SAVE_VERSION) {
@@ -212,6 +214,15 @@ export const SaveManager = {
           [...(state.sceneHistory ?? []), state.currentScene].filter(Boolean),
       };
       version = 3;
+    }
+
+    // v3 → 4
+    if (version < 4) {
+      state = {
+        ...state,
+        encounterState: state.encounterState ?? null,
+      };
+      version = 4;
     }
 
     return {

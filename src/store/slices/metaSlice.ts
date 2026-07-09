@@ -8,8 +8,14 @@ import { vignetteToCaseData } from './narrativeSlice';
 
 const MAX_MANUAL_SAVES = 10;
 
-/** Result of a manual save — how many old saves the 10-cap evicted (F-052). */
+/**
+ * Result of a manual save. `ok` is false when persistence threw (e.g.
+ * localStorage quota/disabled) so the caller can surface an error instead of a
+ * false "Game saved" (F-103); `evicted` is how many old saves the 10-cap
+ * removed (F-052).
+ */
 export interface SaveResult {
+  ok: boolean;
   evicted: number;
 }
 
@@ -48,7 +54,17 @@ export const createMetaSlice: StateCreator<
     const s = get();
     const gameState = snapshotGameState(s);
     const saveId = `save-${Date.now()}`;
-    SaveManager.save(saveId, gameState, s.caseData?.meta.title);
+
+    // localStorage.setItem can throw (QuotaExceededError, private browsing,
+    // storage disabled, enterprise lockdown). Without this guard the throw
+    // becomes an unhandled rejection while the caller shows "Game saved" — the
+    // player believes the game saved when it didn't (F-103). Mirror autoSave's
+    // resilience, but REPORT the failure so the UI can surface an error toast.
+    try {
+      SaveManager.save(saveId, gameState, s.caseData?.meta.title);
+    } catch {
+      return { ok: false, evicted: 0 };
+    }
 
     // Cap manual saves at MAX_MANUAL_SAVES (exclude autosave)
     const all = SaveManager.listSaves();
@@ -61,7 +77,7 @@ export const createMetaSlice: StateCreator<
         evicted += 1;
       }
     }
-    return { evicted };
+    return { ok: true, evicted };
   },
 
   autoSave: () => {
@@ -109,6 +125,9 @@ export const createMetaSlice: StateCreator<
         // reload does not re-fire them (F-006). Fall back to the visited history
         // for pre-v3 saves that predate this field.
         state.visitedScenes = gameState.visitedScenes ?? [...(gameState.sceneHistory ?? []), gameState.currentScene].filter(Boolean);
+        // Resume mid-encounter progress so a reload doesn't restart the fight or
+        // re-roll/re-apply the reaction damage (F-105). Absent in pre-v4 saves → null.
+        state.encounterState = gameState.encounterState ?? null;
         state.lastEffectMessages = [];
         state.settings = gameState.settings;
         state.caseData = caseData;

@@ -136,7 +136,7 @@ export default function App() {
   const [loadError, setLoadError] = useState<string | null>(null);
   // Carries a monotonic `nonce` so two identical consecutive toast messages
   // still re-trigger the auto-dismiss effect (setState bails on an equal value).
-  const [saveToast, setSaveToast] = useState<{ message: string; nonce: number } | null>(null);
+  const [saveToast, setSaveToast] = useState<{ message: string; nonce: number; tone: 'ok' | 'error' } | null>(null);
   const [completionResult, setCompletionResult] = useState<CaseCompletionResult | null>(null);
   const [endingNarrative, setEndingNarrative] = useState<string | null>(null);
   const completeCase = useStore((s) => s.completeCase);
@@ -154,14 +154,17 @@ export default function App() {
   }, [abilityUsed, archetype, activateAbility, setFlag]);
 
   // Manual save: confirm success and warn when the 10-save cap evicted the
-  // oldest save(s), so a save is never silently lost (F-052).
+  // oldest save(s), so a save is never silently lost (F-052). On a persistence
+  // failure (localStorage quota/disabled), surface an ERROR toast rather than a
+  // false "Game saved" (F-103).
   const handleSaveGame = useCallback(async () => {
-    const { evicted } = await saveGame();
-    const message =
-      evicted > 0
+    const { ok, evicted } = await saveGame();
+    const message = !ok
+      ? 'Save failed — your browser storage may be full or disabled. The game was not saved.'
+      : evicted > 0
         ? `Game saved — oldest save${evicted > 1 ? 's' : ''} removed (10-save limit reached)`
         : 'Game saved';
-    setSaveToast((prev) => ({ message, nonce: (prev?.nonce ?? 0) + 1 }));
+    setSaveToast((prev) => ({ message, tone: ok ? 'ok' : 'error', nonce: (prev?.nonce ?? 0) + 1 }));
   }, [saveGame]);
 
   // Auto-dismiss the save toast after a few seconds. `saveToast` is a fresh
@@ -360,12 +363,18 @@ export default function App() {
           )}
         </Suspense>
 
-        {/* Save-confirmation toast (F-052). aria-live so it's announced. */}
+        {/* Save toast (F-052/F-103). Success is a polite status; a save failure
+            is an assertive alert with error styling so it isn't mistaken for a
+            confirmation. */}
         {saveToast && (
           <div
-            role="status"
-            aria-live="polite"
-            className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-stone-800 border border-gaslight-amber/40 rounded px-4 py-2 text-sm text-gaslight-fog shadow-lg z-50"
+            role={saveToast.tone === 'error' ? 'alert' : 'status'}
+            aria-live={saveToast.tone === 'error' ? 'assertive' : 'polite'}
+            className={
+              saveToast.tone === 'error'
+                ? 'fixed bottom-4 left-1/2 -translate-x-1/2 bg-red-900/90 border border-red-700 rounded px-4 py-2 text-sm text-red-200 shadow-lg z-50'
+                : 'fixed bottom-4 left-1/2 -translate-x-1/2 bg-stone-800 border border-gaslight-amber/40 rounded px-4 py-2 text-sm text-gaslight-fog shadow-lg z-50'
+            }
           >
             {saveToast.message}
           </div>

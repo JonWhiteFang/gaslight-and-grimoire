@@ -99,6 +99,34 @@ describe('SaveManager v3 migration — visitedScenes', () => {
   });
 });
 
+describe('SaveManager v4 migration — encounterState (F-105)', () => {
+  it('defaults encounterState to null for a v3 save', () => {
+    const v3State = {
+      ...makeV1StateWithoutNewFields(),
+      currentScene: 's1',
+      sceneHistory: [],
+      connections: [],
+      visitedScenes: ['s1'],
+    };
+    const old = { version: 3, timestamp: 't', state: v3State } as unknown as SaveFile;
+    const migrated = SaveManager.migrate(old);
+    expect(migrated.state.encounterState).toBeNull();
+    expect(migrated.version).toBe(CURRENT_SAVE_VERSION);
+  });
+
+  it('leaves an existing encounterState untouched', () => {
+    const enc = { id: 's1', rounds: [], currentRound: 2, isComplete: false, reactionCheckPassed: true };
+    const state = {
+      ...makeV1StateWithoutNewFields(),
+      currentScene: 's1', sceneHistory: [], connections: [], visitedScenes: ['s1'],
+      encounterState: enc,
+    };
+    const old = { version: 3, timestamp: 't', state } as unknown as SaveFile;
+    const migrated = SaveManager.migrate(old);
+    expect(migrated.state.encounterState).toEqual(enc);
+  });
+});
+
 describe('SaveManager — chained v0 → current migration (F-031)', () => {
   // A v0 blob predates factionReputation, sceneHistory, connections, and
   // visitedScenes. One migrate() call must walk every step and backfill them all.
@@ -108,7 +136,7 @@ describe('SaveManager — chained v0 → current migration (F-031)', () => {
     return { ...base, currentScene: 's2' };
   }
 
-  it('walks v0 → 1 → 2 → 3 in a single call, backfilling every added field', () => {
+  it('walks v0 → 1 → 2 → 3 → 4 in a single call, backfilling every added field', () => {
     const old = { version: 0, timestamp: 't', state: makeV0State() } as unknown as SaveFile;
     const migrated = SaveManager.migrate(old);
 
@@ -118,6 +146,7 @@ describe('SaveManager — chained v0 → current migration (F-031)', () => {
     expect(migrated.state.connections).toEqual([]);        // v1 → 2
     // v2 → 3: visitedScenes seeded from (empty) sceneHistory + currentScene.
     expect(migrated.state.visitedScenes).toContain('s2');
+    expect(migrated.state.encounterState).toBeNull();      // v3 → 4
   });
 
   it('load() of a v0 blob returns a fully-migrated, non-null state', () => {

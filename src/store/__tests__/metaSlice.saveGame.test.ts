@@ -32,7 +32,10 @@ beforeEach(() => {
     currentCase: 'the-whitechapel-cipher',
   });
 });
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
 
 describe('metaSlice.saveGame — eviction reporting (F-052)', () => {
   it('reports evicted: 0 for a normal save under the cap', async () => {
@@ -58,5 +61,26 @@ describe('metaSlice.saveGame — eviction reporting (F-052)', () => {
     expect(result.evicted).toBeGreaterThanOrEqual(1);
     // Still capped at 10 manual saves afterwards.
     expect(SaveManager.listSaves().filter((s) => s.id !== 'autosave')).toHaveLength(10);
+  });
+});
+
+// F-103: a manual save that hits a localStorage throw (QuotaExceededError,
+// private browsing, storage disabled) must NOT become an unhandled rejection
+// while the UI shows "Game saved". saveGame resolves to a failure signal so the
+// caller can surface an error toast. (autoSave already swallows the throw; this
+// makes the manual path consistent — and honest.)
+describe('metaSlice.saveGame — surfaces a localStorage failure instead of throwing (F-103)', () => {
+  it('resolves to { ok: false } (no unhandled rejection) when setItem throws', async () => {
+    vi.spyOn(localStorageMock, 'setItem').mockImplementation(() => {
+      throw new DOMException('quota', 'QuotaExceededError');
+    });
+    const result = await useStore.getState().saveGame();
+    expect(result.ok).toBe(false);
+  });
+
+  it('reports ok: true on a normal save', async () => {
+    const result = await useStore.getState().saveGame();
+    expect(result.ok).toBe(true);
+    expect(result.evicted).toBe(0);
   });
 });
