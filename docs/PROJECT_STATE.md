@@ -8,10 +8,13 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-09 (**Full-doc-drift sweep + audit-file relocation — docs-only, uncommitted. 21 verified drift fixes across 8 docs; moved `2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md` → `docs/audits/`. Test baseline unchanged 611; no code touched.**)
-**This session (doc sweep):** ran a fan-out audit (9 per-doc auditors + historical link-check, each finding adversarially verified against source) → **21 CONFIRMED drift fixes**, all applied. Highlights: engine-reference `CaseCompletionResult.vignettesUnlocked: string[]` + `checkVignetteUnlocks(): string[]` (were singular/nullable — F-057 drift); the "no audio ships / silent" claim corrected in **4 docs** (9 SFX now ship); CLAUDE.md scene-count parenthetical fixed (201 = base+variants **excl.** shared; 215 at runtime), `haltScenes.ts` added to the engine list, `CaseCompletion`/`InvestigationHalted` added to the component hierarchy; content-JSON described as wrapped objects not bare arrays; a dead `build→deploy` CI ref, two stale `file:line`s in architecture.md, `66→67` validator example, doc-map missing `audio-asset-kit.md`, and several stale audio-status lines. **Also moved** the 2026-07-09 audit report from repo root into `docs/audits/` (via `git mv`, history preserved) beside the 2026-07-07 audit; repointed the 4 live PROJECT_STATE links (`../` → `audits/`) + the RUN_LOG history href (annotated, not rewritten). All 85 internal doc links resolve; validator clean (7 cases). — Prior (below): #60 CI type-check (PR #68).
+_Last updated: 2026-07-09 (**Answered the issue #52 agent-perspective interview — posted as a comment on the GitHub issue (NOT committed to the repo). This checkpoint's spine/doc edits are the only committed change; no code/content touched, test baseline unchanged 611.**)
+**This session (interview):** the user asked the agent to answer **issue #52** — an interview addressed to Claude Code for a jonwhitefang.uk blog post on how G&G was built. Ran a fan-out research workflow (8 per-cluster researchers, every claim grounded in git/gh/ADR/RUN_LOG citations; the fact-check phase largely stalled on agent timeouts but returned zero corrections, and every load-bearing figure was independently re-verified by the lead against primary sources). Posted a first-person, candour-over-polish answer to all 11 questions ([issue #52, comment 4926364394](https://github.com/JonWhiteFang/gaslight-and-grimoire/issues/52#issuecomment-4926364394)). **Central honesty findings the blog must not get wrong** (surfaced so future sessions don't re-derive them): the project began under **Kiro** (a different AI IDE) at the 2026-02-19 initial commit `be92632` — the design bible, 4 archetypes, 4 factions, the deduction system, the entire Phase A–E foundation, and the "198 scenes" content uplift (`50df7a1`, 2026-02-25) all **predate Claude Code**, which only took over on 2026-07-07 (`4707828`); the issue's "198 scenes" is a stale Kiro-era commit-title figure (live: **201 base / 215 runtime**, per F-120); there were **two** audits (67→22 issues + 23→8), not one; the deduction mechanic was **activated** (stable ids + content), not built; and the human/agent division of labour is invisible in git (every non-bot commit authored "Jon White"). The interview itself changed no repo files — comment-only. — Prior (below): full doc-drift sweep + audit relocation (PR #69).
 
-_Prior update: 2026-07-09 (**Audit-2 P3 #60 FIXED — CI type-checks scripts/ + vite.config.ts (PR #68, merged). ENTIRE audit-2 code backlog (#53–#60) CLEAR.**)
+_Prior update: 2026-07-09 (**Full-doc-drift sweep + audit-file relocation — docs-only (PR #69, merged). 21 verified drift fixes across 8 docs; moved `2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md` → `docs/audits/`. Test baseline unchanged 611; no code touched.**)
+**Prior session (doc sweep):** ran a fan-out audit (9 per-doc auditors + historical link-check, each finding adversarially verified against source) → **21 CONFIRMED drift fixes**, all applied. Highlights: engine-reference `CaseCompletionResult.vignettesUnlocked: string[]` + `checkVignetteUnlocks(): string[]` (were singular/nullable — F-057 drift); the "no audio ships / silent" claim corrected in **4 docs** (9 SFX now ship); CLAUDE.md scene-count parenthetical fixed (201 = base+variants **excl.** shared; 215 at runtime), `haltScenes.ts` added to the engine list, `CaseCompletion`/`InvestigationHalted` added to the component hierarchy; content-JSON described as wrapped objects not bare arrays; a dead `build→deploy` CI ref, two stale `file:line`s in architecture.md, `66→67` validator example, doc-map missing `audio-asset-kit.md`, and several stale audio-status lines. **Also moved** the 2026-07-09 audit report from repo root into `docs/audits/` (via `git mv`, history preserved) beside the 2026-07-07 audit; repointed the 4 live PROJECT_STATE links (`../` → `audits/`) + the RUN_LOG history href (annotated, not rewritten). All 85 internal doc links resolve; validator clean (7 cases). — Prior (below): #60 CI type-check (PR #68).
+
+_Earlier: 2026-07-09 (**Audit-2 P3 #60 FIXED — CI type-checks scripts/ + vite.config.ts (PR #68, merged). ENTIRE audit-2 code backlog (#53–#60) CLEAR.**)
 **#60 (F-123):** the build gate's `tsc` had `include: ["src"]`, so `scripts/` — incl. `scripts/validateCase.ts`, the
 content-validator source that is itself a CI correctness gate — was in no tsconfig; a type regression there passed the build
 and only surfaced at runtime via the vite-node shim. `vite.config.ts` was nominally covered by `tsconfig.node.json` but that
@@ -119,7 +122,7 @@ build artifacts (`vite.config.js`/`.d.ts`) `tsconfig.node.json`'s `composite:tru
   #53–#60 (F-101…F-123): CLEAR — both P0 gameplay blockers FIXED (#53 auto-succeed PR #62, #54 Mayfair true ending
   PR #63); all P1 FIXED (#55 save/reload PR #65, #56 scene-transition PR #64, #57 a11y/errors PR #66, #58 docs PR #61);
   P2 #59 test quality FIXED (PR #67); P3 #60 CI type-check `scripts/` FIXED (PR #68).** No audit-2 code items left.
-  See the audit report + the issues.
+  See the audit report + the issues. **Non-code #52 (agent-perspective interview) answered** on the issue 2026-07-09.
 - **Deployment:** **Cloudflare static-assets Worker** at `holodeck.jonwhitefang.uk/gaslight-and-grimoire/*` (GitHub
   Pages retired, ADR-0007). Config in-repo: `wrangler.jsonc` (assets-only), `public/_headers` (real CSP header incl.
   `frame-ancestors 'none'`), `scripts/nest-for-cloudflare.mjs` (postbuild nests `dist/*` under the route prefix, keeps
@@ -138,9 +141,10 @@ build artifacts (`vite.config.js`/`.d.ts`) `tsconfig.node.json`'s `composite:tru
 - **Verification:** 2026-07-09 — on merged `main`: `npm run test:run` → **611 passed (611)** across **58** files;
   `npm run lint` clean, validator clean (7 cases), `npm ci --ignore-scripts` + `npm run build` green (build now also
   type-checks `scripts/` + `vite.config.ts`; emits `dist/gaslight-and-grimoire/` + `dist/_headers`). **CI green on PR #68**
-  (and #62–#67) — all six checks pass on each, including the **Cloudflare Workers Build**. This session's doc sweep +
-  audit-file move are **docs-only, uncommitted** — no code touched, so the 611/58 baseline holds unchanged; re-verified
-  `node scripts/validateCase.mjs` → 7 cases clean and **all 85 internal doc links resolve (0 broken)** post-move.
+  (and #62–#67) — all six checks pass on each, including the **Cloudflare Workers Build**. This session (interview) touched
+  **no code or content** — the answer was posted to GitHub issue #52, not the repo — so the 611/58 baseline holds unchanged;
+  re-verified live this session: `npm run test:run` → **611 passed (611)** / 58 files, `node scripts/validateCase.mjs` →
+  **201 scenes / 7 cases** clean. Only this checkpoint's spine edits are committed.
 
 ---
 
@@ -180,15 +184,19 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 
 ## Next actions (explicit order)
 
-**Audit-2 code backlog: CLEAR.** All of #53–#60 merged (PRs #62–#68). The only open GitHub issues are #20 (media,
-user-blocked) and #52 (interview, non-code). No open code work.
+**Audit-2 code backlog: CLEAR.** All of #53–#60 merged (PRs #62–#68). The only open GitHub issue is #20 (media,
+user-blocked). No open code work. **#52 (agent-perspective interview) answered** 2026-07-09 — a first-person response to
+all 11 questions is posted as a [comment on the issue](https://github.com/JonWhiteFang/gaslight-and-grimoire/issues/52#issuecomment-4926364394)
+(the blog draft itself is the user's to write; the issue can be closed once they've mined the answer).
 
 **Media track (partly user-blocked) — the practical next steps if resuming:**
 1. **User generates the 10 ambient loops** (Stable Audio/Suno per [`audio-asset-kit.md`](audio-asset-kit.md)) into `public/audio/ambient/`, exact filenames. *(Unblocked; user step.)*
 2. **Perceptual SFX QA (needs human ears)** — the 9 SFX load & trigger correctly in-browser (Playwright-verified), but whether they *sound* right (grounded/never-campy; occult stinger suitably uncanny) can't be machine-checked. One known duration outlier accepted: `clue-deduction` at 2.62s audible. *(User step.)*
 3. **Build `scripts/checkAudioAssets.mjs`** (presence + content-cross-reference) + a unit test, then revisit CI wiring (likely `--strict`) once all files land. *(Best once ambient files land.)*
 
-**Non-code:** #52 — the agent's-perspective interview/blog piece for jonwhitefang.uk (writing task).
+**Non-code:** #52 — **DONE** (agent's-perspective interview answered on the issue 2026-07-09). Remaining is the user's own
+blog write-up for jonwhitefang.uk, plus optionally closing #52. The posted answer flags the overclaim traps to avoid
+(Kiro origin, 198→201 scene count, two audits not one, "activated not built" deduction, invisible agent/human git line).
 
 **Notes for whoever picks this up:** the audit's 4 rejected false positives are recorded in the report's *Rejected findings*
 section — don't re-file them. Both audit backlogs (#1–#22 and #53–#60) are now fully cleared except the media milestone (#20).
