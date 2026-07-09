@@ -39,7 +39,8 @@ every screen in `<AccessibilityProvider>`.
           ├── <GameContent>           # Resolves current scene, picks body panel
           │   ├── <NarrativePanel />  # Scene text, illustration, dice/clue/effect cards
           │   ├── <ChoicePanel />     # Choice cards (default body)
-          │   └── <EncounterPanel />  # Multi-round encounter UI (when scene.encounter)
+          │   ├── <EncounterPanel />  # Multi-round encounter UI (when scene.encounter)
+          │   └── <InvestigationHalted /> # Failure screen when composure/vitality = 0
           ├── <StatusBar />           # Composure + vitality meters
           ├── <EvidenceBoard />       # Overlay: clue cards, connection threads, deduce
           ├── <CaseJournal />         # Overlay: clues, deductions, scene timeline
@@ -49,12 +50,13 @@ every screen in `<AccessibilityProvider>`.
 
 `GameContent` renders `NarrativePanel` and then chooses the body: a terminal
 "Case Complete" button when the scene has no choices and no encounter, an
-`EncounterPanel` when `scene.encounter` is set, otherwise `ChoicePanel`. All 16
+`EncounterPanel` when `scene.encounter` is set, an `InvestigationHalted` screen
+when composure or vitality hits 0, otherwise `ChoicePanel`. All 17
 component directories under `src/components/` are represented above
 (`AccessibilityProvider`, `AmbientAudio`, `CaseCompletion`, `CaseJournal`,
 `CaseSelection`, `CharacterCreation`, `ChoicePanel`, `EncounterPanel`,
-`ErrorBoundary`, `EvidenceBoard`, `HeaderBar`, `NPCGallery`, `NarrativePanel`,
-`SettingsPanel`, `StatusBar`, `TitleScreen`).
+`ErrorBoundary`, `EvidenceBoard`, `HeaderBar`, `InvestigationHalted`,
+`NPCGallery`, `NarrativePanel`, `SettingsPanel`, `StatusBar`, `TitleScreen`).
 
 ## Store: six slices
 
@@ -98,7 +100,11 @@ intersection of the six slice interfaces.
 - **`applyEffects` lives in `worldSlice`, not the engine.** It is a store action
   that dispatches an `Effect[]` to the relevant slice actions (`composure`,
   `vitality`, `flag`, `disposition`, `suspicion`, `reputation`, `discoverClue`,
-  `setMemoryFlag`). It is invoked from `NarrativePanel` on scene entry.
+  `setMemoryFlag`). It is invoked from **`narrativeSlice.goToScene`** on scene
+  entry, gated on `visitedScenes` so a scene's `onEnter` fires **exactly once per
+  playthrough** (never re-firing on back-navigation or save-load — F-006).
+  `NarrativePanel` only *reads* the resulting `lastEffectMessages`; effect
+  application must **not** be re-added to the view layer.
 - **Evidence-board connections persist in `evidenceSlice`.** `connections` holds
   `{ fromId, toId }` id pairs (deduped, order-insensitive). DOM anchor points are
   recomputed on render; the store never holds pixel coordinates. Connections are
@@ -110,9 +116,10 @@ intersection of the six slice interfaces.
 CaseSelection → loadAndStartCase(id)  (or loadAndStartVignette)
   → loadCase(id) / loadVignette(id)   fetch /content/cases/<id>/*.json (or side-cases)
   → validateContent + index arrays into Record<string, T> by id
-  → set caseData; reset clues/npcs/deductions/connections; clear ability/reward
-    flags (ability-auto-succeed-{reason,vigor,influence}, ability-veil-sight-active,
-    last-critical-faculty) — other world flags persist across cases
+  → set caseData; reset clues/npcs/deductions/connections; clear ability
+    flags (ability-auto-succeed-{reason,vigor,influence}, ability-veil-sight-active)
+    and the typed investigator.lastCriticalFaculty reward field (F-013) — other
+    world flags persist across cases
   → goToScene(firstScene)             push prev scene to sceneHistory;
       apply onEnter effects once per scene (gated on visitedScenes — F-006)
       → NarrativePanel renders scene (auto-discovers clues; shows lastEffectMessages)
