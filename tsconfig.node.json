@@ -2,6 +2,12 @@
   "compilerOptions": {
     "composite": true,
     "skipLibCheck": true,
+    // Explicit modern target/lib: without a `lib`, `tsc -b` (IDE/build-mode,
+    // which follows this project reference) reported TS2550 on `vite.config.ts`'s
+    // `String.includes` — an ES2015+ API. Don't rely on `@types/node`'s implicit
+    // `/// <reference lib="es2020" />` to backfill it (F-123).
+    "target": "ES2022",
+    "lib": ["ES2023"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true
