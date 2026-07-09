@@ -205,3 +205,23 @@ describe('narrativeSlice.loadAndStartCase — recovers meters after a halt', () 
     expect(useStore.getState().currentScene).toBe('test-scene-1');
   });
 });
+
+// F-104: resetForNewCase must clear the previous case's currentScene. Otherwise
+// the new case's first goToScene pushes the stale foreign scene id into the
+// fresh sceneHistory (phantom id in autosave + a live-but-no-op "Review previous
+// scene" button at case start).
+describe('narrativeSlice.loadAndStartCase — does not leak the previous scene into new history (F-104)', () => {
+  beforeEach(() => {
+    resetNarrative();
+    stubFetchWithFixture();
+    // Simulate finishing a prior case: a real currentScene + some history.
+    useStore.setState({ currentScene: 'prev-case-final-scene', sceneHistory: ['prev-a', 'prev-b'] });
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('starts the new case with an empty sceneHistory (no foreign previous-case id)', async () => {
+    await useStore.getState().loadAndStartCase('test-case');
+    expect(useStore.getState().sceneHistory).toEqual([]);
+    expect(useStore.getState().currentScene).toBe('test-scene-1');
+  });
+});
