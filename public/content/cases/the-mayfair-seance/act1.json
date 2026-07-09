@@ -304,8 +304,17 @@
     {
       "id": "ms-act1-room-partial",
       "act": 1,
-      "narrative": "The séance room is arranged with theatrical precision — black velvet, low gaslight, a faint smell of incense. You notice the table is unusually heavy for its size, and the gas lamps are fitted with an unfamiliar valve mechanism. Something about the room feels staged, but you cannot identify the specific artifice before Lady Ashworth calls the guests to take their seats.",
-      "cluesAvailable": [],
+      "narrative": "The séance room is arranged with theatrical precision — black velvet, low gaslight, a faint smell of incense. You notice the table is unusually heavy for its size, and the gas lamps are fitted with an unfamiliar valve mechanism. Something about the room is staged. A hurried glance passes over it; a patient eye can trace the thread of copper from the table's edge to the wainscoting before Lady Ashworth calls the guests to take their seats.",
+      "cluesAvailable": [
+        {
+          "clueId": "ms-clue-hidden-mechanism",
+          "method": "check",
+          "requiresFaculty": {
+            "faculty": "perception",
+            "minimum": 11
+          }
+        }
+      ],
       "choices": [
         {
           "id": "ms-choice-room-partial-proceed",

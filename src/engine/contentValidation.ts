@@ -149,6 +149,38 @@ export function validateBundle(
         warnings.push(`clue "${clue.id}" is never discoverable (no reachable scene lists it in cluesAvailable)`);
       }
     }
+
+    // F-102: a key deduction that GATES content (via requiresDeduction /
+    // hasDeduction) must be formable through skilled play — not only by rolling
+    // criticals. For every clue such a recipe requires, at least one discovery
+    // source must be reachable without depending on a `critical` outcome edge.
+    // Otherwise the gated content (e.g. a case's true ending) is an RNG lottery.
+    // This is an error, not a warning: it violates the CLAUDE.md content rule
+    // ("no single Faculty / lucky roll should gate critical story progress").
+    const gatedRecipeIds = collectGatedDeductionIds(bundle);
+    if (gatedRecipeIds.size > 0) {
+      // Use OBTAINABLE sources (cluesAvailable + onEnter discoverClue) here, not
+      // the looser `discoverable` set — the latter also counts a clue merely
+      // *referenced* by a reachable requiresClue/advantageIf, which would mask a
+      // clue that is only actually GATHERED on a critical tier (the Mayfair bug).
+      const obtainableAll = computeObtainableClues(bundle, reachable);
+      const nonCritReachable = computeNonCriticalReachableScenes(bundle);
+      const obtainableNonCrit = computeObtainableClues(bundle, nonCritReachable);
+      for (const recipe of bundle.recipes ?? []) {
+        if (!gatedRecipeIds.has(recipe.id)) continue;
+        for (const clueId of recipe.requiredClues) {
+          // Only meaningful for clues that exist and are obtainable at all (an
+          // unknown clue is already an error above; a wholly-unobtainable clue is
+          // already a warning — don't double-report either here).
+          if (!clueIds.has(clueId)) continue;
+          if (obtainableAll.has(clueId) && !obtainableNonCrit.has(clueId)) {
+            errors.push(
+              `clue "${clueId}" (required by gated key deduction "${recipe.id}") is only obtainable on a critical roll — the gated content is unreachable through skilled play (F-102)`,
+            );
+          }
+        }
+      }
+    }
   }
 
   return { errors, warnings };
@@ -178,6 +210,62 @@ export function computeReachableScenes(bundle: ContentBundle): Set<string> {
     }
   }
   return reachable;
+}
+
+/**
+ * BFS from `firstScene` like {@link computeReachableScenes}, but a scene is only
+ * reached through edges that a player can take WITHOUT rolling a critical: a
+ * check choice's `success`/`partial`/`failure`/`fumble` tiers, and every
+ * non-check edge. A destination reachable *only* via some choice's `critical`
+ * tier is excluded. Used to detect critical-gated content (F-102).
+ *
+ * Note: a scene reachable both critically and non-critically stays in the set —
+ * we drop an edge only when `critical` is its sole route from a given choice.
+ */
+export function computeNonCriticalReachableScenes(bundle: ContentBundle): Set<string> {
+  const byId = new Map(bundle.scenes.map((s) => [s.id, s]));
+  const reachable = new Set<string>();
+  const { firstScene } = bundle;
+  if (!firstScene || !byId.has(firstScene)) return reachable;
+
+  const queue: string[] = [firstScene];
+  reachable.add(firstScene);
+  while (queue.length > 0) {
+    const scene = byId.get(queue.shift()!);
+    if (!scene) continue;
+    for (const target of nonCriticalOutgoingEdges(scene)) {
+      if (byId.has(target) && !reachable.has(target)) {
+        reachable.add(target);
+        queue.push(target);
+      }
+    }
+  }
+  return reachable;
+}
+
+/**
+ * The set of recipe ids that actually GATE content — referenced by any choice's
+ * `requiresDeduction`, any scene/variant `hasDeduction` condition, or a
+ * `ClueDiscovery.requiresDeduction`. A recipe nobody gates on has no reachability
+ * obligation (F-102 only concerns gated content).
+ */
+function collectGatedDeductionIds(bundle: ContentBundle): Set<string> {
+  const gated = new Set<string>();
+  const scan = (scene: SceneNode) => {
+    for (const condition of scene.conditions ?? []) {
+      if (condition.type === 'hasDeduction') gated.add(condition.target);
+    }
+    if (scene.variantCondition?.type === 'hasDeduction') gated.add(scene.variantCondition.target);
+    for (const discovery of scene.cluesAvailable ?? []) {
+      if (discovery.requiresDeduction) gated.add(discovery.requiresDeduction);
+    }
+    for (const choice of allChoices(scene)) {
+      if (choice.requiresDeduction) gated.add(choice.requiresDeduction);
+    }
+  };
+  for (const scene of bundle.scenes) scan(scene);
+  for (const variant of bundle.variants) scan(variant);
+  return gated;
 }
 
 /**
@@ -394,6 +482,31 @@ function outgoingEdges(scene: SceneNode): string[] {
 }
 
 /**
+ * Outgoing edges reachable without a critical roll (F-102). For a faculty check,
+ * only the non-`critical` tiers count; for a non-check choice, its resolved
+ * `success ?? critical` destination always counts (no roll is involved). A
+ * destination that a check reaches only via `critical` is therefore dropped —
+ * unless some other (non-check, or lower-tier) edge also reaches it.
+ */
+function nonCriticalOutgoingEdges(scene: SceneNode): string[] {
+  const targets: string[] = [];
+  for (const choice of allChoices(scene)) {
+    const outcomes = choice.outcomes ?? {};
+    const isCheck = !!choice.faculty && (choice.difficulty !== undefined || !!choice.dynamicDifficulty);
+    if (isCheck) {
+      for (const [tier, target] of Object.entries(outcomes)) {
+        if (tier !== 'critical' && target) targets.push(target);
+      }
+    } else {
+      // Non-check: resolves via success ?? critical, no roll — always traversable.
+      const target = outcomes.success ?? outcomes.critical;
+      if (target) targets.push(target);
+    }
+  }
+  return targets;
+}
+
+/**
  * Clues discoverable from reachable scenes: any clue listed in a reachable
  * scene's cluesAvailable, or referenced by a reachable choice's requiresClue /
  * advantageIf. Variant cluesAvailable count when the variant's base is reachable.
@@ -419,4 +532,33 @@ function computeDiscoverableClues(bundle: ContentBundle, reachable: Set<string>)
     if (variant.variantOf && reachable.has(variant.variantOf)) collect(variant);
   }
   return discoverable;
+}
+
+/**
+ * Clues actually OBTAINABLE from the given reachable-scene set: only real
+ * discovery points — a scene's `cluesAvailable`, or an `onEnter` `discoverClue`
+ * effect. Unlike {@link computeDiscoverableClues}, this excludes clues merely
+ * *referenced* by a choice's `requiresClue`/`advantageIf` (a reference is not a
+ * source). Used by the F-102 critical-gating check so a clue only gathered on a
+ * `critical` tier is correctly seen as not obtainable on the non-critical graph.
+ */
+function computeObtainableClues(bundle: ContentBundle, reachable: Set<string>): Set<string> {
+  const obtainable = new Set<string>();
+
+  const collect = (scene: SceneNode) => {
+    for (const discovery of scene.cluesAvailable ?? []) {
+      if (discovery.clueId) obtainable.add(discovery.clueId);
+    }
+    for (const effect of scene.onEnter ?? []) {
+      if (effect.type === 'discoverClue' && effect.target) obtainable.add(effect.target);
+    }
+  };
+
+  for (const scene of bundle.scenes) {
+    if (reachable.has(scene.id)) collect(scene);
+  }
+  for (const variant of bundle.variants) {
+    if (variant.variantOf && reachable.has(variant.variantOf)) collect(variant);
+  }
+  return obtainable;
 }
