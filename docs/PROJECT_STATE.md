@@ -8,16 +8,17 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-09 (**Closed #47 — migrated deployment from GitHub Pages to a Cloudflare
-static-assets Worker at `holodeck.jonwhitefang.uk/gaslight-and-grimoire/`.** PR #48 (`2e539fa`): `wrangler.jsonc`
-(assets-only), `public/_headers` (real CSP header + `frame-ancestors 'none'`), `deploy.yml` → CI gate only (no publish).
-PR #49 (`7144d34`): `scripts/nest-for-cloudflare.mjs` postbuild — nests `dist/*` under `dist/gaslight-and-grimoire/`
-(except `_headers`) so the Worker's 1:1 path→file mapping matches the routed prefix (fixed the live 404 the owner found).
-Owner re-verified live: 200 + correct CSP, content loads, deep-links, character-creation works end-to-end. GitHub Pages
-unpublished via API. Decision recorded in **ADR-0007** (Enacted). Doc-drift sweep fixed all "GitHub Pages" deploy refs
-across CLAUDE.md + docs/. Test baseline **554** (unchanged; 56 files). **Now: the entire audit backlog is cleared except
-#20 (media — ambient loops + perceptual QA, partly user-blocked).** Prior day (2026-07-08): P3 #22 polish (PR #46), #21
-hardening (PR #45), engine-reference rewrite (PR #44).)_
+_Last updated: 2026-07-09 (**Dependency major-group migration — PR #51 merged (`95f6f9c`), 19 of 20 majors
+from Dependabot #43.**) Landed in dependency-ordered clusters, each gated on lint + validator + test:run + build:
+**React 18→19**, framer-motion 12, zustand 5, immer 11, @testing-library/react 16; **Vite 7→8** (Rolldown), Vitest 4,
+vite-node 6, jsdom 29, @vitejs/plugin-react 6, fast-check 4; **Tailwind 3→4** (CSS-first: `@theme` block, `@tailwindcss/postcss`,
+dropped autoprefixer + `tailwind.config.js`), **ESLint 9→10** + react-hooks 7 + globals 17. Three code fixes: a zustand-v5
+unstable-selector render loop under React 19, Vite 8/Rolldown's function-only `manualChunks`, and a full lockfile regen so
+Linux `npm ci` resolves the new native deps (`@emnapi/*`). **TypeScript held at 5.x** — TS 7 is blocked (no `typescript-eslint`
+release, incl. canary, supports TS ≥6.1.0); #43 closed, superseded. Tailwind 4 visually verified in-browser (title +
+character-creation). Also merged the three safe Dependabot PRs (#42 minor/patch, #38 setup-node 6, #40 checkout 7). Test
+baseline **554** (unchanged; 56 files). Doc-drift sweep fixed React-18→19 / Vitest-3→4 refs across CLAUDE.md + docs/. Decision
+in **ADR-0008**. Prior (same day): closed #47 — Cloudflare Worker deploy migration (PRs #48/#49, ADR-0007).)_
 
 ---
 
@@ -34,13 +35,16 @@ hardening (PR #45), engine-reference rewrite (PR #44).)_
 - **Active gate:** CI enforces it. Every push/PR to `main` runs `npm run lint` + the validator + `npm run test:run` in
   the `test` job; `build` (build-compiles check, **no publish** now) depends on it. CI installs run
   `npm ci --ignore-scripts` (F-038). Bar unchanged locally: lint + test suite green + validator clean before merge.
-- **Branch focus:** `main` (at `7144d34`, **PR #49 merged**) — #47 deploy migration closed. Next work starts from a fresh
-  branch off `main`. Prior: PR #48 (#47 config), and 2026-07-08 PRs #46/#45/#44/#37.
-- **Verification:** 2026-07-09 — `npm run test:run` → **554 passed (554)** across **56** files (unchanged; one flaky fail
-  in a resource-starved background run did not reproduce on a clean re-run); `npm run build` green and emits
-  `dist/gaslight-and-grimoire/` + `dist/_headers` (nesting verified). **Live (owner-verified):** `curl -sI
-  .../gaslight-and-grimoire/` → 200 with CSP incl. `frame-ancestors 'none'`; content/deep-link/character-creation work in a
-  real browser. CI green on PR #48 + #49 (Cloudflare Workers Build check passed on #49).
+- **Dependencies:** All npm majors current **except TypeScript** (held at 5.x — TS 7 blocked until `typescript-eslint`
+  drops its `<6.1.0` peer cap). Runtime: React 19, framer-motion 12, zustand 5, immer 11. Toolchain: Vite 8 (Rolldown),
+  Vitest 4, jsdom 29, Tailwind 4 (CSS-first `@theme`), ESLint 10. See ADR-0008 + [[dependabot-major-group-migration]] for
+  the clustering approach and the emnapi lockfile gotcha.
+- **Branch focus:** `main` (at `95f6f9c`, **PR #51 merged**) — dep major-group migration done. Next work starts from a fresh
+  branch off `main`. Prior: PRs #48/#49 (#47 deploy), and 2026-07-08 PRs #46/#45/#44/#37.
+- **Verification:** 2026-07-09 — on merged `main`: `npm run test:run` → **554 passed (554)** across **56** files;
+  `npm run lint` clean, validator clean, `npm run build` green (emits `dist/gaslight-and-grimoire/` + `dist/_headers`).
+  **CI green on PR #51** — all six checks pass, including the **Cloudflare Workers Build** (deploy preview). Tailwind 4
+  render verified in a real browser (title + character-creation screens, 0 console errors).
 
 ---
 
@@ -97,7 +101,7 @@ These are flagged-but-unresolved. Resolve each via an ADR when decided, then mar
 
 ## References
 
-- Decisions: [`DECISIONS/`](DECISIONS/) — [ADR-0001](DECISIONS/ADR-0001-content-engine-separation.md) (content↔engine separation & bounded state, Enacted), [ADR-0002](DECISIONS/ADR-0002-committed-memory-spine.md) (this memory spine, Enacted), [ADR-0003](DECISIONS/ADR-0003-playwright-mcp-project-scope.md) (Playwright MCP at project scope, Enacted), [ADR-0004](DECISIONS/ADR-0004-content-authoring-automation-layer.md) (content-authoring automation layer, Enacted), [ADR-0005](DECISIONS/ADR-0005-key-deduction-recipes.md) (stable deduction identity via key-deduction recipes, Enacted), [ADR-0006](DECISIONS/ADR-0006-media-asset-strategy.md) (media asset strategy — AI-generated audio, prompt-kit pipeline, illustrations parked, Accepted), [ADR-0007](DECISIONS/ADR-0007-cloudflare-worker-deploy.md) (Cloudflare static-assets Worker deploy, retire GitHub Pages, Enacted).
+- Decisions: [`DECISIONS/`](DECISIONS/) — [ADR-0001](DECISIONS/ADR-0001-content-engine-separation.md) (content↔engine separation & bounded state, Enacted), [ADR-0002](DECISIONS/ADR-0002-committed-memory-spine.md) (this memory spine, Enacted), [ADR-0003](DECISIONS/ADR-0003-playwright-mcp-project-scope.md) (Playwright MCP at project scope, Enacted), [ADR-0004](DECISIONS/ADR-0004-content-authoring-automation-layer.md) (content-authoring automation layer, Enacted), [ADR-0005](DECISIONS/ADR-0005-key-deduction-recipes.md) (stable deduction identity via key-deduction recipes, Enacted), [ADR-0006](DECISIONS/ADR-0006-media-asset-strategy.md) (media asset strategy — AI-generated audio, prompt-kit pipeline, illustrations parked, Accepted), [ADR-0007](DECISIONS/ADR-0007-cloudflare-worker-deploy.md) (Cloudflare static-assets Worker deploy, retire GitHub Pages, Enacted), [ADR-0008](DECISIONS/ADR-0008-dependency-major-migration-strategy.md) (clustered major-dependency migration, defer TypeScript 7, Enacted).
 - Media: [audio asset prompt kit](../audio-asset-kit.md) · [design spec](superpowers/specs/2026-07-08-audio-asset-kit-design.md).
 - Run history: [`RUN_LOG.md`](RUN_LOG.md).
 - Audit: [`audits/ULTRACODE_FULL_REPO_ANALYSIS.md`](audits/ULTRACODE_FULL_REPO_ANALYSIS.md) (2026-07-07, 67 findings) → GitHub issues #1–#22.

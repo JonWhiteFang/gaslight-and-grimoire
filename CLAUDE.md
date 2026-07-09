@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A browser-based choose-your-own-adventure game set in Victorian London where magic exists beneath the rational world. Players investigate branching mysteries blending Sherlock Holmes-style deduction with D&D-style faculty checks and dice mechanics. Built with React 18, Zustand, Tailwind CSS, Framer Motion, and Howler.js. Deployed as a Cloudflare static-assets Worker at `holodeck.jonwhitefang.uk/gaslight-and-grimoire/`.
+A browser-based choose-your-own-adventure game set in Victorian London where magic exists beneath the rational world. Players investigate branching mysteries blending Sherlock Holmes-style deduction with D&D-style faculty checks and dice mechanics. Built with React 19, Zustand, Tailwind CSS v4, Framer Motion, and Howler.js. Deployed as a Cloudflare static-assets Worker at `holodeck.jonwhitefang.uk/gaslight-and-grimoire/`.
 
 ## Documentation (docs/)
 
@@ -237,7 +237,7 @@ Custom colour palette under `gaslight-*`:
 
 ## Testing
 
-- Vitest 3 + React Testing Library + fast-check for property-based tests.
+- Vitest 4 + React Testing Library + fast-check for property-based tests.
 - Component tests: `src/components/__tests__/`
 - Engine tests: `src/engine/__tests__/`
 - Property-based tests use `.property.test.ts` suffix.

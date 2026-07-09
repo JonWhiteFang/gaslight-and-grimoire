@@ -3,7 +3,7 @@
 ## Overview
 
 Gaslight & Grimoire is a browser-based choose-your-own-adventure game built with
-React 18, a single Zustand store (Immer middleware), Tailwind CSS, Framer Motion,
+React 19, a single Zustand store (Immer middleware), Tailwind CSS v4, Framer Motion,
 and Howler.js, deployed as a Cloudflare static-assets Worker at
 `holodeck.jonwhitefang.uk/gaslight-and-grimoire/`. The system enforces a strict
 split between two domains:

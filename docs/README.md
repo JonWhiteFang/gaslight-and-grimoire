@@ -3,8 +3,8 @@
 Gaslight & Grimoire is a browser-based choose-your-own-adventure game set in a
 Victorian London where magic exists beneath the rational world. Players
 investigate branching mysteries that blend Sherlock Holmes-style deduction with
-D&D-style faculty checks and d20 dice mechanics. It is built with React 18, a
-single Zustand store (Immer), Tailwind CSS, Framer Motion, and Howler.js, and
+D&D-style faculty checks and d20 dice mechanics. It is built with React 19, a
+single Zustand store (Immer), Tailwind CSS v4, Framer Motion, and Howler.js, and
 deployed as a Cloudflare static-assets Worker at
 `holodeck.jonwhitefang.uk/gaslight-and-grimoire/`.
 
