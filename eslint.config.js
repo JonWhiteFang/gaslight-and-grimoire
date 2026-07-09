@@ -33,6 +33,21 @@ export default tseslint.config(
         'warn',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
+      // ESLint 10 + eslint-plugin-react-hooks 7 add these to their `recommended`
+      // presets. They flag working, intentional code — not the hook-deps /
+      // conditional-hooks bugs this lean config exists to catch — so keeping the
+      // pre-migration lint contract, we opt out rather than fold a behavioural
+      // refactor into a dependency bump:
+      //   - set-state-in-effect: a performance heuristic; our effects that call
+      //     setState (init-from-storage, animation resets) are deliberate and
+      //     correct. Revisit as its own change if we adopt the React Compiler.
+      //   - no-useless-assignment (core): flags defensive final assignments in
+      //     the save-migration ladder and the onEnter guard that document intent.
+      //   - refs: flags reading ref.current during render — which the Evidence
+      //     Board does by design to measure DOM positions for connection threads.
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/refs': 'off',
+      'no-useless-assignment': 'off',
     },
   },
   {
