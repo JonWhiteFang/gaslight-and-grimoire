@@ -8,7 +8,24 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-09 (**Audit-2 P2 #59 FIXED — test quality (PR #67, merged). Only #60 (P3) left in the code backlog.**)
+_Last updated: 2026-07-09 (**Audit-2 P3 #60 FIXED — CI type-checks scripts/ + vite.config.ts (PR #68, merged). ENTIRE audit-2 code backlog (#53–#60) CLEAR.**)
+**#60 (F-123):** the build gate's `tsc` had `include: ["src"]`, so `scripts/` — incl. `scripts/validateCase.ts`, the
+content-validator source that is itself a CI correctness gate — was in no tsconfig; a type regression there passed the build
+and only surfaced at runtime via the vite-node shim. `vite.config.ts` was nominally covered by `tsconfig.node.json` but that
+project had no `lib`, so `tsc -b` reported `TS2550` on its `String.includes`. Fix: new **`tsconfig.scripts.json`**
+(non-composite + `noEmit` — so unlike the composite `tsconfig.node.json` it avoids `TS6310` and emits no litter; `lib: ES2023`,
+`types: ["node"]`) covering `scripts/**/*.ts` + `vite.config.ts`; new `typecheck:scripts` npm script chained into `build`
+between `tsc` and `vite build`; `tsconfig.node.json` given explicit `target ES2022`/`lib ES2023` to fix the `TS2550` at root;
+`@types/node@^20` devDep (pinned to the `.nvmrc` Node-20 line). Verified the issue's own check: a `const x: string = 42` in
+the validator made `npm run build` exit 0 before, exit 2 after (same for a `vite.config.ts` error). **CI round-trip:** the
+first push failed `npm ci` on the **emnapi lockfile trap** ([[dependabot-major-group-migration]]) — local Node v25/npm 11
+re-resolved the optional `@emnapi/*` ranges to 1.11.2 vs CI's Node-20 1.11.1; fixed by a clean `rm -rf node_modules
+package-lock.json && npm install` regen + `npm ci` verify (memory note updated). Test baseline unchanged **611**; all six CI
+checks passed on PR #68. Doc-drift sweep: `CLAUDE.md` Commands (build tsc scope + `typecheck:scripts`) + CI/CD `build`-job
+description. **Audit-2 code backlog: CLEAR (#53–#60 all done). Only #20 (media, user-blocked) + #52 (interview) remain open.**
+— Prior (below): #59 test quality (PR #67).
+
+Earlier this session: **Audit-2 P2 #59 FIXED — test quality (PR #67, merged).**
 **#59 (F-112–F-116 + 2 correctness cross-check gaps):** seven test-quality defects, one **test-only** PR — the 588-test
 suite was green while several invariants had zero real guards (tests exercised copies of logic, transitive paths, or asserted
 nothing about the behaviour they were named for). Every new/rewritten test was **mutation-verified**: the real production
@@ -96,26 +113,29 @@ build artifacts (`vite.config.js`/`.d.ts`) `tsconfig.node.json`'s `composite:tru
 
 - **Stage:** Phases A–E complete and the game is playable end-to-end (7 cases). The **first** audit's backlog
   (#1–#22, findings F-001…F-067) is fully cleared except **#20 (media assets)**. **Second audit (2026-07-09) backlog
-  #53–#60 (F-101…F-123): both P0 gameplay blockers FIXED — #53 auto-succeed (PR #62) + #54 Mayfair true ending
-  (PR #63); all P1 FIXED — #55 save/reload safety (PR #65), #56 scene-transition hygiene (PR #64), #57 a11y/errors
-  (PR #66), #58 docs (PR #61); P2 #59 test quality FIXED (PR #67).** Remaining: **#60 (P3) — no P0/P1/P2 left.**
+  #53–#60 (F-101…F-123): CLEAR — both P0 gameplay blockers FIXED (#53 auto-succeed PR #62, #54 Mayfair true ending
+  PR #63); all P1 FIXED (#55 save/reload PR #65, #56 scene-transition PR #64, #57 a11y/errors PR #66, #58 docs PR #61);
+  P2 #59 test quality FIXED (PR #67); P3 #60 CI type-check `scripts/` FIXED (PR #68).** No audit-2 code items left.
   See the audit report + the issues.
 - **Deployment:** **Cloudflare static-assets Worker** at `holodeck.jonwhitefang.uk/gaslight-and-grimoire/*` (GitHub
   Pages retired, ADR-0007). Config in-repo: `wrangler.jsonc` (assets-only), `public/_headers` (real CSP header incl.
   `frame-ancestors 'none'`), `scripts/nest-for-cloudflare.mjs` (postbuild nests `dist/*` under the route prefix, keeps
   `_headers` at root). Cloudflare git-connects the repo and builds `main` on push; Cloudflare-side setup is owner-managed.
 - **Active gate:** CI enforces it. Every push/PR to `main` runs `npm run lint` + the validator + `npm run test:run` in
-  the `test` job; `build` (build-compiles check, **no publish** now) depends on it. CI installs run
+  the `test` job; `build` (build-compiles check, **no publish** now) depends on it — and its `tsc` step now also
+  type-checks `scripts/` + `vite.config.ts` via `tsconfig.scripts.json` (F-123). CI installs run
   `npm ci --ignore-scripts` (F-038). Bar unchanged locally: lint + test suite green + validator clean before merge.
 - **Dependencies:** All npm majors current **except TypeScript** (held at 5.x — TS 7 blocked until `typescript-eslint`
   drops its `<6.1.0` peer cap). Runtime: React 19, framer-motion 12, zustand 5, immer 11. Toolchain: Vite 8 (Rolldown),
   Vitest 4, jsdom 29, Tailwind 4 (CSS-first `@theme`), ESLint 10. See ADR-0008 + [[dependabot-major-group-migration]] for
   the clustering approach and the emnapi lockfile gotcha.
-- **Branch focus:** `main` (at `629df31`, **PRs #62/#63/#64/#65/#66/#67 merged**) — both P0s + all P1 (#55/#56/#57/#58)
-  + P2 #59 cleared. Next work (P3 #60) starts from a fresh branch off `main`. Prior: PR #51 (deps), PRs #48/#49 (#47 deploy).
+- **Branch focus:** `main` (at `a5d4265`, **PRs #62–#68 merged**) — the entire audit-2 code backlog (#53–#60) is cleared.
+  No open code work; next substantive items are user-blocked (#20 media) or non-code (#52 interview). Prior: PR #51 (deps),
+  PRs #48/#49 (#47 deploy).
 - **Verification:** 2026-07-09 — on merged `main`: `npm run test:run` → **611 passed (611)** across **58** files;
-  `npm run lint` clean, validator clean (7 cases), `npm run build` green (emits `dist/gaslight-and-grimoire/` +
-  `dist/_headers`). **CI green on PR #67** (and #62–#66) — all six checks pass on each, including the **Cloudflare Workers Build**.
+  `npm run lint` clean, validator clean (7 cases), `npm ci --ignore-scripts` + `npm run build` green (build now also
+  type-checks `scripts/` + `vite.config.ts`; emits `dist/gaslight-and-grimoire/` + `dist/_headers`). **CI green on PR #68**
+  (and #62–#67) — all six checks pass on each, including the **Cloudflare Workers Build**.
 
 ---
 
@@ -149,30 +169,26 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 | R2 | Audit-2 remediation — P1 (code) | `[x]` | **Complete.** **#55 — PR #65:** save/reload safety — `saveGame` try/catch + error toast (F-103), persisted `encounterState` (v3→v4) so reload doesn't re-roll the reaction check (F-105); 569→577. **#56 — PR #64:** scene-transition hygiene (F-118/F-104/F-106/F-108); 564→569. **#57 — PR #66:** a11y/errors — React-19 `inert={bool}` (F-007 regression), ErrorBoundary auto-save claim gated, loading fallbacks `role=status`, + `evaluateCondition` own-property guard (fixed a pre-existing flaky determinism test); 577→588. |
 | R2′ | Audit-2 remediation — P1 (docs #58) | `[x]` | **Done — PR #61 (`3dc49aa`).** F-119 `architecture.md` onEnter anti-pattern (+ F-013 flag drift); F-120 scene counts → 201; F-121 component count 16→17; F-122 choices/scene → ~1.77. Also closed the `.gitignore` `vite.config` emit-litter gap. Docs-only. |
 | R3 | Audit-2 remediation — P2 test quality (#59) | `[x]` | **Done — PR #67 (`629df31`), test-only.** F-112–F-116 + 2 correctness cross-check gaps: replaced copy-of-logic/transitive/smoke tests with real-unit, **mutation-verified** guards — npcBounds→real slice clamps, new worldSlice reputation ±10, Nerve-vs-Lore tiebreak, direct `resolveScene` variant tests, real eviction (oldest evicted + autosave protected), `applyEffects` flag-false result, mundane vitality-only branch. No production code changed. 588→611 (+23), 56→58 files. |
-| R3′ | Audit-2 remediation — P3 CI type-check (#60) | `[ ]` | **#60** CI build gate `tsc` doesn't type-check `scripts/` incl. the validator source (F-123); its `tsc -b` also surfaces pre-existing `TS2550` on `vite.config.ts`. Not started — last audit-2 code item. |
+| R3′ | Audit-2 remediation — P3 CI type-check (#60) | `[x]` | **Done — PR #68 (`98d3ac9`).** New `tsconfig.scripts.json` (non-composite + `noEmit`, `lib ES2023`, `types:["node"]`) covering `scripts/**/*.ts` + `vite.config.ts`; `typecheck:scripts` npm script chained into `build`; `tsconfig.node.json` given explicit `target/lib` to fix the `TS2550` at root; `@types/node@^20` devDep. A type error in the validator source now fails the build (was exit 0). Emnapi lockfile trap on first push → clean regen. Baseline unchanged (611). |
 
 ---
 
 ## Next actions (explicit order)
 
-**Media track (partly user-blocked):**
-1. **Perceptual SFX QA (needs human ears)** — the 9 SFX load & trigger correctly in-browser (Playwright-verified), but whether they *sound* right (grounded/never-campy; occult stinger suitably uncanny) can't be machine-checked. One known duration outlier accepted: `clue-deduction` at 2.62s audible. *(User step.)*
-2. **User generates the 10 ambient loops** (Stable Audio/Suno per [`audio-asset-kit.md`](audio-asset-kit.md)) into `public/audio/ambient/`, exact filenames. *(Unblocked; user step.)*
+**Audit-2 code backlog: CLEAR.** All of #53–#60 merged (PRs #62–#68). The only open GitHub issues are #20 (media,
+user-blocked) and #52 (interview, non-code). No open code work.
+
+**Media track (partly user-blocked) — the practical next steps if resuming:**
+1. **User generates the 10 ambient loops** (Stable Audio/Suno per [`audio-asset-kit.md`](audio-asset-kit.md)) into `public/audio/ambient/`, exact filenames. *(Unblocked; user step.)*
+2. **Perceptual SFX QA (needs human ears)** — the 9 SFX load & trigger correctly in-browser (Playwright-verified), but whether they *sound* right (grounded/never-campy; occult stinger suitably uncanny) can't be machine-checked. One known duration outlier accepted: `clue-deduction` at 2.62s audible. *(User step.)*
 3. **Build `scripts/checkAudioAssets.mjs`** (presence + content-cross-reference) + a unit test, then revisit CI wiring (likely `--strict`) once all files land. *(Best once ambient files land.)*
 
-**Code track — Audit-2 backlog (new, from the 2026-07-09 report):**
-4. **~~#53 auto-succeed (PR #62)~~ + ~~#54 Mayfair true ending (PR #63)~~ DONE — both P0 blockers cleared.** No P0 left.
-5. **P1 all DONE:** ~~#55 save/reload safety (PR #65)~~ + ~~#56 scene-transition hygiene (PR #64)~~ + ~~#57 a11y/errors (PR #66)~~
-   + ~~#58 docs (PR #61)~~. No P0/P1 left.
-6. **~~#59 P2 test quality (PR #67)~~ DONE** — real-unit, mutation-verified guards replacing copy-of-logic/smoke tests.
-7. **Next — P3 — #60** (CI type-checks `scripts/` incl. the validator source; note its `tsc -b` also surfaces pre-existing
-   `TS2550` errors on `vite.config.ts` that must be handled). Last audit-2 code item; then the backlog is clear except #20 media.
-
-**Media track (partly user-blocked, unchanged):** ambient loops + perceptual SFX QA remain a user step (#20). See items 1–3 above.
+**Non-code:** #52 — the agent's-perspective interview/blog piece for jonwhitefang.uk (writing task).
 
 **Notes for whoever picks this up:** the audit's 4 rejected false positives are recorded in the report's *Rejected findings*
-section — don't re-file them. The follow-up "per-tier reachability mode for the validator" is now **implemented** (PR #63,
-`contentValidation.ts`) — it errors when a gated key-deduction clue is only obtainable on a `critical` tier.
+section — don't re-file them. Both audit backlogs (#1–#22 and #53–#60) are now fully cleared except the media milestone (#20).
+The lockfile is fragile to incremental edits — see the emnapi trap in [[dependabot-major-group-migration]]; full-regen +
+`npm ci` verify before pushing any dep change.
 
 ---
 
@@ -182,7 +198,7 @@ These are flagged-but-unresolved. Resolve each via an ADR when decided, then mar
 
 - ~~**How do we source and license media assets?**~~ **RESOLVED 2026-07-08 → [ADR-0006](DECISIONS/ADR-0006-media-asset-strategy.md).** AI-generate **audio only** via a prompt kit the user runs (no API in repo); illustrations parked at lowest priority. Naturalistic never-campy house style. Prompt kit authored: [`audio-asset-kit.md`](audio-asset-kit.md).
 - **Audit-1 backlog** — 22 issues from the first Ultracode audit ([report](audits/ULTRACODE_FULL_REPO_ANALYSIS.md)); all cleared except #20 (media). 5 findings rejected by adversarial verification — don't re-file.
-- **Audit-2 backlog (2026-07-09)** — 8 issues #53–#60 ([report](../2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md), F-101…F-123). All done except **#60 (P3)** — CI type-check `scripts/` (F-123), the last code item. 4 findings **rejected** by adversarial verification (report's *Rejected findings* section) — don't re-file.
+- **Audit-2 backlog (2026-07-09)** — 8 issues #53–#60 ([report](../2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md), F-101…F-123). **All done (PRs #62–#68 merged).** 4 findings **rejected** by adversarial verification (report's *Rejected findings* section) — don't re-file.
 - ~~**`.gitignore` gap:** `tsc -b` emitted `vite.config.js`/`.d.ts` from the composite `tsconfig.node.json` reference.~~ **RESOLVED 2026-07-09 → PR #61 (`3dc49aa`).** Gitignored the two artifacts. `noEmit` was ruled out — composite projects forbid it (TS6310, breaks `npm run build`); the plain `tsc` in the build path never emits them anyway, only `tsc -b` (IDE/build-mode) does.
 
 ---

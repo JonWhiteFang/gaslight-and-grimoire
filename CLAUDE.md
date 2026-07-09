@@ -124,11 +124,12 @@ scripts/
 ## Commands
 
 ```bash
-npm run dev          # Vite dev server
-npm run build        # tsc + vite build
-npm run lint         # ESLint (flat config; TS recommended + react-hooks)
-npm test             # vitest watch mode
-npm run test:run     # vitest single run (use this for CI / scripted checks)
+npm run dev              # Vite dev server
+npm run build            # tsc (src/) + tsc -p tsconfig.scripts.json (scripts/ + vite.config.ts) + vite build + nest
+npm run typecheck:scripts  # Type-check scripts/ + vite.config.ts alone (the tooling tsconfig.json's include:["src"] skips)
+npm run lint             # ESLint (flat config; TS recommended + react-hooks)
+npm test                 # vitest watch mode
+npm run test:run         # vitest single run (use this for CI / scripted checks)
 node scripts/validateCase.mjs  # Validate case content JSON
 ```
 
@@ -256,8 +257,10 @@ Custom colour palette under `gaslight-*`:
   root redirect) is owner-managed, out of repo scope.
 - `deploy.yml` (workflow name: `CI`) — on push to main, PR to main, or manual dispatch. Two jobs:
   `test` (`npm run lint` + validator `node scripts/validateCase.mjs` + `npm run test:run`) →
-  `build` (`npm run build`, build-compiles check only — no publish). `build` needs `test`, so a failing
-  lint/validator/test blocks the merge gate. It no longer publishes anywhere (deploy is Cloudflare-side).
+  `build` (`npm run build`, build-compiles check only — no publish; its `tsc` step now also type-checks
+  `scripts/` + `vite.config.ts` via `tsconfig.scripts.json`, so a type regression in the validator source
+  fails the gate — F-123). `build` needs `test`, so a failing lint/validator/test blocks the merge gate.
+  It no longer publishes anywhere (deploy is Cloudflare-side).
   Dependency auditing is **not** here — it lives in `security.yml` (F-032). `concurrency:
   cancel-in-progress: false`. Node pinned via `.nvmrc` (`node-version-file`).
 - `security.yml` — on PR to main + weekly Monday 08:00 UTC: npm audit + OWASP Dependency-Check (fail on CVSS ≥ 7).
