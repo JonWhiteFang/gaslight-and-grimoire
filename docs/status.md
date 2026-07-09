@@ -88,7 +88,7 @@ illustrations do not yet.
   `clue-physical`, `clue-testimony`, `clue-occult`, `clue-deduction`,
   `clue-redHerring`, `composure-decrease`, `vitality-decrease`,
   `scene-transition`). **The 9 SFX `.mp3` files now ship** under
-  `public/audio/sfx/` (AI-generated per [audio-asset-kit.md](../audio-asset-kit.md),
+  `public/audio/sfx/` (AI-generated per [audio-asset-kit.md](audio-asset-kit.md),
   loudness-normalized to ~-14 LUFS). SFX urls are base-path-aware
   (`buildSfxSrc` prefixes `import.meta.env.BASE_URL`). The **10 ambient loops**
   referenced via `SceneNode.ambientAudio` do **not** exist yet — Howler silently

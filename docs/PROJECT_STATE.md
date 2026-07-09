@@ -8,7 +8,15 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-09 (**Second full Ultracode repo audit — analysis only, no code changed.**) Ran the
+_Last updated: 2026-07-09 (**Audit-2 issue #58 done — doc-drift + `.gitignore` gap fixed (PR #61, `3dc49aa`).**)
+Corrected F-119 (`architecture.md` said `applyEffects` runs from `NarrativePanel` — the F-006 anti-pattern; now
+`goToScene`/`visitedScenes`, view read-only) + the adjacent F-013 `last-critical-faculty` flag drift; F-120 scene counts
+→ 67/50/44 total **201** (per validator) in `status.md` + `CLAUDE.md`; F-121 component count 16→17 (added
+`InvestigationHalted`); F-122 "2.0+ choices/scene" → ~1.77 (2.14 among choice-bearing scenes). `.gitignore` now ignores
+`vite.config.js`/`.d.ts` (the `tsc -b` composite-reference emit litter — `noEmit` ruled out: composite projects forbid it,
+TS6310 breaks the build). Docs-only, no code; test baseline **554** unchanged. **Audit-2 code backlog remains: #53/#54
+(P0), #55/#56/#57 (P1), #59/#60 (P2/P3).** — Prior this session (below): the audit itself.
+Second full Ultracode repo audit — analysis only, no code changed. Ran the
 command battery (all green — 554 tests, lint, validator, build, 0 npm vulns) then an orchestrated 13-dimension
 adversarial fan-out (71 agents) + lead verification. 37 raw → **23 root-cause-deduped verified findings** (new IDs
 **F-101…F-123**, distinct from the prior F-001…F-067); 4 rejected as false positives. Report:
@@ -79,7 +87,8 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 | — | Deployment — Cloudflare Worker migration (retire GitHub Pages) | `[x]` | **Complete — issue #47, ADR-0007.** PR #48 (`2e539fa`): `wrangler.jsonc` + `public/_headers` (real CSP + `frame-ancestors 'none'`) + `deploy.yml` → CI-gate-only. PR #49 (`7144d34`): `scripts/nest-for-cloudflare.mjs` postbuild nesting (fixed live 404). Owner-verified live; Pages unpublished. |
 | — | Second full Ultracode repo audit (analysis only) | `[x]` | **2026-07-09.** Report at repo root (`2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md`); 71-agent fan-out + lead verification → **23 findings (F-101…F-123)**, 4 rejected, overall risk Medium. Filed **8 grouped issues #53–#60**. No code changed. |
 | R | Audit-2 remediation — P0 gameplay blockers | `[ ]` | **#53** auto-succeed ability never consumed (F-101/F-107); **#54** Mayfair true ending RNG-locked behind two nat-20s (F-102). Not started. |
-| R2 | Audit-2 remediation — P1 | `[ ]` | **#55** save/reload safety (F-103/F-105); **#56** scene-transition state hygiene (F-118/F-104/F-106/F-108); **#57** a11y+errors incl. React-19 `inert` regression; **#58** docs-drift incl. `architecture.md` F-006 anti-pattern (F-119–F-122). Not started. |
+| R2 | Audit-2 remediation — P1 (code) | `[ ]` | **#55** save/reload safety (F-103/F-105); **#56** scene-transition state hygiene (F-118/F-104/F-106/F-108); **#57** a11y+errors incl. React-19 `inert` regression. Not started. |
+| R2′ | Audit-2 remediation — P1 (docs #58) | `[x]` | **Done — PR #61 (`3dc49aa`).** F-119 `architecture.md` onEnter anti-pattern (+ F-013 flag drift); F-120 scene counts → 201; F-121 component count 16→17; F-122 choices/scene → ~1.77. Also closed the `.gitignore` `vite.config` emit-litter gap. Docs-only. |
 | R3 | Audit-2 remediation — P2/P3 | `[ ]` | **#59** test-quality (F-112–F-116); **#60** CI type-check `scripts/` (F-123). Not started. |
 
 ---
@@ -88,7 +97,7 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 
 **Media track (partly user-blocked):**
 1. **Perceptual SFX QA (needs human ears)** — the 9 SFX load & trigger correctly in-browser (Playwright-verified), but whether they *sound* right (grounded/never-campy; occult stinger suitably uncanny) can't be machine-checked. One known duration outlier accepted: `clue-deduction` at 2.62s audible. *(User step.)*
-2. **User generates the 10 ambient loops** (Stable Audio/Suno per [`audio-asset-kit.md`](../audio-asset-kit.md)) into `public/audio/ambient/`, exact filenames. *(Unblocked; user step.)*
+2. **User generates the 10 ambient loops** (Stable Audio/Suno per [`audio-asset-kit.md`](audio-asset-kit.md)) into `public/audio/ambient/`, exact filenames. *(Unblocked; user step.)*
 3. **Build `scripts/checkAudioAssets.mjs`** (presence + content-cross-reference) + a unit test, then revisit CI wiring (likely `--strict`) once all files land. *(Best once ambient files land.)*
 
 **Code track — Audit-2 backlog (new, from the 2026-07-09 report):**
@@ -96,10 +105,9 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
    use, ideally via a shared `resolveCheckOutcome` helper so choices *and* encounters agree. Then **#54** (Mayfair true
    ending; F-102): dual-source `ms-clue-vesper-journal` (+ the second clue) onto a non-critical tier so the best ending
    is reachable through skilled play. Both are gameplay release-blockers before serious playtesting.
-5. **Then P1 — #55/#56/#57/#58.** #56 (scene-transition state hygiene) groups four defects that all touch
-   `goToScene`/`resetForNewCase`, so one PR. #58 (docs-drift) includes correcting `architecture.md:101` (it documents
-   the F-006 anti-pattern) — do this promptly; a maintainer following it would reintroduce a fixed bug.
-6. **Then P2/P3 — #59** (test quality — several suites test copies-of-logic, not the real unit) and **#60** (CI type-checks `scripts/`).
+5. **Then P1 (code) — #55/#56/#57.** #56 (scene-transition state hygiene) groups four defects that all touch
+   `goToScene`/`resetForNewCase`, so one PR. (**#58 — the P1 docs-drift — is done: PR #61.**)
+6. **Then P2/P3 — #59** (test quality — several suites test copies-of-logic, not the real unit) and **#60** (CI type-checks `scripts/`; note its `tsc -b` also surfaces pre-existing `TS2550` errors on `vite.config.ts`).
 
 **Media track (partly user-blocked, unchanged):** ambient loops + perceptual SFX QA remain a user step (#20). See items 1–3 above.
 
@@ -112,17 +120,17 @@ section — don't re-file them. The follow-up "per-tier reachability mode for th
 
 These are flagged-but-unresolved. Resolve each via an ADR when decided, then mark it RESOLVED with a link.
 
-- ~~**How do we source and license media assets?**~~ **RESOLVED 2026-07-08 → [ADR-0006](DECISIONS/ADR-0006-media-asset-strategy.md).** AI-generate **audio only** via a prompt kit the user runs (no API in repo); illustrations parked at lowest priority. Naturalistic never-campy house style. Prompt kit authored: [`audio-asset-kit.md`](../audio-asset-kit.md).
+- ~~**How do we source and license media assets?**~~ **RESOLVED 2026-07-08 → [ADR-0006](DECISIONS/ADR-0006-media-asset-strategy.md).** AI-generate **audio only** via a prompt kit the user runs (no API in repo); illustrations parked at lowest priority. Naturalistic never-campy house style. Prompt kit authored: [`audio-asset-kit.md`](audio-asset-kit.md).
 - **Audit-1 backlog** — 22 issues from the first Ultracode audit ([report](audits/ULTRACODE_FULL_REPO_ANALYSIS.md)); all cleared except #20 (media). 5 findings rejected by adversarial verification — don't re-file.
 - **Audit-2 backlog (2026-07-09)** — 8 issues #53–#60 ([report](../2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md), F-101…F-123). Work queue, not a decision: confirm the P0→P3 ordering above is right and whether any P2/P3 (#59/#60) should be deferred. 4 findings **rejected** by adversarial verification (report's *Rejected findings* section) — don't re-file.
-- **`.gitignore` gap (flagged, needs a call):** `tsconfig.node.json` has `composite: true`, so `tsc` (via `npm run build`) emits `vite.config.js` + `vite.config.d.ts` + a `.tsbuildinfo` into the repo root. `.tsbuildinfo` is ignored; the `.js`/`.d.ts` are **not**, so they show as untracked after any build (I removed them this session). Options: add `vite.config.js`/`vite.config.d.ts` to `.gitignore`, or drop `composite:true` if the project reference isn't needed. Decide + fix in a small chore PR.
+- ~~**`.gitignore` gap:** `tsc -b` emitted `vite.config.js`/`.d.ts` from the composite `tsconfig.node.json` reference.~~ **RESOLVED 2026-07-09 → PR #61 (`3dc49aa`).** Gitignored the two artifacts. `noEmit` was ruled out — composite projects forbid it (TS6310, breaks `npm run build`); the plain `tsc` in the build path never emits them anyway, only `tsc -b` (IDE/build-mode) does.
 
 ---
 
 ## References
 
 - Decisions: [`DECISIONS/`](DECISIONS/) — [ADR-0001](DECISIONS/ADR-0001-content-engine-separation.md) (content↔engine separation & bounded state, Enacted), [ADR-0002](DECISIONS/ADR-0002-committed-memory-spine.md) (this memory spine, Enacted), [ADR-0003](DECISIONS/ADR-0003-playwright-mcp-project-scope.md) (Playwright MCP at project scope, Enacted), [ADR-0004](DECISIONS/ADR-0004-content-authoring-automation-layer.md) (content-authoring automation layer, Enacted), [ADR-0005](DECISIONS/ADR-0005-key-deduction-recipes.md) (stable deduction identity via key-deduction recipes, Enacted), [ADR-0006](DECISIONS/ADR-0006-media-asset-strategy.md) (media asset strategy — AI-generated audio, prompt-kit pipeline, illustrations parked, Accepted), [ADR-0007](DECISIONS/ADR-0007-cloudflare-worker-deploy.md) (Cloudflare static-assets Worker deploy, retire GitHub Pages, Enacted), [ADR-0008](DECISIONS/ADR-0008-dependency-major-migration-strategy.md) (clustered major-dependency migration, defer TypeScript 7, Enacted).
-- Media: [audio asset prompt kit](../audio-asset-kit.md) · [design spec](superpowers/specs/2026-07-08-audio-asset-kit-design.md).
+- Media: [audio asset prompt kit](audio-asset-kit.md) · [design spec](superpowers/specs/2026-07-08-audio-asset-kit-design.md).
 - Run history: [`RUN_LOG.md`](RUN_LOG.md).
 - Audits: [`audits/ULTRACODE_FULL_REPO_ANALYSIS.md`](audits/ULTRACODE_FULL_REPO_ANALYSIS.md) (2026-07-07, 67 findings) → issues #1–#22; [`../2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md`](../2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md) (2026-07-09, 23 findings F-101…F-123) → issues #53–#60.
 - Architecture, invariants, store conventions, content rules, known gaps: [../CLAUDE.md](../CLAUDE.md).

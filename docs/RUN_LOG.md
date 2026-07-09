@@ -19,6 +19,18 @@
 
 ---
 
+## 2026-07-09 — Audit-2 #58: doc-drift + `.gitignore` gap fixed (PR #61)
+
+- **Goal:** Clear the two follow-ups left after the audit checkpoint — the doc-drift the audit *found* (F-119–F-122, tracked in #58) and the `.gitignore` gap for the `vite.config` build litter.
+- **Did (PR #61, `3dc49aa`, squash-merged to `main`, branch deleted):** Branch `chore/audit2-docs-drift-and-gitignore`. **F-119** — `docs/architecture.md` said `applyEffects` is "invoked from `NarrativePanel` on scene entry" (the exact F-006 anti-pattern `CLAUDE.md` forbids) → corrected to `narrativeSlice.goToScene`, gated on `visitedScenes` (once per playthrough), view-layer read-only; **also** fixed the adjacent data-flow note where the removed `last-critical-faculty` flag should be the typed `investigator.lastCriticalFaculty` field (F-013). **F-120** — scene counts `66/49/43`→`67/50/44`, total `198`→`201` in `status.md` + `CLAUDE.md` (matching the validator both cite). **F-121** — component count `16`→`17`, added `InvestigationHalted` to the tree, count, and list. **F-122** — "2.0+ choices/scene" → ~1.77 across all content (2.14 among choice-bearing scenes). **`.gitignore`** — added `vite.config.js`/`.d.ts`.
+- **One course-correction worth remembering:** first tried fixing the emit at source with `noEmit:true` in `tsconfig.node.json` — it **broke `npm run build`** (`TS6310: referenced composite project may not disable emit`). Caught by verifying the real build path end-to-end (not just the isolated `tsc -b`). Reverted; used gitignore instead. The plain `tsc` in `npm run build` never emits these — only `tsc -b` (IDE/build-mode) does, from the composite reference.
+- **Verified:** `npm run lint` clean, validator 7 cases clean, `npm run build` green, `npm run test:run` → **554 passed (554)**. All 6 CI checks green on PR #61 (test, build, npm audit, OWASP Dependency-Check, Cloudflare Workers build). All figures verified against ground truth (validator + a content scan), not guessed.
+- **Doc-drift sweep (this checkpoint):** updated the spine to reflect #58 done — `_Last updated:_`, tracker (split R2 → R2 code-P1 `[ ]` + R2′ docs-P1 `[x]`), Next actions (removed #58 from the P1 list), and marked the `.gitignore` Open question RESOLVED. **Also found + fixed a pre-existing broken link:** `audio-asset-kit.md` lives at `docs/audio-asset-kit.md`, but PROJECT_STATE.md (×3) and status.md (×1) linked it as `../audio-asset-kit.md` (dead — resolves to repo root). Fixed to `audio-asset-kit.md`; ADR-0006's `../` ref is correct from `docs/DECISIONS/` and left alone. No code touched → 554 baseline holds. The audit *report* itself (`2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md`) is left as a point-in-time deliverable — not retro-edited to mark F-119–F-122 fixed.
+- **Open / blockers:** **Audit-2 code backlog remains: #53/#54 (P0), #55/#56/#57 (P1 code), #59/#60 (P2/P3).** Next up is #53 (auto-succeed ability — highest-value P0, sets up the shared check-helper for #56/F-107). F-123 note: #60's `tsc -b` surfaces pre-existing `TS2550` errors on `vite.config.ts`.
+- **Memory updated:** STATE ☑ · RUN_LOG ☑ · ADR ☐ (no non-trivial decision — the noEmit-vs-gitignore call is recorded here + in PROJECT_STATE, too small for an ADR).
+
+---
+
 ## 2026-07-09 — Second full Ultracode repo audit (analysis only) → 23 findings, 8 issues #53–#60
 
 - **Goal:** Run a fresh, reachability-aware full-repo audit (the `/effort ultracode` super-prompt) hunting *new* subtle defects that survived the first audit (F-001…F-067, all closed), then file grouped GitHub issues. **Analysis only — no code changes.**
