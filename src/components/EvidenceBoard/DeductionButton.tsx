@@ -17,12 +17,18 @@ type Phase = 'idle' | 'rolling' | 'success' | 'failure';
 
 const DEDUCTION_DC = 14;
 
+// Stable empty-array reference for the recipes selector. Returning a fresh `[]`
+// from a Zustand selector re-triggers a render every time (v5 uses strict
+// Object.is snapshot caching), which loops under React 19 — so the fallback
+// must be a single shared reference, not a new literal per render.
+const NO_RECIPES: never[] = [];
+
 export function DeductionButton({ connectedClueIds, onResult }: DeductionButtonProps) {
   const investigator = useInvestigator();
   const reducedMotion = useSettings().reducedMotion;
   const clues = useStore((s) => s.clues);
   const addDeduction = useStore((s) => s.addDeduction);
-  const recipes = useStore((s) => s.caseData?.recipes ?? []);
+  const recipes = useStore((s) => s.caseData?.recipes ?? NO_RECIPES);
   const updateClueStatus = useStore((s) => s.updateClueStatus);
 
   const [phase, setPhase] = useState<Phase>('idle');

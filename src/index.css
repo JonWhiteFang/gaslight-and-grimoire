@@ -1,6 +1,24 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/*
+ * Tailwind 4 is CSS-first: the custom design tokens that used to live in
+ * tailwind.config.js `theme.extend` are declared here in `@theme`. Each
+ * `--color-gaslight-*` token generates the matching utilities (bg-gaslight-amber,
+ * text-gaslight-ink, border-gaslight-brass, …); the `--font-*` tokens generate
+ * `font-serif` / `font-mono`.
+ */
+@theme {
+  --color-gaslight-amber: #d4a853;
+  --color-gaslight-crimson: #8b1a1a;
+  --color-gaslight-slate: #2c3e50;
+  --color-gaslight-fog: #b8c5d0;
+  --color-gaslight-ink: #1a1a2e;
+  --color-gaslight-gold: #c9a84c;
+  --color-gaslight-brass: #b5860d;
+
+  --font-serif: Georgia, Cambria, serif;
+  --font-mono: 'Courier New', monospace;
+}
 
 :root {
   --font-size-base: 16px;
