@@ -279,10 +279,14 @@
     {
       "id": "ms-act2-occult-partial",
       "act": 2,
-      "narrative": "You recognise fragments of the Grey Dawn invocation in Vesper's chant. This is not standard parlour spiritualism — she is using real occult protocols, or a convincing approximation. When the manifestation fades, Vesper collapses. You reach her before the other guests. 'It was not supposed to be like this,' she murmurs. 'The numbers were wrong.' She will say no more.",
+      "narrative": "You recognise fragments of the Grey Dawn invocation in Vesper's chant. This is not standard parlour spiritualism — she is using real occult protocols, or a convincing approximation. When the manifestation fades, Vesper collapses. You reach her before the other guests. 'It was not supposed to be like this,' she murmurs. 'The numbers were wrong.' She will say no more — but as she slumps against the table, a leather-bound journal slips from inside her coat and falls open at your feet. You pocket it before the others crowd in, and your fingers find the binding circle carved into the underside of the table where hers had rested.",
       "cluesAvailable": [
         {
           "clueId": "ms-clue-grey-dawn-sigil",
+          "method": "exploration"
+        },
+        {
+          "clueId": "ms-clue-vesper-journal",
           "method": "exploration"
         }
       ],
