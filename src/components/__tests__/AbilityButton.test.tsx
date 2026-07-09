@@ -8,6 +8,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AbilityButton } from '../HeaderBar/AbilityButton';
 import { useStore } from '../../store';
+import { resetForNewCase } from '../../store/slices/narrativeSlice';
+import type { CaseData } from '../../types';
+
+/** Minimal CaseData for exercising the real resetForNewCase (no content fetch). */
+function makeCaseData(): CaseData {
+  return {
+    meta: {
+      id: 'test-case', title: 'Test', synopsis: '', acts: 3,
+      firstScene: 'scene-1', facultyDistribution: {},
+    } as CaseData['meta'],
+    scenes: {}, clues: {}, npcs: {}, variants: [],
+  };
+}
 
 // ─── AbilityButton rendering ──────────────────────────────────────────────────
 
@@ -176,29 +189,28 @@ describe('Store — ability lifecycle', () => {
     expect(useStore.getState().investigator.abilityUsed).toBe(false);
   });
 
-  it('loadAndStartCase resets abilityUsed to false', () => {
+  // These drive the REAL case-load reset (resetForNewCase, the unit
+  // loadAndStartCase runs inside its set() block) rather than hand-simulating it
+  // with setState/delete. A hand-simulated test passes even if the production
+  // reset is broken; this one fails if the reset ever stops clearing the flag.
+  it('resetForNewCase (the loadAndStartCase reset) restores abilityUsed to false', () => {
     useStore.getState().useAbility();
     expect(useStore.getState().investigator.abilityUsed).toBe(true);
 
-    // loadAndStartCase resets abilityUsed inside its set() block
-    useStore.setState({ investigator: { ...useStore.getState().investigator, abilityUsed: false } });
+    useStore.setState((s) => resetForNewCase(s, makeCaseData()));
     expect(useStore.getState().investigator.abilityUsed).toBe(false);
   });
 
-  it('loadAndStartCase sets the new case ID', () => {
-    useStore.setState({ currentCase: 'whitechapel-cipher' });
-    expect(useStore.getState().currentCase).toBe('whitechapel-cipher');
+  it('resetForNewCase sets the new case ID', () => {
+    useStore.setState((s) => resetForNewCase(s, makeCaseData()));
+    expect(useStore.getState().currentCase).toBe('test-case');
   });
 
-  it('loadAndStartCase clears ability flags from world slice', () => {
+  it('resetForNewCase clears ability auto-succeed and veil-sight flags from world slice', () => {
     useStore.getState().setFlag('ability-auto-succeed-reason', true);
     useStore.getState().setFlag('ability-veil-sight-active', true);
 
-    // loadAndStartCase deletes these flags inside its set() block
-    const flags = { ...useStore.getState().flags };
-    delete flags['ability-auto-succeed-reason'];
-    delete flags['ability-veil-sight-active'];
-    useStore.setState({ flags });
+    useStore.setState((s) => resetForNewCase(s, makeCaseData()));
 
     expect(useStore.getState().flags['ability-auto-succeed-reason']).toBeUndefined();
     expect(useStore.getState().flags['ability-veil-sight-active']).toBeUndefined();

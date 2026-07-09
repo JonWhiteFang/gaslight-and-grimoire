@@ -113,6 +113,51 @@ describe('Choice → Navigation → Effect pipeline', () => {
   });
 });
 
+// F-101: the archetype auto-succeed ability (Elementary/Street Survivor/Silver
+// Tongue) is a once-per-case flag. It must be *consumed* on use — before the fix
+// it was set-and-never-cleared, so every subsequent same-faculty check auto-crit
+// for the rest of the case. Consumption is verified end-to-end: the first check
+// auto-crits without a roll, the second performs a real roll.
+describe('processChoice — ability auto-succeed consumption (F-101)', () => {
+  const reasonCheck: Choice = {
+    id: 'c-reason', text: 'Deduce', faculty: 'reason', difficulty: 12,
+    outcomes: { critical: 's-crit', success: 's-ok', partial: 's-part', failure: 's-fail', fumble: 's-fumble' },
+  };
+
+  it('auto-succeeds once, clears the flag, and rolls for real on the next same-faculty check', () => {
+    const state = makeState({ flags: { 'ability-auto-succeed-reason': true } });
+    // setFlag must mutate the live state so the second check observes consumption,
+    // mirroring how the real store threads flags through buildGameState.
+    const actions: EngineActions = {
+      ...mockActions,
+      setFlag: vi.fn((key: string, value: boolean | string) => {
+        state.flags[key] = value as boolean;
+      }),
+    };
+
+    // First Reason check: auto-crit, no dice rolled.
+    const first = processChoice(reasonCheck, state, actions);
+    expect(first.tier).toBe('critical');
+    expect(first.roll).toBeUndefined();
+    expect(mockPerformCheck).not.toHaveBeenCalled();
+    expect(actions.setFlag).toHaveBeenCalledWith('ability-auto-succeed-reason', false);
+
+    // Second Reason check in the same case: the ability is spent, so a real roll runs.
+    mockPerformCheck.mockReturnValue({ roll: 3, modifier: 1, total: 4, tier: 'failure' });
+    const second = processChoice(reasonCheck, state, actions);
+    expect(second.tier).toBe('failure');
+    expect(mockPerformCheck).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not touch the flag when the ability was never activated', () => {
+    mockPerformCheck.mockReturnValue({ roll: 15, modifier: 1, total: 16, tier: 'success' });
+    processChoice(reasonCheck, makeState(), mockActions);
+    expect(mockActions.setFlag).not.toHaveBeenCalledWith(
+      'ability-auto-succeed-reason', expect.anything(),
+    );
+  });
+});
+
 describe('Condition gating', () => {
   it('hasClue passes when clue is revealed', () => {
     const state = makeState({

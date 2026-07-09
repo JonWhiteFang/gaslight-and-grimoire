@@ -182,15 +182,16 @@ Rules:
 - `evaluateConditions` — pure AND logic over `Condition[]` against `GameState`.
 - `resolveScene` — returns variant scene if its condition is met, otherwise base scene.
 - `applyEffects` — store action in `worldSlice` that applies `Effect[]`. Called by `goToScene` on scene entry, gated so a scene's `onEnter` fires exactly once per playthrough (see `visitedScenes` below).
-- `processChoice` — performs faculty check (using `resolveDC` for dynamic difficulty), applies NPC effects, navigates to next scene. A non-check choice with no `success`/`critical` outcome throws (F-022). Checks archetype ability auto-succeed flags (`ability-auto-succeed-reason`, `ability-auto-succeed-vigor`, `ability-auto-succeed-influence`) before rolling — if set, returns `critical` tier without a dice roll.
-- `computeChoiceResult` — pure function extracted from `processChoice`. Computes the choice outcome (ability auto-succeed, dice check, advantage, DC resolution) without store access. Returns `ChoiceResult`. Used by `processChoice` internally; can be called directly for testing or preview.
+- `processChoice` — performs faculty check (using `resolveDC` for dynamic difficulty), applies NPC effects, navigates to next scene. A non-check choice with no `success`/`critical` outcome throws (F-022). Checks archetype ability auto-succeed flags (`ability-auto-succeed-reason`, `ability-auto-succeed-vigor`, `ability-auto-succeed-influence`) before rolling — if set, returns `critical` tier without a dice roll **and consumes the flag** via `actions.setFlag(flag, false)` so the once-per-case ability fires exactly once (F-101).
+- `resolveCheckOutcome(choice, state, label?)` — the shared, pure check-resolution unit that both `computeChoiceResult` and `processEncounterChoice` call, so the two check paths cannot drift (F-107). Returns `{ result: ChoiceResult, consumedAbilityFlag? }`; when the auto-succeed ability fired it names the flag the impure caller must clear. Handles auto-succeed, dynamic-difficulty DC, advantage, the roll, and the non-check fallback.
+- `computeChoiceResult` — pure function; a thin wrapper over `resolveCheckOutcome` (returns just its `result`). Computes the choice outcome (ability auto-succeed, dice check, advantage, DC resolution) without store access. Returns `ChoiceResult`. Used by `processChoice` internally; can be called directly for testing or preview.
 - `canDiscoverClue` — pure gate check for `ClueDiscovery` requirements.
 - `validateContent` — checks for broken scene-graph edges and missing clue references.
 
 ### Encounters (narrativeEngine.ts + EncounterPanel)
 - Triggered by `SceneNode.encounter` field — `GameContent` renders `EncounterPanel` instead of `ChoicePanel`.
 - `startEncounter` — for supernatural encounters, performs Nerve/Lore reaction check at DC 12. Failure: composure damage + worseAlternative replacement.
-- `processEncounterChoice` — escape paths (`isEscapePath`) are terminal (navigate to their outcome + complete the encounter immediately, no damage). Otherwise faculty check + damage application. Supernatural = dual-axis (composure + vitality). Mundane = single axis.
+- `processEncounterChoice` — escape paths (`isEscapePath`) are terminal (navigate to their outcome + complete the encounter immediately, no damage). Otherwise resolves the check through the **shared `resolveCheckOutcome`** (same unit as `processChoice`, F-107) — so encounters honour the archetype auto-succeed ability (consumed on use, F-101), dynamic-difficulty DCs, and advantage — then applies damage. Supernatural = dual-axis (composure + vitality). Mundane = single axis.
 - `getEncounterChoices` — filters choices by conditions, always includes escape paths. (Advantage is applied on the roll in `processEncounterChoice`, not annotated here.)
 
 ### Case Progression (caseProgression.ts)

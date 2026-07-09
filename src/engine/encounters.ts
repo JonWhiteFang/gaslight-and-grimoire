@@ -14,8 +14,8 @@ import type {
 } from '../types';
 import type { EngineActions } from './engineActions';
 import { performCheck, rollD20 } from './diceEngine';
-import { computeAdvantage } from './advantage';
 import { evaluateConditions } from './conditions';
+import { resolveCheckOutcome } from './choiceResolution';
 
 // ─── Encounter System ─────────────────────────────────────────────────────────
 
@@ -111,41 +111,16 @@ export function processEncounterChoice(
     };
   }
 
-  // Determine Advantage via the shared single source of truth: any revealed
-  // advantageIf clue, or a Lore check with Veil Sight active (F-014).
-  const hasAdvantage = computeAdvantage(choice, state);
+  // Resolve the check through the SAME shared unit as choice processing so the
+  // two paths cannot drift (F-107). This gives encounters the archetype
+  // auto-succeed ability, dynamic-difficulty DCs, and advantage (clue OR Veil
+  // Sight) for free — all of which the old parallel pipeline silently ignored.
+  const { result, consumedAbilityFlag } = resolveCheckOutcome(choice, state, 'Encounter choice');
+  const { nextSceneId, roll, modifier, total, tier } = result;
 
-  let nextSceneId: string;
-  let roll: number | undefined;
-  let modifier: number | undefined;
-  let total: number | undefined;
-  let tier: ChoiceResult['tier'];
-
-  if (choice.faculty && choice.difficulty !== undefined) {
-    const result = performCheck(
-      choice.faculty,
-      state.investigator,
-      choice.difficulty,
-      hasAdvantage,
-      false,
-    );
-    roll = result.roll;
-    modifier = result.modifier;
-    total = result.total;
-    tier = result.tier;
-    nextSceneId = choice.outcomes[result.tier];
-  } else {
-    const fallbackScene = choice.outcomes['success'] ?? choice.outcomes['critical'];
-    if (!fallbackScene) {
-      // A non-check encounter choice must always name a destination. Without this
-      // guard, navigation to `undefined` yields a blank scene (resolveScene throws,
-      // useCurrentScene swallows it). Fail loudly at the source instead (F-022).
-      throw new Error(
-        `[NarrativeEngine] Encounter choice "${choice.id}" has no dice check and no "success"/"critical" outcome — nowhere to navigate.`,
-      );
-    }
-    nextSceneId = fallbackScene;
-    tier = 'success';
+  // Consume the once-per-case auto-succeed ability on use (F-101).
+  if (consumedAbilityFlag) {
+    actions.setFlag(consumedAbilityFlag, false);
   }
 
   if (tier === 'critical' && choice.faculty) {
