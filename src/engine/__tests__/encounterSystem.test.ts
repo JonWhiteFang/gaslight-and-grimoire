@@ -27,6 +27,7 @@ const mockActions = {
   adjustReputation: vi.fn(),
   discoverClue: vi.fn(),
   updateFaculty: vi.fn(),
+  setLastCriticalFaculty: vi.fn(),
   investigator: { name: '', archetype: 'deductionist' as const, faculties: { reason: 10, perception: 10, nerve: 10, vigor: 10, influence: 10, lore: 10 }, composure: 10, vitality: 10, abilityUsed: false },
 } as any;
 
@@ -37,6 +38,10 @@ const mockRollD20 = vi.fn();
 vi.mock('../diceEngine', () => ({
   performCheck: (...args: unknown[]) => mockPerformCheck(...args),
   rollD20: () => mockRollD20(),
+  // resolveDC is consulted once encounters route checks through the shared
+  // computeChoiceResult unit (F-107). Faithful enough for these tests: honour
+  // dynamicDifficulty's baseDC, else the fixed difficulty.
+  resolveDC: (c: any) => (c.dynamicDifficulty ? c.dynamicDifficulty.baseDC : (c.difficulty ?? 12)),
 }));
 
 import {
@@ -433,6 +438,48 @@ describe('processEncounterChoice — escape path is terminal', () => {
 
     expect(mockAdjustComposure).not.toHaveBeenCalled();
     expect(mockAdjustVitality).not.toHaveBeenCalled();
+  });
+});
+
+// ─── Test 2c: Archetype auto-succeed ability works (once) in encounters (F-107) ─
+//
+// The mirror of F-101: encounters ran their own check pipeline that ignored the
+// ability-auto-succeed flag entirely, so a Deductionist/Operator/Mesmerist got no
+// effect from their ability on an encounter check of their primary faculty. After
+// routing through the shared unit, the ability auto-crits once and is consumed.
+
+describe('processEncounterChoice — ability auto-succeed (F-107)', () => {
+  it('auto-succeeds a same-faculty encounter check without rolling, and consumes the flag', () => {
+    const choice = makeChoice({ id: 'vigor-check', faculty: 'vigor', difficulty: 18 });
+    const round = makeRound([choice], false);
+    const encounterState = {
+      id: 'enc-1', rounds: [round], currentRound: 0, isComplete: false, reactionCheckPassed: null,
+    };
+    const state = makeGameState({ flags: { 'ability-auto-succeed-vigor': true } });
+
+    const { result } = processEncounterChoice(choice, encounterState, state, mockActions);
+
+    expect(result.tier).toBe('critical');
+    expect(mockPerformCheck).not.toHaveBeenCalled();
+    expect(mockSetFlag).toHaveBeenCalledWith('ability-auto-succeed-vigor', false);
+  });
+
+  it('honours dynamicDifficulty in encounter checks (previously ignored)', () => {
+    mockPerformCheck.mockReturnValue({ tier: 'success', roll: 15, modifier: 0, total: 15, dc: 10, natural: 15 });
+    const choice = makeChoice({
+      id: 'dyn-check', faculty: 'nerve', difficulty: undefined,
+      dynamicDifficulty: { baseDC: 10, scaleFaculty: 'nerve', highThreshold: 14, highDC: 16 },
+    });
+    const round = makeRound([choice], false);
+    const encounterState = {
+      id: 'enc-1', rounds: [round], currentRound: 0, isComplete: false, reactionCheckPassed: null,
+    };
+    const state = makeGameState();
+
+    processEncounterChoice(choice, encounterState, state, mockActions);
+
+    // Fourth arg is the DC — resolveDC(baseDC) = 10, not the old undefined→non-check path.
+    expect(mockPerformCheck).toHaveBeenCalledWith('nerve', state.investigator, 10, false, false);
   });
 });
 

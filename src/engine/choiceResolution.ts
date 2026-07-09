@@ -17,28 +17,54 @@ import { computeAdvantage } from './advantage';
 // ─── Choice Processing ────────────────────────────────────────────────────────
 
 /**
- * Pure computation of a choice outcome. No store access, no side effects.
- * Handles ability auto-succeed, dice checks, advantage, and DC resolution.
+ * The outcome of a check plus, when the archetype auto-succeed ability fired,
+ * the flag that must be consumed (F-101). The consuming caller (`processChoice`,
+ * `processEncounterChoice`) clears it via `actions.setFlag(flag, false)` so the
+ * once-per-case ability works exactly once.
  */
-export function computeChoiceResult(
+export interface CheckOutcome {
+  result: ChoiceResult;
+  consumedAbilityFlag?: string;
+}
+
+/**
+ * Shared, pure check-resolution unit used by BOTH choice processing and
+ * encounters so the two paths cannot drift (F-107). Handles:
+ *   - the archetype auto-succeed ability (returns tier `critical` and names the
+ *     flag to consume — F-101),
+ *   - dynamic-difficulty DC resolution,
+ *   - advantage (clue OR Veil-Sight),
+ *   - the dice roll,
+ *   - and the non-check `success`/`critical` fallback destination.
+ *
+ * No store access, no side effects. `label` only shapes the error message so
+ * choices and encounters keep their distinct wording.
+ */
+export function resolveCheckOutcome(
   choice: Choice,
   state: GameState,
-): ChoiceResult {
+  label = 'Choice',
+): CheckOutcome {
   if (choice.faculty && (choice.difficulty !== undefined || choice.dynamicDifficulty)) {
     const abilityFlag = abilityAutoSucceedFlag(choice.faculty);
     if (abilityFlag && state.flags[abilityFlag]) {
-      return { nextSceneId: choice.outcomes['critical'], tier: 'critical' };
+      return {
+        result: { nextSceneId: choice.outcomes['critical'], tier: 'critical' },
+        consumedAbilityFlag: abilityFlag,
+      };
     }
 
     const dc = resolveDC(choice, state.investigator);
     const hasAdvantage = computeAdvantage(choice, state);
-    const result = performCheck(choice.faculty, state.investigator, dc, hasAdvantage, false);
+    const check = performCheck(choice.faculty, state.investigator, dc, hasAdvantage, false);
     return {
-      nextSceneId: choice.outcomes[result.tier],
-      roll: result.roll,
-      modifier: result.modifier,
-      total: result.total,
-      tier: result.tier,
+      result: {
+        nextSceneId: choice.outcomes[check.tier],
+        roll: check.roll,
+        modifier: check.modifier,
+        total: check.total,
+        tier: check.tier,
+      },
     };
   }
 
@@ -48,13 +74,22 @@ export function computeChoiceResult(
     // navigation to `undefined` yields a blank scene (resolveScene throws,
     // useCurrentScene swallows it). Fail loudly at the source instead (F-022).
     throw new Error(
-      `[NarrativeEngine] Choice "${choice.id}" has no dice check and no "success"/"critical" outcome — nowhere to navigate.`,
+      `[NarrativeEngine] ${label} "${choice.id}" has no dice check and no "success"/"critical" outcome — nowhere to navigate.`,
     );
   }
-  return {
-    nextSceneId: fallbackScene,
-    tier: 'success',
-  };
+  return { result: { nextSceneId: fallbackScene, tier: 'success' } };
+}
+
+/**
+ * Pure computation of a choice outcome. No store access, no side effects.
+ * Thin wrapper over the shared {@link resolveCheckOutcome}; the ability-flag
+ * consumption it signals is applied by the impure `processChoice`.
+ */
+export function computeChoiceResult(
+  choice: Choice,
+  state: GameState,
+): ChoiceResult {
+  return resolveCheckOutcome(choice, state).result;
 }
 
 /**
@@ -66,7 +101,13 @@ export function processChoice(
   state: GameState,
   actions: EngineActions,
 ): ChoiceResult {
-  const result = computeChoiceResult(choice, state);
+  const { result, consumedAbilityFlag } = resolveCheckOutcome(choice, state);
+
+  // Consume the once-per-case auto-succeed ability so it cannot auto-crit every
+  // subsequent same-faculty check for the rest of the case (F-101).
+  if (consumedAbilityFlag) {
+    actions.setFlag(consumedAbilityFlag, false);
+  }
 
   if (result.tier === 'critical' && choice.faculty) {
     actions.setLastCriticalFaculty(choice.faculty);
