@@ -263,6 +263,9 @@ Custom colour palette under `gaslight-*`:
 - `security.yml` — on PR to main + weekly Monday 08:00 UTC: npm audit + OWASP Dependency-Check (fail on CVSS ≥ 7).
 - `.github/dependabot.yml` — weekly grouped npm + github-actions updates (F-039).
 - Vite base path: `/gaslight-and-grimoire/` (matches the Worker route prefix — keep unchanged).
+- **Merge strategy: do NOT squash-merge.** Use a merge commit (`gh pr merge --merge`) or rebase — never
+  `--squash`. Squashing collapses a PR's per-commit history (and its TDD RED→GREEN steps) into one commit,
+  which this repo's memory spine relies on for traceability.
 
 ## Character System
 
