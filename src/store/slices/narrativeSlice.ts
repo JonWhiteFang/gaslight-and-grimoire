@@ -28,6 +28,11 @@ export function vignetteToCaseData(data: VignetteData): CaseData {
 export function resetForNewCase(state: WritableDraft<GameStore>, data: CaseData): void {
   state.caseData = data;
   state.currentCase = data.meta.id;
+  // Clear the previous case's currentScene too: otherwise the new case's first
+  // goToScene pushes the stale foreign id into the fresh sceneHistory (phantom
+  // id in the autosave + a live-but-no-op "Review previous scene" at case start,
+  // F-104). The empty-string sentinel is already special-cased by goToScene.
+  state.currentScene = '';
   state.sceneHistory = [];
   state.visitedScenes = [];
   state.lastEffectMessages = [];
@@ -101,46 +106,64 @@ export const createNarrativeSlice: StateCreator<
 
   goToScene: (sceneId) => {
     set((state) => {
+      const prevScene = state.currentScene;
       // Skip the empty-string sentinel present before the first scene loads,
       // so sceneHistory only ever contains real scene ids.
-      if (state.currentScene) {
-        state.sceneHistory.push(state.currentScene);
+      if (prevScene) {
+        state.sceneHistory.push(prevScene);
+      }
+      // A cross-scene navigation clears any lingering dice/outcome result, so
+      // the overlay from the previous check can't float over the destination
+      // scene (or persist across further navigations) until manually dismissed
+      // (F-106). A re-navigation to the same scene leaves it in place.
+      if (prevScene !== sceneId) {
+        state.lastCheckResult = null;
       }
       state.currentScene = sceneId;
     });
 
-    // Apply the scene's onEnter effects exactly once per playthrough. Gating on
-    // visitedScenes means revisiting (back button) or reloading a save cannot
-    // re-apply — or "farm" — a scene's composure/vitality/flag effects (F-006).
-    // Owning this here (rather than in a NarrativePanel effect) also decouples
-    // the state transition's consequences from which component happens to be
-    // mounted (F-008).
+    // Apply the scene's onEnter effects exactly once per playthrough. We gate on
+    // the RESOLVED scene identity (base id OR the variant id resolveScene picks),
+    // not the base id alone: a hub first entered before its variant condition is
+    // true, then re-entered after it flips, must fire the variant's DISTINCT
+    // onEnter once (F-118) — while still never re-firing the same resolved scene
+    // (F-006). Owning this here (not in a NarrativePanel effect) also decouples
+    // the transition's consequences from which component is mounted (F-008).
     const { caseData, visitedScenes } = get();
-    const alreadyVisited = visitedScenes.includes(sceneId);
 
-    if (caseData && !alreadyVisited) {
+    if (caseData) {
+      let resolvedId = sceneId;
       let onEnter = null;
       try {
-        onEnter = resolveScene(sceneId, snapshotGameState(get()), caseData).onEnter ?? null;
+        const resolved = resolveScene(sceneId, snapshotGameState(get()), caseData);
+        resolvedId = resolved.id;
+        onEnter = resolved.onEnter ?? null;
       } catch {
         // Scene not in caseData (e.g. a shared scene not yet indexed) — nothing to apply.
         onEnter = null;
       }
-      if (onEnter && onEnter.length > 0) {
+
+      const alreadyVisited = visitedScenes.includes(resolvedId);
+      if (!alreadyVisited && onEnter && onEnter.length > 0) {
         get().applyEffects(onEnter);
         const messages = generateEffectMessages(onEnter, get().npcs);
         set((state) => {
           state.lastEffectMessages = messages;
-          state.visitedScenes.push(sceneId);
+          state.visitedScenes.push(resolvedId);
         });
-      } else {
+      } else if (!alreadyVisited) {
         set((state) => {
           state.lastEffectMessages = [];
-          state.visitedScenes.push(sceneId);
+          state.visitedScenes.push(resolvedId);
+        });
+      } else {
+        // Revisit of an already-resolved scene: no effects re-fire, no stale feedback.
+        set((state) => {
+          state.lastEffectMessages = [];
         });
       }
     } else {
-      // Revisit (or no case loaded): no effects re-fire, and no stale feedback lingers.
+      // No case loaded: nothing to apply, and no stale feedback lingers.
       set((state) => {
         state.lastEffectMessages = [];
       });

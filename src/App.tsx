@@ -141,6 +141,10 @@ export default function App() {
   const [endingNarrative, setEndingNarrative] = useState<string | null>(null);
   const completeCase = useStore((s) => s.completeCase);
   const currentCase = useStore((s) => s.currentCase);
+  // Reactive so the "Review previous scene" button's enabled state tracks
+  // sceneHistory as the player advances (F-108) — a non-reactive getState() read
+  // left it stale-disabled during play and stale-enabled at case start.
+  const canGoBack = useStore((s) => s.sceneHistory.length > 0);
 
   const handleActivateAbility = useCallback(() => {
     if (abilityUsed) return;
@@ -333,7 +337,7 @@ export default function App() {
             const history = useStore.getState().sceneHistory;
             if (history.length > 0) setReviewSceneId(history[history.length - 1]);
           }}
-          canGoBack={useStore.getState().sceneHistory.length > 0}
+          canGoBack={canGoBack}
         />
         <AmbientAudio />
 
