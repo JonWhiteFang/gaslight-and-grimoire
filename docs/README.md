@@ -16,6 +16,7 @@ deployed as a Cloudflare static-assets Worker at
 | [architecture.md](./architecture.md) | You need the system structure: the engine↔store boundary, store slices, data flow, and bounded-state rules. |
 | [engine-reference.md](./engine-reference.md) | You need the per-module API for `src/engine/` — signatures and behaviour. |
 | [content-authoring.md](./content-authoring.md) | You are writing or editing case/vignette JSON — the schema, `Condition`/`Effect` mechanics, and the audio asset reference. |
+| [audio-asset-kit.md](./audio-asset-kit.md) | You are generating the game's audio assets — the ambient-loop / SFX prompt kit and filename conventions. |
 | [status.md](./status.md) | You want the current-state snapshot: content inventory, implemented systems, asset status, and the test baseline. |
 | [Gaslight_&_Grimoire_design.md](./Gaslight_&_Grimoire_design.md) | You want the design intent and vision — the canonical design bible. |
 | [PROJECT_STATE.md](./PROJECT_STATE.md) | You are resuming work and need the one-page live snapshot: where the build is right now and what's next. **Read this first.** |
@@ -29,7 +30,7 @@ authoring rules, and known gaps), see [../CLAUDE.md](../CLAUDE.md).
 
 ```bash
 npm run dev                    # Vite dev server
-npm run build                  # tsc + vite build
+npm run build                  # tsc (src/) + typecheck:scripts + vite build + Cloudflare nest
 npm run test:run               # vitest single run (use for CI / scripted checks)
 node scripts/validateCase.mjs  # Validate case/vignette content JSON
 ```

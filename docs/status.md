@@ -1,6 +1,6 @@
 # Status
 
-Current state of Gaslight & Grimoire as of 2026-07-07. This is a factual
+Current state of Gaslight & Grimoire as of 2026-07-09. This is a factual
 snapshot of what exists — not a roadmap. For architectural and API detail it
 links to the sibling docs rather than repeating them.
 

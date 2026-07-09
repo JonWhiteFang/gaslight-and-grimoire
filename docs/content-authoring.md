@@ -303,7 +303,7 @@ node scripts/validateCase.mjs public/content/cases/the-whitechapel-cipher  # one
 Successful output:
 
 ```
-✓ cases/the-whitechapel-cipher — 66 scenes, 14 clues
+✓ cases/the-whitechapel-cipher — 67 scenes, 14 clues
 ...
 All 7 case(s) validated successfully.
 ```
@@ -337,8 +337,9 @@ It also emits **warnings** (non-fatal, CLI only) for scenes unreachable from
 
 The validator runs in CI — it is a step in the `test` job of
 `.github/workflows/deploy.yml` (`run: node scripts/validateCase.mjs`, after
-`npm ci`), and `build` → `deploy` depend on that job, so a broken reference
-blocks deployment.
+`npm ci`), and the `build` (build-compiles) job depends on that `test` job, so a
+broken reference fails the merge gate. (Deployment itself is Cloudflare-side per
+`wrangler.jsonc`; this workflow does not publish.)
 
 ## Audio asset reference
 
@@ -385,7 +386,8 @@ reused across later cases and vignettes. To find every scene that references a
 given track, run `grep -rl ambientAudio public/content/` (or grep a specific
 filename, e.g. `grep -rl ambient-whitechapel-night public/content/`).
 
-**These files are not yet present in the repo** (9 SFX + 10 ambient = 19 total).
-The audio system is fully coded but silent: Howler handles the missing files
-gracefully, playing nothing (see architecture.md / `audioManager`). Dropping the
-named files into the paths above enables audio with no code changes.
+**The 9 SFX files now ship in `public/audio/sfx/`; the 10 ambient loops are not
+yet present in the repo.** SFX play; ambient is silent until the loop files are
+added. Howler handles the missing ambient files gracefully, playing nothing (see
+architecture.md / `audioManager`). Dropping the named ambient files into the path
+above enables ambient audio with no code changes.

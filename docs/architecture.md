@@ -144,8 +144,8 @@ fires from `goToScene` when `settings.autoSaveFrequency === 'scene'`.
   `processChoice` calls `actions.goToScene(nextSceneId)` **before** returning its
   `ChoiceResult` — navigation is a side effect of the call.
 - **Zero store imports in engine source.** No non-test file under `src/engine/`
-  imports `useStore` (verified — see below). The only `useStore` reference under
-  `src/engine/` is in a test file.
+  imports `useStore` (verified — see below). The only `useStore` references under
+  `src/engine/` are in test files.
 - **Audio is a store subscription.** `initAudioSubscription()`
   (`src/store/audioSubscription.ts`) registers a `useStore.subscribe` listener
   that diffs successive states and plays SFX (composure/vitality decreases,
@@ -176,7 +176,8 @@ itself call either; the save id is generated in `metaSlice`.)
 
 ```
 $ grep -rl "useStore" src/engine
-src/engine/__tests__/caseProgression.test.ts   # test only; no engine source match
+src/engine/__tests__/caseProgression.test.ts   # test only
+src/engine/__tests__/npcBounds.property.test.ts # test only; no engine source match
 
 $ grep -n "adjustReputation" src/store/slices/npcSlice.ts
 33:      get().adjustReputation(npc.faction, delta * 0.5);
@@ -185,11 +186,11 @@ $ grep -rnE "Date.now\(\)|Math.random\(\)" \
     src/engine/diceEngine.ts src/engine/hintEngine.ts \
     src/engine/saveManager.ts src/engine/buildDeduction.ts \
     src/store/slices/metaSlice.ts
-src/engine/diceEngine.ts:23:  return Math.floor(Math.random() * 20) + 1;
+src/engine/diceEngine.ts:24:  return Math.floor(Math.random() * 20) + 1;
 src/engine/buildDeduction.ts:24:    id: `deduction-${Date.now()}-${Math.random().toString(36).slice(2)}`,
 src/engine/hintEngine.ts:39:  sceneEntryTime: Date.now(),
 src/engine/hintEngine.ts:81:  const dwellTrigger = Date.now() - state.sceneEntryTime >= SCENE_DWELL_MS;
 src/engine/hintEngine.ts:143:  state.sceneEntryTime = Date.now();
-src/store/slices/metaSlice.ts:43:    const saveId = `save-${Date.now()}`;
+src/store/slices/metaSlice.ts:56:    const saveId = `save-${Date.now()}`;
 # (saveManager.ts: no match)
 ```
