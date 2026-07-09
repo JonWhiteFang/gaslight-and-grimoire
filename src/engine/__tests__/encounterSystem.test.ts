@@ -223,6 +223,40 @@ describe('startEncounter — Reaction_Check', () => {
 
     expect(encounterState.reactionCheckPassed).toBeNull();
   });
+
+  // F-114: the reaction faculty is `nerve >= lore ? nerve : lore`, so on a TIE it
+  // must resolve to Nerve. Nothing asserted which faculty was checked at the
+  // boundary, so flipping the tiebreak (>= → >) survived the suite.
+  it('checks NERVE (not Lore) when nerve and lore scores are tied', () => {
+    mockPerformCheck.mockReturnValue({ tier: 'success', roll: 15, modifier: 0, total: 15, dc: 12, natural: 15 });
+    const state = makeGameState({ investigator: makeInvestigator({ faculties: { reason: 10, perception: 10, nerve: 11, vigor: 10, influence: 10, lore: 11 } }) });
+    const rounds = [makeRound([makeChoice()], true)];
+
+    startEncounter('enc-1', rounds, true, state, mockActions);
+
+    // performCheck(faculty, investigator, dc, hasAdvantage, hasDisadvantage)
+    expect(mockPerformCheck.mock.calls[0][0]).toBe('nerve');
+  });
+
+  it('checks LORE when lore strictly exceeds nerve', () => {
+    mockPerformCheck.mockReturnValue({ tier: 'success', roll: 15, modifier: 0, total: 15, dc: 12, natural: 15 });
+    const state = makeGameState({ investigator: makeInvestigator({ faculties: { reason: 10, perception: 10, nerve: 8, vigor: 10, influence: 10, lore: 14 } }) });
+    const rounds = [makeRound([makeChoice()], true)];
+
+    startEncounter('enc-1', rounds, true, state, mockActions);
+
+    expect(mockPerformCheck.mock.calls[0][0]).toBe('lore');
+  });
+
+  it('checks NERVE when nerve strictly exceeds lore', () => {
+    mockPerformCheck.mockReturnValue({ tier: 'success', roll: 15, modifier: 0, total: 15, dc: 12, natural: 15 });
+    const state = makeGameState({ investigator: makeInvestigator({ faculties: { reason: 10, perception: 10, nerve: 14, vigor: 10, influence: 10, lore: 8 } }) });
+    const rounds = [makeRound([makeChoice()], true)];
+
+    startEncounter('enc-1', rounds, true, state, mockActions);
+
+    expect(mockPerformCheck.mock.calls[0][0]).toBe('nerve');
+  });
 });
 
 // ─── Test 2: Supernatural encounter applies dual-axis damage ──────────────────
@@ -255,6 +289,58 @@ describe('processEncounterChoice — dual-axis damage', () => {
 
     const choice = makeChoice({
       encounterDamage: { composureDelta: -2, vitalityDelta: -1 },
+    });
+    const round = makeRound([choice], false); // mundane
+    const encounterState = {
+      id: 'enc-1',
+      rounds: [round],
+      currentRound: 0,
+      isComplete: false,
+      reactionCheckPassed: null,
+    };
+    const state = makeGameState();
+
+    processEncounterChoice(choice, encounterState, state, mockActions);
+
+    expect(mockAdjustComposure).toHaveBeenCalledWith(-2);
+    expect(mockAdjustVitality).not.toHaveBeenCalled();
+  });
+
+  // Mundane single-axis damage: the `else if (vitalityDelta !== undefined)`
+  // branch (encounters.ts) — a mundane choice carrying ONLY vitality damage must
+  // apply it. Only the composure-only mundane path was covered, so deleting the
+  // `else if` (or its guard) survived the suite.
+  it('applies only Vitality damage on failure in a mundane encounter with vitality-only damage', () => {
+    mockPerformCheck.mockReturnValue({ tier: 'failure', roll: 3, modifier: 0, total: 3, dc: 12, natural: 3 });
+
+    const choice = makeChoice({
+      encounterDamage: { vitalityDelta: -2 }, // no composureDelta
+    });
+    const round = makeRound([choice], false); // mundane
+    const encounterState = {
+      id: 'enc-1',
+      rounds: [round],
+      currentRound: 0,
+      isComplete: false,
+      reactionCheckPassed: null,
+    };
+    const state = makeGameState();
+
+    processEncounterChoice(choice, encounterState, state, mockActions);
+
+    expect(mockAdjustVitality).toHaveBeenCalledWith(-2);
+    expect(mockAdjustComposure).not.toHaveBeenCalled();
+  });
+
+  // Guards the mundane `else` exclusivity: when BOTH deltas are present in a
+  // mundane encounter, only composure is applied (composure takes precedence;
+  // vitality is NOT also applied). This is the flip side of the vitality-only
+  // test — together they pin the single-axis rule.
+  it('applies ONLY composure (never vitality) when a mundane choice carries both deltas', () => {
+    mockPerformCheck.mockReturnValue({ tier: 'failure', roll: 3, modifier: 0, total: 3, dc: 12, natural: 3 });
+
+    const choice = makeChoice({
+      encounterDamage: { composureDelta: -2, vitalityDelta: -3 },
     });
     const round = makeRound([choice], false); // mundane
     const encounterState = {
