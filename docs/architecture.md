@@ -101,8 +101,10 @@ intersection of the six slice interfaces.
   that dispatches an `Effect[]` to the relevant slice actions (`composure`,
   `vitality`, `flag`, `disposition`, `suspicion`, `reputation`, `discoverClue`,
   `setMemoryFlag`). It is invoked from **`narrativeSlice.goToScene`** on scene
-  entry, gated on `visitedScenes` so a scene's `onEnter` fires **exactly once per
-  playthrough** (never re-firing on back-navigation or save-load — F-006).
+  entry, gated on `visitedScenes` **keyed by the resolved scene id** (base or
+  variant) so a scene's `onEnter` fires **exactly once per playthrough** — never
+  re-firing on back-navigation or save-load (F-006), yet still firing a variant's
+  distinct `onEnter` once when its condition first becomes true (F-118).
   `NarrativePanel` only *reads* the resulting `lastEffectMessages`; effect
   application must **not** be re-added to the view layer.
 - **Evidence-board connections persist in `evidenceSlice`.** `connections` holds
@@ -116,12 +118,13 @@ intersection of the six slice interfaces.
 CaseSelection → loadAndStartCase(id)  (or loadAndStartVignette)
   → loadCase(id) / loadVignette(id)   fetch /content/cases/<id>/*.json (or side-cases)
   → validateContent + index arrays into Record<string, T> by id
-  → set caseData; reset clues/npcs/deductions/connections; clear ability
-    flags (ability-auto-succeed-{reason,vigor,influence}, ability-veil-sight-active)
-    and the typed investigator.lastCriticalFaculty reward field (F-013) — other
-    world flags persist across cases
-  → goToScene(firstScene)             push prev scene to sceneHistory;
-      apply onEnter effects once per scene (gated on visitedScenes — F-006)
+  → set caseData; reset currentScene/clues/npcs/deductions/connections (F-104);
+    clear ability flags (ability-auto-succeed-{reason,vigor,influence},
+    ability-veil-sight-active) and the typed investigator.lastCriticalFaculty
+    reward field (F-013) — other world flags persist across cases
+  → goToScene(firstScene)             push prev scene to sceneHistory; clear a
+      stale lastCheckResult on cross-scene nav (F-106); apply onEnter effects
+      once per resolved scene (gated on visitedScenes, base-or-variant — F-006/F-118)
       → NarrativePanel renders scene (auto-discovers clues; shows lastEffectMessages)
       → ChoicePanel → processChoice(choice, state, actions)
           → diceEngine (resolveDC, performCheck / rollD20)
