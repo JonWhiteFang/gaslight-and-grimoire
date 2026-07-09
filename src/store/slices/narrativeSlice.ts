@@ -1,7 +1,7 @@
 import type { StateCreator } from 'zustand';
 import type { WritableDraft } from 'immer';
 import type { GameStore } from '../types';
-import type { CaseData, OutcomeTier, VignetteData } from '../../types';
+import type { CaseData, EncounterState, OutcomeTier, VignetteData } from '../../types';
 import { CaseProgression, type CaseCompletionResult } from '../../engine/caseProgression';
 import { loadCase, loadVignette, resolveScene, validateContent } from '../../engine/narrativeEngine';
 import { CASE_LOAD_CLEARED_FLAGS } from '../../engine/flags';
@@ -56,6 +56,7 @@ export function resetForNewCase(state: WritableDraft<GameStore>, data: CaseData)
   state.deductions = {};
   state.connections = [];
   state.lastCheckResult = null;
+  state.encounterState = null;
 
   // Populate clues and NPCs from loaded case data
   for (const [id, clue] of Object.entries(data.clues)) {
@@ -82,9 +83,13 @@ export interface NarrativeSlice {
   /** Feedback messages from the most recent scene's onEnter effects (transient). */
   lastEffectMessages: string[];
   lastCheckResult: CheckResult | null;
+  /** In-progress encounter state, or null when not in an encounter (F-105). */
+  encounterState: EncounterState | null;
   caseData: CaseData | null;
   goToScene: (sceneId: string) => void;
   setCheckResult: (result: CheckResult | null) => void;
+  /** Persist the live encounter progress so a reload resumes it (F-105). */
+  setEncounterState: (state: EncounterState | null) => void;
   loadAndStartCase: (caseId: string) => Promise<void>;
   loadAndStartVignette: (vignetteId: string) => Promise<void>;
   completeCase: (caseId: string) => CaseCompletionResult;
@@ -102,6 +107,7 @@ export const createNarrativeSlice: StateCreator<
   visitedScenes: [],
   lastEffectMessages: [],
   lastCheckResult: null,
+  encounterState: null,
   caseData: null,
 
   goToScene: (sceneId) => {
@@ -118,6 +124,9 @@ export const createNarrativeSlice: StateCreator<
       // (F-106). A re-navigation to the same scene leaves it in place.
       if (prevScene !== sceneId) {
         state.lastCheckResult = null;
+        // Leaving a scene ends any encounter that was in progress there, so the
+        // persisted encounter state must not linger into the next scene (F-105).
+        state.encounterState = null;
       }
       state.currentScene = sceneId;
     });
@@ -178,6 +187,11 @@ export const createNarrativeSlice: StateCreator<
   setCheckResult: (result) =>
     set((state) => {
       state.lastCheckResult = result;
+    }),
+
+  setEncounterState: (encounterState) =>
+    set((state) => {
+      state.encounterState = encounterState;
     }),
 
   /**

@@ -80,4 +80,27 @@ describe('EncounterPanel', () => {
     render(<EncounterPanel sceneId="s1" rounds={[{ ...baseRound, isSupernatural: true }]} isSupernatural={true} onComplete={() => {}} />);
     expect(screen.getByText(/overwhelms you/i)).toBeTruthy();
   });
+
+  // F-105: when a persisted encounterState for this scene already exists in the
+  // store (e.g. after a reload mid-encounter), the panel must RESUME from it, not
+  // re-run startEncounter — which would re-roll the reaction check and re-apply
+  // its composure damage (save-scum), and reset currentRound.
+  it('resumes a persisted encounterState without re-running startEncounter (F-105)', () => {
+    useStore.setState({
+      encounterState: {
+        id: 's1', rounds: [{ ...baseRound, isSupernatural: true }],
+        currentRound: 0, isComplete: false, reactionCheckPassed: false,
+      },
+    });
+    render(<EncounterPanel sceneId="s1" rounds={[{ ...baseRound, isSupernatural: true }]} isSupernatural={true} onComplete={() => {}} />);
+    expect(mockStartEncounter).not.toHaveBeenCalled();
+    // The reaction damage was already applied pre-reload → no reaction banner re-shows.
+    expect(screen.queryByText(/overwhelms you/i)).toBeNull();
+  });
+
+  it('runs startEncounter when there is no persisted state for this scene', () => {
+    useStore.setState({ encounterState: null });
+    render(<EncounterPanel sceneId="s1" rounds={[baseRound]} isSupernatural={false} onComplete={() => {}} />);
+    expect(mockStartEncounter).toHaveBeenCalledTimes(1);
+  });
 });

@@ -258,6 +258,13 @@ export interface GameState {
    * reloading a save cannot re-apply — or "farm" — its effects. Persisted from save v3.
    */
   visitedScenes?: string[];
+  /**
+   * In-progress encounter state (round index + whether the reaction check has
+   * run and its result), or null/absent when not in an encounter. Persisted so a
+   * reload mid-encounter resumes rather than restarting — which would re-roll and
+   * re-apply the reaction damage and lose round progress (F-105). From save v4.
+   */
+  encounterState?: EncounterState | null;
   settings: GameSettings;
 }
 

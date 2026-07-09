@@ -25,19 +25,37 @@ export function EncounterPanel({ sceneId, rounds, isSupernatural, onComplete }: 
   const clues = useStore((s) => s.clues);
   const deductions = useStore((s) => s.deductions);
   const setCheckResult = useStore((s) => s.setCheckResult);
+  const setStoreEncounterState = useStore((s) => s.setEncounterState);
 
-  const [encounterState, setEncounterState] = useState<EncounterState | null>(null);
+  const [encounterState, setEncounterStateLocal] = useState<EncounterState | null>(null);
   const [reactionMessage, setReactionMessage] = useState<string | null>(null);
   const initRef = useRef(false);
 
-  // Initialize encounter on mount
+  // Mirror an EncounterState into both local render state and the store, so the
+  // reaction roll and round progress survive a save/reload (F-105).
+  const commitEncounterState = useCallback((state: EncounterState) => {
+    setEncounterStateLocal(state);
+    setStoreEncounterState(state);
+  }, [setStoreEncounterState]);
+
+  // Initialize (or RESUME) the encounter on mount.
   useEffect(() => {
     if (initRef.current) return;
     initRef.current = true;
 
+    // If a persisted encounterState for THIS scene already exists (e.g. after a
+    // reload mid-encounter), resume from it rather than re-running startEncounter
+    // — which would re-roll the reaction check, re-apply its composure damage
+    // (save-scum), and reset currentRound (F-105).
+    const persisted = useStore.getState().encounterState;
+    if (persisted && persisted.id === sceneId && !persisted.isComplete) {
+      setEncounterStateLocal(persisted);
+      return;
+    }
+
     const gameState = buildGameState(useStore.getState());
     const state = startEncounter(sceneId, rounds, isSupernatural, gameState, useStore.getState());
-    setEncounterState(state);
+    commitEncounterState(state);
 
     if (isSupernatural && state.reactionCheckPassed !== null) {
       setReactionMessage(
@@ -47,7 +65,7 @@ export function EncounterPanel({ sceneId, rounds, isSupernatural, onComplete }: 
       );
       setTimeout(() => setReactionMessage(null), 3000);
     }
-  }, [sceneId, rounds, isSupernatural]);
+  }, [sceneId, rounds, isSupernatural, commitEncounterState]);
 
   const handleChoiceSelect = useCallback(
     (choiceId: string) => {
@@ -74,13 +92,13 @@ export function EncounterPanel({ sceneId, rounds, isSupernatural, onComplete }: 
         });
       }
 
-      setEncounterState(newState);
+      commitEncounterState(newState);
 
       if (newState.isComplete) {
         onComplete();
       }
     },
-    [encounterState, setCheckResult, onComplete],
+    [encounterState, setCheckResult, onComplete, commitEncounterState],
   );
 
   if (!encounterState) return null;

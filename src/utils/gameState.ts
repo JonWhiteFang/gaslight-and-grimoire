@@ -15,6 +15,7 @@ export function snapshotGameState(s: GameStore): GameState {
     sceneHistory: s.sceneHistory,
     connections: s.connections,
     visitedScenes: s.visitedScenes,
+    encounterState: s.encounterState,
     settings: s.settings,
   };
 }
