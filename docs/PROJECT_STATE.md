@@ -8,7 +8,19 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-09 (**Audit-2 P1 #56 FIXED — scene-transition state hygiene (PR #64, merged).**)
+_Last updated: 2026-07-09 (**Audit-2 P1 #55 FIXED — save/reload safety (PR #65, merged).**)
+**#55 (F-103/F-105):** two persistence-safety defects. **F-103** — manual `saveGame` had no try/catch (autoSave did), so a
+`localStorage` throw (quota/private-browsing) became an unhandled rejection while the UI showed "Game saved"; now returns
+`{ ok:false }` and App shows a `role="alert"` error toast. **F-105** — encounter reaction-check damage re-rolled on
+save/reload because `EncounterState` was component-only + unpersisted; now `encounterState` lives in the store + save (v3→v4
+migration, defaults null), `EncounterPanel` resumes a persisted in-progress encounter instead of re-running `startEncounter`,
+and `goToScene`/`resetForNewCase` clear it. TDD (RED watched). Test baseline **569→577**; lint + validator (7 cases) + build
+green; all six CI checks passed on PR #65. Doc-drift sweep: `status.md` baseline 569→577; save version 3→4 + the v3→v4
+migration step in `CLAUDE.md` + `engine-reference.md`; `encounterState`/`setEncounterState` added to the narrativeSlice
+rows (`CLAUDE.md` + `architecture.md`); the `saveGame` try/catch noted. **Audit-2 code backlog remaining: #57 (P1),
+#59 (P2), #60 (P3).** — Prior (below): #56 scene-transition hygiene (PR #64).
+
+Earlier this session: **Audit-2 P1 #56 FIXED — scene-transition state hygiene (PR #64, merged).**
 **#56 (F-118/F-104/F-106/F-108):** four defects on the `goToScene`/`resetForNewCase` seam, one PR. The once-per-scene
 `onEnter` gate now keys on the **resolved** scene id (base or variant), so a variant's distinct `onEnter` fires once when
 newly eligible (F-118) while still never re-firing (F-006 preserved); `resetForNewCase` clears `currentScene` so no foreign
@@ -54,8 +66,8 @@ build artifacts (`vite.config.js`/`.d.ts`) `tsconfig.node.json`'s `composite:tru
 - **Stage:** Phases A–E complete and the game is playable end-to-end (7 cases). The **first** audit's backlog
   (#1–#22, findings F-001…F-067) is fully cleared except **#20 (media assets)**. **Second audit (2026-07-09) backlog
   #53–#60 (F-101…F-123): both P0 gameplay blockers FIXED — #53 auto-succeed (PR #62) + #54 Mayfair true ending
-  (PR #63); of P1, #56 scene-transition hygiene (PR #64) + #58 docs (PR #61) done.** Remaining: **#55/#57 (P1), #59 (P2),
-  #60 (P3) — no P0 left.** See the audit report + the issues.
+  (PR #63); of P1, #55 save/reload safety (PR #65) + #56 scene-transition hygiene (PR #64) + #58 docs (PR #61) done.**
+  Remaining: **#57 (P1), #59 (P2), #60 (P3) — no P0 left.** See the audit report + the issues.
 - **Deployment:** **Cloudflare static-assets Worker** at `holodeck.jonwhitefang.uk/gaslight-and-grimoire/*` (GitHub
   Pages retired, ADR-0007). Config in-repo: `wrangler.jsonc` (assets-only), `public/_headers` (real CSP header incl.
   `frame-ancestors 'none'`), `scripts/nest-for-cloudflare.mjs` (postbuild nests `dist/*` under the route prefix, keeps
@@ -67,11 +79,11 @@ build artifacts (`vite.config.js`/`.d.ts`) `tsconfig.node.json`'s `composite:tru
   drops its `<6.1.0` peer cap). Runtime: React 19, framer-motion 12, zustand 5, immer 11. Toolchain: Vite 8 (Rolldown),
   Vitest 4, jsdom 29, Tailwind 4 (CSS-first `@theme`), ESLint 10. See ADR-0008 + [[dependabot-major-group-migration]] for
   the clustering approach and the emnapi lockfile gotcha.
-- **Branch focus:** `main` (at `469a86a`, **PRs #62 + #63 + #64 merged**) — both P0s + P1 #56 cleared. Next work (P1 #55
-  or #57) starts from a fresh branch off `main`. Prior: PR #61 (#58 docs), PR #51 (deps), PRs #48/#49 (#47 deploy).
-- **Verification:** 2026-07-09 — on merged `main`: `npm run test:run` → **569 passed (569)** across **56** files;
+- **Branch focus:** `main` (at `9b69046`, **PRs #62/#63/#64/#65 merged**) — both P0s + P1 #55/#56 cleared. Next work
+  (P1 #57) starts from a fresh branch off `main`. Prior: PR #61 (#58 docs), PR #51 (deps), PRs #48/#49 (#47 deploy).
+- **Verification:** 2026-07-09 — on merged `main`: `npm run test:run` → **577 passed (577)** across **56** files;
   `npm run lint` clean, validator clean (7 cases), `npm run build` green (emits `dist/gaslight-and-grimoire/` +
-  `dist/_headers`). **CI green on PRs #62/#63/#64** — all six checks pass on each, including the **Cloudflare Workers Build**.
+  `dist/_headers`). **CI green on PRs #62/#63/#64/#65** — all six checks pass on each, including the **Cloudflare Workers Build**.
 
 ---
 
@@ -102,7 +114,7 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 | — | Deployment — Cloudflare Worker migration (retire GitHub Pages) | `[x]` | **Complete — issue #47, ADR-0007.** PR #48 (`2e539fa`): `wrangler.jsonc` + `public/_headers` (real CSP + `frame-ancestors 'none'`) + `deploy.yml` → CI-gate-only. PR #49 (`7144d34`): `scripts/nest-for-cloudflare.mjs` postbuild nesting (fixed live 404). Owner-verified live; Pages unpublished. |
 | — | Second full Ultracode repo audit (analysis only) | `[x]` | **2026-07-09.** Report at repo root (`2026-07-09_ULTRACODE_FULL_REPO_ANALYSIS.md`); 71-agent fan-out + lead verification → **23 findings (F-101…F-123)**, 4 rejected, overall risk Medium. Filed **8 grouped issues #53–#60**. No code changed. |
 | R | Audit-2 remediation — P0 gameplay blockers | `[x]` | **Both done.** **#53 — PR #62:** auto-succeed ability consumed once via shared `resolveCheckOutcome` (F-101); encounters route through the same unit (F-107). **#54 — PR #63:** Mayfair true ending de-crit-gated by dual-sourcing 2 clues (F-102) + a validator guard against crit-gated deduction clues. 554→564 tests. |
-| R2 | Audit-2 remediation — P1 (code) | `[~]` | **#56 DONE — PR #64:** scene-transition state hygiene — resolved-id `onEnter` gate (F-118), `currentScene` reset (F-104), `lastCheckResult` cleared on nav (F-106), reactive `canGoBack` (F-108); 564→569 tests. Remaining: **#55** save/reload safety (F-103/F-105); **#57** a11y+errors incl. React-19 `inert` regression. |
+| R2 | Audit-2 remediation — P1 (code) | `[~]` | **#55 DONE — PR #65:** save/reload safety — `saveGame` try/catch + error toast (F-103), persisted `encounterState` (v3→v4) so reload doesn't re-roll the reaction check (F-105); 569→577. **#56 DONE — PR #64:** scene-transition hygiene (F-118/F-104/F-106/F-108); 564→569. Remaining: **#57** a11y+errors incl. React-19 `inert` regression. |
 | R2′ | Audit-2 remediation — P1 (docs #58) | `[x]` | **Done — PR #61 (`3dc49aa`).** F-119 `architecture.md` onEnter anti-pattern (+ F-013 flag drift); F-120 scene counts → 201; F-121 component count 16→17; F-122 choices/scene → ~1.77. Also closed the `.gitignore` `vite.config` emit-litter gap. Docs-only. |
 | R3 | Audit-2 remediation — P2/P3 | `[ ]` | **#59** test-quality (F-112–F-116); **#60** CI type-check `scripts/` (F-123). Not started. |
 
@@ -117,10 +129,9 @@ Source of truth for each phase's scope: the Implementation Roadmap in [../CLAUDE
 
 **Code track — Audit-2 backlog (new, from the 2026-07-09 report):**
 4. **~~#53 auto-succeed (PR #62)~~ + ~~#54 Mayfair true ending (PR #63)~~ DONE — both P0 blockers cleared.** No P0 left.
-5. **P1 (code): ~~#56 scene-transition hygiene (PR #64)~~ DONE.** Remaining P1: **#55** (save/reload safety: F-103 silent
-   manual-save failure + F-105 encounter reaction re-roll) and **#57** (a11y+errors incl. the React-19 `inert=''`
-   regression). Suggested next: **#55** — smaller, self-contained (`saveManager`/`metaSlice` + the encounter reaction
-   persistence), then #57 (spans several components). (**#58 — the P1 docs-drift — is done: PR #61.**)
+5. **P1 (code): ~~#56 scene-transition hygiene (PR #64)~~ + ~~#55 save/reload safety (PR #65)~~ DONE.** Remaining P1:
+   **#57** (a11y+errors incl. the React-19 `inert=''` regression, a false auto-save claim, and unannounced loading —
+   spans several components). This is the last P1. (**#58 — the P1 docs-drift — is done: PR #61.**)
 6. **Then P2/P3 — #59** (test quality — several suites test copies-of-logic, not the real unit; note #53's PR already
    fixed the two self-fulfilling AbilityButton guard tests, and #54 added a real per-tier reachability validator rule) and
    **#60** (CI type-checks `scripts/`; note its `tsc -b` also surfaces pre-existing `TS2550` errors on `vite.config.ts`).

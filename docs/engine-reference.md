@@ -160,13 +160,13 @@ index at `gg_save_index` (array of `SaveSummary`, sorted by timestamp desc).
 > calls neither `Date.now()` nor `Math.random()`; the save id is generated in
 > `metaSlice`.
 
-- `const CURRENT_SAVE_VERSION = 3`.
+- `const CURRENT_SAVE_VERSION = 4`.
 - `interface SaveSummary { id: string; timestamp: string; caseName: string; investigatorName: string }`.
 - `SaveManager.save(saveId: string, state: GameState, caseTitle?: string): void` — wraps `state` in a `SaveFile` (`version`, ISO `timestamp`, `state`), writes it, and upserts the index entry (re-sorted desc). `caseTitle`, when supplied, becomes the summary's readable `caseName` (else it falls back to `state.currentCase`).
 - `SaveManager.load(saveId: string): GameState | null` — reads and parses the save, runs `migrate`, returns the migrated `state` (or `null` if missing/unparseable).
 - `SaveManager.listSaves(): SaveSummary[]` — returns the index.
 - `SaveManager.deleteSave(saveId: string): void` — removes the save and its index entry.
-- `SaveManager.migrate(saveFile: SaveFile): SaveFile` — idempotent upgrade to the current version (**3**). **v0→v1**: default `factionReputation` to `{}`. **v1→v2**: backfill `sceneHistory` and `connections` to `[]` (a missing `sceneHistory` otherwise crashes the first `goToScene` after load). **v2→v3**: backfill `visitedScenes` from `sceneHistory + currentScene`, so reloading a pre-v3 save doesn't re-fire `onEnter` on scenes already seen (F-006).
+- `SaveManager.migrate(saveFile: SaveFile): SaveFile` — idempotent upgrade to the current version (**4**). **v0→v1**: default `factionReputation` to `{}`. **v1→v2**: backfill `sceneHistory` and `connections` to `[]` (a missing `sceneHistory` otherwise crashes the first `goToScene` after load). **v2→v3**: backfill `visitedScenes` from `sceneHistory + currentScene`, so reloading a pre-v3 save doesn't re-fire `onEnter` on scenes already seen (F-006). **v3→v4**: default `encounterState` to `null`, so a pre-v4 save resumes as "not in an encounter" rather than restarting/re-rolling a mid-encounter reaction check (F-105).
 
 ## audioManager.ts
 

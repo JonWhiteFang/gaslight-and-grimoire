@@ -139,7 +139,7 @@ Single `useStore` (Zustand + Immer) composed from six slices:
 | Slice | State | Actions |
 |---|---|---|
 | `investigatorSlice` | `investigator` | `initInvestigator`, `updateFaculty`, `adjustComposure`, `adjustVitality`, `useAbility`, `resetAbility` |
-| `narrativeSlice` | `currentScene`, `currentCase`, `sceneHistory`, `visitedScenes`, `lastEffectMessages`, `lastCheckResult`, `caseData` | `goToScene`, `setCheckResult`, `loadAndStartCase`, `loadAndStartVignette`, `completeCase` |
+| `narrativeSlice` | `currentScene`, `currentCase`, `sceneHistory`, `visitedScenes`, `lastEffectMessages`, `lastCheckResult`, `encounterState`, `caseData` | `goToScene`, `setCheckResult`, `setEncounterState`, `loadAndStartCase`, `loadAndStartVignette`, `completeCase` |
 | `evidenceSlice` | `clues`, `deductions`, `connections` | `discoverClue`, `updateClueStatus`, `addDeduction`, `addConnection`, `clearConnections` |
 | `npcSlice` | `npcs` | `adjustDisposition`, `adjustSuspicion`, `setNpcMemoryFlag`, `removeNpc` |
 | `worldSlice` | `flags`, `factionReputation` | `setFlag`, `adjustReputation` |
@@ -208,9 +208,9 @@ Rules:
 ### Save System (saveManager.ts)
 - localStorage with `gg_save_` prefix. Index at `gg_save_index`.
 - `SaveFile` wraps `GameState` with `version` + `timestamp`.
-- Migration pipeline: v0→v1 adds `factionReputation`; v1→v2 backfills `sceneHistory` + `connections`; v2→v3 backfills `visitedScenes` (from `sceneHistory + currentScene`, so reloads don't re-fire `onEnter` — F-006). Current version: 3 (`CURRENT_SAVE_VERSION`).
-- `saveGame` generates unique IDs (`save-{timestamp}`), capped at 10 manual saves.
-- `autoSave` writes to the `'autosave'` slot, triggered by `goToScene` (scene frequency) or ChoicePanel (choice frequency) based on `autoSaveFrequency` setting.
+- Migration pipeline: v0→v1 adds `factionReputation`; v1→v2 backfills `sceneHistory` + `connections`; v2→v3 backfills `visitedScenes` (from `sceneHistory + currentScene`, so reloads don't re-fire `onEnter` — F-006); v3→v4 defaults `encounterState` to null (so a reload mid-encounter resumes rather than re-rolling the reaction check — F-105). Current version: 4 (`CURRENT_SAVE_VERSION`).
+- `saveGame` generates unique IDs (`save-{timestamp}`), capped at 10 manual saves. Wrapped in try/catch — a `localStorage` throw returns `{ ok: false }` rather than an unhandled rejection, so the UI surfaces an error toast instead of a false "Game saved" (F-103).
+- `autoSave` writes to the `'autosave'` slot, triggered by `goToScene` (scene frequency) or ChoicePanel (choice frequency) based on `autoSaveFrequency` setting. In-progress `encounterState` (round + reaction result) is part of the snapshot, so an autosave on encounter-scene entry resumes correctly on reload (F-105).
 - `load` guards the deserialised blob: a non-object envelope or a state failing the `isValidGameState` shape check (missing `investigator`/`clues`/… or wrong types) returns `null` rather than corrupting the store (F-036).
 - `loadGame` restores all `GameState` fields and re-fetches `caseData` via `loadCase(currentCase)`.
 

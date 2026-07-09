@@ -19,6 +19,15 @@
 
 ---
 
+## 2026-07-09 — Audit-2 #55 (P1): save/reload safety (PR #65)
+
+- **Goal:** Fix the two P1 persistence-safety defects — silent manual-save failure (F-103) and encounter reaction-check re-roll on reload (F-105).
+- **Did (branch `fix/55-save-reload-safety`, PR #65 squash-merged to `main` as `9b69046`, branch deleted):** TDD (RED watched). **F-103** — `saveGame` had no try/catch though `autoSave` did; a `localStorage.setItem` throw (quota / private browsing / disabled) became an unhandled rejection while `handleSaveGame` showed "Game saved". Wrapped the save in try/catch; `SaveResult` gained an `ok` flag; `App` shows an error toast (`role="alert"`, assertive, red styling) on `ok:false`. **F-105** — `EncounterState` (`currentRound`, `reactionCheckPassed`) was component-only + unpersisted, so an autosave-on-encounter-entry + reload re-ran `startEncounter` → re-rolled the reaction check, re-applied composure damage (save-scum), reset the round. Persisted `encounterState` in `narrativeSlice` (+ `setEncounterState` action) + `snapshotGameState` + `loadGame`; new save **v3→v4** migration defaults it to null; `EncounterPanel` resumes a persisted in-progress encounter for the scene (skips `startEncounter`) and mirrors round progress back to the store; `goToScene` clears it on cross-scene nav (reusing the F-106 guard) and `resetForNewCase` clears it. **Tests:** metaSlice.saveGame (`ok:false` on throw / `ok:true` normal), App (real new-game flow → game screen → `SaveManager.save` throws → `role="alert"` error toast, not "Game saved"), metaSlice.loadGame (encounterState round-trips), EncounterPanel (resumes persisted / runs when none), saveMigration (v3→v4 default null + untouched-when-present, v0→4 chain).
+- **Verified:** `npm run test:run` → **577 passed (577)**, 56 files (was 569; +8). `npm run lint` clean, `node scripts/validateCase.mjs` → 7 cases clean, `npm run build` green. RED confirmed failing for the right reasons before each GREEN. **All six CI checks green on PR #65.**
+- **Doc-drift sweep (auto-fixed this session's drift):** `status.md` baseline `569`→`577`. Save version `3`→`4` + the v3→v4 migration step in `CLAUDE.md` (Save System) + `engine-reference.md` (`CURRENT_SAVE_VERSION` + `migrate`). Added `encounterState`/`setEncounterState` to the narrativeSlice rows in `CLAUDE.md` + `architecture.md`. Noted the `saveGame` try/catch + `autoSave` encounter-state snapshot in `CLAUDE.md`. No broken internal links.
+- **Open / blockers:** #55 done. **#57 is the last remaining P1** (a11y/errors — React-19 `inert` regression, false auto-save claim, unannounced loading; spans several components). Then P2 #59, P3 #60. No blockers.
+- **Memory updated:** STATE ☑ · RUN_LOG ☑ · ADR ☐ (no new architectural decision — persisting `encounterState` extends the existing save/snapshot pattern + migration pipeline; the try/catch mirrors `autoSave`).
+
 ## 2026-07-09 — Audit-2 #56 (P1): scene-transition state hygiene (PR #64)
 
 - **Goal:** Fix the P1 root-cause cluster on the `goToScene`/`resetForNewCase` seam — four related defects (F-118/F-104/F-106/F-108), one PR since they touch the same two functions.
