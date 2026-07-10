@@ -19,6 +19,8 @@ deployed as a Cloudflare static-assets Worker at
 | [audio-asset-kit.md](./audio-asset-kit.md) | You are generating the game's audio assets — the ambient-loop / SFX prompt kit and filename conventions. |
 | [status.md](./status.md) | You want the current-state snapshot: content inventory, implemented systems, asset status, and the test baseline. |
 | [Gaslight_&_Grimoire_design.md](./Gaslight_&_Grimoire_design.md) | You want the design intent and vision — the canonical design bible. |
+| [content-ideas-prompt.md](./content-ideas-prompt.md) | You want to generate new case/vignette ideas — the reusable ideation prompt. |
+| [content-ideas-2026-07-10.md](./content-ideas-2026-07-10.md) | You want the 2026-07-10 ideation output: 10 new content concepts, top-3 ranking, The Comet Club pitch, and the Mythos-thread staging plan. |
 | [PROJECT_STATE.md](./PROJECT_STATE.md) | You are resuming work and need the one-page live snapshot: where the build is right now and what's next. **Read this first.** |
 | [RUN_LOG.md](./RUN_LOG.md) | You want the append-only history of working sessions (what happened, when). |
 | [DECISIONS/](./DECISIONS/) | You want the *why* behind non-trivial calls — Architecture Decision Records. |

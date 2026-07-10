@@ -4,15 +4,15 @@ A browser-based choose-your-own-adventure game set in a Victorian London where m
 the rational world. Players investigate branching mysteries that blend Sherlock Holmes-style
 deduction with D&D-style faculty checks and d20 dice mechanics.
 
-**▶ Play it: https://jonwhitefang.github.io/gaslight-and-grimoire/**
+**▶ Play it: https://holodeck.jonwhitefang.uk/gaslight-and-grimoire/**
 
-Seven cases (198 scenes) span three multi-act mysteries and four side vignettes, with four playable
+Seven cases (201 scenes) span three multi-act mysteries and four side vignettes, with four playable
 archetypes, four factions, an evidence-connection deduction system, and stateful hints.
 
 ## Tech stack
 
-React 18 · [Zustand](https://github.com/pmndrs/zustand) (single Immer-powered store) ·
-Tailwind CSS · Framer Motion · [Howler.js](https://howlerjs.com/) · TypeScript · Vite · Vitest.
+React 19 · [Zustand](https://github.com/pmndrs/zustand) (single Immer-powered store) ·
+Tailwind CSS v4 · Framer Motion · [Howler.js](https://howlerjs.com/) · TypeScript · Vite · Vitest.
 Narrative content is authored as JSON under `public/content/` and loaded by the engine at runtime,
 kept strictly separate from game logic in `src/engine/`.
 
@@ -40,7 +40,7 @@ npm run dev       # start the Vite dev server
 ## Continuous integration
 
 - **`.github/workflows/deploy.yml`** — on push/PR to `main`: lint + content validation + full test
-  suite gate a production build, which deploys to GitHub Pages (deploy skipped on PR events).
+  suite gate a build-compiles check (no publish; deployment is Cloudflare-side via `wrangler.jsonc`).
 - **`.github/workflows/security.yml`** — `npm audit` + OWASP Dependency-Check on every PR and weekly.
 
 ## Documentation
