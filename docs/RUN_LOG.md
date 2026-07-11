@@ -19,6 +19,14 @@
 
 ---
 
+## 2026-07-11 (fourth session) — context7 MCP scope conflict fixed (first task through the ADR-0010 gates)
+
+- **Goal:** Resolve the `claude mcp list` diagnostic flagged last session: `context7` defined at user scope (HTTP `https://mcp.context7.com/mcp`) *and* project scope (stdio `npx -y @upstash/context7-mcp`) with different endpoints.
+- **Did:** Kept the repo-shareable project scope (per ADR-0004's team-shareability intent) but standardized it on the HTTP endpoint: `.mcp.json` context7 entry → `{"type": "http", "url": "https://mcp.context7.com/mcp"}`; then `claude mcp remove context7 -s user` (machine-local `~/.claude.json`). **ADR-0010 gates exercised for real:** Gate 1 found an ordering hazard (plan originally removed the working user entry before proving the project entry parsed/connected — reordered to edit → JSON-validate → remove → probe, with the diff-hygiene check it also asked for); Gate 2 on the final diff: "no blocking findings." Verified: conflict diagnostic gone; `claude mcp get context7` → Scope: Project, Type: http, correct URL. Sweep: no doc drift (docs name context7 without transport specifics).
+- **Verified:** `python3 -m json.tool .mcp.json` valid; `git diff` touches only the context7 stanza (playwright/github untouched); post-removal `claude mcp list/get` probe. Accepted residuals (surfaced by Gate 1, not fully closable here): project-scope servers show a one-time "Pending approval" trust prompt on next launch (standard; same as the repo's playwright/github entries), and no fresh-clone smoke test was run (the identical URL is proven reachable in the same listing). Repo change is one config stanza; test baseline unaffected (611/58, 201/7 stands).
+- **Open / blockers:** approve the context7 project server at next interactive launch. `npm ci` before next code session. Unchanged: #20 (media), content-ideas pick.
+- **Memory updated:** STATE ☑ · RUN_LOG ☑ · ADR ☐ (routine config fix — no decision with lasting alternatives; the scope-choice rationale already lives in ADR-0004).
+
 ## 2026-07-11 (third session) — Codex integrated as cross-provider adversarial reviewer (ADR-0010)
 
 - **Goal:** Execute the user's hardened setup prompt: OpenAI Codex CLI as an MCP-based adversarial reviewer, with every non-trivial plan and code change gated on a Codex review (or an explicitly announced skip).
