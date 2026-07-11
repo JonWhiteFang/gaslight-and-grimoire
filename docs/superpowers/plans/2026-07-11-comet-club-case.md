@@ -127,7 +127,7 @@ The full 16-clue reference table below defines every field; each task's "add clu
 | `cc-clue-corven-absence` | testimony | The Skipped Chair | `cc-act2-corven-confides` | `["cc-clue-seating-chart","cc-clue-halloway-diary"]` | `["pattern","chair4"]` | Corven was called from the eyepiece in 1882 and never looked — and the pattern passed over him |
 | `cc-clue-1882-log` | physical | The Private Observation Log | `cc-act2-observatory-log` | `["cc-clue-razored-page","cc-clue-founder-death"]` | `["observatory","1882"]` | The Society's own record of the comet night — one page razored out |
 | `cc-clue-razored-page` | occult | The Razored Page | `cc-act2-razored-found` | `["cc-clue-ost-period","cc-clue-1882-log"]` | `["occult","1882"]` | The recovered page: an object between comet and Earth, sketched as an angular mark |
-| `cc-clue-ost-period` | occult | Ost's Recomputation | `cc-act2-ost-study` | `["cc-clue-razored-page","cc-clue-founder-death"]` | `["occult","astronomy"]` | The occulting object is periodic — and the next perihelion is not far off |
+| `cc-clue-ost-period` | occult | Ost's Recomputation | `cc-act2-ost-confides` | `["cc-clue-razored-page","cc-clue-founder-death"]` | `["occult","astronomy"]` | The occulting object is periodic — and the next perihelion is not far off |
 | `cc-clue-briggs-nights` | testimony | The Worked Dome | `cc-act2-briggs-lodge` | `["cc-clue-dome-warmth"]` | `["observatory"]` | On certain nights the dome is worked though no one enters; Briggs keeps the dates |
 | `cc-clue-dome-warmth` | occult | The Warm Refractor | `cc-act2-dome-witnessed` | `["cc-clue-briggs-nights","cc-clue-ost-period"]` | `["occult","observatory"]` | On a marked night, the great refractor is warm to the touch |
 | `cc-clue-founder-death` | physical | The Founder's Obituary | `cc-act1-ras-library` | `["cc-clue-1882-log","cc-clue-ost-period"]` | `["pattern","1885"]` | Chair 1, dead "of age" in 1885 — the date fits as the pattern's first collection |
@@ -332,7 +332,7 @@ Expected: 0 errors; `29 scenes, 8 clues`.
 - [ ] **Step 3: Commit**
 
 ```bash
-git add public/content/cases/the-comet-club/act2.json
+git add public/content/cases/the-comet-club/act2.json public/content/cases/the-comet-club/clues.json
 git commit -m "feat(content): Comet Club Act II loop 1 — the tontine layer"
 ```
 
@@ -403,17 +403,18 @@ Expected: 0 errors; `50 scenes, 16 clues`.
 - [ ] **Step 3: Commit**
 
 ```bash
-git add public/content/cases/the-comet-club/act2.json
+git add public/content/cases/the-comet-club/act2.json public/content/cases/the-comet-club/clues.json
 git commit -m "feat(content): Comet Club Act II loop 2 — the pattern layer"
 ```
 
 ---
 
-### Task 5: Act III — Perihelion Night (17 scenes + bridge)
+### Task 5: Act III — Perihelion Night (16 Act III scenes + 1 Act II bridge)
 
 **Files:**
+- Modify: `public/content/cases/the-comet-club/deductions.json` (Step 0: the four recipes)
 - Modify: `public/content/cases/the-comet-club/act2.json` (hub summons spoke + `cc-act2-midpoint`)
-- Modify: `public/content/cases/the-comet-club/act3.json` (17 scenes)
+- Modify: `public/content/cases/the-comet-club/act3.json` (16 scenes)
 
 **Interfaces:**
 - Consumes: deduction ids (Task 1), flags from Tasks 2–4.
@@ -464,7 +465,7 @@ Expected: 0 errors; `67 scenes, 16 clues`. Zero unreachable-scene warnings for a
 - [ ] **Step 4: Commit**
 
 ```bash
-git add public/content/cases/the-comet-club/act2.json public/content/cases/the-comet-club/act3.json
+git add public/content/cases/the-comet-club/act2.json public/content/cases/the-comet-club/act3.json public/content/cases/the-comet-club/deductions.json
 git commit -m "feat(content): Comet Club Act III — Perihelion Night"
 ```
 
