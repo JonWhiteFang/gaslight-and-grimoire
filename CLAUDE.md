@@ -4,16 +4,17 @@
 
 A browser-based choose-your-own-adventure game set in Victorian London where magic exists beneath the rational world. Players investigate branching mysteries blending Sherlock Holmes-style deduction with D&D-style faculty checks and dice mechanics. Built with React 19, Zustand, Tailwind CSS v4, Framer Motion, and Howler.js. Deployed as a Cloudflare static-assets Worker at `holodeck.jonwhitefang.uk/gaslight-and-grimoire/`.
 
-## Documentation (docs/)
+## Documentation (docs/) — one authority per fact
 
-Project docs live under `docs/`. Read the relevant one before significant changes:
+Project docs live under `docs/`. **Each fact has exactly one authoritative home — this file points at
+the authorities and does not restate them.** Read the relevant doc before significant changes:
 
 - `docs/README.md` — orientation and doc map (start here)
 - `docs/architecture.md` — component hierarchy, store slices, engine modules, data flow, cross-slice couplings, determinism notes
-- `docs/engine-reference.md` — per-module engine API (signatures + behavior)
-- `docs/content-authoring.md` — case/vignette JSON schemas, Condition/Effect catalogs, validation, audio asset reference
-- `docs/status.md` — current state: systems present, content inventory, test baseline
-- `docs/Gaslight_&_Grimoire_design.md` — the original design bible (vision, world, mechanics, narrative intent)
+- `docs/engine-reference.md` — per-module engine API (signatures + behavior): dice, conditions, choice resolution, encounters, case progression, hints, saves/migrations, audio
+- `docs/content-authoring.md` — case/vignette JSON schemas, Condition/Effect catalogs, authoring rules, validation, audio asset reference
+- `docs/status.md` — current state: systems present, content inventory (cases, scenes, clues, NPCs), test baseline
+- `docs/Gaslight_&_Grimoire_design.md` — the original design bible (vision, world, mechanics, narrative intent — archetypes, factions, faculties)
 
 ## Project memory — read at session start, update at session end
 
@@ -36,82 +37,28 @@ Two strict domains — never mix them:
 - `public/content/` — narrative data as JSON (cases, clues, NPCs, scenes). Vite serves `public/` at the site root, so the engine fetches these at runtime as `/content/...`.
 - `src/engine/` — game logic (pure functions where possible)
 
-Components live in `src/components/[Name]/` with `index.ts` barrel exports. State is managed by a single Zustand store composed of six Immer-powered slices.
-
-## Component Hierarchy
-
-```
-<ErrorBoundary>
-  <App>
-  └── <AccessibilityProvider>       # Provides a11y settings: reducedMotion, fontSize, highContrast
-      ├── <TitleScreen />
-      ├── <LoadGameScreen />        # Save list with delete buttons
-      ├── <CharacterCreation />     # Archetype selection + faculty point allocation
-      ├── <CaseSelection />         # Case browser: main cases + unlocked vignettes
-      ├── <CaseCompletion />        # End-of-case screen (faculty bonus, vignette unlocks) — App renders on the `case-complete` screen
-      └── (game screen — a <div>, not a component; App switches on `screen` state)
-          ├── <HeaderBar />         # Ability button, hint button, overlay toggles
-          ├── <AmbientAudio />      # Non-rendering: ambient track from scene.ambientAudio
-          ├── <GameContent>         # NarrativePanel + StatusBar + one body: ChoicePanel | EncounterPanel | Case-Complete btn — OR swaps entirely to <InvestigationHalted /> on a knockout (composure/vitality = 0)
-          │   ├── <NarrativePanel />  # Scene text, illustration, dice roll overlay, clue discovery card, active clue prompts
-          │   ├── <ChoicePanel />     # Choice cards rendered from current SceneNode.choices
-          │   ├── <EncounterPanel />  # Multi-round encounter UI (when scene has encounter field)
-          │   ├── <InvestigationHalted /> # Full-screen swap when composure or vitality hits 0 (haltScenes)
-          │   └── <StatusBar />       # Vitality meter, composure meter
-          └── <Suspense>            # Overlays are React.lazy-loaded (F-043):
-              ├── <EvidenceBoard />   # Overlay: clue cards, connection threads, deduction button
-              ├── <CaseJournal />     # Overlay: clues gathered, deductions, key events
-              ├── <NPCGallery />      # Overlay
-              └── <SettingsPanel />   # Overlay
-```
+Components live in `src/components/[Name]/` with `index.ts` barrel exports. State is managed by a single Zustand store composed of six Immer-powered slices. The full component hierarchy, slice tables, and engine data flow are in `docs/architecture.md`; per-module engine behavior is in `docs/engine-reference.md`.
 
 ## Directory Layout
 
 ```
 public/content/                 # served at runtime as /content/
-  manifest.json                 # CaseManifest: lists all cases and vignettes with metadata
-  shared/
-    breakdown.json              # Shared breakdown scene (composure=0), injected into all cases
-    incapacitation.json         # Shared incapacitation scene (vitality=0), injected into all cases
-  cases/[case-name]/          # Main cases (3-act structure)
-    meta.json                 # CaseMeta: id, title, synopsis, acts, firstScene, facultyDistribution
-    act1.json, act2.json, act3.json  # { "scenes": SceneNode[] } per act (wrapped, not a bare array)
-    clues.json                # { "clues": Clue[] }
-    npcs.json                 # { "npcs": NPCState[] }
-    variants.json             # { "variants": SceneNode[] } triggered by cross-case flags
-    deductions.json           # { "deductions": KeyDeduction[] } recipes (optional) — stable ids for hasDeduction gates
-  side-cases/[vignette-name]/ # Side vignettes (2-act structure)
-    meta.json                 # VignetteMeta (optional triggerCondition)
-    scenes.json ({ "scenes": … }), clues.json, npcs.json
-
+  manifest.json                 # CaseManifest: all cases and vignettes with metadata
+  shared/                       # breakdown/incapacitation halt scenes, injected into all cases
+  cases/[case-name]/            # Main cases (3-act): meta.json, act1-3.json, clues.json,
+                                #   npcs.json, variants.json, deductions.json
+  side-cases/[vignette-name]/   # Side vignettes (2-act): meta.json, scenes.json, clues.json, npcs.json
+                                # (JSON schemas + wrapping rules: docs/content-authoring.md)
 src/
   types/index.ts              # ALL type definitions live here
-  utils/
-    gameState.ts              # snapshotGameState — shared GameState builder (used by store + engine)
-  store/
-    index.ts                  # useStore + selector hooks + action hooks
-    types.ts                  # GameStore = intersection of all slices
-    slices/                   # Six domain slices (see below)
-  engine/
-    narrativeEngine.ts        # Barrel: re-exports contentLoader/conditions/choiceResolution/encounters (import path unchanged)
-    contentLoader.ts          # fetchManifest, loadCase, loadVignette, validateContent (+ cached loadSharedScenes/mergeSharedScenes, fetchJson, indexById)
-    conditions.ts             # evaluateConditions, evaluateCondition, resolveScene, canDiscoverClue
-    choiceResolution.ts       # computeChoiceResult, processChoice
-    encounters.ts             # startEncounter, processEncounterChoice, getEncounterChoices
-    advantage.ts              # computeAdvantage — single source for check advantage (clue OR lore+Veil Sight); used by checks, encounters, ChoiceCard badge
-    flags.ts                  # Single source of truth for ability/progression flag string keys (FLAGS, abilityAutoSucceedFlag, CASE_LOAD_CLEARED_FLAGS)
-    constants.ts              # FACTIONS, OUTCOME_TIERS, assertNever exhaustiveness guard
-    contentValidation.ts      # Shared content validator (validateBundle) — used by validateContent + the CLI
-    engineActions.ts          # EngineActions interface — the store-facing seam that keeps engine free of store imports
-    diceEngine.ts             # d20 rolls, advantage/disadvantage, modifier calc, outcome tiers
-    buildDeduction.ts         # Pure deduction builder + key-deduction recipe matcher (matchDeduction/buildDeductionFromRecipe)
-    caseProgression.ts        # End-of-case logic, faculty bonuses, vignette unlocks
-    haltScenes.ts             # Classifies the shared halt scenes (breakdown/incapacitation); HALT_SCENE_IDS, isHaltScene, haltReason (App uses these for the InvestigationHalted screen)
-    hintEngine.ts             # Stateful hint system (3 escalating levels)
-    saveManager.ts            # localStorage persistence with versioned migrations, multi-save support
-    audioManager.ts           # Howler.js SFX management (lazy-cached Howl instances)
-    cluePrompts.ts            # Atmospheric prompt text generator for exploration/check clue discovery
-    effectMessages.ts         # Pure effect-to-feedback-message generator (atmospheric + mechanical annotation)
+  utils/gameState.ts          # snapshotGameState — shared GameState builder (store + engine)
+  store/                      # useStore + selector/action hooks; six slices in store/slices/
+  engine/                     # game-logic modules — see docs/engine-reference.md for each:
+                              #   narrativeEngine (barrel), contentLoader, conditions,
+                              #   choiceResolution, encounters, advantage, flags, constants,
+                              #   contentValidation, engineActions, diceEngine, buildDeduction,
+                              #   caseProgression, haltScenes, hintEngine, saveManager,
+                              #   audioManager, cluePrompts, effectMessages
   components/                 # React components (each in own directory)
   data/archetypes.ts          # Archetype definitions, faculty constants
 
@@ -119,9 +66,7 @@ scripts/
   validateCase.mjs            # Content-validation entry point (vite-node shim) — run after editing case JSON
   validateCase.ts             # The real validator; imports shared src/engine/contentValidation (edit logic HERE, not the .mjs shim)
 
-.github/workflows/
-  deploy.yml                  # CI gate: lint + validator + tests + build-compiles check (push/PR to main). Deploy is Cloudflare-side (wrangler.jsonc)
-  security.yml                # OWASP Dependency-Check + npm audit (weekly + on PR)
+.github/workflows/            # deploy.yml (CI gate), security.yml (dependency auditing)
 ```
 
 ## Commands
@@ -138,16 +83,8 @@ node scripts/validateCase.mjs  # Validate case content JSON
 
 ## Store & State Management
 
-Single `useStore` (Zustand + Immer) composed from six slices:
-
-| Slice | State | Actions |
-|---|---|---|
-| `investigatorSlice` | `investigator` | `initInvestigator`, `updateFaculty`, `adjustComposure`, `adjustVitality`, `useAbility`, `resetAbility` |
-| `narrativeSlice` | `currentScene`, `currentCase`, `sceneHistory`, `visitedScenes`, `lastEffectMessages`, `lastCheckResult`, `encounterState`, `caseData` | `goToScene`, `setCheckResult`, `setEncounterState`, `loadAndStartCase`, `loadAndStartVignette`, `completeCase` |
-| `evidenceSlice` | `clues`, `deductions`, `connections` | `discoverClue`, `updateClueStatus`, `addDeduction`, `addConnection`, `clearConnections` |
-| `npcSlice` | `npcs` | `adjustDisposition`, `adjustSuspicion`, `setNpcMemoryFlag`, `removeNpc` |
-| `worldSlice` | `flags`, `factionReputation` | `setFlag`, `adjustReputation` |
-| `metaSlice` | `settings` | `updateSettings`, `saveGame`, `autoSave`, `loadGame` |
+Single `useStore` (Zustand + Immer) composed from six slices: `investigator`, `narrative`, `evidence`,
+`npc`, `world`, `meta` (state/action tables in `docs/architecture.md`).
 
 Rules:
 - Always use selector hooks (`useInvestigator`, `useClues`, `useCaseData`, etc.) — never subscribe to the full store.
@@ -158,87 +95,23 @@ Rules:
 - Immer is active — mutate draft state directly inside slice actions. No manual spreading.
 - `adjustDisposition` on a faction-aligned NPC automatically propagates `delta * 0.5` to faction reputation.
 
-## Key Types (src/types/index.ts)
-
-- `Faculty`: `reason | perception | nerve | vigor | influence | lore`
-- `Archetype`: `deductionist | occultist | operator | mesmerist`
-- `OutcomeTier`: `critical | success | partial | failure | fumble`
-- `ClueStatus`: `new | examined | connected | deduced | contested | spent`
-- `ClueType`: `physical | testimony | occult | deduction | redHerring`
-- `NpcSuspicionTier`: `normal (0-2) | evasive (3-5) | concealing (6-8) | hostile (9-10)`
-- `Condition` — gates scene access and choices (types: `hasClue`, `hasDeduction`, `hasFlag`, `facultyMin`, `archetypeIs`, `npcDisposition`, `npcSuspicion`, `factionReputation`, `npcMemoryFlag`)
-- `Effect` — mutates game state on scene entry (types: `composure`, `vitality`, `flag`, `disposition`, `suspicion`, `reputation`, `discoverClue`, `setMemoryFlag`)
-- `SceneNode` — atomic narrative unit with `choices`, `cluesAvailable`, `conditions`, `onEnter` effects, optional `variantOf`/`variantCondition`, optional `encounter`
-- `Choice` — may have `faculty`/`difficulty` for checks, `advantageIf` clue refs, `outcomes` per tier, `npcEffect`, encounter extensions (`worseAlternative`, `isEscapePath`, `encounterDamage`)
-
-## Engine Behaviour
-
-### Dice (diceEngine.ts)
-- `rollD20()` → [1, 20]
-- Modifier = `floor((facultyScore - 10) / 2)` + trained bonus (+1 if faculty matches archetype's primary faculty, 0 otherwise)
-- Outcome: nat 20 → critical, nat 1 → fumble, total ≥ DC → success, total ≥ DC-3 → partial, else failure
-- Advantage: roll 2d20 take highest. Disadvantage: take lowest. Both cancel out.
-- Dynamic difficulty: `choice.dynamicDifficulty` scales DC based on a faculty score threshold.
-- Trained bonus: `getTrainedBonus(faculty, archetype)` returns +1 when the check faculty is the archetype's primary (deductionist→reason, occultist→lore, operator→vigor, mesmerist→influence).
-
-### Narrative (narrativeEngine.ts)
-- `loadCase` / `loadVignette` — fetch JSON, index by ID into `Record<string, T>`.
-- `evaluateConditions` — pure AND logic over `Condition[]` against `GameState`.
-- `resolveScene` — returns variant scene if its condition is met, otherwise base scene.
-- `applyEffects` — store action in `worldSlice` that applies `Effect[]`. Called by `goToScene` on scene entry, gated so a scene's `onEnter` fires exactly once per playthrough (see `visitedScenes` below). The gate keys on the **resolved** scene identity (base id or the variant id `resolveScene` picks), so a variant's distinct `onEnter` fires once when its condition first becomes true, without re-firing the same resolved scene (F-118).
-- `processChoice` — performs faculty check (using `resolveDC` for dynamic difficulty), applies NPC effects, navigates to next scene. A non-check choice with no `success`/`critical` outcome throws (F-022). Checks archetype ability auto-succeed flags (`ability-auto-succeed-reason`, `ability-auto-succeed-vigor`, `ability-auto-succeed-influence`) before rolling — if set, returns `critical` tier without a dice roll **and consumes the flag** via `actions.setFlag(flag, false)` so the once-per-case ability fires exactly once (F-101).
-- `resolveCheckOutcome(choice, state, label?)` — the shared, pure check-resolution unit that both `computeChoiceResult` and `processEncounterChoice` call, so the two check paths cannot drift (F-107). Returns `{ result: ChoiceResult, consumedAbilityFlag? }`; when the auto-succeed ability fired it names the flag the impure caller must clear. Handles auto-succeed, dynamic-difficulty DC, advantage, the roll, and the non-check fallback.
-- `computeChoiceResult` — pure function; a thin wrapper over `resolveCheckOutcome` (returns just its `result`). Computes the choice outcome (ability auto-succeed, dice check, advantage, DC resolution) without store access. Returns `ChoiceResult`. Used by `processChoice` internally; can be called directly for testing or preview.
-- `canDiscoverClue` — pure gate check for `ClueDiscovery` requirements.
-- `validateContent` — checks for broken scene-graph edges and missing clue references.
-
-### Encounters (narrativeEngine.ts + EncounterPanel)
-- Triggered by `SceneNode.encounter` field — `GameContent` renders `EncounterPanel` instead of `ChoicePanel`.
-- `startEncounter` — for supernatural encounters, performs Nerve/Lore reaction check at DC 12. Failure: composure damage + worseAlternative replacement.
-- `processEncounterChoice` — escape paths (`isEscapePath`) are terminal (navigate to their outcome + complete the encounter immediately, no damage). Otherwise resolves the check through the **shared `resolveCheckOutcome`** (same unit as `processChoice`, F-107) — so encounters honour the archetype auto-succeed ability (consumed on use, F-101), dynamic-difficulty DCs, and advantage — then applies damage. Supernatural = dual-axis (composure + vitality). Mundane = single axis.
-- `getEncounterChoices` — filters choices by conditions, always includes escape paths. (Advantage is applied on the roll in `processEncounterChoice`, not annotated here.)
-
-### Case Progression (caseProgression.ts)
-- `completeCase` — grants +1 faculty bonus from the typed `investigator.lastCriticalFaculty` field (F-013), checks vignette unlocks, auto-saves.
-- Vignette unlocks triggered by: faction reputation thresholds, NPC disposition thresholds, or required (persisted) flags. `checkVignetteUnlocks` returns **every** satisfied vignette (F-057), so simultaneously-earned unlocks all fire. See `VIGNETTE_CONDITIONS` in `caseProgression.ts` for the live registry.
-
-### Hints (hintEngine.ts)
-- Stateful singleton tracking board visits, connection attempts, scene dwell time.
-- `trackActivity()` called from `NarrativePanel` (scene changes), `EvidenceBoard` (board visits, connection attempts).
-- Triggers after 3+ board visits with no connections OR 5+ minutes on a scene.
-- 3 escalating levels: narrative nudge → specific clue suggestion → direct reveal.
-- Level 3 gated behind Level 2 being shown first. Respects `hintsEnabled` setting.
-
-### Save System (saveManager.ts)
-- localStorage with `gg_save_` prefix. Index at `gg_save_index`.
-- `SaveFile` wraps `GameState` with `version` + `timestamp`.
-- Migration pipeline: v0→v1 adds `factionReputation`; v1→v2 backfills `sceneHistory` + `connections`; v2→v3 backfills `visitedScenes` (from `sceneHistory + currentScene`, so reloads don't re-fire `onEnter` — F-006); v3→v4 defaults `encounterState` to null (so a reload mid-encounter resumes rather than re-rolling the reaction check — F-105). Current version: 4 (`CURRENT_SAVE_VERSION`).
-- `saveGame` generates unique IDs (`save-{timestamp}`), capped at 10 manual saves. Wrapped in try/catch — a `localStorage` throw returns `{ ok: false }` rather than an unhandled rejection, so the UI surfaces an error toast instead of a false "Game saved" (F-103).
-- `autoSave` writes to the `'autosave'` slot, triggered by `goToScene` (scene frequency) or ChoicePanel (choice frequency) based on `autoSaveFrequency` setting. In-progress `encounterState` (round + reaction result) is part of the snapshot, so an autosave on encounter-scene entry resumes correctly on reload (F-105).
-- `load` guards the deserialised blob: a non-object envelope or a state failing the `isValidGameState` shape check (missing `investigator`/`clues`/… or wrong types) returns `null` rather than corrupting the store (F-036).
-- `loadGame` restores all `GameState` fields and re-fetches `caseData` via `loadCase(currentCase)`.
-
-### Audio (audioManager.ts)
-- Howler.js with lazy-cached Howl instances per SFX event.
-- SFX events: `dice-roll`, `clue-{type}`, `composure-decrease`, `vitality-decrease`, `scene-transition`.
-- Triggered from store slices (investigator, narrative, evidence).
+All type definitions live in `src/types/index.ts`; the `Condition`/`Effect` catalogs and content-facing
+type shapes are documented in `docs/content-authoring.md`.
 
 ## Content Authoring Rules
 
+The full authoring ruleset (gating, deductions, red herrings, key-deduction recipes, alternate paths)
+lives in `docs/content-authoring.md` — read it before writing content. Non-negotiables:
+
 - `Condition` and `Effect` are the ONLY mechanism for gating and mutating game state from content JSON. No ad-hoc logic in scene handlers.
-- Deductions are always derived from linked clue IDs — never hardcode deduction outcomes.
-- If any connected clue is a `redHerring`, the deduction's `isRedHerring` must be true.
-- **Key deductions** (`deductions.json`): a `KeyDeduction` recipe (stable `id` + `requiredClues` set) gives a conclusion a gate-able identity. Connecting a superset of `requiredClues` + passing the Reason check stores the deduction under the authored `id` (`matchDeduction` — subset semantics), so `requiresDeduction`/`hasDeduction` gates resolve. Gate the *true/best* ending behind one, but keep the case completable without it. Recipe clue refs + gate targets are validator-enforced.
-- No single Faculty should gate critical story progress — always provide alternate paths.
-- Choices must have meaningful consequences; avoid cosmetic-only branching.
 - Run `node scripts/validateCase.mjs` after editing case files to catch broken references. Validates all cases by default, or pass a specific case path.
 - Narrative tone: measured, atmospheric, never campy.
 
-## Tailwind Theme
+## Current Content
 
-Custom colour palette under `gaslight-*`:
-- `amber` (#D4A853), `crimson` (#8B1A1A), `slate` (#2C3E50), `fog` (#B8C5D0), `ink` (#1A1A2E), `gold` (#C9A84C), `brass` (#B5860D)
-- Fonts: serif (Georgia), mono (Courier New)
+7 cases (3 main, 4 side vignettes), all 4 factions active. The live inventory — per-case scene/clue/NPC
+counts, endings, unlock conditions, totals — is in `docs/status.md`; verify counts with
+`node scripts/validateCase.mjs`, don't quote from memory.
 
 ## Testing
 
@@ -273,47 +146,10 @@ Custom colour palette under `gaslight-*`:
   `--squash`. Squashing collapses a PR's per-commit history (and its TDD RED→GREEN steps) into one commit,
   which this repo's memory spine relies on for traceability.
 
-## Character System
-
-Four archetypes, each with +3/+1 faculty bonuses and a once-per-case ability:
-- Deductionist: +3 Reason, +1 Perception. Ability: Elementary (auto-succeed Reason check).
-- Occultist: +3 Lore, +1 Perception. Ability: Veil Sight (reveal supernatural elements).
-- Operator: +3 Vigor, +1 Nerve. Ability: Street Survivor (auto-succeed Vigor check).
-- Mesmerist: +3 Influence, +1 Nerve. Ability: Silver Tongue (auto-succeed Influence check).
-
-Base faculty score: 8. Bonus points to allocate: 12. Composure and Vitality: 0–10 (start at 10).
-
-## Current Content
-
-### Main Cases (3-act structure)
-- **"The Whitechapel Cipher"** — 67 scenes, 14 clues, 7 NPCs, 6 variants, 4 endings. Cipher murders in Whitechapel, conspiracy reaching Scotland Yard. Court of Smoke underworld path, archetype-exclusive scenes.
-- **"The Mayfair Séance"** — 50 scenes, 13 clues, 7 NPCs, 6 variants, 4 endings. Society séance turns deadly, fraud meets genuine supernatural. Court of Smoke ritual supplier path.
-- **"The Lamplighter's Wake"** — 44 scenes, 13 clues, 7 NPCs, 3 variants, 4 endings. Dead Lamplighter agent, locked room, Gasworks Veil fragment trafficking. Court of Smoke as primary antagonist.
-
-### Side Cases (vignettes, 2-act structure)
-- **"A Matter of Shadows"** — 13 scenes, 5 clues, 3 NPCs, 3 endings. Missing Lamplighter courier in Southwark. Unlocks at Lamplighters rep ≥ 2.
-- **"The Rationalist's Dilemma"** — 10 scenes, 5 clues, 2 NPCs, 3 endings. Scientist detects the Veil electromagnetically; Circle wants it buried. Unlocks at Rationalists Circle rep ≥ 2.
-- **"The Debt of Smoke"** — 9 scenes, 4 clues, 2 NPCs, 3 endings. Court of Smoke contact asks for help with a stolen Veil fragment. Unlocks via the persisted `wc-court-deal-made` flag (set by the Whitechapel Court-of-Smoke ending).
-- **"The Unfinished Case"** — 8 scenes, 4 clues, 2 NPCs, 3 endings. Cold case: the original cipher maker was murdered before the Whitechapel events. Unlocks after completing The Whitechapel Cipher.
-
-### Content Totals
-- 201 scenes, 58 clues, 30 NPCs across 7 cases (scene count per `node scripts/validateCase.mjs` — base + variants, **excl.** the injected shared scenes; 215 at runtime once the 14 injected shared scenes — breakdown + incapacitation × 7 cases — are counted)
-- All 4 factions active: Rationalists Circle, Hermetic Order of the Grey Dawn, Lamplighters, Court of Smoke
-- Archetype-exclusive scenes in all 3 main cases (Deductionist, Occultist, Operator, Mesmerist)
-- ~1.77 choices per scene across all content (2.14 among choice-bearing scenes, i.e. excluding terminal endings and encounter scenes)
-
 ## Known Bugs & Gaps
 
 **`docs/status.md` + `docs/PROJECT_STATE.md` are the live source of truth** for current state and the
-open audit backlog — consult them, not this section, for what's outstanding. (Run `npm run test:run`
-for the live test baseline.) Phases A–E are complete; the original-build gaps (active clue discovery,
-NPC dialogue, recovery mechanics, persistent evidence board, Veil Sight, consequence feedback, content
-depth, faction clamping, CI validation) are all fixed. What remains:
-
-- **Media assets** — the audio system is fully coded and 9 SFX have shipped, but ambient loops and
-  illustrations are still pending (illustrations parked at lowest priority). See PROJECT_STATE milestone M.
-- **2026-07 repo-audit backlog** — see the prioritised issue list in `docs/PROJECT_STATE.md` and
-  `docs/audits/ULTRACODE_FULL_REPO_ANALYSIS.md` for any remaining P2/P3 items.
+open audit backlog — consult them, not this file. (Run `npm run test:run` for the live test baseline.)
 
 ## Architectural Warnings
 
@@ -327,13 +163,3 @@ Things to be aware of when making changes:
 - **`Object.keys(data.scenes)[0]` is the fallback for first scene** — In `loadAndStartCase`. Used only when `meta.json` lacks a `firstScene` field. All cases now have `firstScene` set explicitly.
 - **9 SFX ship; ambient loops & illustrations pending** — The 9 SFX `.mp3`s live in `public/audio/sfx/` (git-tracked). Howler silently handles the still-missing ambient loops and illustrations. SFX is triggered via a store subscription in `src/store/audioSubscription.ts` (initialized in `main.tsx`), not from slice actions.
 - **`Date.now()` and `Math.random()` used directly** — In `diceEngine.rollD20()`, `hintEngine`, `metaSlice.saveGame` (save ID), `buildDeduction`. Not injectable. Tests work around this. (`saveManager` uses neither `Date.now()` nor `Math.random()`; it stamps a save's `timestamp` with `new Date().toISOString()`.)
-
-## Implementation Roadmap
-
-The project was built in phases A–E, all complete. Summary:
-
-- **Phase A (Foundation)**: ✅ COMPLETE — Fixed loadGame, deduped snapshots, wired hints, fixed abilities, added validation, added firstScene
-- **Phase B (Core Refactoring)**: ✅ COMPLETE — Extracted pure computeChoiceResult, moved buildDeduction to engine, audio subscription, consolidated CheckResult types, runtime content validation with tier completeness
-- **Phase C (Gap Filling)**: ✅ COMPLETE — ClueDiscoveryCard, save button, faction display, error display, case completion screen
-- **Phase D (Integration)**: ✅ COMPLETE — Encounter UI, stale state cleanup, remove dead code
-- **Phase E (Game Design)**: ✅ COMPLETE — ~~Active clue discovery~~ ✅, ~~consequence feedback~~ ✅, ~~Veil Sight~~ ✅, ~~recovery mechanics~~ ✅, ~~persistent evidence board~~ ✅, ~~faction clamping~~ ✅, ~~CI validation~~ ✅, ~~NPC dialogue~~ ✅, ~~scene history~~ ✅, ~~testing expansion~~ ✅, ~~content depth~~ ✅. Remaining: audio/visual assets. See `docs/status.md` for current state.

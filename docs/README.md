@@ -25,8 +25,8 @@ deployed as a Cloudflare static-assets Worker at
 | [RUN_LOG.md](./RUN_LOG.md) | You want the prepend-only history of working sessions (what happened, when; newest on top). |
 | [DECISIONS/](./DECISIONS/) | You want the *why* behind non-trivial calls — Architecture Decision Records. |
 
-For the working agreement (architecture rules, store conventions, content
-authoring rules, and known gaps), see [../CLAUDE.md](../CLAUDE.md).
+For the working agreement (the two-domain rule, store conventions, commands,
+CI/CD, and architectural warnings), see [../CLAUDE.md](../CLAUDE.md).
 
 ## Commands
 
