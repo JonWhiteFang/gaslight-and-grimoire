@@ -26,7 +26,8 @@ deployed as a Cloudflare static-assets Worker at
 | [DECISIONS/](./DECISIONS/) | You want the *why* behind non-trivial calls — Architecture Decision Records. |
 
 For the working agreement (the two-domain rule, store conventions, commands,
-CI/CD, and architectural warnings), see [../CLAUDE.md](../CLAUDE.md).
+CI/CD, architectural warnings, and the Codex adversarial-review gates), see
+[../CLAUDE.md](../CLAUDE.md).
 
 ## Commands
 

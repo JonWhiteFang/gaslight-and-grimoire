@@ -163,3 +163,47 @@ Things to be aware of when making changes:
 - **`Object.keys(data.scenes)[0]` is the fallback for first scene** — In `loadAndStartCase`. Used only when `meta.json` lacks a `firstScene` field. All cases now have `firstScene` set explicitly.
 - **9 SFX ship; ambient loops & illustrations pending** — The 9 SFX `.mp3`s live in `public/audio/sfx/` (git-tracked). Howler silently handles the still-missing ambient loops and illustrations. SFX is triggered via a store subscription in `src/store/audioSubscription.ts` (initialized in `main.tsx`), not from slice actions.
 - **`Date.now()` and `Math.random()` used directly** — In `diceEngine.rollD20()`, `hintEngine`, `metaSlice.saveGame` (save ID), `buildDeduction`. Not injectable. Tests work around this. (`saveManager` uses neither `Date.now()` nor `Math.random()`; it stamps a save's `timestamp` with `new Date().toISOString()`.)
+
+## Adversarial review with Codex (plans and code)
+
+Codex (via the codex MCP tool) is this project's adversarial reviewer. **Every non-trivial task passes
+both gates** — the gates attach to the *work*, not to whether a plan was formally declared:
+
+**Gate 1 — plans.** Every non-trivial task gets a plan, and the plan is reviewed **before any
+mutation** (file edit, commit, config change). This applies whether or not plan mode was used — a
+"direct edit" of non-trivial scope still requires a stated plan and its review first. Submit the full
+plan to Codex and instruct it to attack: assume at least one flawed assumption, missed requirement,
+ordering hazard, or simpler alternative, and find it. Revise the plan for valid findings before
+starting work.
+
+**Gate 2 — code changes.** Before declaring any non-trivial implementation task complete, submit the
+**complete task diff against the starting base** — the recorded start commit, with untracked task
+files staged intent-to-add first (`git add -N`) so `git diff <start>` shows their full contents; it
+must cover committed *and* uncommitted work, and incremental commits during the task do not shrink
+the reviewed diff. Instruct Codex to perform an adversarial review: assume the code contains at least one
+bug, security issue, or missed edge case, and find it. Tell Codex what the Gate-1 plan was so it can
+also flag divergence from it. **Ordering vs. `/checkpoint`:** run Gate 2 after the task's edits and
+before checkpoint; the checkpoint's mechanical spine updates (STATE/RUN_LOG/ADR text, verified drift
+fixes) are exempt, but if checkpoint makes substantive non-spine changes, those need their own review.
+
+**Minimum context per call** (Codex has no memory between calls — never assume it remembers a prior
+gate): the goal, the starting revision, the full plan or complete diff under review, the file paths
+touched, and the applicable constraints (relevant CLAUDE.md rules / ADRs). Omitting the file or
+constraint that would expose a defect voids the review — when in doubt, include it.
+
+Rules for both gates:
+
+- **Completion is blocked while accepted findings are unfixed.** Address all valid findings, then
+  re-submit for re-review. At most two review rounds per gate (initial + one re-review); after that,
+  anything still disputed, any accepted-but-unfixed finding, and any new valid defect from the
+  re-review goes to the user as an explicit open question — do not keep arguing with Codex, do not
+  silently pick a side, and do not declare the task complete until the user decides.
+- If you disagree with a finding, say so explicitly to the user and explain why rather than silently
+  ignoring it.
+- Codex runs in read-only sandbox mode for reviews. Never grant Codex write access for a review task.
+- "Non-trivial" means anything beyond a purely mechanical, semantics-preserving change (local typo
+  fixes, comment-only edits, verified no-op renames). Renames and config changes that can alter
+  behaviour are non-trivial. When unsure, get the review.
+- If the codex MCP tool is unavailable or errors, do not fail the task — but the gate does not
+  silently vanish: tell the user immediately, and when presenting the plan or finished work, state
+  prominently which review gate was skipped and why.
