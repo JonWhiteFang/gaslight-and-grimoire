@@ -1,9 +1,11 @@
-# ADR-0005: Stable deduction identity via authored key-deduction recipes
+---
+status: "Enacted"
+date: "2026-07-08"
+deciders: "Jon White (jpawhite); design brainstorm this session"
+phase: "Audit remediation — P1 (#6)"
+---
 
-- **Status:** Enacted
-- **Date:** 2026-07-08
-- **Deciders:** Jon White (jpawhite); design brainstorm this session
-- **Phase / stage:** Audit remediation — P1 (#6)
+# ADR-0005: Stable deduction identity via authored key-deduction recipes
 
 ## Context
 

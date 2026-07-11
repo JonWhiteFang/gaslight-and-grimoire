@@ -1,9 +1,11 @@
-# ADR-0008: Clustered major-dependency migration; defer TypeScript 7; opt out of new lint rules
+---
+status: "Enacted"
+date: "2026-07-09"
+deciders: "Jon White (owner), Claude"
+phase: "Maintenance / dependency upkeep"
+---
 
-- **Status:** Enacted
-- **Date:** 2026-07-09
-- **Deciders:** Jon White (owner), Claude
-- **Phase / stage:** Maintenance / dependency upkeep
+# ADR-0008: Clustered major-dependency migration; defer TypeScript 7; opt out of new lint rules
 
 ## Context
 

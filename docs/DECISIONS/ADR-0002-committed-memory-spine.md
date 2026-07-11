@@ -1,9 +1,11 @@
-# ADR-0002: Adopt a committed, version-controlled project-memory spine
+---
+status: "Enacted (was Accepted 2026-07-07; the loop was exercised through its first real end-of-session `/checkpoint` on 2026-07-07)"
+date: "2026-07-07"
+deciders: "Project maintainer"
+phase: "Tooling / process"
+---
 
-- **Status:** Enacted (was Accepted 2026-07-07; the loop was exercised through its first real end-of-session `/checkpoint` on 2026-07-07)
-- **Date:** 2026-07-07
-- **Deciders:** Project maintainer
-- **Phase / stage:** Tooling / process
+# ADR-0002: Adopt a committed, version-controlled project-memory spine
 
 ## Context
 

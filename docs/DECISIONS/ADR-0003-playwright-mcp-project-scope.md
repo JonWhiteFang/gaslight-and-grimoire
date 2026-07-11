@@ -1,9 +1,11 @@
-# ADR-0003: Commit the Playwright MCP server at project scope
+---
+status: "Enacted"
+date: "2026-07-07"
+deciders: "Project maintainer"
+phase: "Tooling / process"
+---
 
-- **Status:** Enacted
-- **Date:** 2026-07-07
-- **Deciders:** Project maintainer
-- **Phase / stage:** Tooling / process
+# ADR-0003: Commit the Playwright MCP server at project scope
 
 ## Context
 

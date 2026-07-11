@@ -2,8 +2,8 @@
 name: checkpoint
 description: Use at the end of a working session, before finishing or committing, to persist project
   memory and keep the docs current — runs a fast doc-drift sweep (fixing stale status/version/link
-  drift), updates docs/PROJECT_STATE.md, appends docs/RUN_LOG.md, and adds an ADR if a non-trivial
-  decision was made.
+  drift), adds an ADR if a non-trivial decision was made, updates docs/PROJECT_STATE.md, and prepends
+  a docs/RUN_LOG.md entry.
 ---
 
 # Checkpoint — persist project memory
@@ -47,30 +47,35 @@ auto-memory.
    - **Auto-fix** unambiguous drift (stale status line, wrong version string, dead link, a duplicated
      fact that should be a pointer). Make the minimal edit.
    - **Never rewrite history.** `RUN_LOG.md` entries and ADR decisions are point-in-time records — do
-     not "correct" them. If an ADR's body states a fact later superseded, **annotate** it with a dated
-     pointer to what superseded it; don't edit the original decision.
+     not "correct" them. If an ADR's body states a fact later superseded, record the supersession in its
+     front matter (`status`, `superseded-by`) and in the `DECISIONS/README.md` index (with a dated note);
+     never edit the body itself.
    - **Surface, don't guess.** If a discrepancy needs a judgment call, list it in the report for the
      user instead of editing.
 
-   Record what you fixed (and what you flagged) in the RUN_LOG entry (Step 4).
+   Record what you fixed (and what you flagged) in the RUN_LOG entry (Step 5).
 
-3. **Update `docs/PROJECT_STATE.md`** (keep it ~one page):
+3. **Add an ADR** *only if* a non-trivial decision was made this session (a choice with alternatives and
+   consequences). Copy `docs/DECISIONS/ADR-TEMPLATE.md` to `docs/DECISIONS/ADR-NNNN-<slug>.md` (next
+   number in sequence), fill it in, and add its row to the `docs/DECISIONS/README.md` index. Steps 4
+   and 5 link to it.
+
+4. **Update `docs/PROJECT_STATE.md`** (keep it ~one page):
    - Bump `_Last updated:_` to today (with a one-line "what changed + what's next").
    - Move any item `[ ]`→`[~]`→`[x]` / `[!]` in the phase/milestone tracker.
    - Refresh **Current position** (especially the **Verification** line — cite the latest
-     `npm run test:run` result), **Next actions**, and **Open questions**.
+     `npm run test:run` result), **Next actions**, and **Open questions** (linking any ADR from Step 3).
 
-4. **Append an entry to `docs/RUN_LOG.md`** at the **top** (newest first), using the template in that
+5. **Prepend an entry to `docs/RUN_LOG.md`** at the **top** (newest first), using the template in that
    file: Goal, Did, Verified (commands/tests + results, or "n/a — no code yet"), Open/blockers, and
-   which memory artifacts you updated. Include the sweep's fixes/flags from Step 2.
-
-5. **Add an ADR** *only if* a non-trivial decision was made this session (a choice with alternatives and
-   consequences). Copy `docs/DECISIONS/ADR-TEMPLATE.md` to `docs/DECISIONS/ADR-NNNN-<slug>.md` (next
-   number in sequence), fill it in, wire it into `docs/DECISIONS/README.md`, and link it from
-   `PROJECT_STATE.md` → References and the RUN_LOG entry.
+   which memory artifacts you updated (linking any ADR from Step 3). Include the sweep's fixes/flags
+   from Step 2.
 
 6. **Report** a short summary of what you updated — including what the sweep fixed and anything it
-   flagged. Do **not** commit unless the user asks — surface the changed files so they can review.
+   flagged. Do **not** commit unless the user asks — surface the changed files so they can review. The
+   normal expectation is that spine updates ride along with the session's work in the same commit/PR
+   (that's what makes the memory *committed*); a separate memory-only commit is fine when the user
+   prefers it.
 
 ## Guardrails
 
@@ -81,5 +86,12 @@ auto-memory.
   spine tracks *progress and decisions*, then *points* at the authoritative docs.
 - The sweep is a **fast scan, not a full audit.** If it starts ballooning, stop and tell the user a full
   doc audit is warranted as its own task.
-- If nothing meaningful changed, it's fine to run a quick sweep, append a brief RUN_LOG entry, and skip
+- If nothing meaningful changed, it's fine to run a quick sweep, prepend a brief RUN_LOG entry, and skip
   the rest. Don't manufacture state changes.
+- A conservative variant: run the sweep **report-only** outside the spine — list drift findings instead
+  of fixing them. The default auto-fix policy is deliberate; downgrade only if the user asks for it.
+- **Checkpoint on the branch you worked on.** If the spine moved on `main` while you worked, rebase/merge
+  first so the checkpoint updates the latest STATE, not a stale one. `PROJECT_STATE.md` conflicts: take
+  the newer session's version wholesale, then re-check the trackers reflect both branches' work.
+  `RUN_LOG.md` conflicts: keep both entries, newest date first. ADR number races: the branch that merges
+  second renumbers (numbers are cheap and never reused).
