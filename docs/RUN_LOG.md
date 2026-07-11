@@ -19,6 +19,17 @@
 
 ---
 
+## 2026-07-11 (second session) — CLAUDE.md trimmed to a pointer map (ADR-0009, docs-only)
+
+- **Goal:** The user asked for a sweep of CLAUDE.md ("anything to cut or refine?"). A claude-md-improver audit scored it 78/100 (B): commands/warnings strong, but ~40% of 339 lines restated `docs/`-owned facts — the proven source of the recurring sweep drift (17 CLAUDE.md commits since 2026-07-07: 198→201 scenes, React 18→19, save v3→v4, …). User first chose report-only, then approved the **full trim**.
+- **Did (docs-only — no code, no `public/content/`):**
+  - **CLAUDE.md 339 → 165 lines.** Cut to pointers: Engine Behaviour (→ `engine-reference.md`), Component Hierarchy (→ `architecture.md`), Current Content (→ `status.md`, plus a "verify counts with the validator, don't quote from memory" instruction), Key Types (→ `types/index.ts` + `content-authoring.md`), store slice table (Rules bullets kept), Content Authoring Rules restatements (three non-negotiables kept). Deleted: completed A–E Implementation Roadmap, Character System, Tailwind Theme, the duplicate onEnter/visitedScenes explanation (Architectural Warnings copy kept). Kept in full: doc map (now stating one-authority-per-fact explicitly), memory-spine protocol, two-domain rule, Directory Layout (annotations condensed), Commands, Testing, CI/CD (incl. no-squash), all 8 Architectural Warnings.
+  - **[ADR-0009](DECISIONS/ADR-0009-claude-md-pointer-doctrine.md)** (Enacted, first ADR on the new MADR 4.x template): CLAUDE.md is a pointer map, not a mirror — reference detail lives only in its authoritative doc; the sweep's duplication check now treats restated `docs/` facts in CLAUDE.md as drift. Indexed in `DECISIONS/README.md`; linked from STATE → References.
+  - **Doc-drift sweep (fixes):** two references into removed sections repointed — PROJECT_STATE's tracker legend cited "the Implementation Roadmap in ../CLAUDE.md" (→ `status.md`); `docs/README.md`'s CLAUDE.md blurb listed "known gaps" (→ actual current contents). No anchor links into removed sections found; design bible's own "Character System"/"Roadmap" headings are its own content, untouched.
+- **Verified:** n/a — docs-only; no code/content changed. Grep-verified no dangling references to removed sections. Validator/tests still not runnable locally (`node_modules` absent); 2026-07-09 baseline (611 tests / 58 files, 201 scenes / 7 cases) stands.
+- **Open / blockers:** `npm ci` still needed before the next code session. Unchanged: #20 (media), content-ideas pick pending.
+- **Memory updated:** STATE ☑ · RUN_LOG ☑ · ADR ☑ ([ADR-0009](DECISIONS/ADR-0009-claude-md-pointer-doctrine.md))
+
 ## 2026-07-11 — Memory-spine sync to the updated portable guide (docs/config only)
 
 - **Goal:** The upstream `guides/portable-memory-spine.md` (JonWhiteFang/Documents, private repo — fetched via `gh api`) took two updates today: a hardening pass (commit `0cadf2b9`) and a MADR 4.x ADR-template modernization (`e77d4eed`). Bring this repo's spine implementation (adopted in [ADR-0002](DECISIONS/ADR-0002-committed-memory-spine.md)) in line.
