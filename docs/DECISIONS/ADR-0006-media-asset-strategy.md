@@ -1,9 +1,11 @@
-# ADR-0006: Media asset strategy — AI-generated audio, prompt-kit pipeline, illustrations parked
+---
+status: "Accepted"
+date: "2026-07-08"
+deciders: "Jon White (product), Claude (design/brainstorm)"
+phase: "Media assets (#20)"
+---
 
-- **Status:** Accepted
-- **Date:** 2026-07-08
-- **Deciders:** Jon White (product), Claude (design/brainstorm)
-- **Phase / stage:** Media assets (#20)
+# ADR-0006: Media asset strategy — AI-generated audio, prompt-kit pipeline, illustrations parked
 
 ## Context
 

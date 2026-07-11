@@ -1,6 +1,6 @@
 # Run Log — Gaslight & Grimoire
 
-> Append-only history of working sessions. Newest entry at the **top**. One entry per session.
+> Prepend-only history of working sessions. New entries at the **top**; never edit past entries. One entry per session.
 > Keep entries short — detail that's still *current* belongs in [PROJECT_STATE.md](PROJECT_STATE.md);
 > decisions belong in [DECISIONS/](DECISIONS/). This log is the *narrative of what happened, when*.
 
@@ -18,6 +18,17 @@
 ```
 
 ---
+
+## 2026-07-11 — Memory-spine sync to the updated portable guide (docs/config only)
+
+- **Goal:** The upstream `guides/portable-memory-spine.md` (JonWhiteFang/Documents, private repo — fetched via `gh api`) took two updates today: a hardening pass (commit `0cadf2b9`) and a MADR 4.x ADR-template modernization (`e77d4eed`). Bring this repo's spine implementation (adopted in [ADR-0002](DECISIONS/ADR-0002-committed-memory-spine.md)) in line.
+- **Did (14 files, docs/`.claude` config only — no code, no `public/content/`):**
+  - **MADR 4.x:** rewrote `DECISIONS/ADR-TEMPLATE.md` — YAML front matter (`status/date/deciders/phase/supersedes/superseded-by`) + new **Confirmation** section; script-converted all 8 existing ADRs' metadata bullets to the same front matter (values verbatim, YAML-parse-verified; decision bodies untouched); `DECISIONS/README.md` gained front-matter "How to add" steps + the precise immutability rule (decision content frozen; front matter/Confirmation/Links/index row mutable).
+  - **Hardening fixes:** "append-only" → "prepend-only" RUN_LOG terminology (this file's header, `docs/README.md`, `CLAUDE.md`); `/checkpoint` skill: step order → sweep → ADR → STATE → RUN_LOG → report, supersessions via front matter + index, commit-expectation added to step 6, guardrails gained the report-only sweep variant + branch/multi-agent conflict protocol. Hook + settings already matched the guide — unchanged.
+  - **Doc-drift sweep:** clean — no other doc restates the spine mechanics; all links in changed files resolve. Deliberate leave-alone: ADR-0002's body says "append-only" (frozen point-in-time record; not a superseding decision, so no front-matter/index annotation either).
+- **Verified:** n/a — no code/content changed; YAML front matter of all 8 ADRs parse-checked with PyYAML. Validator/tests not runnable (`node_modules` still absent); 2026-07-09 baseline (611 tests / 58 files, 201 scenes / 7 cases) stands.
+- **Open / blockers:** `npm ci` still needed before the next code session. Existing ADRs lack Confirmation sections (template-only addition; retrofitting would mean inventing content — new ADRs get them). #20 (media) unchanged; content-ideas pick still awaiting the user.
+- **Memory updated:** STATE ☑ · RUN_LOG ☑ · ADR ☐ (no new decision — this syncs the spine to the guide it already adopted via ADR-0002; the retrofit-vs-leave metadata call was cosmetic).
 
 ## 2026-07-10 — Content ideation: 10 new case/vignette concepts + Mythos-thread staging (docs-only)
 

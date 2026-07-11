@@ -22,7 +22,7 @@ across sessions and machines (unlike a tool's machine-local auto-memory). It doe
 architecture or scope rules in this file and `docs/` — it tracks *what's done and what's been decided*:
 
 - **`docs/PROJECT_STATE.md`** — the one-page live snapshot. **Read this first** when resuming work.
-- **`docs/RUN_LOG.md`** — append-only session history (what happened, when).
+- **`docs/RUN_LOG.md`** — prepend-only session history (what happened, when; newest on top).
 - **`docs/DECISIONS/`** — Architecture Decision Records (the *why* behind non-trivial calls).
 
 **Protocol.** Start of work: read `PROJECT_STATE.md` + the latest `RUN_LOG.md` entry. End of session:

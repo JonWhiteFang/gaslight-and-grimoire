@@ -35,7 +35,19 @@ guide is the *current rule* and the ADR is the *historical record* — check the
 
 1. **Pick the next number** (never reused, even if an ADR is later superseded).
 2. **Choose a short slug:** `ADR-NNNN-<short-slug>.md`, kept in this directory.
-3. **Copy the template** ([ADR-TEMPLATE.md](ADR-TEMPLATE.md)); fill in context, decision, status, date,
-   consequences. Add a **Relations** line if it supersedes or pairs with an existing ADR — and update the
-   other ADR's status to point back.
+3. **Copy the template** ([ADR-TEMPLATE.md](ADR-TEMPLATE.md)); fill in the YAML front matter and the
+   body. If it **supersedes** an existing ADR, set `supersedes:` in the new ADR's front matter and
+   `superseded-by:` (plus `status`) in the old one's. If it merely **pairs with** another ADR, link them
+   under **Links → Related ADRs** only — the supersession keys are for lifecycle replacement, nothing
+   else. (The index's *Relations* column summarises both kinds of link.)
 4. **Wire it into the index** (a row above) and link it from [../PROJECT_STATE.md](../PROJECT_STATE.md) → References.
+
+## The immutability rule, precisely
+
+An ADR's *decision content* (Context / Decision / Alternatives considered / Consequences) is written
+once and never edited. The mutable parts are the pointers around it: the YAML front matter (`status`,
+`superseded-by`), the **Confirmation** section (it names the *current* verification check, so update it
+when the check moves — a renamed test, a CI rule replacing a manual review), the **Links** section
+(append later commits/PRs/related ADRs; don't remove entries), and the ADR's row in this index. Add a
+dated annotation in the index when a change needs explaining. A single ADR can be **partly superseded**
+(e.g. one section replaced by a later ADR while the rest stands) — note that here, not in the body.

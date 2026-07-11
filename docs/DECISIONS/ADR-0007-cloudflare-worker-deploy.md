@@ -1,9 +1,11 @@
-# ADR-0007: Deploy via a Cloudflare static-assets Worker (retire GitHub Pages)
+---
+status: "Enacted"
+date: "2026-07-09"
+deciders: "Site owner (JonWhiteFang), Claude"
+phase: "Deployment (issue #47)"
+---
 
-- **Status:** Enacted
-- **Date:** 2026-07-09
-- **Deciders:** Site owner (JonWhiteFang), Claude
-- **Phase / stage:** Deployment (issue #47)
+# ADR-0007: Deploy via a Cloudflare static-assets Worker (retire GitHub Pages)
 
 ## Context
 

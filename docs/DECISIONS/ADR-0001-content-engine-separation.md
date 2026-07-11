@@ -1,9 +1,11 @@
-# ADR-0001: Content ↔ engine separation, single store, bounded state
+---
+status: "Enacted"
+date: "2026-07-07 (recorded retroactively; the decision predates the spine and is realised in the current codebase)"
+deciders: "Project maintainer"
+phase: "Foundation (Phases A–E)"
+---
 
-- **Status:** Enacted
-- **Date:** 2026-07-07 (recorded retroactively; the decision predates the spine and is realised in the current codebase)
-- **Deciders:** Project maintainer
-- **Phase / stage:** Foundation (Phases A–E)
+# ADR-0001: Content ↔ engine separation, single store, bounded state
 
 ## Context
 
