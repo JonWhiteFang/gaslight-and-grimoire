@@ -103,9 +103,16 @@ No `triggerCondition` — main cases are always available.
 
 (Weir and Featherstonehaugh are faction-aligned: disposition changes propagate ×0.5 to Court of Smoke / Rationalists Circle reputation — intended.)
 
-- [ ] **Step 5: Write clues.json (16 clues)**
+- [ ] **Step 5: Write clues.json (the 2 dinner clues only)**
 
-All clues: `"status": "new"`, `"isRevealed": false`. Table gives the remaining fields; write `description` prose from the content column (1–3 sentences each, evidence-register).
+**Clue placement schedule (Codex Gate-1 fix):** the validator errors on any `sceneSource` naming a scene that doesn't exist yet, so `clues.json` grows task-by-task, each clue landing in the same task that authors its source scene:
+
+- Task 1: `cc-clue-seating-chart`, `cc-clue-death-dates`
+- Task 2: `cc-clue-founding-wager`, `cc-clue-sash-weights`, `cc-clue-quack-tonic`, `cc-clue-founder-death`
+- Task 3: `cc-clue-sloane-debts`, `cc-clue-weir-instructions`
+- Task 4: `cc-clue-halloway-diary`, `cc-clue-corven-absence`, `cc-clue-1882-log`, `cc-clue-razored-page`, `cc-clue-ost-period`, `cc-clue-briggs-nights`, `cc-clue-dome-warmth`, `cc-clue-aster-purchase`
+
+The full 16-clue reference table below defines every field; each task's "add clues" step copies its rows from here. All clues: `"status": "new"`, `"isRevealed": false`. Write `description` prose from the content column (1–3 sentences each, evidence-register).
 
 | id | type | title | sceneSource | connectsTo | tags | content (for description) |
 |---|---|---|---|---|---|---|
@@ -126,7 +133,9 @@ All clues: `"status": "new"`, `"isRevealed": false`. Table gives the remaining f
 | `cc-clue-founder-death` | physical | The Founder's Obituary | `cc-act1-ras-library` | `["cc-clue-1882-log","cc-clue-ost-period"]` | `["pattern","1885"]` | Chair 1, dead "of age" in 1885 — the date fits as the pattern's first collection |
 | `cc-clue-aster-purchase` | physical | Aster's Purchase | `cc-act2-aster-papers` | `["cc-clue-founding-wager"]` | `["tontine","client"]` | Aster bought chair 11's debts the day before he hired you |
 
-- [ ] **Step 6: Write deductions.json (4 recipes)**
+- [ ] **Step 6: Write deductions.json as an empty wrapper**
+
+`deductions.json`: `{ "deductions": [] }` — the recipes below reference clues authored in Tasks 2–4 (`requiredClues` ids are validator-enforced against `clues.json`), so the four recipes are written in **Task 5 Step 0**, before any `requiresDeduction` gate is authored. This is the reference block Task 5 copies verbatim:
 
 ```json
 {
@@ -173,7 +182,7 @@ All clues: `"status": "new"`, `"isRevealed": false`. Table gives the remaining f
     {
       "id": "cc-act1-dinner",
       "act": 1,
-      "narrative": "<PROSE: the Aldebaran Society dinner at Pall Mall. Aster seats the player at dead chair 3. All nine survivors present and named in passing; three empty chairs dressed in black crepe; the founding wager toasted; the seating chart framed on the wall with three dates inked beneath. End on Aster's murmured request for a private word.>",
+      "narrative": "<PROSE: the Aldebaran Society dinner at Pall Mall. Aster seats the player at dead chair 3. All seven surviving members present and named in passing (chairs 4, 6, 7, 8, 9, 10, 11 — chairs 1 and 12 died years ago, chairs 2, 3, 5 are the recent dead); three empty chairs dressed in black crepe; the founding wager toasted; the seating chart framed on the wall with three dates inked beneath. End on Aster's murmured request for a private word.>",
       "ambientAudio": "ambient-club-dining",
       "cluesAvailable": [
         { "clueId": "cc-clue-seating-chart", "method": "automatic" },
@@ -192,7 +201,7 @@ All clues: `"status": "new"`, `"isRevealed": false`. Table gives the remaining f
 - [ ] **Step 8: Validate**
 
 Run: `node scripts/validateCase.mjs public/content/cases/the-comet-club`
-Expected: `✓ cases/the-comet-club — 1 scenes, 16 clues` with 0 errors; warnings for undiscoverable clues are expected at this stage.
+Expected: `✓ cases/the-comet-club — 1 scenes, 2 clues` with 0 errors.
 
 Also run: `node scripts/validateCase.mjs`
 Expected: `All 8 case(s) validated successfully.`
@@ -216,6 +225,7 @@ git commit -m "feat(content): scaffold The Comet Club — meta, manifest, clues,
 **Files:**
 - Modify: `public/content/cases/the-comet-club/act1.json` (dinner choices + 15 new scenes)
 - Modify: `public/content/cases/the-comet-club/act2.json` (seed `cc-act2-hub` so Act I edges resolve)
+- Modify: `public/content/cases/the-comet-club/clues.json` (add this task's 4 clues per the Task 1 placement schedule: `cc-clue-founding-wager`, `cc-clue-sash-weights`, `cc-clue-quack-tonic`, `cc-clue-founder-death` — rows copied from the Task 1 reference table)
 
 **Interfaces:**
 - Consumes: clue/npc ids from Task 1.
@@ -259,7 +269,7 @@ Every scene below goes in `act1.json` with `"act": 1`. Beats define the prose. C
 - [ ] **Step 3: Validate**
 
 Run: `node scripts/validateCase.mjs public/content/cases/the-comet-club`
-Expected: 0 errors; `17 scenes, 16 clues`. Warnings for still-undiscoverable Act II/III clues remain.
+Expected: 0 errors; `17 scenes, 6 clues`.
 
 - [ ] **Step 4: Commit**
 
@@ -274,6 +284,7 @@ git commit -m "feat(content): Comet Club Act I — the Eighth Chair (16 scenes)"
 
 **Files:**
 - Modify: `public/content/cases/the-comet-club/act2.json`
+- Modify: `public/content/cases/the-comet-club/clues.json` (add `cc-clue-sloane-debts`, `cc-clue-weir-instructions` from the Task 1 reference table)
 
 **Interfaces:**
 - Consumes: `cc-act2-hub`, clue ids, npc ids.
@@ -297,12 +308,18 @@ New scenes (all `"act": 2`):
 5. `cc-act2-moneylender-den` — beat: a Court of Smoke counting-house behind a chandler's (Court variant point, Task 6). Choices:
    - `cc-choice-lender-pay` "Buy the information outright." → `cc-act2-moneylender-deal`
    - `cc-choice-lender-lean` "Lean: the Yard would love this address." — nerve, DC 11; critical/success: `cc-act2-moneylender-deal`; partial/failure/fumble: `cc-act2-moneylender-price`
-6. `cc-act2-moneylender-deal` — beat: Sloane sold out with professional indifference. cluesAvailable: `[{ "clueId": "cc-clue-sloane-debts", "method": "dialogue" }]`. onEnter: `[{ "type": "reputation", "target": "Court of Smoke", "delta": 1 }]`. Choice → `cc-act2-hub`.
-7. `cc-act2-moneylender-price` — beat: the same information at a worse price — a favour owed. onEnter: `[{ "type": "reputation", "target": "Court of Smoke", "delta": -1 }, { "type": "composure", "delta": -1, "description": "You leave owing the Court something unnamed" }]`. cluesAvailable: `[{ "clueId": "cc-clue-sloane-debts", "method": "dialogue" }]`. Choice → `cc-act2-hub`.
+6. `cc-act2-moneylender-deal` — beat: Sloane sold out with professional indifference. cluesAvailable: `[{ "clueId": "cc-clue-sloane-debts", "method": "dialogue" }]`. onEnter: `[{ "type": "reputation", "target": "Court of Smoke", "delta": 2 }]` (spec requires a ±2 Court swing via the moneylender handling). Choice → `cc-act2-hub`.
+7. `cc-act2-moneylender-price` — beat: the same information at a worse price — a favour owed. onEnter: `[{ "type": "reputation", "target": "Court of Smoke", "delta": -2 }, { "type": "composure", "delta": -1, "description": "You leave owing the Court something unnamed" }]`. cluesAvailable: `[{ "clueId": "cc-clue-sloane-debts", "method": "dialogue" }]`. Choice → `cc-act2-hub`.
 8. `cc-act2-chair6-watch` — beat: a night on the square opposite Pemberton-Rhee's. Choice `cc-choice-watch-spot` "Hold the watch through the small hours." — perception, DC 11; critical/success: `cc-act2-rooftop-pursuit`; partial/failure/fumble: `cc-act2-weir-lost`.
-9. `cc-act2-rooftop-pursuit` — **mundane encounter**. `"encounter": { "isSupernatural": false, "rounds": [...] }`, 2 rounds:
-   - Round 1 choices: `cc-enc-roof-chase` "Take the parapet after him." vigor DC 11, damage `{ "vitalityDelta": -2 }`, all-tier outcomes → success-family `cc-act2-weir-caught` / failure-family `cc-act2-weir-lost`; `cc-enc-roof-cutoff` "Read the roofline — drop to the mews and cut him off." perception DC 10, damage `{ "vitalityDelta": -1 }`, success-family → `cc-act2-weir-caught`, failure-family → `cc-act2-weir-lost`; escape `cc-enc-roof-break` `isEscapePath: true` "Let him go — mark his line of flight." → `cc-act2-weir-lost`.
-   - Round 2 mirrors round 1 at DC 12 (the final leap). (Follow `wc-act2-cellar-ambush` in `the-whitechapel-cipher/act2.json` as the structural model.)
+9. `cc-act2-rooftop-pursuit` — **mundane encounter**. `"encounter": { "isSupernatural": false, "rounds": [...] }`, 2 rounds. (`wc-act2-cellar-ambush` in `the-whitechapel-cipher/act2.json` is the **JSON-structure model only** — it is one round; this encounter fully specifies both of its rounds below. Tier mapping shorthand used here and in the dome encounter: "→ A / B" means `critical` and `success` target A; `partial`, `failure`, `fumble` target B.)
+   - Round 1 (`"roundNumber": 1, "isSupernatural": false`):
+     - `cc-enc-roof-chase` "Take the parapet after him." — vigor, DC 11, `encounterDamage: { "vitalityDelta": -2 }` → `cc-act2-weir-caught` / `cc-act2-weir-lost`
+     - `cc-enc-roof-cutoff` "Read the roofline — drop to the mews and cut him off." — perception, DC 10, `encounterDamage: { "vitalityDelta": -1 }` → `cc-act2-weir-caught` / `cc-act2-weir-lost`
+     - `cc-enc-roof-break` "Let him go — mark his line of flight." — `isEscapePath: true`, no check, outcomes `{ "success": "cc-act2-weir-lost" }`
+   - Round 2 (`"roundNumber": 2, "isSupernatural": false`) — the final leap across the mews gap:
+     - `cc-enc-roof-leap` "Follow him across the gap." — vigor, DC 12, `encounterDamage: { "vitalityDelta": -2 }` → `cc-act2-weir-caught` / `cc-act2-weir-lost`
+     - `cc-enc-roof-anticipate` "He must come down at the corner stair — be there first." — perception, DC 12, `encounterDamage: { "vitalityDelta": -1 }` → `cc-act2-weir-caught` / `cc-act2-weir-lost`
+     - `cc-enc-roof-abandon` "Break off — no testimony is worth the drop." — `isEscapePath: true`, no check, outcomes `{ "success": "cc-act2-weir-lost" }`
 10. `cc-act2-weir-caught` — beat: Weir winded on the leads; he talks because the alternative is the drop. cluesAvailable: `[{ "clueId": "cc-clue-weir-instructions", "method": "dialogue" }]`. onEnter: `[{ "type": "suspicion", "target": "cc-npc-weir", "delta": 2 }]`. Choice → `cc-act2-hub`.
 11. `cc-act2-weir-lost` — beat: gone over the rooftops; but a man that practiced has a paymaster you already suspect (Mesmerist variant point, Task 6 — the variant re-delivers `cc-clue-weir-instructions`). Second route stays open: choice `cc-choice-lost-lender` "The Court brokered this hire. Go back to the counting-house and buy the rest." — `requiresClue: "cc-clue-sloane-debts"` → `cc-act2-weir-caught` (the Court sells you Weir's location; scene prose covers both arrivals — write it entry-agnostic: Weir cornered, talking). This is the second route that keeps `cc-clue-weir-instructions` off a single faculty.
 12. `cc-act2-millbank-vestry` — beat: Millbank confirms chair 2 dosed himself for years — "he feared poison so much he administered it". onEnter: `[{ "type": "flag", "target": "cc-tonic-dissolved", "value": true }]`. Choice → `cc-act2-hub`.
@@ -310,7 +327,7 @@ New scenes (all `"act": 2`):
 - [ ] **Step 2: Validate**
 
 Run: `node scripts/validateCase.mjs public/content/cases/the-comet-club`
-Expected: 0 errors; `29 scenes, 16 clues`.
+Expected: 0 errors; `29 scenes, 8 clues`.
 
 - [ ] **Step 3: Commit**
 
@@ -321,10 +338,11 @@ git commit -m "feat(content): Comet Club Act II loop 1 — the tontine layer"
 
 ---
 
-### Task 4: Act II loop 2 — the pattern layer + optional threads (17 scenes)
+### Task 4: Act II loop 2 — the pattern layer + optional threads (21 scenes)
 
 **Files:**
 - Modify: `public/content/cases/the-comet-club/act2.json`
+- Modify: `public/content/cases/the-comet-club/clues.json` (add the remaining 8 clues from the Task 1 reference table: `cc-clue-halloway-diary`, `cc-clue-corven-absence`, `cc-clue-1882-log`, `cc-clue-razored-page`, `cc-clue-ost-period`, `cc-clue-briggs-nights`, `cc-clue-dome-warmth`, `cc-clue-aster-purchase`)
 
 **Interfaces:**
 - Consumes: hub, flags `cc-halloway-trusts`, `cc-knows-log-gap` (Task 2).
@@ -336,6 +354,7 @@ Append to `cc-act2-hub` choices:
 - `cc-choice-hub-halloway` "Lady Halloway will receive you now." — `requiresFlag: "cc-halloway-trusts"` → `cc-act2-halloway-diary`
 - `cc-choice-hub-halloway-cold` "Earn Lady Halloway's door a second time." — influence, DC 11; critical/success: `cc-act2-halloway-diary` (scene prose written entry-agnostic); partial/failure/fumble: `cc-act2-hub` (alternate route to the diary for players who failed Act I)
 - `cc-choice-hub-corven` "Corven drinks at the Lamb by four o'clock." → `cc-act2-corven-rooms`
+- `cc-choice-hub-chair3` "Chair 3's study stands as he left it. Ask his widow's leave to examine it." → `cc-act2-chair3-study`
 - `cc-choice-hub-chairs` "Make the round of the surviving chairs." → `cc-act2-pemberton-rhee`
 - `cc-choice-hub-hampstead` "Go up to Hampstead and the observatory." → `cc-act2-hampstead-grounds`
 - `cc-choice-hub-solicitors` "Something about Aster's timing itches. Visit his solicitors." — `requiresClue: "cc-clue-founding-wager"` → `cc-act2-solicitors`
@@ -343,6 +362,7 @@ Append to `cc-act2-hub` choices:
 New scenes (all `"act": 2`; unlisted return edges → `cc-act2-hub`):
 
 1. `cc-act2-halloway-diary` — beat: she reads the diary aloud rather than surrender it. cluesAvailable: `[{ "clueId": "cc-clue-halloway-diary", "method": "dialogue" }]`. onEnter: `[{ "type": "flag", "target": "cc-halloway-trusts", "value": true }]` (idempotent for the cold-route entry).
+1b. `cc-act2-chair3-study` — **chair 3's death scene, and the non-Influence route to the diary** (Codex Gate-1 fix: the diary must not hang on Influence alone, and all three death scenes must be explorable). Beat: the study where chair 3's heart stopped at his desk; blackout curtains fitted for daytime sleep; the observation diary in the desk drawer, its last entries counting down in his own hand. Household staff admit you without a check — the widow's leave is a matter of a card, not a roll. cluesAvailable: `[{ "clueId": "cc-clue-halloway-diary", "method": "exploration" }]`. Choices → `cc-act2-hub`, and `cc-choice-study-condole` "Carry the diary's weight to Lady Halloway herself." → `cc-act2-halloway-diary`.
 2. `cc-act2-corven-rooms` — beat: Corven three brandies in. Choice `cc-choice-corven-steer` "Steer him to the night of the comet." — influence, DC 10 (lore alternative below); critical/success: `cc-act2-corven-confides`; partial/failure/fumble: `cc-act2-corven-maudlin`. Second choice `cc-choice-corven-lore` "Talk astronomy until the amateur in him surfaces." — lore, DC 10; same outcome mapping (two-faculty route).
 3. `cc-act2-corven-confides` — beat: the telegram that called him from the eyepiece; the shame and the luck of it. cluesAvailable: `[{ "clueId": "cc-clue-corven-absence", "method": "dialogue" }]`.
 4. `cc-act2-corven-maudlin` — beat: he weeps about being spared and cannot say why; try again another way. Choices → `cc-act2-corven-rooms` ("Order another and wait."), → `cc-act2-hub`.
@@ -358,21 +378,27 @@ New scenes (all `"act": 2`; unlisted return edges → `cc-act2-hub`):
 12. `cc-act2-ost-study` — spoke from hub: add hub choice `cc-choice-hub-ost` "Dr. Ost has stopped sleeping on certain nights. Ask him why." → this scene. Beat: Ost half-hoping to be debunked. Choice `cc-choice-ost-show` "Show him what you hold and ask for the figure." — `requiresFlag: "cc-knows-log-gap"` → `cc-act2-ost-confides`; alternate `cc-choice-ost-page` "Lay the razored page on his desk." — `requiresClue: "cc-clue-razored-page"` → `cc-act2-ost-confides`; else `cc-choice-ost-general` "Press him with nothing in hand." — influence, DC 13; critical/success: `cc-act2-ost-confides`; partial/failure/fumble: `cc-act2-ost-evasive`.
 13. `cc-act2-ost-confides` — beat: the recomputation; the period; the perihelion. cluesAvailable: `[{ "clueId": "cc-clue-ost-period", "method": "dialogue" }]`. onEnter: `[{ "type": "flag", "target": "cc-ost-confided", "value": true }]`.
 14. `cc-act2-ost-evasive` — beat: he retreats into method; come back armed. Choice → `cc-act2-hub`.
-15. `cc-act2-dome-night` — **supernatural encounter** (`"isSupernatural": true`), 2 rounds (model: any supernatural encounter in `the-lamplighters-wake`; opening Nerve/Lore reaction at DC 12 is engine-supplied):
-    - Round 1: `cc-enc-dome-hold` "Hold your ground and observe what works the dome." nerve DC 12, damage `{ "composureDelta": -2 }`, success-family → `cc-act2-dome-witnessed`, failure-family → `cc-act2-dome-fled`; `cc-enc-dome-name` "Recite the constellations — order the sky back into a map." lore DC 11, damage `{ "composureDelta": -1 }`, success-family → `cc-act2-dome-witnessed`, failure-family → `cc-act2-dome-fled`; escape `cc-enc-dome-out` `isEscapePath: true` "Get out onto the gantry and down." → `cc-act2-dome-fled` (Operator variant point, Task 6).
-    - Round 2 at DC 13: the refractor swings to bear on nothing visible.
+15. `cc-act2-dome-night` — **supernatural encounter** (`"isSupernatural": true`), 2 rounds; the engine supplies the opening Nerve/Lore reaction check at DC 12. Damage is **dual-axis** (composure + vitality) per the supernatural-encounter rule in `docs/content-authoring.md`.
+    - Round 1 (`"roundNumber": 1, "isSupernatural": true`):
+      - `cc-enc-dome-hold` "Hold your ground and observe what works the dome." — nerve, DC 12, `encounterDamage: { "composureDelta": -2, "vitalityDelta": -1 }` → `cc-act2-dome-witnessed` / `cc-act2-dome-fled`
+      - `cc-enc-dome-name` "Recite the constellations — order the sky back into a map." — lore, DC 11, `encounterDamage: { "composureDelta": -1, "vitalityDelta": -1 }` → `cc-act2-dome-witnessed` / `cc-act2-dome-fled`
+      - `cc-enc-dome-out` "Get out onto the gantry and down." — `isEscapePath: true`, no check, outcomes `{ "success": "cc-act2-dome-fled" }` (Operator variant point, Task 6)
+    - Round 2 (`"roundNumber": 2, "isSupernatural": true`) — the refractor swings to bear on nothing visible:
+      - `cc-enc-dome-stand` "Stand where it points and refuse to be moved." — nerve, DC 13, `encounterDamage: { "composureDelta": -2, "vitalityDelta": -1 }` → `cc-act2-dome-witnessed` / `cc-act2-dome-fled`
+      - `cc-enc-dome-chart` "Chart its bearing against Briggs's almanac dates." — lore, DC 13, `encounterDamage: { "composureDelta": -1, "vitalityDelta": -1 }` → `cc-act2-dome-witnessed` / `cc-act2-dome-fled`
+      - `cc-enc-dome-flee` "Take the stair three at a time and do not look up." — `isEscapePath: true`, no check, outcomes `{ "success": "cc-act2-dome-fled" }`
 16. `cc-act2-dome-witnessed` — beat: the great refractor warm as a kettle in an empty dome. cluesAvailable: `[{ "clueId": "cc-clue-dome-warmth", "method": "check", "requiresFaculty": { "faculty": "nerve", "minimum": 3 } }]`. onEnter: `[{ "type": "composure", "delta": -1, "description": "Metal should not hold heat it was never given" }]`. Choice → `cc-act2-hub`.
 17. `cc-act2-dome-fled` — beat: down the hill with the dome silent behind you. Choice → `cc-act2-hampstead-grounds` ("Return on the next marked night." — the encounter is repeatable), → `cc-act2-hub`.
 18. `cc-act2-solicitors` — beat: Gray's Inn; a clerk who can be charmed or a ledger that can be glimpsed. Choice `cc-choice-solicitor-charm` — influence, DC 12; critical/success: `cc-act2-aster-papers`; partial/failure/fumble: `cc-act2-solicitors-rebuffed`.
 19. `cc-act2-aster-papers` — beat: the assignment of chair 11's debts, dated the day before your engagement. cluesAvailable: `[{ "clueId": "cc-clue-aster-purchase", "method": "exploration" }]`. Choice → `cc-act2-hub`.
 20. `cc-act2-solicitors-rebuffed` — beat: professional discretion, impenetrable. Choice → `cc-act2-hub`.
 
-(Scenes 18–20 make loop 2 seventeen new scenes plus three from Task 3's count adjustments — final Act II tally after Task 5: 34.)
+(Loop 2 adds 21 scenes including `cc-act2-chair3-study` — final Act II tally after Task 5's midpoint: 35.)
 
 - [ ] **Step 2: Validate**
 
 Run: `node scripts/validateCase.mjs public/content/cases/the-comet-club`
-Expected: 0 errors; `49 scenes, 16 clues`.
+Expected: 0 errors; `50 scenes, 16 clues`.
 
 - [ ] **Step 3: Commit**
 
@@ -393,6 +419,10 @@ git commit -m "feat(content): Comet Club Act II loop 2 — the pattern layer"
 - Consumes: deduction ids (Task 1), flags from Tasks 2–4.
 - Produces: terminal flags `cc-case-complete`, `cc-club-dispersed`, `cc-took-the-eyepiece`, `mythos-period-computed`.
 
+- [ ] **Step 0: Write the four deduction recipes into deductions.json**
+
+Copy the four-recipe JSON block from Task 1 Step 6 verbatim into `deductions.json` (all 16 `requiredClues` ids now exist in `clues.json`). Run `node scripts/validateCase.mjs public/content/cases/the-comet-club` — 0 errors — before authoring any `requiresDeduction` gate below.
+
 - [ ] **Step 1: Add the midpoint and the summons to act2.json**
 
 - `cc-act2-midpoint` — hub spoke `cc-choice-hub-midpoint` "Lay the murder out end to end." — `requiresDeduction: "cc-deduction-one-true-murder"` → this scene. Beat: one death is bought; the others are not; the murderer is hiding inside something he does not understand. onEnter: `[{ "type": "flag", "target": "cc-midpoint-passed", "value": true }]`. Choice → `cc-act2-hub`.
@@ -408,7 +438,7 @@ All scenes `"act": 3`.
    - `cc-choice-eve-forced` "Go to Hampstead and force the question there, evidence or no." → `cc-act3-confront-forced`
 2. `cc-act3-confront-prepared` — beat: Sloane, the ledger, Weir's account (reference `cc-clue-weir-instructions` if held — write the prose to stand either way); he folds. Choice → `cc-act3-sloane-defence`.
 3. `cc-act3-confront-forced` — beat: accusation on instinct at the gathering's edge. Choice `cc-choice-forced-press` — influence, DC 13, `advantageIf: ["cc-clue-weir-instructions"]`; critical/success: `cc-act3-sloane-defence`; partial/failure/fumble: `cc-act3-sloane-slips`.
-4. `cc-act3-confront-collapse` — beat: the poisoner theory laid out — and dismantled by Millbank's testimony and Sloane's counter-thrusts; the club closes ranks (write the collapse harder if `cc-tonic-dissolved` is unset — the player never even checked). onEnter: `[{ "type": "flag", "target": "cc-murderer-walked", "value": true }, { "type": "composure", "delta": -2, "description": "The theory comes apart in your hands in front of the whole table" }]`. Choice → `cc-act3-ending-failure`.
+4. `cc-act3-confront-collapse` — beat: the poisoner theory laid out — and dismantled by Sloane's counter-thrusts and the members' own knowledge of chair 2's habits; the club closes ranks. (Prose must be **state-neutral** — scene narrative is a single string with no conditional mechanism, so write the dismantling without referencing whether the player heard Millbank's testimony.) onEnter: `[{ "type": "flag", "target": "cc-murderer-walked", "value": true }, { "type": "composure", "delta": -2, "description": "The theory comes apart in your hands in front of the whole table" }]`. Choice → `cc-act3-ending-failure`.
 5. `cc-act3-sloane-defence` — beat: "I stole from a fire." One dying man killed for money inside a pattern killing them all. onEnter: `[{ "type": "flag", "target": "cc-sloane-unmasked", "value": true }]`. Choices: `cc-choice-defence-law` "Hand him to the law before the gathering." → `cc-act3-gathering`; `cc-choice-defence-use` "Keep him close — a murderer who studied the pattern is still a student of it." → `cc-act3-gathering`, `npcEffect: { "npcId": "cc-npc-sloane", "dispositionDelta": 2, "suspicionDelta": 0 }`.
 6. `cc-act3-sloane-slips` — beat: by morning Sloane is on a packet to Ostend; the pattern keeps his chair. onEnter: `[{ "type": "flag", "target": "cc-sloane-fled", "value": true }]`. Choice → `cc-act3-gathering`.
 7. `cc-act3-gathering` — beat: the survivors at Hampstead; Aster's intent declared: he will take the eyepiece and see it back. Choice → `cc-act3-nexus`.
@@ -416,7 +446,7 @@ All scenes `"act": 3`.
    - `cc-choice-nexus-disperse` "End it: expose everything, disperse the club, seal the log." → `cc-act3-disperse`
    - `cc-choice-nexus-observe` "Let Aster look — and watch him as he does." — nerve, DC 12; critical/success: `cc-act3-aster-watched`; partial/failure/fumble: `cc-act3-aster-flinched`
    - `cc-choice-nexus-eyepiece` "Take the eyepiece yourself." → `cc-act3-eyepiece-approach`
-9. `cc-act3-disperse` — beat: the murder exposed (or its flight admitted), the wager dissolved, the log sealed with the Lamplighters. onEnter: `[{ "type": "flag", "target": "cc-club-dispersed", "value": true }, { "type": "reputation", "target": "Lamplighters", "delta": 1 }]`. Choices: `cc-choice-disperse-best` "Keep what you understand to yourself, and keep Ost's date." — `requiresDeduction: "cc-deduction-the-return"` → `cc-act3-ending-best`; `cc-choice-disperse-plain` "Let it be a murder story, and let the rest go unexplained." → `cc-act3-ending-compromised`.
+9. `cc-act3-disperse` — beat: the murder exposed (or its flight admitted), the wager dissolved, the log sealed with the Lamplighters. onEnter: `[{ "type": "flag", "target": "cc-club-dispersed", "value": true }, { "type": "reputation", "target": "Lamplighters", "delta": 1 }]`. Choices: `cc-choice-disperse-best` "Keep what you understand to yourself, and keep Ost's date." — `requiresDeduction: "cc-deduction-the-return"` **and** `requiresFlag: "cc-sloane-unmasked"` (both fields on the one choice; `isChoiceVisible` in `src/components/ChoicePanel/ChoicePanel.tsx` ANDs all `requires*` fields — verified. The spec's Best ending demands the murderer unmasked, so a fled Sloane forecloses it) → `cc-act3-ending-best`; `cc-choice-disperse-plain` "Let it be a murder story, and let the rest go unexplained." → `cc-act3-ending-compromised`.
 10. `cc-act3-aster-watched` — beat: you watch a man's ticket punched; Aster lowers himself from the eyepiece smiling, and thanks you. onEnter: `[{ "type": "composure", "delta": -3, "description": "You watched, and you will keep watching it for years" }, { "type": "flag", "target": "cc-watched-collection", "value": true }]`. Choice → `cc-act3-ending-compromised`.
 11. `cc-act3-aster-flinched` — beat: you look away at the moment it matters; Aster looks alone. Choice → `cc-act3-ending-compromised`.
 12. `cc-act3-eyepiece-approach` — **base scene = the blind version** (full version is a Task 6 variant gated on `cc-deduction-the-return`). Beat: taking the eyepiece with no framework to survive what fills it. onEnter: `[{ "type": "flag", "target": "cc-took-the-eyepiece", "value": true }, { "type": "composure", "delta": -4, "description": "You looked without understanding, and something looked back without effort" }, { "type": "vitality", "delta": -1, "description": "Your hands will not stop shaking for a week" }]`. Choice → `cc-act3-ending-eyepiece`.
@@ -429,7 +459,7 @@ All scenes `"act": 3`.
 - [ ] **Step 3: Validate**
 
 Run: `node scripts/validateCase.mjs public/content/cases/the-comet-club`
-Expected: 0 errors; `66 scenes, 16 clues`. Zero unreachable-scene warnings for act1–3 ids.
+Expected: 0 errors; `67 scenes, 16 clues`. Zero unreachable-scene warnings for act1–3 ids.
 
 - [ ] **Step 4: Commit**
 
@@ -463,7 +493,7 @@ Each is a full `SceneNode` in `variants.json` (`"act"` matches its base) with `v
 - [ ] **Step 2: Validate**
 
 Run: `node scripts/validateCase.mjs public/content/cases/the-comet-club`
-Expected: 0 errors; scene count rises to `73 scenes, 16 clues` (if the validator's count excludes variants it will read `66` — trust 0 errors as the gate either way).
+Expected: 0 errors; scene count rises to `74 scenes, 16 clues` (if the validator's count excludes variants it will read `67` — trust 0 errors as the gate either way).
 
 - [ ] **Step 3: Commit**
 
@@ -494,7 +524,7 @@ Expected: both PASS at the pre-existing baseline (content-only change; any new f
 Add the row (numbers verbatim from Step 1's validator output) to the content inventory table and update the totals row:
 
 ```markdown
-| The Comet Club | main (3-act) | 73 | 16 | 10 |
+| The Comet Club | main (3-act) | 74 | 16 | 10 |
 ```
 
 - [ ] **Step 4: Commit**
@@ -526,6 +556,6 @@ git commit -m "fix(content): Comet Club — content-integrity review findings"
 
 ## After the plan (orchestrator-level, not implementer tasks)
 
-- **Codex Gate 2:** submit the complete task diff against the recorded start commit (`84d7d49`'s parent is docs-only; record the actual base before Task 1) for adversarial review per CLAUDE.md, before declaring done.
+- **Codex Gate 2:** submit the complete task diff against the recorded start base `2d8281ea104015a527836bdce13c58c39405d313` (the plan commit — no content files exist before it): `git add -N` any untracked task files, then review `git diff 2d8281ea`, before declaring done.
 - **`/checkpoint`:** update PROJECT_STATE/RUN_LOG; the mythos-flag decision (`mythos-period-computed` authored with no consumer yet) may warrant an ADR line referencing the ideation doc's Part 4 staging.
 - **Merge:** PR with merge commit (never squash), on user instruction only.
