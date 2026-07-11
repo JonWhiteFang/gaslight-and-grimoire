@@ -19,6 +19,18 @@
 
 ---
 
+## 2026-07-11 (third session) — Codex integrated as cross-provider adversarial reviewer (ADR-0010)
+
+- **Goal:** Execute the user's hardened setup prompt: OpenAI Codex CLI as an MCP-based adversarial reviewer, with every non-trivial plan and code change gated on a Codex review (or an explicitly announced skip).
+- **Did:**
+  - **Preflight found the machine-side already done:** Codex CLI 0.144.1 (brew cask), ChatGPT auth (no stored API key), `codex` MCP server at **user scope** `✔ Connected`, and `~/.codex/config.toml` already carrying the effective top-level `sandbox_mode = "read-only"` + `approval_policy = "untrusted"` (confirmed `codex doctor`: approval `UnlessTrusted`, filesystem sandbox `restricted`). Model `gpt-5.6-sol` smoke-tested working on ChatGPT auth (`codex exec --sandbox read-only ... < /dev/null`) — the prompt's expected model blocker never applied. MCP tools were already loaded in-session, so the usual "restart Claude Code" open item didn't apply either. **No machine config was changed.**
+  - **Repo-side (the only change):** appended CLAUDE.md §"Adversarial review with Codex" — Gate 1 (every non-trivial task's plan reviewed **before any mutation**, attached to the work not to a declared plan) + Gate 2 (**complete task diff vs. recorded starting base**, untracked files `git add -N`'d, reviewed before completion; runs before `/checkpoint`, mechanical spine updates exempt) + minimum-context and two-round/escalation rules. **The gate text was itself dogfooded through both gates:** Codex's round-1 review of the verbatim prompt text found 5 loopholes (uncommitted-only diffs, undeclared-plan dodge, accepted-but-unfixed findings, checkpoint ordering, vague context); user approved the hardened variant; round-2 re-review confirmed 4 fixed + 1 residual (untracked files) which was fixed with Codex's exact wording. Gate-1 live test also produced a real repo-specific catch (faction key must be the exact string `Hermetic Order of the Grey Dawn`).
+  - **[ADR-0010](DECISIONS/ADR-0010-codex-adversarial-review-gates.md)** (Enacted) records the decision; indexed; STATE updated. **Doc-drift sweep fix:** `docs/README.md`'s CLAUDE.md blurb extended to mention the review gates.
+  - **Replicate machine-side on another machine:** `brew install --cask codex && codex login && claude mcp add --scope user codex -- codex mcp-server`, then top-level `sandbox_mode = "read-only"` / `approval_policy = "untrusted"` in `~/.codex/config.toml`.
+- **Verified:** `codex doctor` (policy/sandbox/auth), CLI smoke test (model answered, 10.5k tokens), and both gates exercised live through `mcp__codex__codex` (plan review + diff review, read-only). Repo change is docs-only; 2026-07-09 baseline (611/58, 201/7) stands (`node_modules` still absent).
+- **Open / blockers:** `npm ci` before next code session. Flagged, unresolved (user's call): `claude mcp list` reports a **context7 scope conflict** (user-scope HTTP endpoint vs. project `.mcp.json` npx entry). Unchanged: #20 (media), content-ideas pick.
+- **Memory updated:** STATE ☑ · RUN_LOG ☑ · ADR ☑ ([ADR-0010](DECISIONS/ADR-0010-codex-adversarial-review-gates.md))
+
 ## 2026-07-11 (second session) — CLAUDE.md trimmed to a pointer map (ADR-0009, docs-only)
 
 - **Goal:** The user asked for a sweep of CLAUDE.md ("anything to cut or refine?"). A claude-md-improver audit scored it 78/100 (B): commands/warnings strong, but ~40% of 339 lines restated `docs/`-owned facts — the proven source of the recurring sweep drift (17 CLAUDE.md commits since 2026-07-07: 198→201 scenes, React 18→19, save v3→v4, …). User first chose report-only, then approved the **full trim**.
