@@ -1,1 +1,32 @@
-{ "deductions": [] }
+{
+  "deductions": [
+    {
+      "id": "cc-deduction-one-true-murder",
+      "requiredClues": ["cc-clue-sash-weights", "cc-clue-sloane-debts"],
+      "title": "One True Murder",
+      "description": "Exactly one of the three deaths is human work. The sash weights were moved by hired hands, and Sloane's ledger paid for them — a single killing dressed to sit inside the pattern. Whatever explains the others, it did not use a window.",
+      "isRedHerring": false
+    },
+    {
+      "id": "cc-deduction-numbered-tickets",
+      "requiredClues": ["cc-clue-halloway-diary", "cc-clue-corven-absence", "cc-clue-seating-chart"],
+      "title": "Numbered Tickets",
+      "description": "The order is not the seating — it is the order they took the eyepiece. Corven never looked, and the deaths pass over his chair. The pattern predates the murderer, who is only hiding inside it.",
+      "isRedHerring": false
+    },
+    {
+      "id": "cc-deduction-the-return",
+      "requiredClues": ["cc-clue-razored-page", "cc-clue-ost-period"],
+      "title": "The Return",
+      "description": "What the twelve observed in 1882 was not the comet. It is periodic, it is approaching perihelion, and the club's deaths keep its timetable. The collection is an approach.",
+      "isRedHerring": false
+    },
+    {
+      "id": "cc-deduction-poisoner",
+      "requiredClues": ["cc-clue-quack-tonic", "cc-clue-sloane-debts", "cc-clue-death-dates"],
+      "title": "A Poisoner Works the Chart",
+      "description": "Arsenic in chair 2's tonic, Sloane's debts, three convenient deaths — a single poisoner harvesting the tontine chair by chair. Coherent, confident, and wrong.",
+      "isRedHerring": true
+    }
+  ]
+}

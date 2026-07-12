@@ -144,6 +144,30 @@
             "failure": "cc-act2-ost-study",
             "fumble": "cc-act2-ost-study"
           }
+        },
+        {
+          "id": "cc-choice-hub-midpoint",
+          "text": "Lay the murder out end to end.",
+          "requiresDeduction": "cc-deduction-one-true-murder",
+          "outcomes": {
+            "critical": "cc-act2-midpoint",
+            "success": "cc-act2-midpoint",
+            "partial": "cc-act2-midpoint",
+            "failure": "cc-act2-midpoint",
+            "fumble": "cc-act2-midpoint"
+          }
+        },
+        {
+          "id": "cc-choice-hub-summons",
+          "text": "Briggs's note arrives: the club gathers at Hampstead at the perihelion. Go.",
+          "requiresFlag": "cc-interval-grasped",
+          "outcomes": {
+            "critical": "cc-act3-eve",
+            "success": "cc-act3-eve",
+            "partial": "cc-act3-eve",
+            "failure": "cc-act3-eve",
+            "fumble": "cc-act3-eve"
+          }
         }
       ]
     },
@@ -1214,6 +1238,28 @@
         {
           "id": "cc-choice-aster-papers-return",
           "text": "Leave the chambers and return to the club.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-midpoint",
+      "act": 2,
+      "narrative": "Set it out, then, plainly, the way you would for a coroner who did not believe in patterns: chair 5's sash weights did not shift themselves, and Sloane's ledger stops paying the week the window let go. That is a man's hand, wanted or hired, on one rope. It is not chair 2's tonic, self-dosed by a vain man's own appetite for cures, and it is not whatever took chair 3 in his sleep with no mark on him at all. Two deaths refuse to answer to motive, means, or a moneylender's patience. One does.\n\nWhich means the club's murderer — the ordinary, comprehensible, arrestable murderer — has been hiding inside something he does not understand and cannot control, dressing one killing to sit inside a pattern he had no hand in starting. He thinks the pattern is his cover. He has no idea he is also, possibly, its next course.\n\nYou sit with that a long moment. It clarifies nothing about who dies next. It clarifies everything about who can be stopped.",
+      "onEnter": [
+        { "type": "flag", "target": "cc-midpoint-passed", "value": true }
+      ],
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-midpoint-return",
+          "text": "Return to the club with the distinction fixed in mind.",
           "outcomes": {
             "critical": "cc-act2-hub",
             "success": "cc-act2-hub",

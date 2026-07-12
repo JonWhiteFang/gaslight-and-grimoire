@@ -1,1 +1,373 @@
-{ "scenes": [] }
+{
+  "scenes": [
+    {
+      "id": "cc-act3-eve",
+      "act": 3,
+      "narrative": "Briggs's note comes by hand, folded once, no signature needed: the club gathers at Hampstead when the object comes round to its closest approach, three nights hence. What you do with those three nights depends entirely on what you are carrying into them.\n\nIf you have already laid the murder out end to end — one death bought, two not — you can go to Sloane tonight, on your own ground, before the gathering makes a performance of everything. If what you are carrying is the poisoner's theory instead, coherent and confident and built from a tonic bottle and a ledger, you can lay that at the chart too, and see if it survives contact with the man who kept it. Or you can carry nothing but the accusation itself, and force the question at Hampstead's edge, in front of everyone, evidence or no.\n\nThe comet — or whatever it actually is — does not wait on your certainty. It has never waited on anyone's.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-eve-prepared",
+          "text": "Confront Sloane before the gathering — on your terms.",
+          "requiresDeduction": "cc-deduction-one-true-murder",
+          "outcomes": {
+            "critical": "cc-act3-confront-prepared",
+            "success": "cc-act3-confront-prepared",
+            "partial": "cc-act3-confront-prepared",
+            "failure": "cc-act3-confront-prepared",
+            "fumble": "cc-act3-confront-prepared"
+          }
+        },
+        {
+          "id": "cc-choice-eve-herring",
+          "text": "Confront the poisoner working the chart.",
+          "requiresDeduction": "cc-deduction-poisoner",
+          "outcomes": {
+            "critical": "cc-act3-confront-collapse",
+            "success": "cc-act3-confront-collapse",
+            "partial": "cc-act3-confront-collapse",
+            "failure": "cc-act3-confront-collapse",
+            "fumble": "cc-act3-confront-collapse"
+          }
+        },
+        {
+          "id": "cc-choice-eve-forced",
+          "text": "Go to Hampstead and force the question there, evidence or no.",
+          "outcomes": {
+            "critical": "cc-act3-confront-forced",
+            "success": "cc-act3-confront-forced",
+            "partial": "cc-act3-confront-forced",
+            "failure": "cc-act3-confront-forced",
+            "fumble": "cc-act3-confront-forced"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act3-confront-prepared",
+      "act": 3,
+      "narrative": "You find Sloane alone, which is how you arranged it, and you set the ledger and the sash weights in front of him without preamble. He does not reach for the brandy. He does not reach for anything. What Weir told you when you had him cornered lines up with the figures to the week, and you say so, plainly, watching for the moment the arithmetic closes on him.\n\nHe watches it close too. For a long moment he says nothing at all, and the silence does more work than any accusation could — a man doing sums he has done before, alone, and arriving each time at the same unbearable total.\n\n\"You'll want to know why,\" he says at last, and it is not a question. \"Everyone always wants to know why, as if the why makes it a different thing than what it is.\" He does not deny it again. He does not try to.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-prepared-continue",
+          "text": "Let him say it.",
+          "outcomes": {
+            "critical": "cc-act3-sloane-defence",
+            "success": "cc-act3-sloane-defence",
+            "partial": "cc-act3-sloane-defence",
+            "failure": "cc-act3-sloane-defence",
+            "fumble": "cc-act3-sloane-defence"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act3-confront-forced",
+      "act": 3,
+      "narrative": "There is no ledger in your hand, no sash weight, nothing but instinct sharpened over weeks into something you are willing to say aloud in front of witnesses at the edge of the Hampstead grounds, the gathering assembling behind you in the dark. You put Sloane's name to the pattern and watch his face for the tell you are gambling everything on finding.\n\nIt is a hard thing to accuse a man of murder with nothing but a shape in your head to back it, and you know it, and he knows you know it, and for a moment the whole question balances on nothing more than how convincingly you can hold a man's eyes while naming what he did.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-forced-press",
+          "text": "Press the accusation and watch for the break.",
+          "faculty": "influence",
+          "difficulty": 13,
+          "advantageIf": ["cc-clue-weir-instructions"],
+          "outcomes": {
+            "critical": "cc-act3-sloane-defence",
+            "success": "cc-act3-sloane-defence",
+            "partial": "cc-act3-sloane-slips",
+            "failure": "cc-act3-sloane-slips",
+            "fumble": "cc-act3-sloane-slips"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act3-confront-collapse",
+      "act": 3,
+      "narrative": "You lay the poisoner's theory out at the chart, in front of the gathering members, and for a moment it holds the room the way a good theory does: the tonic, the arsenic dose sized to read as vanity's own excess, Sloane's debts stopping the very week they should. It is coherent. It is confident. It is, within thirty seconds of Sloane's first question, visibly wrong.\n\nHe does not need to raise his voice. He only asks who is supposed to have dosed a bottle that never left its owner's rooms, that his own man watched him buy and his own man watched him drink from, alone, on three separate occasions witnessed by people in this room who are only too glad to say so now. The tonic was self-administered vanity, not murder — everyone at that table who knew the dead man at all could have told you as much, and several of them now do, at length, and not kindly.\n\nThe theory does not survive its own telling. Worse, it hands the room a reason to close ranks around whatever the truth actually is, because you have just demonstrated, in front of all of them, how easily a determined investigator can be wrong.",
+      "onEnter": [
+        { "type": "flag", "target": "cc-murderer-walked", "value": true },
+        { "type": "composure", "delta": -2, "description": "The theory comes apart in your hands in front of the whole table" }
+      ],
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-collapse-continue",
+          "text": "Withdraw from the wreckage of the accusation.",
+          "outcomes": {
+            "critical": "cc-act3-ending-failure",
+            "success": "cc-act3-ending-failure",
+            "partial": "cc-act3-ending-failure",
+            "failure": "cc-act3-ending-failure",
+            "fumble": "cc-act3-ending-failure"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act3-sloane-defence",
+      "act": 3,
+      "narrative": "\"I stole from a fire,\" Sloane says, and it is, in its way, the most honest sentence he has spoken to you since the dinner. Chair 5 was going to die of a moneylender's patience running out regardless — Sloane's debts had passed the point where the Court of Smoke settles quietly — and a man drowning in that particular water does not, it turns out, ask many questions about which flood carries him under. Weir was paid to arrange one death. The window, the sash weights, the timing set to sit inside a pattern already killing men on its own schedule: all of it built to look like something already happening, rather than something new.\n\n\"One dying man,\" Sloane says, \"killed for money, inside a pattern that was going to take him for free eventually anyway. I only moved the date up. I didn't invent the dying.\" It is not an excuse he expects you to accept. It has the flat, exhausted cadence of a man who stopped trying to make it sound better some weeks ago, and is only now saying it because you have finally made him.",
+      "onEnter": [
+        { "type": "flag", "target": "cc-sloane-unmasked", "value": true }
+      ],
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-defence-law",
+          "text": "Hand him to the law before the gathering.",
+          "outcomes": {
+            "critical": "cc-act3-gathering",
+            "success": "cc-act3-gathering",
+            "partial": "cc-act3-gathering",
+            "failure": "cc-act3-gathering",
+            "fumble": "cc-act3-gathering"
+          }
+        },
+        {
+          "id": "cc-choice-defence-use",
+          "text": "Keep him close — a murderer who studied the pattern is still a student of it.",
+          "npcEffect": { "npcId": "cc-npc-sloane", "dispositionDelta": 2, "suspicionDelta": 0 },
+          "outcomes": {
+            "critical": "cc-act3-gathering",
+            "success": "cc-act3-gathering",
+            "partial": "cc-act3-gathering",
+            "failure": "cc-act3-gathering",
+            "fumble": "cc-act3-gathering"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act3-sloane-slips",
+      "act": 3,
+      "narrative": "He does not break. He apologises for your evident distress, expresses sympathy for the strain of your investigation, and by the time you have recovered enough of your composure to press again, he has excused himself to attend to the gathering's arrangements, and is gone into the dark toward the house.\n\nBy morning, word reaches you that Sloane took the first packet out of Harwich for Ostend, travelling light, having settled what few debts remained with a promptness that surprises everyone who knew him. Whatever else he was, he was not a fool, and an accusation without proof, once voiced and denied, gives a guilty man exactly the warning an innocent one would never have needed. The pattern, indifferent as ever to the guilt or innocence of any single chair, keeps his empty place in its count regardless.",
+      "onEnter": [
+        { "type": "flag", "target": "cc-sloane-fled", "value": true }
+      ],
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-slips-continue",
+          "text": "Go on to the gathering without him.",
+          "outcomes": {
+            "critical": "cc-act3-gathering",
+            "success": "cc-act3-gathering",
+            "partial": "cc-act3-gathering",
+            "failure": "cc-act3-gathering",
+            "fumble": "cc-act3-gathering"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act3-gathering",
+      "act": 3,
+      "narrative": "The survivors assemble at Hampstead under a sky scoured clear for the occasion, the great dome open above them like a held breath. Fewer chairs than the founding wager remembers, and everyone present knows exactly why, whatever they say aloud about it.\n\nAster does not wait for niceties. He states his intent to the assembled club as plainly as he stated his commission to you weeks ago: he means to take the eyepiece tonight, at the exact moment of closest approach, and see the collection back the way the founders once saw it come. Whatever the wager promised the last man standing, he intends to collect it in full, tonight, in front of witnesses, before anyone can talk him out of it or beat him to it.\n\nBriggs works the dome's gearing in silence. Ost stands very still near the eyepiece mount, not looking at it. Everyone else watches Aster the way people watch a man walking toward a cliff edge they are too polite, or too frightened, to mention aloud.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-gathering-continue",
+          "text": "Step into whatever this is about to become.",
+          "outcomes": {
+            "critical": "cc-act3-nexus",
+            "success": "cc-act3-nexus",
+            "partial": "cc-act3-nexus",
+            "failure": "cc-act3-nexus",
+            "fumble": "cc-act3-nexus"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act3-nexus",
+      "act": 3,
+      "narrative": "The dome stands open, the refractor already swinging toward its mark, and the club's remaining members have arranged themselves around the mount the way mourners arrange themselves around a grave — near enough to see, far enough to claim afterward they hadn't been close. Aster's hand rests on the eyepiece housing. Whatever happens in the next few minutes happens because someone in this room decides it does.\n\nYou have perhaps one choice left that matters more than the others. End it cleanly, and disperse a club that has clearly outlived whatever purpose it once served — expose the murder or the flight, dissolve the wager, and seal the log with people who know how to keep a secret buried. Let Aster look, and stand close enough to watch exactly what looking costs him. Or take the eyepiece from him yourself, and see with your own eyes what the pattern has been protecting, or hunting, or both, for over a century.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-nexus-disperse",
+          "text": "End it: expose everything, disperse the club, seal the log.",
+          "outcomes": {
+            "critical": "cc-act3-disperse",
+            "success": "cc-act3-disperse",
+            "partial": "cc-act3-disperse",
+            "failure": "cc-act3-disperse",
+            "fumble": "cc-act3-disperse"
+          }
+        },
+        {
+          "id": "cc-choice-nexus-observe",
+          "text": "Let Aster look — and watch him as he does.",
+          "faculty": "nerve",
+          "difficulty": 12,
+          "outcomes": {
+            "critical": "cc-act3-aster-watched",
+            "success": "cc-act3-aster-watched",
+            "partial": "cc-act3-aster-flinched",
+            "failure": "cc-act3-aster-flinched",
+            "fumble": "cc-act3-aster-flinched"
+          }
+        },
+        {
+          "id": "cc-choice-nexus-eyepiece",
+          "text": "Take the eyepiece yourself.",
+          "outcomes": {
+            "critical": "cc-act3-eyepiece-approach",
+            "success": "cc-act3-eyepiece-approach",
+            "partial": "cc-act3-eyepiece-approach",
+            "failure": "cc-act3-eyepiece-approach",
+            "fumble": "cc-act3-eyepiece-approach"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act3-disperse",
+      "act": 3,
+      "narrative": "You call a halt to it in front of everyone. What you say depends on what you carry into the room — the murder laid bare, ledger and sash weights and a confession already given, or a fled man's empty chair standing in for the confession he never gave — but either way, the wager dies where it stands. You tell them plainly that the tontine ends tonight, that nothing further is collected, that whatever the dome has been protecting stops being any one man's inheritance and becomes, instead, a matter for people equipped to actually contend with it.\n\nThe Lamplighters' name, when you invoke it, does the rest of the work for you — enough of the surviving members know enough about who quietly handles London's stranger inheritances that the objection dies unspoken. Briggs seals the observatory log himself, at your direction, and Aster's hand comes off the eyepiece housing at last, whether from relief or defeat you genuinely cannot tell.\n\nThe survivors disperse into the dark in twos and threes, the founding wager formally, finally, dissolved. Somewhere behind you, the dome begins its slow mechanical closing.",
+      "onEnter": [
+        { "type": "flag", "target": "cc-club-dispersed", "value": true },
+        { "type": "reputation", "target": "Lamplighters", "delta": 1 }
+      ],
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-disperse-best",
+          "text": "Keep what you understand to yourself, and keep Ost's date.",
+          "requiresDeduction": "cc-deduction-the-return",
+          "requiresFlag": "cc-sloane-unmasked",
+          "outcomes": {
+            "critical": "cc-act3-ending-best",
+            "success": "cc-act3-ending-best",
+            "partial": "cc-act3-ending-best",
+            "failure": "cc-act3-ending-best",
+            "fumble": "cc-act3-ending-best"
+          }
+        },
+        {
+          "id": "cc-choice-disperse-plain",
+          "text": "Let it be a murder story, and let the rest go unexplained.",
+          "outcomes": {
+            "critical": "cc-act3-ending-compromised",
+            "success": "cc-act3-ending-compromised",
+            "partial": "cc-act3-ending-compromised",
+            "failure": "cc-act3-ending-compromised",
+            "fumble": "cc-act3-ending-compromised"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act3-aster-watched",
+      "act": 3,
+      "narrative": "You do not stop him. You stand close instead, near enough to see what the eyepiece does to a man's face when he finally gets what he has spent months, and a small fortune in dead friends, working toward. Aster leans in. His hand does not shake. For a long moment nothing in his expression moves at all, which is somehow worse than any reaction you had braced for.\n\nWhen he straightens, he is smiling, an easy, satisfied, terrible smile, the smile of a man whose ticket has just been punched and who has decided, on the spot and apparently forever, that the fare was worth it. He thanks you. Sincerely. He thanks you for staying to see it with him, as though you had done him a kindness rather than merely failed to stop him.\n\nYou watched a man collect on the tontine's oldest promise, and you will keep watching it, in memory, for a very long time after tonight.",
+      "onEnter": [
+        { "type": "composure", "delta": -3, "description": "You watched, and you will keep watching it for years" },
+        { "type": "flag", "target": "cc-watched-collection", "value": true }
+      ],
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-aster-watched-continue",
+          "text": "Leave the dome behind, and Aster with it.",
+          "outcomes": {
+            "critical": "cc-act3-ending-compromised",
+            "success": "cc-act3-ending-compromised",
+            "partial": "cc-act3-ending-compromised",
+            "failure": "cc-act3-ending-compromised",
+            "fumble": "cc-act3-ending-compromised"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act3-aster-flinched",
+      "act": 3,
+      "narrative": "You look away. It happens without your quite deciding it — a flinch of the eyes at the exact moment Aster leans into the eyepiece, and by the time you have made yourself look back, whatever passed between him and the dark has already passed, and the moment that mattered is over.\n\nAster straightens alone. Nobody was watching, in the end, not really, and he says nothing about it, and neither does anyone else, and the silence that follows has the particular quality of a room agreeing, without a word spoken, never to discuss what just happened here.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-aster-flinched-continue",
+          "text": "Leave the dome behind.",
+          "outcomes": {
+            "critical": "cc-act3-ending-compromised",
+            "success": "cc-act3-ending-compromised",
+            "partial": "cc-act3-ending-compromised",
+            "failure": "cc-act3-ending-compromised",
+            "fumble": "cc-act3-ending-compromised"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act3-eyepiece-approach",
+      "act": 3,
+      "narrative": "You take the eyepiece from Aster before he can object, or before you can let yourself think better of it, and lean in with nothing to steady you — no razored page's angular sketch fully understood, no computed period held firmly enough in mind to know what you are bracing against. You simply look, the way the founders once looked, the way three dead chairs looked before you ever sat at this table.\n\nWhat fills the glass does not resolve into anything a trained eye could name, and that absence of resolution is itself the horror of it — not a shape but an angle, not a distance but a proximity that should not be possible at the reported scale, and beneath it all a dawning, wordless certainty that the looking has been noticed, and returned, and found you insufficiently prepared to survive the attention.\n\nYou pull back from the eyepiece with no framework left standing to file the sight under. Your hands do not stop shaking for a long time after.",
+      "onEnter": [
+        { "type": "flag", "target": "cc-took-the-eyepiece", "value": true },
+        { "type": "composure", "delta": -4, "description": "You looked without understanding, and something looked back without effort" },
+        { "type": "vitality", "delta": -1, "description": "Your hands will not stop shaking for a week" }
+      ],
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-eyepiece-continue",
+          "text": "Step back from the dome, whatever you carry with you now.",
+          "outcomes": {
+            "critical": "cc-act3-ending-eyepiece",
+            "success": "cc-act3-ending-eyepiece",
+            "partial": "cc-act3-ending-eyepiece",
+            "failure": "cc-act3-ending-eyepiece",
+            "fumble": "cc-act3-ending-eyepiece"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act3-ending-best",
+      "act": 3,
+      "narrative": "The club is dispersed, the log sealed, the murder settled one way or another and the wager formally, publicly dead. What you keep back is smaller than any of that, and quieter: the date, computed from a razored page and a recomputed period, of when the thing the founders called a comet comes round again. You do not write it down. You do not tell Aster, or the Lamplighters, or anyone at all.\n\nThere is a particular kind of quiet that settles over a case closed this thoroughly — no loose thread left visible to the club, no explanation owed to anyone who was not entitled to one, and one fact, the only fact that actually matters in the long run, held in exactly one head. You walk away from Hampstead with the strange, chilling comfort of a problem correctly solved and then correctly hidden, which is not the same as a problem correctly ended. It is, for now, enough.",
+      "onEnter": [
+        { "type": "flag", "target": "cc-case-complete", "value": true },
+        { "type": "flag", "target": "mythos-period-computed", "value": true }
+      ],
+      "cluesAvailable": [],
+      "choices": []
+    },
+    {
+      "id": "cc-act3-ending-compromised",
+      "act": 3,
+      "narrative": "The human ledger balances, more or less — a murderer named or a murderer fled, the tontine dissolved, the survivors scattered back into whatever remains of their lives. It reads, from the outside, like a solved case, and in the sense that matters to a coroner's report, it is one.\n\nThe other ledger, the one the founders opened in 1882 and never closed, stays open. You leave Hampstead without the period computed, without the date fixed, carrying only the certain knowledge that the interval between collections has been shrinking for over a century and shows no particular sign of stopping now. Somewhere out past the edge of what the club's own instruments can measure, it keeps shrinking still, indifferent to whether anyone in London happens to be watching.",
+      "onEnter": [
+        { "type": "flag", "target": "cc-case-complete", "value": true }
+      ],
+      "cluesAvailable": [],
+      "choices": []
+    },
+    {
+      "id": "cc-act3-ending-failure",
+      "act": 3,
+      "narrative": "The club closes ranks around you the way clubs close ranks around any outsider who has just embarrassed himself in front of the membership, and there is nothing left to do with the wreckage of a theory that did not survive its own telling but withdraw from it as gracefully as you can manage, which is not very.\n\nA week later, a last letter arrives from Briggs, sparse and careful in the way of a man who has learned not to write anything he would regret a stranger reading. The pattern, he reports, has not paused to consider your accusation, or your embarrassment, or anything else about you at all. It has simply continued, indifferent, on its own schedule — and the seating chart, he notes without further comment, now runs to ten chairs where it once ran to twelve.",
+      "onEnter": [
+        { "type": "flag", "target": "cc-case-complete", "value": true }
+      ],
+      "cluesAvailable": [],
+      "choices": []
+    },
+    {
+      "id": "cc-act3-ending-eyepiece",
+      "act": 3,
+      "narrative": "What you keep, in the end, is not knowledge. You never fixed the period, never wrote the date, never turned what you saw into anything a report could hold. What you keep instead is a direction — a felt, bodily certainty of orientation that arrived with the looking and has not left since, an instinct for which way a particular kind of deep water runs.\n\nYou will notice it again, unbidden, the next time you stand at the edge of an estuary, or a harbour, or any stretch of water that goes down further than the light follows: a small, cold, wordless awareness of which way it deepens, and which way, if something down there ever decided to come looking, it would come from. You did not ask for this. You do not know how to put it down. You will carry it, quietly, for the rest of your life.",
+      "onEnter": [
+        { "type": "flag", "target": "cc-case-complete", "value": true },
+        { "type": "flag", "target": "mythos-period-computed", "value": true }
+      ],
+      "cluesAvailable": [],
+      "choices": []
+    }
+  ]
+}
