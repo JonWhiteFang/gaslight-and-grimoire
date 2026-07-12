@@ -1,0 +1,494 @@
+{
+  "scenes": [
+    {
+      "id": "cc-act1-dinner",
+      "act": 1,
+      "narrative": "The Aldebaran Society keeps its rooms above a chandler's shop in Pall Mall, a narrow stair climbing past brass instrument cases to a dining hall hung with star charts and the mounted skeleton of some long-dead comet-hunter's telescope. Colonel Aster meets you at the door himself, waistcoat straining, hand trembling faintly around his own. 'You'll sit at chair three,' he says, and does not explain further until you see it: a long table set for twelve, three of the settings dressed in black crepe, three empty chairs pushed back as though their occupants had merely stepped out and would return. They will not.\n\nThe seven who remain are cordial in the brittle way of men rehearsing normality. Lady Wren Halloway holds forth on comet tails to a politely glazed Mr. Corven. Sir Julius Pemberton-Rhee argues astronomy with the Reverend Dr. Millbank in the tone of men who have had the same argument for thirty years. Dr. Ost sits apart, recalculating something on a napkin. Mr. Featherstonehaugh watches the room with a Rationalist's careful skepticism, and Mr. Sloane drinks more than he eats, his eyes finding the black crepe again and again.\n\nWhen the port is poured, Aster rises. He toasts the founding wager of 1882 — the night the twelve of them sat this same table and swore the last man living would take the Hampstead observatory and all it held. The toast lands wrong; three men do not raise their glasses. On the wall behind him hangs the original seating chart, framed under glass, three dates inked beneath it in a hand you recognize as his own.\n\nAs the others rise from the table, Aster touches your sleeve. 'A private word,' he murmurs, 'before you go.'",
+      "ambientAudio": "ambient-club-dining",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-seating-chart", "method": "automatic" },
+        { "clueId": "cc-clue-death-dates", "method": "automatic" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-dinner-aster",
+          "text": "Accept the Colonel's request for a private word.",
+          "outcomes": {
+            "critical": "cc-act1-aster-commission",
+            "success": "cc-act1-aster-commission",
+            "partial": "cc-act1-aster-commission",
+            "failure": "cc-act1-aster-commission",
+            "fumble": "cc-act1-aster-commission"
+          }
+        },
+        {
+          "id": "cc-choice-dinner-observe",
+          "text": "Study the survivors around the table before committing to anything.",
+          "faculty": "perception",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "cc-act1-table-observed",
+            "success": "cc-act1-table-observed",
+            "partial": "cc-act1-table-observed",
+            "failure": "cc-act1-table-misread",
+            "fumble": "cc-act1-table-misread"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act1-table-observed",
+      "act": 1,
+      "narrative": "You take your time before you take your leave, and the table repays the attention. Sloane's cuffs are frayed beneath sleeves cut by a good tailor — a man dressing above what his purse now allows. Sir Julius tastes nothing before the others do; it is habit, not suspicion, but it is a habit worth having only if a man has cause to expect poison somewhere in his life. Corven drinks with a purpose that has nothing to do with thirst, working steadily toward a numbness he clearly intends to reach before the evening ends. And Dr. Ost, for all his talk of orbits, spends the meal watching the window rather than the table, as though the street outside held more of his attention than the twelve — now seven — of them ever could.\n\nNone of it is proof of anything. All of it is the sort of detail a case is built from.",
+      "cluesAvailable": [],
+      "onEnter": [
+        { "type": "suspicion", "target": "cc-npc-sloane", "delta": 1 }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-table-observed-follow",
+          "text": "Follow Aster to his private word.",
+          "outcomes": {
+            "critical": "cc-act1-aster-commission",
+            "success": "cc-act1-aster-commission",
+            "partial": "cc-act1-aster-commission",
+            "failure": "cc-act1-aster-commission",
+            "fumble": "cc-act1-aster-commission"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act1-table-misread",
+      "act": 1,
+      "narrative": "You try a question you think oblique — something about how the Society divides what its founders left behind — and watch it land wrong. The table does not erupt; it simply closes, chairs angling a fraction away from you, conversation resuming at a register that no longer admits you to it. Sir Julius's mouth thins. Somewhere down the table, a glass is set down with more force than the gesture requires.\n\nWhatever these men are protecting, you have just announced yourself as someone asking after it, and the silence that follows has edges.",
+      "cluesAvailable": [],
+      "onEnter": [
+        { "type": "suspicion", "target": "cc-npc-pemberton-rhee", "delta": 1 },
+        { "type": "composure", "delta": -1, "description": "The silence that follows your question has edges" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-table-misread-follow",
+          "text": "Follow Aster to his private word before the evening sours further.",
+          "outcomes": {
+            "critical": "cc-act1-aster-commission",
+            "success": "cc-act1-aster-commission",
+            "partial": "cc-act1-aster-commission",
+            "failure": "cc-act1-aster-commission",
+            "fumble": "cc-act1-aster-commission"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act1-aster-commission",
+      "act": 1,
+      "narrative": "Aster's study smells of pipe smoke and old paper, and of something medicinal beneath both. He does not sit; his hands need the mantelpiece to hold steady. 'In eighty-two,' he says, 'the twelve of us sat down to observe the comet and swore a wager over the port — foolish, the way young men's oaths always are. Whoever of us lived longest would take the Hampstead observatory, and everything the dome holds. It seemed a joke then. It has stopped being one.'\n\nHe lays it out plainly: chair two, chair three, chair five, dead within five weeks, each death ordinary enough on a death certificate and impossible together. He wants it stopped before it reaches chair six, or himself, or any other number at that table. 'You'll come as my guest,' he says, 'not as a detective. The club must not know what you are, or it will simply stop talking in front of you — and I suspect it has already stopped talking in front of me.'",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-founding-wager", "method": "dialogue" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-commission-accept",
+          "text": "Accept the commission.",
+          "outcomes": {
+            "critical": "cc-act1-crossroads",
+            "success": "cc-act1-crossroads",
+            "partial": "cc-act1-crossroads",
+            "failure": "cc-act1-crossroads",
+            "fumble": "cc-act1-crossroads"
+          }
+        },
+        {
+          "id": "cc-choice-commission-press",
+          "text": "Press him: what does the dome conceal?",
+          "faculty": "influence",
+          "difficulty": 12,
+          "outcomes": {
+            "critical": "cc-act1-aster-candour",
+            "success": "cc-act1-aster-candour",
+            "partial": "cc-act1-crossroads",
+            "failure": "cc-act1-crossroads",
+            "fumble": "cc-act1-crossroads"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act1-aster-candour",
+      "act": 1,
+      "narrative": "Something in your asking loosens him. He lowers himself into the chair by the cold fireplace at last, and for a moment the bluster goes out of him entirely. 'I am dying regardless,' he says, quite simply. 'My physician gives me the winter, perhaps less. That is why I can afford to be curious about what the others are so frightened of — I have already lost the wager on my own account, whatever the dome turns out to hold.' He looks at you with something close to gratitude for the honesty he has just permitted himself. 'Find out what is killing them. I would like to know before I join the list, if only so someone does.'",
+      "cluesAvailable": [],
+      "onEnter": [
+        { "type": "disposition", "target": "cc-npc-aster", "delta": 2 }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-aster-candour-proceed",
+          "text": "Take your leave and begin the work.",
+          "outcomes": {
+            "critical": "cc-act1-crossroads",
+            "success": "cc-act1-crossroads",
+            "partial": "cc-act1-crossroads",
+            "failure": "cc-act1-crossroads",
+            "fumble": "cc-act1-crossroads"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act1-crossroads",
+      "act": 1,
+      "narrative": "Morning finds you with a commission, a dead man's seating chart, and no shortage of directions to take it. Chair five fell from a window in a house not far from here, and houses remember more than their owners like to admit. Lady Halloway, widow of chair three, has not yet been called upon, and grief loosens tongues that formality otherwise keeps shut. The Royal Astronomical Society keeps its own record of what the Aldebaran men observed in 1882, quite apart from whatever they told each other over port. And chair two's rooms, sealed by his landlady pending some resolution of his affairs, have not yet been searched by anyone with cause to look properly.\n\nThree deaths, three approaches, and — Aster's warning aside — not unlimited time to choose among them.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-crossroads-chair5",
+          "text": "Visit the house where chair five fell.",
+          "outcomes": {
+            "critical": "cc-act1-chair5-house",
+            "success": "cc-act1-chair5-house",
+            "partial": "cc-act1-chair5-house",
+            "failure": "cc-act1-chair5-house",
+            "fumble": "cc-act1-chair5-house"
+          }
+        },
+        {
+          "id": "cc-choice-crossroads-halloway",
+          "text": "Call on Lady Halloway, widow of chair three.",
+          "outcomes": {
+            "critical": "cc-act1-halloway-call",
+            "success": "cc-act1-halloway-call",
+            "partial": "cc-act1-halloway-call",
+            "failure": "cc-act1-halloway-call",
+            "fumble": "cc-act1-halloway-call"
+          }
+        },
+        {
+          "id": "cc-choice-crossroads-ras",
+          "text": "Consult the Royal Astronomical Society's library.",
+          "outcomes": {
+            "critical": "cc-act1-ras-library",
+            "success": "cc-act1-ras-library",
+            "partial": "cc-act1-ras-library",
+            "failure": "cc-act1-ras-library",
+            "fumble": "cc-act1-ras-library"
+          }
+        },
+        {
+          "id": "cc-choice-crossroads-chair2",
+          "text": "Chair 2's rooms are still under his landlady's seal.",
+          "outcomes": {
+            "critical": "cc-act1-chair2-rooms",
+            "success": "cc-act1-chair2-rooms",
+            "partial": "cc-act1-chair2-rooms",
+            "failure": "cc-act1-chair2-rooms",
+            "fumble": "cc-act1-chair2-rooms"
+          }
+        },
+        {
+          "id": "cc-choice-crossroads-interval",
+          "text": "Enough — take stock of the dates.",
+          "outcomes": {
+            "critical": "cc-act1-interval",
+            "success": "cc-act1-interval",
+            "partial": "cc-act1-interval",
+            "failure": "cc-act1-interval",
+            "fumble": "cc-act1-interval"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act1-chair5-house",
+      "act": 1,
+      "narrative": "The house is handsome and quiet, its stairs still holding the particular hush of a place where something has gone recently, badly wrong. Chair five — Mr. Talbot Vane, you learn from the housekeeper's careful non-answers — fell from the landing window above the stair, three floors to the areaway below. Natural enough, the inquest ruled: a man of his age, a loose sash, a wet step. The window itself sits at the turn of the stair, its glass replaced but its frame original, painted over more than once in a shade of cream that does not quite match the wall around it.",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-sash-weights", "method": "exploration" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-chair5-window",
+          "text": "Examine the window mechanism itself.",
+          "faculty": "perception",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "cc-act1-chair5-window",
+            "success": "cc-act1-chair5-window",
+            "partial": "cc-act1-chair5-street",
+            "failure": "cc-act1-chair5-street",
+            "fumble": "cc-act1-chair5-street"
+          }
+        },
+        {
+          "id": "cc-choice-chair5-household",
+          "text": "Question the household.",
+          "outcomes": {
+            "critical": "cc-act1-chair5-street",
+            "success": "cc-act1-chair5-street",
+            "partial": "cc-act1-chair5-street",
+            "failure": "cc-act1-chair5-street",
+            "fumble": "cc-act1-chair5-street"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act1-chair5-window",
+      "act": 1,
+      "narrative": "Beneath the fresh cream paint, the sash cord runs to a pair of iron weights set into the frame's hollow channel — and the channel has been opened. Not by damp or by age: the wood around the access plate shows the bright, deliberate scoring of a chisel, since disguised under a coat of paint too new for the rest of the frame. Someone lifted this plate, did something to the weights inside, and closed it up again with care enough that an inquest looking for an accident found exactly the accident it expected.\n\nThe drop, in other words, was not an accident that happened to a careless old man. It was prepared, by hands that understood exactly how a window kills and took pains that it should look like it had killed on its own.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-chair5-window-thread",
+          "text": "There is more of this case to pursue tonight.",
+          "outcomes": {
+            "critical": "cc-act1-crossroads",
+            "success": "cc-act1-crossroads",
+            "partial": "cc-act1-crossroads",
+            "failure": "cc-act1-crossroads",
+            "fumble": "cc-act1-crossroads"
+          }
+        },
+        {
+          "id": "cc-choice-chair5-window-rest",
+          "text": "Enough for one night.",
+          "outcomes": {
+            "critical": "cc-act1-interval",
+            "success": "cc-act1-interval",
+            "partial": "cc-act1-interval",
+            "failure": "cc-act1-interval",
+            "fumble": "cc-act1-interval"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act1-chair5-street",
+      "act": 1,
+      "narrative": "The housekeeper's account is thin but consistent: Mr. Vane had complained of the window before, said the sash stuck in damp weather, and had been meaning to have it seen to. Nothing in her telling suggests a man expecting harm. It is the girl who scrubs the front steps who gives you the better thread, once a coin loosens her tongue — two nights before Mr. Vane fell, she saw a man on the leads above the mews at an hour when no chimney sweep or roofer had business being there, moving along the roofline toward this house with the unhurried care of someone who had done it before and expected to do it again.\n\nShe did not think to mention it to the police. Nobody asked her.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-chair5-street-thread",
+          "text": "There is more of this case to pursue tonight.",
+          "outcomes": {
+            "critical": "cc-act1-crossroads",
+            "success": "cc-act1-crossroads",
+            "partial": "cc-act1-crossroads",
+            "failure": "cc-act1-crossroads",
+            "fumble": "cc-act1-crossroads"
+          }
+        },
+        {
+          "id": "cc-choice-chair5-street-rest",
+          "text": "Enough for one night.",
+          "outcomes": {
+            "critical": "cc-act1-interval",
+            "success": "cc-act1-interval",
+            "partial": "cc-act1-interval",
+            "failure": "cc-act1-interval",
+            "fumble": "cc-act1-interval"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act1-halloway-call",
+      "act": 1,
+      "narrative": "Lady Halloway receives callers in a drawing room still arranged for two, her husband's chair angled toward the fire as though he might yet return to fill it. Chair three — Mr. Edmund Halloway — died of what his physician called a weakened heart, five weeks after chair two and a fortnight before the man whose window you have just examined. She is composed in the manner of a woman who has rehearsed her composure carefully, and watches you with the particular wariness of someone who has already fielded too many condolence calls that were not really about condolence.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-halloway-card",
+          "text": "Present yourself honestly — a friend of Aster's, asking about her husband's last weeks.",
+          "faculty": "influence",
+          "difficulty": 9,
+          "outcomes": {
+            "critical": "cc-act1-halloway-parlour",
+            "success": "cc-act1-halloway-parlour",
+            "partial": "cc-act1-halloway-doorstep",
+            "failure": "cc-act1-halloway-doorstep",
+            "fumble": "cc-act1-halloway-doorstep"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act1-halloway-parlour",
+      "act": 1,
+      "narrative": "Something in your honesty disarms her, and the careful composure slips just enough to let something real through. She admits she has read his diary since the funeral, cover to cover, twice. She will not show it to you — not yet, not to a stranger, whatever Aster's word is worth — but she will tell you this much: in his last weeks, Edmund kept, in her words, 'astronomer's hours, reversed.' He slept through the daylight and was awake and restless through the night, as though his body had decided the sun itself had become something to avoid. She does not know why. She says she has stopped trying to guess, because every guess she has made so far has frightened her.",
+      "cluesAvailable": [],
+      "onEnter": [
+        { "type": "disposition", "target": "cc-npc-halloway", "delta": 2 },
+        { "type": "flag", "target": "cc-halloway-trusts", "value": true }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-halloway-parlour-thread",
+          "text": "There is more of this case to pursue tonight.",
+          "outcomes": {
+            "critical": "cc-act1-crossroads",
+            "success": "cc-act1-crossroads",
+            "partial": "cc-act1-crossroads",
+            "failure": "cc-act1-crossroads",
+            "fumble": "cc-act1-crossroads"
+          }
+        },
+        {
+          "id": "cc-choice-halloway-parlour-rest",
+          "text": "Enough for one night.",
+          "outcomes": {
+            "critical": "cc-act1-interval",
+            "success": "cc-act1-interval",
+            "partial": "cc-act1-interval",
+            "failure": "cc-act1-interval",
+            "fumble": "cc-act1-interval"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act1-halloway-doorstep",
+      "act": 1,
+      "narrative": "Whatever warmth you had hoped to find does not arrive. Lady Halloway's composure hardens rather than softens, and propriety does the rest of the work for her — a widow, she reminds you, owes no explanations of her husband's private hours to a caller she has met precisely once. The door closes with a politeness more final than any slammed shutter. You leave with the clear sense that a second approach, properly made, might fare better — but it will need more standing than a stranger's introduction affords, and that standing is not yet yours to offer.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-halloway-doorstep-thread",
+          "text": "There is more of this case to pursue tonight.",
+          "outcomes": {
+            "critical": "cc-act1-crossroads",
+            "success": "cc-act1-crossroads",
+            "partial": "cc-act1-crossroads",
+            "failure": "cc-act1-crossroads",
+            "fumble": "cc-act1-crossroads"
+          }
+        },
+        {
+          "id": "cc-choice-halloway-doorstep-rest",
+          "text": "Enough for one night.",
+          "outcomes": {
+            "critical": "cc-act1-interval",
+            "success": "cc-act1-interval",
+            "partial": "cc-act1-interval",
+            "failure": "cc-act1-interval",
+            "fumble": "cc-act1-interval"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act1-ras-library",
+      "act": 1,
+      "narrative": "The Royal Astronomical Society's library is a hushed vault of bound proceedings and celestial atlases, and the clerk who fetches your requested volumes clearly regards a request for 1882 obituaries as a species of harmless eccentricity. You find what you came for eventually, filed under a name that means nothing to you until you cross-reference it against Aster's seating chart: chair one, the Society's own founding secretary, dead in 1885 — 'of age,' the obituary says, though the man was not yet sixty. It is the earliest death the chart accounts for, three years after the comet, and something about its placement, first in a sequence that has since accelerated, sits uneasily against everything else you have learned.",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-founder-death", "method": "exploration" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-ras-compare",
+          "text": "Compare the Society's published 1882 notices against what a private log ought to hold.",
+          "faculty": "reason",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "cc-act1-ras-stacks",
+            "success": "cc-act1-ras-stacks",
+            "partial": "cc-act1-crossroads",
+            "failure": "cc-act1-crossroads",
+            "fumble": "cc-act1-crossroads"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act1-ras-stacks",
+      "act": 1,
+      "narrative": "You work back through the Society's published proceedings for the whole of 1882, night by night, notice by notice, and the record is thinner than it has any right to be. Every observation the Aldebaran men logged that year found its way into print eventually — weather reports, magnitude estimates, the driest astronomical minutiae — except for one. The night of the comet itself, the night the founding wager was sworn, appears in the Society's index only as a date with nothing beneath it, as though the twelve of them had gone up to the dome, seen something, and agreed among themselves that whatever it was would never be written down where anyone else might read it.",
+      "cluesAvailable": [],
+      "onEnter": [
+        { "type": "flag", "target": "cc-knows-log-gap", "value": true }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-ras-stacks-thread",
+          "text": "There is more of this case to pursue tonight.",
+          "outcomes": {
+            "critical": "cc-act1-crossroads",
+            "success": "cc-act1-crossroads",
+            "partial": "cc-act1-crossroads",
+            "failure": "cc-act1-crossroads",
+            "fumble": "cc-act1-crossroads"
+          }
+        },
+        {
+          "id": "cc-choice-ras-stacks-rest",
+          "text": "Enough for one night.",
+          "outcomes": {
+            "critical": "cc-act1-interval",
+            "success": "cc-act1-interval",
+            "partial": "cc-act1-interval",
+            "failure": "cc-act1-interval",
+            "fumble": "cc-act1-interval"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act1-chair2-rooms",
+      "act": 1,
+      "narrative": "The landlady lets you in with obvious relief at having someone else take responsibility for the sealed rooms, and chair two's lodgings prove a bachelor's clutter of astronomical journals, unpaid bills, and half-finished correspondence — Mr. Ambrose Quill, you learn from the letters, dead of a fever the doctors could not properly name. In the washstand, behind a chipped basin, sits a squat brown bottle of patent tonic, half its label peeled away, the dregs crusted dark at the bottom. It is the sort of remedy sold on street corners with extravagant promises and a formula no chemist would sign his name to — the kind of thing a frightened, ailing man buys for himself and doses without ever suspecting the cure is worse than whatever ailed him.",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-quack-tonic", "method": "exploration" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-chair2-rooms-thread",
+          "text": "There is more of this case to pursue tonight.",
+          "outcomes": {
+            "critical": "cc-act1-crossroads",
+            "success": "cc-act1-crossroads",
+            "partial": "cc-act1-crossroads",
+            "failure": "cc-act1-crossroads",
+            "fumble": "cc-act1-crossroads"
+          }
+        },
+        {
+          "id": "cc-choice-chair2-rooms-rest",
+          "text": "Enough for one night.",
+          "outcomes": {
+            "critical": "cc-act1-interval",
+            "success": "cc-act1-interval",
+            "partial": "cc-act1-interval",
+            "failure": "cc-act1-interval",
+            "fumble": "cc-act1-interval"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act1-interval",
+      "act": 1,
+      "narrative": "You lay the dates out side by side on the desk at your lodgings, the way Aster laid them out beneath his seating chart, and the arithmetic does what arithmetic always does when you stop avoiding it: it tells the truth plainly. Chair two, then chair three five weeks later, then chair five a fortnight after that. The interval is shrinking each time, not by chance but by something that looks, on paper, disturbingly like a design. If the pattern holds, whoever or whatever comes for chair six will have far less warning than chair five was given — and chair five, you now know, was given none at all.\n\nThe club will not talk to a stranger about murder. It may, in time, talk to a guest.",
+      "cluesAvailable": [],
+      "onEnter": [
+        { "type": "flag", "target": "cc-interval-grasped", "value": true },
+        { "type": "composure", "delta": -1, "description": "The arithmetic of the dates is not kind" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-interval-act2",
+          "text": "Begin working the club itself.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    }
+  ]
+}

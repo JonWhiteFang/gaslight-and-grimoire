@@ -1,0 +1,15 @@
+{
+  "id": "the-comet-club",
+  "title": "The Comet Club",
+  "synopsis": "The twelve gentleman-astronomers of the Aldebaran Society are dying in the order they once sat to observe the comet of 1882. Three deaths in five weeks, each natural on its face. The eighth chair wants a detective at the table — which puts you in the seating order too.",
+  "acts": 3,
+  "firstScene": "cc-act1-dinner",
+  "facultyDistribution": {
+    "reason": 6,
+    "influence": 5,
+    "perception": 5,
+    "lore": 4,
+    "nerve": 4,
+    "vigor": 4
+  }
+}

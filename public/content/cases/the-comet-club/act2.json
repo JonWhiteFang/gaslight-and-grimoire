@@ -1,0 +1,1298 @@
+{
+  "scenes": [
+    {
+      "id": "cc-act2-hub",
+      "act": 2,
+      "narrative": "Aster's standing invitation makes the Aldebaran Society's rooms yours to haunt at any hour, and you take him up on it. The survivors have settled into new orbits since the dinner — Sloane at the sideboard more often than not, Sir Julius holding court in the reading room, Ost vanishing for hours toward the Hampstead dome and returning with chalk dust on his cuffs. Nobody here yet knows what you are. That will not last forever, but it has not run out tonight.\n\nThe club talks, if you let it. Every hour spent among these men in this room is an hour spent learning which of their orbits is worth following first.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-hub-sloane",
+          "text": "Call on Sloane.",
+          "outcomes": {
+            "critical": "cc-act2-sloane-study",
+            "success": "cc-act2-sloane-study",
+            "partial": "cc-act2-sloane-study",
+            "failure": "cc-act2-sloane-study",
+            "fumble": "cc-act2-sloane-study"
+          }
+        },
+        {
+          "id": "cc-choice-hub-moneylender",
+          "text": "Follow the smell of Sloane's money to its source.",
+          "requiresClue": "cc-clue-sash-weights",
+          "outcomes": {
+            "critical": "cc-act2-moneylender-den",
+            "success": "cc-act2-moneylender-den",
+            "partial": "cc-act2-moneylender-den",
+            "failure": "cc-act2-moneylender-den",
+            "fumble": "cc-act2-moneylender-den"
+          }
+        },
+        {
+          "id": "cc-choice-hub-chair6",
+          "text": "Watch Pemberton-Rhee's house — if the pattern holds, chair 6 is next.",
+          "requiresFlag": "cc-interval-grasped",
+          "outcomes": {
+            "critical": "cc-act2-chair6-watch",
+            "success": "cc-act2-chair6-watch",
+            "partial": "cc-act2-chair6-watch",
+            "failure": "cc-act2-chair6-watch",
+            "fumble": "cc-act2-chair6-watch"
+          }
+        },
+        {
+          "id": "cc-choice-hub-millbank",
+          "text": "The chaplain heard chair 2's last confession.",
+          "requiresClue": "cc-clue-quack-tonic",
+          "outcomes": {
+            "critical": "cc-act2-millbank-vestry",
+            "success": "cc-act2-millbank-vestry",
+            "partial": "cc-act2-millbank-vestry",
+            "failure": "cc-act2-millbank-vestry",
+            "fumble": "cc-act2-millbank-vestry"
+          }
+        },
+        {
+          "id": "cc-choice-hub-halloway",
+          "text": "Lady Halloway will receive you now.",
+          "requiresFlag": "cc-halloway-trusts",
+          "outcomes": {
+            "critical": "cc-act2-halloway-diary",
+            "success": "cc-act2-halloway-diary",
+            "partial": "cc-act2-halloway-diary",
+            "failure": "cc-act2-halloway-diary",
+            "fumble": "cc-act2-halloway-diary"
+          }
+        },
+        {
+          "id": "cc-choice-hub-halloway-cold",
+          "text": "Earn Lady Halloway's door a second time.",
+          "faculty": "influence",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "cc-act2-halloway-diary",
+            "success": "cc-act2-halloway-diary",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        },
+        {
+          "id": "cc-choice-hub-corven",
+          "text": "Corven drinks at the Lamb by four o'clock.",
+          "outcomes": {
+            "critical": "cc-act2-corven-rooms",
+            "success": "cc-act2-corven-rooms",
+            "partial": "cc-act2-corven-rooms",
+            "failure": "cc-act2-corven-rooms",
+            "fumble": "cc-act2-corven-rooms"
+          }
+        },
+        {
+          "id": "cc-choice-hub-chair3",
+          "text": "Chair 3's study stands as he left it. Ask his widow's leave to examine it.",
+          "outcomes": {
+            "critical": "cc-act2-chair3-study",
+            "success": "cc-act2-chair3-study",
+            "partial": "cc-act2-chair3-study",
+            "failure": "cc-act2-chair3-study",
+            "fumble": "cc-act2-chair3-study"
+          }
+        },
+        {
+          "id": "cc-choice-hub-chairs",
+          "text": "Make the round of the surviving chairs.",
+          "outcomes": {
+            "critical": "cc-act2-pemberton-rhee",
+            "success": "cc-act2-pemberton-rhee",
+            "partial": "cc-act2-pemberton-rhee",
+            "failure": "cc-act2-pemberton-rhee",
+            "fumble": "cc-act2-pemberton-rhee"
+          }
+        },
+        {
+          "id": "cc-choice-hub-hampstead",
+          "text": "Go up to Hampstead and the observatory.",
+          "outcomes": {
+            "critical": "cc-act2-hampstead-grounds",
+            "success": "cc-act2-hampstead-grounds",
+            "partial": "cc-act2-hampstead-grounds",
+            "failure": "cc-act2-hampstead-grounds",
+            "fumble": "cc-act2-hampstead-grounds"
+          }
+        },
+        {
+          "id": "cc-choice-hub-solicitors",
+          "text": "Something about Aster's timing itches. Visit his solicitors.",
+          "requiresClue": "cc-clue-founding-wager",
+          "outcomes": {
+            "critical": "cc-act2-solicitors",
+            "success": "cc-act2-solicitors",
+            "partial": "cc-act2-solicitors",
+            "failure": "cc-act2-solicitors",
+            "fumble": "cc-act2-solicitors"
+          }
+        },
+        {
+          "id": "cc-choice-hub-ost",
+          "text": "Dr. Ost has stopped sleeping on certain nights. Ask him why.",
+          "outcomes": {
+            "critical": "cc-act2-ost-study",
+            "success": "cc-act2-ost-study",
+            "partial": "cc-act2-ost-study",
+            "failure": "cc-act2-ost-study",
+            "fumble": "cc-act2-ost-study"
+          }
+        },
+        {
+          "id": "cc-choice-hub-midpoint",
+          "text": "Lay the murder out end to end.",
+          "requiresDeduction": "cc-deduction-one-true-murder",
+          "outcomes": {
+            "critical": "cc-act2-midpoint",
+            "success": "cc-act2-midpoint",
+            "partial": "cc-act2-midpoint",
+            "failure": "cc-act2-midpoint",
+            "fumble": "cc-act2-midpoint"
+          }
+        },
+        {
+          "id": "cc-choice-hub-summons",
+          "text": "Briggs's note arrives: the club gathers at Hampstead at the perihelion. Go.",
+          "requiresFlag": "cc-interval-grasped",
+          "outcomes": {
+            "critical": "cc-act3-eve",
+            "success": "cc-act3-eve",
+            "partial": "cc-act3-eve",
+            "failure": "cc-act3-eve",
+            "fumble": "cc-act3-eve"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-sloane-study",
+      "act": 2,
+      "narrative": "Sloane receives you in what he still calls his study, though the room has the threadbare correctness of a stage set — good decanters kept half full, a fire built up before you arrived, a cigar box offered with the flourish of a man demonstrating solvency rather than possessing it. He talks well, when he talks: club gossip, the wager, a fond anecdote about chair five that skirts wide of anything useful. It is a performance, and a practiced one, and beneath its polish you catch the same frayed-cuff economy Aster's dinner first showed you — a man dressing above what his purse allows, and dressing harder the closer you sit.\n\nHe watches your glass more than your face, refilling it before you ask, the attentiveness of a host who would rather you drink than think. Somewhere behind the performance is a man with debts, and debts, in a case built on a fortune waiting for the last survivor, are never merely private.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-sloane-press",
+          "text": "Name the moneylender and watch his face.",
+          "faculty": "influence",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "cc-act2-sloane-pressed",
+            "success": "cc-act2-sloane-pressed",
+            "partial": "cc-act2-sloane-stonewalled",
+            "failure": "cc-act2-sloane-stonewalled",
+            "fumble": "cc-act2-sloane-stonewalled"
+          }
+        },
+        {
+          "id": "cc-choice-sloane-ledger-route",
+          "text": "Withdraw and try his paper instead.",
+          "requiresFlag": "cc-sloane-pressed",
+          "outcomes": {
+            "critical": "cc-act2-sloane-ledger",
+            "success": "cc-act2-sloane-ledger",
+            "partial": "cc-act2-sloane-ledger",
+            "failure": "cc-act2-sloane-ledger",
+            "fumble": "cc-act2-sloane-ledger"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-sloane-pressed",
+      "act": 2,
+      "narrative": "You do not ask a question; you offer a name, quietly, the way one offers a card at whist — and something in Sloane's face comes apart before he can stop it. The cigar stalls halfway to his mouth. He recovers almost at once, laughing it off as club rumour, but the recovery is too fast and too loud, and he over-explains a payment nobody has accused him of making, a debt nobody has mentioned, dates that fit together too neatly for a man merely being slandered. He talks himself further into trouble with every sentence meant to talk himself out of it, until he seems to hear it too and stops, glass halfway refilled, the performance in ruins around him.\n\n'You should go,' he says, quite pleasantly, as though the last two minutes had not happened.",
+      "cluesAvailable": [],
+      "onEnter": [
+        { "type": "flag", "target": "cc-sloane-pressed", "value": true },
+        { "type": "suspicion", "target": "cc-npc-sloane", "delta": 2 }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-sloane-pressed-ledger",
+          "text": "His paper will tell what his mouth will not — try the ledger.",
+          "outcomes": {
+            "critical": "cc-act2-sloane-ledger",
+            "success": "cc-act2-sloane-ledger",
+            "partial": "cc-act2-sloane-ledger",
+            "failure": "cc-act2-sloane-ledger",
+            "fumble": "cc-act2-sloane-ledger"
+          }
+        },
+        {
+          "id": "cc-choice-sloane-pressed-return",
+          "text": "Leave him to compose himself and return to the club.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-sloane-stonewalled",
+      "act": 2,
+      "narrative": "The name lands and slides off. Sloane's smile does not so much as flicker; club courtesy, it turns out, is a better armor than composure ever was, a wall of good manners built specifically to survive exactly this sort of prying. He refills your glass, changes the subject to the weather over Hampstead, and asks after your own family with a warmth so evenly applied it might as well be a closed door with a brass knocker on it. Whatever is behind the manners stays behind them tonight.\n\nYou leave with nothing you did not bring, and the distinct sense that Sloane has had practice at this particular performance before you ever arrived to test it.",
+      "cluesAvailable": [],
+      "onEnter": [
+        { "type": "suspicion", "target": "cc-npc-sloane", "delta": 1 }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-sloane-stonewalled-return",
+          "text": "There are other ways to Sloane's money.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-sloane-ledger",
+      "act": 2,
+      "narrative": "Rattled, Sloane is easier to leave alone with his own study than he ought to be, and an hour is more than enough. His accounts sit in a locked desk whose lock has not troubled anyone seriously in years; behind it, the ledgers tell a plainer story than anything he was willing to say aloud. Columns of outgoing sums to an address you do not recognize but will learn to. Interest compounding on interest, the particular arithmetic of a man drowning slowly and pretending, even to himself, that he is only wading. And then, abruptly, the payments stop — a full column that simply ends, the week, you will realize on checking the date against Aster's chart, that chair five went out a landing window that had been prepared for him days in advance.\n\nA man's debts do not usually end themselves. Something ended these.",
+      "cluesAvailable": [
+        {
+          "clueId": "cc-clue-sloane-debts",
+          "method": "check",
+          "requiresFaculty": { "faculty": "reason", "minimum": 3 }
+        }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-sloane-ledger-return",
+          "text": "Return to the club with what the ledger shows.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-moneylender-den",
+      "act": 2,
+      "narrative": "The address the sash weights led you toward turns out to be a chandler's shop in a narrow street off the docks, unremarkable from the pavement, and a Court of Smoke counting-house from the moment its back room door swings shut behind you. No serpent is painted anywhere in sight; there does not need to be. The man behind the ledger desk has the unhurried patience of someone who has never once needed to raise his voice to collect what he is owed, and he regards your arrival with the mild interest of a merchant assessing a new customer rather than the wariness of a criminal assessing a threat.\n\n'Sloane,' he says, before you have finished asking, in the tone of a man confirming rather than revealing. 'Everyone eventually wants to know about Sloane.' The information, his manner makes plain, is a commodity like any other here, and commodities have prices — the only question is which currency you intend to pay in.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-lender-pay",
+          "text": "Buy the information outright.",
+          "outcomes": {
+            "critical": "cc-act2-moneylender-deal",
+            "success": "cc-act2-moneylender-deal",
+            "partial": "cc-act2-moneylender-deal",
+            "failure": "cc-act2-moneylender-deal",
+            "fumble": "cc-act2-moneylender-deal"
+          }
+        },
+        {
+          "id": "cc-choice-lender-lean",
+          "text": "Lean: the Yard would love this address.",
+          "faculty": "nerve",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "cc-act2-moneylender-deal",
+            "success": "cc-act2-moneylender-deal",
+            "partial": "cc-act2-moneylender-price",
+            "failure": "cc-act2-moneylender-price",
+            "fumble": "cc-act2-moneylender-price"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-moneylender-deal",
+      "act": 2,
+      "narrative": "Money changes hands, and the ledger-keeper opens, with the professional indifference of a man discussing the weather, an account that has nothing to do with weather at all. Sloane, it transpires, has owed this house a punishing sum for the better part of a year, an arrangement of increasing regularity and increasingly late payments — right up until a lump sum arrived, unexpectedly and entire, that settled the debt in full some five weeks past. He names the date without prompting, because to him it is only bookkeeping. You recognize it before he finishes speaking. It is the week chair five went out his landing window.\n\n'A man doesn't come into that kind of money honestly,' the ledger-keeper says, closing the book, 'but that's your trade to worry over, not mine.'",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-sloane-debts", "method": "dialogue" }
+      ],
+      "onEnter": [
+        { "type": "reputation", "target": "Court of Smoke", "delta": 2 }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-moneylender-deal-return",
+          "text": "Return to the club with what the Court has told you.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-moneylender-price",
+      "act": 2,
+      "narrative": "The Yard's name does not frighten anyone in this room, and the attempt to make it do so costs you rather than him. The ledger-keeper's patience thins to something colder; he gives you the same information — the punishing debt, the lump sum that closed it out the week chair five died — but names a price you did not choose and cannot easily refuse: a favour, unspecified, owed and collectable at a time and in a form of the Court's choosing. He does not write it down. Men like this do not need to.\n\nYou leave with the fact you came for and something you did not want to leave with — an obligation with no fixed shape yet, hanging over you the way debt hangs over every man who has ever sat across a table like the one you just left.",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-sloane-debts", "method": "dialogue" }
+      ],
+      "onEnter": [
+        { "type": "reputation", "target": "Court of Smoke", "delta": -2 },
+        { "type": "composure", "delta": -1, "description": "You leave owing the Court something unnamed" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-moneylender-price-return",
+          "text": "Return to the club, the debt unpaid behind you.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-chair6-watch",
+      "act": 2,
+      "narrative": "Sir Julius Pemberton-Rhee's house stands dark and respectable across a square gone quiet after midnight, and you take up a watcher's post in the shadow of the plane trees opposite, coat collar up against the damp. If the interval holds — and Aster's shrinking dates say it will, more surely with every week that passes — chair six is due, and due sooner than the pattern's earlier victims were given warning. The house gives away nothing for hours: a light in an upper window, a servant's shadow crossing a curtain, the ordinary small movements of a household that has no idea it is being watched, or guarded, depending on which of those turns out to be true.\n\nThe cold works into your knees before it works into your patience, and somewhere around the second or third hour a stillness settles over the square that has nothing to do with the weather.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-watch-spot",
+          "text": "Hold the watch through the small hours.",
+          "faculty": "perception",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "cc-act2-rooftop-pursuit",
+            "success": "cc-act2-rooftop-pursuit",
+            "partial": "cc-act2-weir-lost",
+            "failure": "cc-act2-weir-lost",
+            "fumble": "cc-act2-weir-lost"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-rooftop-pursuit",
+      "act": 2,
+      "narrative": "A shape detaches itself from the guttering above Pemberton-Rhee's roofline sometime past two — unhurried, sure-footed, moving along the leads with the same practiced ease the chair-five housekeeper's girl once described to you. You are moving before you have finished deciding to, out through the square and up a drainpipe that groans under your weight, onto slates still slick with the evening's rain. The figure hears you and breaks into a run along the ridge line, and the chase that follows is conducted forty feet above the pavement, across a townscape of chimney pots and party walls never built to hold two men sprinting across them in the dark.",
+      "ambientAudio": "ambient-london-street",
+      "cluesAvailable": [],
+      "choices": [],
+      "encounter": {
+        "isSupernatural": false,
+        "rounds": [
+          {
+            "roundNumber": 1,
+            "isSupernatural": false,
+            "choices": [
+              {
+                "id": "cc-enc-roof-chase",
+                "text": "Take the parapet after him.",
+                "faculty": "vigor",
+                "difficulty": 11,
+                "outcomes": {
+                  "critical": "cc-act2-weir-caught",
+                  "success": "cc-act2-weir-caught",
+                  "partial": "cc-act2-weir-lost",
+                  "failure": "cc-act2-weir-lost",
+                  "fumble": "cc-act2-weir-lost"
+                },
+                "encounterDamage": {
+                  "vitalityDelta": -2
+                }
+              },
+              {
+                "id": "cc-enc-roof-cutoff",
+                "text": "Read the roofline — drop to the mews and cut him off.",
+                "faculty": "perception",
+                "difficulty": 10,
+                "outcomes": {
+                  "critical": "cc-act2-weir-caught",
+                  "success": "cc-act2-weir-caught",
+                  "partial": "cc-act2-weir-lost",
+                  "failure": "cc-act2-weir-lost",
+                  "fumble": "cc-act2-weir-lost"
+                },
+                "encounterDamage": {
+                  "vitalityDelta": -1
+                }
+              },
+              {
+                "id": "cc-enc-roof-break",
+                "text": "Let him go — mark his line of flight.",
+                "isEscapePath": true,
+                "outcomes": {
+                  "success": "cc-act2-weir-lost"
+                }
+              }
+            ]
+          },
+          {
+            "roundNumber": 2,
+            "isSupernatural": false,
+            "choices": [
+              {
+                "id": "cc-enc-roof-leap",
+                "text": "Follow him across the gap.",
+                "faculty": "vigor",
+                "difficulty": 12,
+                "outcomes": {
+                  "critical": "cc-act2-weir-caught",
+                  "success": "cc-act2-weir-caught",
+                  "partial": "cc-act2-weir-lost",
+                  "failure": "cc-act2-weir-lost",
+                  "fumble": "cc-act2-weir-lost"
+                },
+                "encounterDamage": {
+                  "vitalityDelta": -2
+                }
+              },
+              {
+                "id": "cc-enc-roof-anticipate",
+                "text": "He must come down at the corner stair — be there first.",
+                "faculty": "perception",
+                "difficulty": 12,
+                "outcomes": {
+                  "critical": "cc-act2-weir-caught",
+                  "success": "cc-act2-weir-caught",
+                  "partial": "cc-act2-weir-lost",
+                  "failure": "cc-act2-weir-lost",
+                  "fumble": "cc-act2-weir-lost"
+                },
+                "encounterDamage": {
+                  "vitalityDelta": -1
+                }
+              },
+              {
+                "id": "cc-enc-roof-abandon",
+                "text": "Break off — no testimony is worth the drop.",
+                "isEscapePath": true,
+                "outcomes": {
+                  "success": "cc-act2-weir-lost"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cc-act2-weir-caught",
+      "act": 2,
+      "narrative": "He goes down hard on the leads, whatever brought you to this rooftop — pursuit or a Court of Smoke informant's directions — finally spent its advantage, and there is nowhere left along this stretch of slate for him to run. Winded, cornered, weighing the drop against the alternative, he chooses talking. His name is Weir, he says, when pressed, and he was paid — well paid, in fact, better than the work seemed to warrant at the time he took it — for exactly one death among the three you have been chasing. Not the pattern entire. One killing, staged with real care to look like it belonged inside a sequence he had no hand in starting and no idea what was driving.\n\n'I don't know what's doing the other two,' he says, and something in the way he says it, glancing once toward the dark beyond the rooftops, suggests he would rather not know either. 'I only know what I was paid for. And I was paid for the window.'",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-weir-instructions", "method": "dialogue" }
+      ],
+      "onEnter": [
+        { "type": "suspicion", "target": "cc-npc-weir", "delta": 2 }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-weir-caught-return",
+          "text": "Return to the club with Weir's account.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-weir-lost",
+      "act": 2,
+      "narrative": "He goes over the far parapet and down some drop or stair you never find in the dark, and by the time you have picked your way back down to the square there is nothing left of him but the memory of how well he moved — the unhurried, practiced ease of a man who has crossed these roofs before and expects to cross them again. That practice is itself a kind of testimony. Whoever hired him did not hire an amateur, and men who work rooftops for a living answer to somebody, a paymaster who arranges these things through channels you already have reason to suspect.\n\nThe trail is not dead. It has simply gone underground, to the sort of counting-house where information changes hands for a price.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-lost-lender",
+          "text": "The Court brokered this hire. Go back to the counting-house and buy the rest.",
+          "requiresClue": "cc-clue-sloane-debts",
+          "outcomes": {
+            "critical": "cc-act2-weir-caught",
+            "success": "cc-act2-weir-caught",
+            "partial": "cc-act2-weir-caught",
+            "failure": "cc-act2-weir-caught",
+            "fumble": "cc-act2-weir-caught"
+          }
+        },
+        {
+          "id": "cc-choice-lost-return",
+          "text": "Return to the club for now.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-millbank-vestry",
+      "act": 2,
+      "narrative": "The Reverend Dr. Millbank receives you in the cold vestry of his parish church, a room that smells of candle wax and the particular dust of unused hymnals, and speaks of chair two's last confession with the careful reluctance of a man weighing a dead parishioner's trust against a living investigation's need. He does not break the seal of it outright — he is too scrupulous for that — but he tells you enough, framing it as pastoral observation rather than confidence betrayed. Ambrose Quill, he says, chair two, had convinced himself for months that someone meant to poison him. He had grown so certain of it, so consumed by the fear, that he had taken to dosing himself against imagined threats with whatever patent remedy promised protection.\n\n'He feared poison so much,' Millbank says quietly, 'that he administered it. I told him as much, near the end, and I do not think he believed me. I am not sure I entirely believed myself.' The tonic in the sealed rooms, the arsenic in its dregs — not murder dressed as accident, but terror dressed as a cure, self-administered by a man too frightened to notice the remedy was worse than whatever he thought was hunting him.",
+      "cluesAvailable": [],
+      "onEnter": [
+        { "type": "flag", "target": "cc-tonic-dissolved", "value": true }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-millbank-return",
+          "text": "Return to the club with what Millbank has told you.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-halloway-diary",
+      "act": 2,
+      "narrative": "Lady Halloway does not hand the diary across the table — she never has, and there is no reason tonight should be the exception. Instead she opens it herself, at a ribboned page, and reads aloud in a voice that has learned, over three weeks of mourning, to say difficult things steadily. Her husband's hand fills the last pages in a script that grows smaller and more hurried as the entries go on, a man documenting his own unraveling with the same precision he once gave the sky. He wrote of sleeping through daylight and waking at dusk as though his body had reset itself to some other clock. He wrote, twice, of 'his number coming round' — the phrase appears first as a joke, in the margin of an ordinary entry, and the second time entirely without one.\n\nShe closes the book before you can ask to hold it. 'He would not have thanked you for troubling me over it,' she says, 'but you did not come here for his thanks, and neither did I keep it for his sake alone.' The diary stays in her lap, but its contents, once read aloud, cannot be unheard.",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-halloway-diary", "method": "dialogue" }
+      ],
+      "onEnter": [
+        { "type": "flag", "target": "cc-halloway-trusts", "value": true }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-halloway-diary-return",
+          "text": "Thank her and return to the club.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-chair3-study",
+      "act": 2,
+      "narrative": "Chair three's study has been left as he died in it — not from sentiment alone, the housekeeper tells you at the door, but because Lady Halloway has not yet found the courage to have it touched. Household staff admit you on the strength of your card and Aster's name alone; there is no leave to earn here, only a widow's grief that has not yet hardened into refusal. The room itself explains a good deal before you have opened a single drawer. Heavy blackout curtains, fitted with a carpenter's care, seal every window against daylight. A man does not go to that trouble unless daylight has become something to be kept out.\n\nThe observation diary sits in the desk's shallow drawer, unlocked, as though he never imagined anyone would need to hide it from him. His last entries count backward rather than forward — not toward some future date but away from one already fixed, the hand growing smaller and the intervals between entries growing shorter, the way a man writes who is listening for footsteps on a stair. You find yourself, before you have finished reading, doing the same small arithmetic he was doing: counting down.",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-halloway-diary", "method": "exploration" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-study-return",
+          "text": "Leave the desk as you found it and return to the club.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        },
+        {
+          "id": "cc-choice-study-condole",
+          "text": "Carry the diary's weight to Lady Halloway herself.",
+          "outcomes": {
+            "critical": "cc-act2-halloway-diary",
+            "success": "cc-act2-halloway-diary",
+            "partial": "cc-act2-halloway-diary",
+            "failure": "cc-act2-halloway-diary",
+            "fumble": "cc-act2-halloway-diary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-corven-rooms",
+      "act": 2,
+      "narrative": "You find Corven at his usual table in the Lamb, three brandies deep by the look of the colour in his face and the deliberate care with which he sets each glass down. He greets you with the loose, relieved warmth of a man glad of company that is not asking him anything yet, and talks freely enough about the club, the wager, the weather — anything, you begin to notice, that is not the comet itself. Every approach to that subject he steers gently but firmly aside, the practiced redirection of a man who has had a great deal of private time to build the habit.\n\nHe is, of the surviving chairs, the easiest company Aster's dinner produced, and the most carefully guarded on exactly one subject. You will have to choose your angle of approach.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-corven-steer",
+          "text": "Steer him to the night of the comet.",
+          "faculty": "influence",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "cc-act2-corven-confides",
+            "success": "cc-act2-corven-confides",
+            "partial": "cc-act2-corven-maudlin",
+            "failure": "cc-act2-corven-maudlin",
+            "fumble": "cc-act2-corven-maudlin"
+          }
+        },
+        {
+          "id": "cc-choice-corven-lore",
+          "text": "Talk astronomy until the amateur in him surfaces.",
+          "faculty": "lore",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "cc-act2-corven-confides",
+            "success": "cc-act2-corven-confides",
+            "partial": "cc-act2-corven-maudlin",
+            "failure": "cc-act2-corven-maudlin",
+            "fumble": "cc-act2-corven-maudlin"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-corven-confides",
+      "act": 2,
+      "narrative": "It comes out slowly, and then all at once, the way confessions do once the first sentence has broken the seal. On the comet night, Corven had his turn at the eyepiece scheduled and ready — he had waited weeks for it, rehearsed the coordinates until he could have found them blind — when a telegram arrived calling him away on a family matter that turned out, in the end, to be nothing at all, a misdirected wire meant for a man of the same surname three streets over. By the time the error was untangled, his turn had passed to the next chair in the rotation, and he never did look through the eyepiece that night.\n\n'I have spent forty years,' he says, staring into what is left of his brandy, 'being grateful for another man's mistake with a telegraph form. I did not look. Whatever the rest of them saw — I did not see it. And I begin to wonder, God forgive me, whether that is the reason I am still here to be ashamed of it.' The shame and the luck sit together in him uneasily, and he seems, for the first time all evening, entirely sober.",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-corven-absence", "method": "dialogue" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-corven-confides-return",
+          "text": "Leave him to his brandy and return to the club.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-corven-maudlin",
+      "act": 2,
+      "narrative": "The steering fails, or the astronomy fails to draw him out, and what you get instead is Corven's grief without its cause — he weeps, quite suddenly and without much dignity, about being the one spared, about surviving into a chair that ought by rights to have been someone else's turn to fill, and cannot or will not say what exactly he thinks he has been spared from. Ask him directly and he only shakes his head and reaches for the bottle. Whatever sits behind the tears has not yet found its way to words, and pressing further only drives it deeper.\n\nHe is not being difficult on purpose. He is a man standing very close to something he cannot look at squarely, and tonight, evidently, is not the night he manages it.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-corven-maudlin-again",
+          "text": "Order another and wait.",
+          "outcomes": {
+            "critical": "cc-act2-corven-rooms",
+            "success": "cc-act2-corven-rooms",
+            "partial": "cc-act2-corven-rooms",
+            "failure": "cc-act2-corven-rooms",
+            "fumble": "cc-act2-corven-rooms"
+          }
+        },
+        {
+          "id": "cc-choice-corven-maudlin-leave",
+          "text": "Leave him to it and return to the club.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-pemberton-rhee",
+      "act": 2,
+      "narrative": "Sir Julius Pemberton-Rhee, chair six, receives you from behind a household arrangement that has quietly reorganized itself around his terror: food-tasters engaged for a man of no particular rank or fortune to warrant them, a will rewritten twice in as many months, and a manner so brittle with fear that your questions feel, more than once, like the final straw threatening to snap something already strained past its measure. He does not so much answer as testify, in the overwrought manner of a man rehearsing his own defense before a court that has not yet convened, offering more than you ask in the hope that volume might substitute for the composure he no longer has.\n\nHe watches you the whole time the way a man watches a physician he does not entirely trust to tell him the truth about his own prognosis, and your presence, however carefully you manage it, plainly unsettles rather than reassures him.",
+      "cluesAvailable": [],
+      "onEnter": [
+        {
+          "type": "suspicion",
+          "target": "cc-npc-pemberton-rhee",
+          "delta": -1,
+          "description": "His guard, such as it was, gives way entirely"
+        }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-pemberton-feather",
+          "text": "The youngest member has opinions he is eager to share.",
+          "outcomes": {
+            "critical": "cc-act2-featherstonehaugh",
+            "success": "cc-act2-featherstonehaugh",
+            "partial": "cc-act2-featherstonehaugh",
+            "failure": "cc-act2-featherstonehaugh",
+            "fumble": "cc-act2-featherstonehaugh"
+          }
+        },
+        {
+          "id": "cc-choice-pemberton-return",
+          "text": "Leave Sir Julius to his tasters and return to the club.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-featherstonehaugh",
+      "act": 2,
+      "narrative": "Featherstonehaugh, the youngest of the surviving chairs by two decades and the most convinced of his own rationalism, receives you in the reading room with the particular energy of a man who has been waiting for someone to agree with him. His campaign of the moment is the 1882 observation log, which he wants burned, or at least buried, on the grounds that its existence is an embarrassment to a Society that ought to be remembered for astronomy rather than for whatever superstitious nonsense a generation of old men convinced themselves they had witnessed through a telescope forty years ago.\n\n'It does the Society no credit,' he says, 'and it does the dead no service either. Let it go quietly into a fire, and let the club be remembered for its science.' He plainly expects you to see the sense of it, and just as plainly has not considered that the log he wants destroyed might be the one document capable of explaining why three of his fellow members are dead.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-feather-side",
+          "text": "Agree the log is a liability — and offer to examine it first.",
+          "npcEffect": { "npcId": "cc-npc-featherstonehaugh", "dispositionDelta": 2, "suspicionDelta": 0 },
+          "outcomes": {
+            "critical": "cc-act2-hampstead-grounds",
+            "success": "cc-act2-hampstead-grounds",
+            "partial": "cc-act2-hampstead-grounds",
+            "failure": "cc-act2-hampstead-grounds",
+            "fumble": "cc-act2-hampstead-grounds"
+          }
+        },
+        {
+          "id": "cc-choice-feather-oppose",
+          "text": "Tell him destroying evidence is a poor kind of rationalism.",
+          "npcEffect": { "npcId": "cc-npc-featherstonehaugh", "dispositionDelta": -2, "suspicionDelta": 1 },
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-hampstead-grounds",
+      "act": 2,
+      "narrative": "The Society's observatory sits on its hill above Hampstead the way it has for decades, a dome of weathered copper gone green with age, ringed by grounds that some long-dead patron laid out for contemplation rather than utility. Briggs's lodge shows a lamp burning at this hour, the only sign of life about the place; the dome itself stands dark and shuttered, silent in the way of a building that has been locked up properly rather than merely abandoned. You can feel, walking the gravel path up from the gate, the particular hush that settles over any place built for looking at the sky — a hush that tonight, for reasons you cannot yet name, does not feel entirely restful.\n\nThe grounds offer more than one direction worth taking, and Briggs's lamp suggests he, at least, is awake to answer a question or two.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-grounds-briggs",
+          "text": "Try the lodge and Briggs's lamp.",
+          "outcomes": {
+            "critical": "cc-act2-briggs-lodge",
+            "success": "cc-act2-briggs-lodge",
+            "partial": "cc-act2-briggs-lodge",
+            "failure": "cc-act2-briggs-lodge",
+            "fumble": "cc-act2-briggs-lodge"
+          }
+        },
+        {
+          "id": "cc-choice-grounds-log",
+          "text": "Go up to the dome and the private log.",
+          "outcomes": {
+            "critical": "cc-act2-observatory-log",
+            "success": "cc-act2-observatory-log",
+            "partial": "cc-act2-observatory-log",
+            "failure": "cc-act2-observatory-log",
+            "fumble": "cc-act2-observatory-log"
+          }
+        },
+        {
+          "id": "cc-choice-grounds-night",
+          "text": "Come back on one of Briggs's marked nights.",
+          "requiresClue": "cc-clue-briggs-nights",
+          "outcomes": {
+            "critical": "cc-act2-dome-night",
+            "success": "cc-act2-dome-night",
+            "partial": "cc-act2-dome-night",
+            "failure": "cc-act2-dome-night",
+            "fumble": "cc-act2-dome-night"
+          }
+        },
+        {
+          "id": "cc-choice-grounds-return",
+          "text": "Leave the hill and return to the club.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-briggs-lodge",
+      "act": 2,
+      "narrative": "Briggs keeps the lodge the way he keeps everything about the observatory — spare, exact, and disinclined to explain itself. He is oiling a telescope tonight, a fine instrument that by his own account no member has been permitted to touch in years, working the mechanism with the unhurried attention of a man who has done this a thousand times and expects to do it a thousand more. He answers your questions in short, careful sentences, but he does not turn you away, and on the desk beside him, half-hidden under a folded newspaper, sits a slim almanac filled with dates in his own cramped hand.\n\nPressed on it, he admits, reluctantly, that the dome is 'worked' — his word, offered without further definition — on certain nights of the year, nights he has learned to mark down and, increasingly, to avoid.",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-briggs-nights", "method": "dialogue" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-briggs-return",
+          "text": "Thank Briggs and step back out onto the grounds.",
+          "outcomes": {
+            "critical": "cc-act2-hampstead-grounds",
+            "success": "cc-act2-hampstead-grounds",
+            "partial": "cc-act2-hampstead-grounds",
+            "failure": "cc-act2-hampstead-grounds",
+            "fumble": "cc-act2-hampstead-grounds"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-observatory-log",
+      "act": 2,
+      "narrative": "The private log sits under glass in the dome's small anteroom, the Society's own record of the comet night, kept apart from the published account for reasons no one has bothered to explain to a mere guest. It reads, for the most part, as you would expect — coordinates, weather notes, the ordinary business of twelve men and a telescope. Then, three pages from the entry you are looking for, the record simply stops mid-sentence: a page has been razored out, cleanly, close to the spine, leaving nothing behind but a thin pale scar of paper and the abrupt silence of a record that knows more than it is telling.\n\nSomeone wanted that page gone badly enough to cut rather than tear it. That kind of care suggests the page went somewhere rather than nowhere.",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-1882-log", "method": "exploration" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-log-search",
+          "text": "Search the founder's effects for the razored page.",
+          "requiresClue": "cc-clue-1882-log",
+          "faculty": "perception",
+          "difficulty": 12,
+          "outcomes": {
+            "critical": "cc-act2-razored-found",
+            "success": "cc-act2-razored-found",
+            "partial": "cc-act2-razored-eluded",
+            "failure": "cc-act2-razored-eluded",
+            "fumble": "cc-act2-razored-eluded"
+          }
+        },
+        {
+          "id": "cc-choice-log-lore",
+          "text": "Reason it as an archivist: where does a careful man hide what he cannot destroy?",
+          "requiresClue": "cc-clue-1882-log",
+          "faculty": "reason",
+          "difficulty": 12,
+          "outcomes": {
+            "critical": "cc-act2-razored-found",
+            "success": "cc-act2-razored-found",
+            "partial": "cc-act2-razored-eluded",
+            "failure": "cc-act2-razored-eluded",
+            "fumble": "cc-act2-razored-eluded"
+          }
+        },
+        {
+          "id": "cc-choice-log-return",
+          "text": "Leave the log and step back outside.",
+          "outcomes": {
+            "critical": "cc-act2-hampstead-grounds",
+            "success": "cc-act2-hampstead-grounds",
+            "partial": "cc-act2-hampstead-grounds",
+            "failure": "cc-act2-hampstead-grounds",
+            "fumble": "cc-act2-hampstead-grounds"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-razored-found",
+      "act": 2,
+      "narrative": "It is not in the log room, and never was — but a careful man does not destroy what he considers evidence, only hides it from casual eyes, and the founder was nothing if not careful. You find it, finally, folded small and pressed flat between the pages of his unread Bible, the one book in his effects certain never to be opened by anyone still living who knew him. Unfolded, the page shows the missing night's true entry: not the comet at all, but something crossing between it and the Earth, sketched in a hand trying and failing to render an angular, wrong-jointed shape that the pencil kept sliding away from, as though the eye that observed it and the hand that drew it could not entirely agree on what they had seen.\n\nThe sketch is only ink on paper, and you tell yourself so twice, looking away from it both times before you manage to hold your gaze steady on the page.",
+      "cluesAvailable": [],
+      "onEnter": [
+        { "type": "discoverClue", "target": "cc-clue-razored-page" },
+        { "type": "composure", "delta": -1, "description": "The sketch is only ink, and you look away from it twice" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-razored-found-return",
+          "text": "Fold the page away and step back outside.",
+          "outcomes": {
+            "critical": "cc-act2-hampstead-grounds",
+            "success": "cc-act2-hampstead-grounds",
+            "partial": "cc-act2-hampstead-grounds",
+            "failure": "cc-act2-hampstead-grounds",
+            "fumble": "cc-act2-hampstead-grounds"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-razored-eluded",
+      "act": 2,
+      "narrative": "The founder's effects yield nothing tonight — no folded page, no hidden drawer, nothing but the ordinary clutter of a dead man's papers giving up none of its secrets to a search conducted, you begin to suspect, in the wrong room entirely. But a razored page does not simply cease to exist; it travels, and it travels toward wherever its remover felt safest keeping it. The founder himself is the obvious thread left untugged — where, exactly, did the man who kept this observatory's earliest secrets finally die, and what became of his private papers afterward?\n\nThe log room has told you what it can. The rest of the answer, if it exists, is somewhere you have not yet looked.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-razored-eluded-again",
+          "text": "Search again with fresh eyes.",
+          "outcomes": {
+            "critical": "cc-act2-observatory-log",
+            "success": "cc-act2-observatory-log",
+            "partial": "cc-act2-observatory-log",
+            "failure": "cc-act2-observatory-log",
+            "fumble": "cc-act2-observatory-log"
+          }
+        },
+        {
+          "id": "cc-choice-razored-eluded-return",
+          "text": "Give it up for tonight and step back outside.",
+          "outcomes": {
+            "critical": "cc-act2-hampstead-grounds",
+            "success": "cc-act2-hampstead-grounds",
+            "partial": "cc-act2-hampstead-grounds",
+            "failure": "cc-act2-hampstead-grounds",
+            "fumble": "cc-act2-hampstead-grounds"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-ost-study",
+      "act": 2,
+      "narrative": "Dr. Ost receives you in a study cluttered with the honest instruments of his profession — slide rules, ephemeris tables, a battered orrery missing one of its outer moons — and something in his manner, from the moment you enter, suggests a man half-hoping to be caught out rather than believed. He has the careful, over-precise speech of a scientist defending a position he no longer entirely trusts, correcting himself twice before finishing a sentence, and when the conversation turns toward the observatory and its recent oddities, he goes very still in the particular way of a man deciding, in real time, whether this is finally the visitor he can afford to tell the truth.\n\nWhat you bring to this conversation — a page, a fact he already knows you know, or nothing at all but your own persistence — will decide which Ost you get to speak with tonight.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-ost-show",
+          "text": "Show him what you hold and ask for the figure.",
+          "requiresFlag": "cc-knows-log-gap",
+          "outcomes": {
+            "critical": "cc-act2-ost-confides",
+            "success": "cc-act2-ost-confides",
+            "partial": "cc-act2-ost-confides",
+            "failure": "cc-act2-ost-confides",
+            "fumble": "cc-act2-ost-confides"
+          }
+        },
+        {
+          "id": "cc-choice-ost-page",
+          "text": "Lay the razored page on his desk.",
+          "requiresClue": "cc-clue-razored-page",
+          "outcomes": {
+            "critical": "cc-act2-ost-confides",
+            "success": "cc-act2-ost-confides",
+            "partial": "cc-act2-ost-confides",
+            "failure": "cc-act2-ost-confides",
+            "fumble": "cc-act2-ost-confides"
+          }
+        },
+        {
+          "id": "cc-choice-ost-general",
+          "text": "Press him with nothing in hand.",
+          "faculty": "influence",
+          "difficulty": 13,
+          "outcomes": {
+            "critical": "cc-act2-ost-confides",
+            "success": "cc-act2-ost-confides",
+            "partial": "cc-act2-ost-evasive",
+            "failure": "cc-act2-ost-evasive",
+            "fumble": "cc-act2-ost-evasive"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-ost-confides",
+      "act": 2,
+      "narrative": "Whatever you brought is enough, and Ost's caution breaks all at once, the relief of it plain on his face even as the substance of what he says grows steadily less comfortable. He has been recomputing, he tells you, quietly and at length, working nights he does not report to the Society because the figures embarrass the astronomer in him even as they convince the rest of him. The object the founder sketched, whatever it was, was not a comet and does not behave like one — but it does behave like something periodic, something with an orbit, and Ost's careful recalculation places its next approach to perihelion uncomfortably close at hand rather than safely in some distant future.\n\n'A comet returns and we call it beautiful,' he says, not quite meeting your eyes. 'I do not know what word we are meant to use for this one.' He does not offer an answer. He offers you the number instead, and lets you draw your own conclusions from it.",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-ost-period", "method": "dialogue" }
+      ],
+      "onEnter": [
+        { "type": "flag", "target": "cc-ost-confided", "value": true }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-ost-confides-return",
+          "text": "Leave Ost to his figures and return to the club.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-ost-evasive",
+      "act": 2,
+      "narrative": "Pressed with nothing to show him, Ost retreats into method — talk of margins of error, of provisional figures not yet fit for a layman's ears, of the proper caution a scientist owes an unproven hypothesis before he commits it to another person's imagination. It is not quite a lie, and it is not quite the truth either; it is the sound of a careful man declining, for want of anything concrete placed in front of him, to be the first to say the frightening thing aloud.\n\nHe will talk, you suspect, to someone who brings him proof rather than merely persistence. Tonight is not that occasion.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-ost-evasive-return",
+          "text": "Leave him to his caution and return to the club.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-dome-night",
+      "act": 2,
+      "narrative": "You come back on one of Briggs's marked nights and find the dome, against every rule of the locked and shuttered building you toured by daylight, standing open to the sky — the great slit drawn back, the refractor swung to some bearing of its own choosing, and not a living soul anywhere about to have opened it. The instrument moves as you watch, by degrees too small to catch in the act and too large to have happened on their own, tracking something across a patch of sky that shows, to your own eye, nothing at all. The cold up here has a different quality than the cold on the grounds below, a stillness that settles into the copper dome and does not so much as stir when you cross the threshold.\n\nWhatever works this instrument on Briggs's marked nights is working it now, and you are no longer merely observing it from the lodge window.",
+      "ambientAudio": "ambient-observatory-night",
+      "cluesAvailable": [],
+      "choices": [],
+      "encounter": {
+        "isSupernatural": true,
+        "rounds": [
+          {
+            "roundNumber": 1,
+            "isSupernatural": true,
+            "choices": [
+              {
+                "id": "cc-enc-dome-hold",
+                "text": "Hold your ground and observe what works the dome.",
+                "faculty": "nerve",
+                "difficulty": 12,
+                "outcomes": {
+                  "critical": "cc-act2-dome-witnessed",
+                  "success": "cc-act2-dome-witnessed",
+                  "partial": "cc-act2-dome-fled",
+                  "failure": "cc-act2-dome-fled",
+                  "fumble": "cc-act2-dome-fled"
+                },
+                "encounterDamage": {
+                  "composureDelta": -2,
+                  "vitalityDelta": -1
+                }
+              },
+              {
+                "id": "cc-enc-dome-name",
+                "text": "Recite the constellations — order the sky back into a map.",
+                "faculty": "lore",
+                "difficulty": 11,
+                "outcomes": {
+                  "critical": "cc-act2-dome-witnessed",
+                  "success": "cc-act2-dome-witnessed",
+                  "partial": "cc-act2-dome-fled",
+                  "failure": "cc-act2-dome-fled",
+                  "fumble": "cc-act2-dome-fled"
+                },
+                "encounterDamage": {
+                  "composureDelta": -1,
+                  "vitalityDelta": -1
+                }
+              },
+              {
+                "id": "cc-enc-dome-out",
+                "text": "Get out onto the gantry and down.",
+                "isEscapePath": true,
+                "outcomes": {
+                  "success": "cc-act2-dome-fled"
+                }
+              }
+            ]
+          },
+          {
+            "roundNumber": 2,
+            "isSupernatural": true,
+            "choices": [
+              {
+                "id": "cc-enc-dome-stand",
+                "text": "Stand where it points and refuse to be moved.",
+                "faculty": "nerve",
+                "difficulty": 13,
+                "outcomes": {
+                  "critical": "cc-act2-dome-witnessed",
+                  "success": "cc-act2-dome-witnessed",
+                  "partial": "cc-act2-dome-fled",
+                  "failure": "cc-act2-dome-fled",
+                  "fumble": "cc-act2-dome-fled"
+                },
+                "encounterDamage": {
+                  "composureDelta": -2,
+                  "vitalityDelta": -1
+                }
+              },
+              {
+                "id": "cc-enc-dome-chart",
+                "text": "Chart its bearing against Briggs's almanac dates.",
+                "faculty": "lore",
+                "difficulty": 13,
+                "outcomes": {
+                  "critical": "cc-act2-dome-witnessed",
+                  "success": "cc-act2-dome-witnessed",
+                  "partial": "cc-act2-dome-fled",
+                  "failure": "cc-act2-dome-fled",
+                  "fumble": "cc-act2-dome-fled"
+                },
+                "encounterDamage": {
+                  "composureDelta": -1,
+                  "vitalityDelta": -1
+                }
+              },
+              {
+                "id": "cc-enc-dome-flee",
+                "text": "Take the stair three at a time and do not look up.",
+                "isEscapePath": true,
+                "outcomes": {
+                  "success": "cc-act2-dome-fled"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cc-act2-dome-witnessed",
+      "act": 2,
+      "narrative": "You stay long enough to see it through, whatever it was, and the dome falls silent around you as abruptly as it woke — the refractor motionless again, the slit above sealed against a sky that has resumed its ordinary indifference. What stays with you is not the shape of the thing you could not quite see. It is the great refractor itself, when you finally lay a hand on the barrel to steady yourself: warm, unmistakably warm, warm as a kettle recently off the boil, in a dome that has stood unheated and unentered for hours before you climbed the hill.\n\nMetal does not hold heat it was never given. You take your hand away and do not put it back.",
+      "cluesAvailable": [
+        {
+          "clueId": "cc-clue-dome-warmth",
+          "method": "check",
+          "requiresFaculty": { "faculty": "nerve", "minimum": 3 }
+        }
+      ],
+      "onEnter": [
+        { "type": "composure", "delta": -1, "description": "Metal should not hold heat it was never given" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-dome-witnessed-return",
+          "text": "Get down off the hill and back to the club.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-dome-fled",
+      "act": 2,
+      "narrative": "You do not stay to see it through. Whatever decision carried you out onto the gantry and down the stair carries you the rest of the way down the hill as well, moving faster than the dark grounds strictly warrant, until the observatory's silhouette against the sky behind you has shrunk to something you can convince yourself, by the time you reach the gate, you might have imagined. The dome stands dark and silent again by the time you look back, giving no sign that anything at all occurred within it tonight.\n\nBriggs keeps his almanac for a reason, and the marked nights, you now understand from the inside, will keep occurring whether or not you are there to watch them.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-dome-fled-again",
+          "text": "Return on the next marked night.",
+          "outcomes": {
+            "critical": "cc-act2-hampstead-grounds",
+            "success": "cc-act2-hampstead-grounds",
+            "partial": "cc-act2-hampstead-grounds",
+            "failure": "cc-act2-hampstead-grounds",
+            "fumble": "cc-act2-hampstead-grounds"
+          }
+        },
+        {
+          "id": "cc-choice-dome-fled-return",
+          "text": "Leave it for tonight and return to the club.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-solicitors",
+      "act": 2,
+      "narrative": "Gray's Inn keeps Aster's solicitors in a set of chambers built for discretion rather than comfort, all locked cabinets and a clerk trained to answer three questions with one word each. He is young enough to be flattered by attention and old enough in the job to know precisely where the lines of professional discretion lie; whether he steps over them tonight will depend on which side of him you engage. Behind him, through a half-open door, you can see a ledger room stacked with the ordinary paperwork of other men's fortunes — Aster's business among them, filed and dated with a solicitor's indifferent precision.\n\nCharm might loosen the clerk's tongue where a direct request would only close it further.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-solicitor-charm",
+          "text": "Charm the clerk into a glimpse of the ledger.",
+          "faculty": "influence",
+          "difficulty": 12,
+          "outcomes": {
+            "critical": "cc-act2-aster-papers",
+            "success": "cc-act2-aster-papers",
+            "partial": "cc-act2-solicitors-rebuffed",
+            "failure": "cc-act2-solicitors-rebuffed",
+            "fumble": "cc-act2-solicitors-rebuffed"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-aster-papers",
+      "act": 2,
+      "narrative": "The clerk's glimpse turns into rather more than a glimpse once he warms to the conversation, and the ledger yields exactly the document you did not know you were looking for until you saw it: the formal assignment of chair eleven's outstanding debts, purchased outright, dated in a solicitor's careful hand the day before Aster walked into your rooms to hire you. A colonel's fortune, it seems, was spent buying up another man's ruin at almost precisely the moment he decided he needed a detective at his table.\n\nThe timing itches worse now than it did before you had a date to attach to the itch. Coincidence explains a great deal in a case like this one. It does not, on its own, explain this.",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-aster-purchase", "method": "exploration" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-aster-papers-return",
+          "text": "Leave the chambers and return to the club.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-midpoint",
+      "act": 2,
+      "narrative": "Set it out, then, plainly, the way you would for a coroner who did not believe in patterns: chair 5's sash weights did not shift themselves, and Sloane's ledger stops paying the week the window let go. That is a man's hand, wanted or hired, on one rope. It is not chair 2's tonic, self-dosed by a vain man's own appetite for cures, and it is not whatever took chair 3 in his sleep with no mark on him at all. Two deaths refuse to answer to motive, means, or a moneylender's patience. One does.\n\nWhich means the club's murderer — the ordinary, comprehensible, arrestable murderer — has been hiding inside something he does not understand and cannot control, dressing one killing to sit inside a pattern he had no hand in starting. He thinks the pattern is his cover. He has no idea he is also, possibly, its next course.\n\nYou sit with that a long moment. It clarifies nothing about who dies next. It clarifies everything about who can be stopped.",
+      "onEnter": [
+        { "type": "flag", "target": "cc-midpoint-passed", "value": true }
+      ],
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-midpoint-return",
+          "text": "Return to the club with the distinction fixed in mind.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-solicitors-rebuffed",
+      "act": 2,
+      "narrative": "The clerk's discretion, when it holds, holds absolutely, and tonight it holds. He answers your remaining questions with the polished nothing of a man who has spent years perfecting exactly that reply, and the ledger room's half-open door swings shut, apparently by his own hand rather than any draft, before you have finished framing a second approach. Professional discretion, you are reminded, was built to survive precisely this sort of pressure, and Gray's Inn has had a great deal more practice at it than you have at overcoming it.\n\nYou leave with nothing beyond a clearer sense of exactly how well Aster's business is protected, which is, in its own small way, a kind of answer.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-solicitors-rebuffed-return",
+          "text": "Leave the chambers and return to the club.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    }
+  ]
+}

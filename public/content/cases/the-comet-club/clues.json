@@ -1,0 +1,180 @@
+{
+  "clues": [
+    {
+      "id": "cc-clue-seating-chart",
+      "type": "physical",
+      "title": "The Founding Seating Chart",
+      "sceneSource": "cc-act1-dinner",
+      "connectsTo": ["cc-clue-death-dates", "cc-clue-corven-absence", "cc-clue-halloway-diary"],
+      "tags": ["society", "pattern"],
+      "description": "The 1882 wager's seating chart, framed and yellowing. Three deaths are annotated in Aster's own hand — chairs 2, 3, and 5, each with a date.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-death-dates",
+      "type": "physical",
+      "title": "Three Dates in Five Weeks",
+      "sceneSource": "cc-act1-dinner",
+      "connectsTo": ["cc-clue-seating-chart", "cc-clue-quack-tonic"],
+      "tags": ["pattern"],
+      "description": "Heart, fall, fever — three causes of death inked beneath the chart. Each interval between them is shorter than the last.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-founding-wager",
+      "type": "testimony",
+      "title": "The Founding Wager",
+      "sceneSource": "cc-act1-aster-commission",
+      "connectsTo": ["cc-clue-sloane-debts", "cc-clue-aster-purchase"],
+      "tags": ["society", "tontine"],
+      "description": "In 1882 the twelve members swore that whoever of them lived longest would take the Hampstead observatory and everything its dome conceals. Aster confirms the wager still stands.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-sash-weights",
+      "type": "physical",
+      "title": "The Moved Sash Weights",
+      "sceneSource": "cc-act1-chair5-house",
+      "connectsTo": ["cc-clue-sloane-debts", "cc-clue-weir-instructions"],
+      "tags": ["murder", "chair5"],
+      "description": "Chair 5's fatal fall was ruled an accident, but the window's sash weight channel shows fresh tool-marks concealed beneath new paint. The drop was prepared, not chanced upon.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-quack-tonic",
+      "type": "redHerring",
+      "title": "Chair 2's Tonic",
+      "sceneSource": "cc-act1-chair2-rooms",
+      "connectsTo": ["cc-clue-sloane-debts", "cc-clue-death-dates"],
+      "tags": ["chair2"],
+      "description": "A patent tonic bottle found in chair 2's rooms, its dregs laced with enough arsenic to read as poisoning. Bought, dosed, and drunk by his own hand — the wrong kind of guilty.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-founder-death",
+      "type": "physical",
+      "title": "The Founder's Obituary",
+      "sceneSource": "cc-act1-ras-library",
+      "connectsTo": ["cc-clue-1882-log", "cc-clue-ost-period"],
+      "tags": ["pattern", "1885"],
+      "description": "Chair 1, the Society's founding secretary, died 'of age' in 1885 — three years after the comet. The date fits the pattern as its first, earliest collection.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-sloane-debts",
+      "type": "physical",
+      "title": "Sloane's Ledger",
+      "sceneSource": "cc-act2-sloane-ledger",
+      "connectsTo": ["cc-clue-sash-weights", "cc-clue-weir-instructions", "cc-clue-quack-tonic"],
+      "tags": ["tontine", "court"],
+      "description": "An hour alone with Sloane's private accounts turns up ruinous debts to a Court of Smoke moneylender — and a run of payments that stops, abruptly, the week chair five died.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-weir-instructions",
+      "type": "testimony",
+      "title": "Weir's Account",
+      "sceneSource": "cc-act2-weir-caught",
+      "connectsTo": ["cc-clue-sash-weights", "cc-clue-sloane-debts"],
+      "tags": ["murder", "court"],
+      "description": "Cornered and out of road, Weir admits he was paid for one death only, staged with care to sit inside a pattern he did not create.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-halloway-diary",
+      "type": "testimony",
+      "title": "The Halloway Diary",
+      "sceneSource": "cc-act2-halloway-diary",
+      "connectsTo": ["cc-clue-seating-chart", "cc-clue-corven-absence"],
+      "tags": ["pattern", "chair3"],
+      "description": "Chair 3's last weeks, in his own hand: sleeping through daylight, waking at dusk, and twice speaking of 'his number coming round.'",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-corven-absence",
+      "type": "testimony",
+      "title": "The Skipped Chair",
+      "sceneSource": "cc-act2-corven-confides",
+      "connectsTo": ["cc-clue-seating-chart", "cc-clue-halloway-diary"],
+      "tags": ["pattern", "chair4"],
+      "description": "Corven was called from the eyepiece on the comet night by a misdirected telegram and never took his turn to look. The pattern of deaths has passed over his chair ever since.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-1882-log",
+      "type": "physical",
+      "title": "The Private Observation Log",
+      "sceneSource": "cc-act2-observatory-log",
+      "connectsTo": ["cc-clue-razored-page", "cc-clue-founder-death"],
+      "tags": ["observatory", "1882"],
+      "description": "The Society's own record of the comet night, kept apart from the published account. One page, three entries from the crucial night, has been razored cleanly from the spine.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-razored-page",
+      "type": "occult",
+      "title": "The Razored Page",
+      "sceneSource": "cc-act2-razored-found",
+      "connectsTo": ["cc-clue-ost-period", "cc-clue-1882-log"],
+      "tags": ["occult", "1882"],
+      "description": "The missing night's true entry, recovered from the founder's unread Bible: not the comet, but an object crossing between it and the Earth, sketched as an angular, wrong-jointed mark the pencil seems to have struggled to hold steady.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-ost-period",
+      "type": "occult",
+      "title": "Ost's Recomputation",
+      "sceneSource": "cc-act2-ost-confides",
+      "connectsTo": ["cc-clue-razored-page", "cc-clue-founder-death"],
+      "tags": ["occult", "astronomy"],
+      "description": "Ost's unreported recalculation of the object's orbit: it is periodic, not a passing comet, and its next perihelion is uncomfortably close at hand.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-briggs-nights",
+      "type": "testimony",
+      "title": "The Worked Dome",
+      "sceneSource": "cc-act2-briggs-lodge",
+      "connectsTo": ["cc-clue-dome-warmth"],
+      "tags": ["observatory"],
+      "description": "Briggs's private almanac of nights the dome is 'worked' though no one enters it — dates he has learned to mark down, and increasingly, to avoid.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-dome-warmth",
+      "type": "occult",
+      "title": "The Warm Refractor",
+      "sceneSource": "cc-act2-dome-witnessed",
+      "connectsTo": ["cc-clue-briggs-nights", "cc-clue-ost-period"],
+      "tags": ["occult", "observatory"],
+      "description": "On a marked night, the great refractor is warm to the touch — warm as a kettle recently off the boil, in a dome that stood unheated for hours before you entered it.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-aster-purchase",
+      "type": "physical",
+      "title": "Aster's Purchase",
+      "sceneSource": "cc-act2-aster-papers",
+      "connectsTo": ["cc-clue-founding-wager"],
+      "tags": ["tontine", "client"],
+      "description": "The formal assignment of chair 11's outstanding debts to Aster, dated the day before he engaged your services.",
+      "status": "new",
+      "isRevealed": false
+    }
+  ]
+}

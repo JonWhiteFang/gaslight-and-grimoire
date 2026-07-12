@@ -1,0 +1,261 @@
+{
+  "variants": [
+    {
+      "id": "cc-var-dinner-occultist",
+      "variantOf": "cc-act1-dinner",
+      "variantCondition": { "type": "archetypeIs", "value": "occultist" },
+      "act": 1,
+      "narrative": "The Aldebaran Society keeps its rooms above a chandler's shop in Pall Mall, a narrow stair climbing past brass instrument cases to a dining hall hung with star charts and the mounted skeleton of some long-dead comet-hunter's telescope. Colonel Aster meets you at the door himself, waistcoat straining, hand trembling faintly around his own. 'You'll sit at chair three,' he says, and does not explain further — but before you have crossed the threshold, Veil Sight has already told you more than he intends to.\n\nFour chairs at the long table are marked, faint as a thumbprint left on glass and just as unmistakable: punched through, each one, the way a conductor punches a ticket — clean, deliberate, official in some grammar you do not yet read. Three of the four sit empty behind their black crepe settings. The fourth is chair three, and Aster has just sat you in it. The chair takes the cold of the room and holds it; you feel it through your coat before you have finished lowering yourself into place, a chill with none of the room's draught to explain it.\n\nThe seven who remain are cordial in the brittle way of men rehearsing normality, oblivious — or performing obliviousness — to the marks you alone can see. When the port is poured, Aster rises to toast the founding wager of 1882, the toast landing wrong as three men fail to raise their glasses to it. As the others rise from the table, Aster touches your sleeve. 'A private word,' he murmurs, 'before you go.' You rise from the cold chair already certain the ticket has not yet been punched through.",
+      "ambientAudio": "ambient-club-dining",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-seating-chart", "method": "automatic" },
+        { "clueId": "cc-clue-death-dates", "method": "automatic" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-dinner-aster",
+          "text": "Accept the Colonel's request for a private word.",
+          "outcomes": {
+            "critical": "cc-act1-aster-commission",
+            "success": "cc-act1-aster-commission",
+            "partial": "cc-act1-aster-commission",
+            "failure": "cc-act1-aster-commission",
+            "fumble": "cc-act1-aster-commission"
+          }
+        },
+        {
+          "id": "cc-choice-dinner-observe",
+          "text": "Study the survivors around the table before committing to anything.",
+          "faculty": "perception",
+          "difficulty": 10,
+          "outcomes": {
+            "critical": "cc-act1-table-observed",
+            "success": "cc-act1-table-observed",
+            "partial": "cc-act1-table-observed",
+            "failure": "cc-act1-table-misread",
+            "fumble": "cc-act1-table-misread"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-var-chair5-deductionist",
+      "variantOf": "cc-act1-chair5-window",
+      "variantCondition": { "type": "archetypeIs", "value": "deductionist" },
+      "act": 1,
+      "onEnter": [
+        { "type": "suspicion", "target": "cc-npc-sloane", "delta": 1 }
+      ],
+      "narrative": "You do not simply look at the sash cord and the scored channel beneath the fresh paint. You run the fall.\n\nChair five stood here, at this window, on the night in question — you set him at it, in the mind's eye, the way he must have stood: reaching to latch the sash against the damp, weight braced on the sill, the ordinary posture of a man who has done this a hundred nights without thinking about it. The weights inside the frame's hollow channel should have held true against that weight. They did not, because someone opened the access plate, did something inside it that a chisel's bright deliberate scoring now betrays, and closed it again with the care of a man expecting an inquest to look no further than the paint.\n\nRun it forward: the sash drops without warning resistance, the frame no longer counterbalanced, and a man leaning his weight against a window that should hold has nothing beneath him but the drop. You measure the angle of the sill against the street below, the distance a body falls before it strikes, the sightline from the pavement opposite — and none of it, not one particular, reads as accident once you have rebuilt it stroke by stroke. It reads as a mechanism, built by someone who understood this window as well as you do now, and who knew precisely which ordinary evening habit would kill the man who owned it.\n\nSomewhere in that reconstruction, a name you have not yet confirmed sits at the mechanism's other end — and you find yourself, without quite meaning to, already doubting one particular alibi rather more than the others.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-chair5-window-thread",
+          "text": "There is more of this case to pursue tonight.",
+          "outcomes": {
+            "critical": "cc-act1-crossroads",
+            "success": "cc-act1-crossroads",
+            "partial": "cc-act1-crossroads",
+            "failure": "cc-act1-crossroads",
+            "fumble": "cc-act1-crossroads"
+          }
+        },
+        {
+          "id": "cc-choice-chair5-window-rest",
+          "text": "Enough for one night.",
+          "outcomes": {
+            "critical": "cc-act1-interval",
+            "success": "cc-act1-interval",
+            "partial": "cc-act1-interval",
+            "failure": "cc-act1-interval",
+            "fumble": "cc-act1-interval"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-var-weir-mesmerist",
+      "variantOf": "cc-act2-weir-lost",
+      "variantCondition": { "type": "archetypeIs", "value": "mesmerist" },
+      "act": 2,
+      "narrative": "He goes over the far parapet and down some drop or stair you never find in the dark, and by the time you have picked your way back down to the square there is nothing left of him but the memory of how well he moved. You let it go, that night. You have a better instrument than pursuit.\n\nThree nights later, you find him again — not hunted down, but arranged, the way these things are arranged among people who understand that certain rooms operate under certain courtesies. He is seated opposite you at the club's card table, cards dealt, a glass at his elbow, under the specific and inviolable custom that nothing said or done across green baize in this house is ever spoken of outside it. He knows the rules as well as you do, and plainly believes they will protect him.\n\nThey do not protect him from you. You do not need to raise your voice, or even, strictly, to lie — only to hold his gaze a beat longer than is comfortable, to let a suggestion settle into the silence between hands, to make the truth feel, to him, like the easier card to play. Weir is not a stupid man, but he is a tired one, and tired men under quiet, sustained pressure tell you things they had every intention of taking to their graves. By the time the hand is played out, you have the name of the counting-house that hired him, spoken across the table in the flat, unhurried tone of a man confessing to himself rather than to you.",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-weir-instructions", "method": "dialogue" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-lost-lender",
+          "text": "The Court brokered this hire. Go back to the counting-house and buy the rest.",
+          "requiresClue": "cc-clue-sloane-debts",
+          "outcomes": {
+            "critical": "cc-act2-weir-caught",
+            "success": "cc-act2-weir-caught",
+            "partial": "cc-act2-weir-caught",
+            "failure": "cc-act2-weir-caught",
+            "fumble": "cc-act2-weir-caught"
+          }
+        },
+        {
+          "id": "cc-choice-lost-return",
+          "text": "Return to the club for now.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-var-dome-operator",
+      "variantOf": "cc-act2-dome-fled",
+      "variantCondition": { "type": "archetypeIs", "value": "operator" },
+      "act": 2,
+      "narrative": "You do not simply run. Whatever decision carried you out onto the gantry carries you, instead, to reading it — the way a burglar reads a building he means to leave without a trace, rather than the way a frightened man reads an exit.\n\nThe main stair is watched, or will be soon enough; you can feel the observatory settling back into whatever attention it keeps on itself. But a gantry built for maintenance is built with more than one way down, and your eye finds it almost before you have consciously gone looking: a sealed hatch set low in the ironwork, painted over so many times it has nearly vanished into the structure, the sort of access nobody sane uses because nobody sane needs to. It has not been opened in years, by the look of the paint sealing its rim — which means, to you, precisely that it is safe.\n\nThe hatch gives with more resistance than welcome, paint cracking along the seam, and drops you into a service crawl that runs beneath the dome's outer walk rather than away from it. It is close, and dark, and smells of cold iron and long-undisturbed dust — and it is warm in one particular stretch, a warmth with no visible source that a hand pressed flat to the brick confirms is not your imagination. You note it, file it, and keep moving, out through a disused coal chute and into the grounds well clear of wherever the main stair leads.",
+      "cluesAvailable": [
+        {
+          "clueId": "cc-clue-dome-warmth",
+          "method": "check",
+          "requiresFaculty": { "faculty": "vigor", "minimum": 3 }
+        }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-dome-fled-again",
+          "text": "Return on the next marked night.",
+          "outcomes": {
+            "critical": "cc-act2-hampstead-grounds",
+            "success": "cc-act2-hampstead-grounds",
+            "partial": "cc-act2-hampstead-grounds",
+            "failure": "cc-act2-hampstead-grounds",
+            "fumble": "cc-act2-hampstead-grounds"
+          }
+        },
+        {
+          "id": "cc-choice-dome-fled-return",
+          "text": "Leave it for tonight and return to the club.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-var-moneylender-court",
+      "variantOf": "cc-act2-moneylender-den",
+      "variantCondition": { "type": "hasFlag", "target": "wc-court-deal-made" },
+      "act": 2,
+      "narrative": "The address the sash weights led you toward turns out to be a chandler's shop in a narrow street off the docks, unremarkable from the pavement, and a Court of Smoke counting-house from the moment its back room door swings shut behind you. This time, though, the man behind the ledger desk looks up and knows your face before you have said a word.\n\nWord travels within the Court the way it travels nowhere else in London — fast, complete, and without the need for a second telling — and your name arrived here well ahead of you, attached to the arrangement already struck in Whitechapel. He sets down his pen with the small, unhurried courtesy of a man greeting a known and reasonably valued acquaintance rather than assessing a stranger.\n\n'Sloane,' he says, before you have finished asking, and does not wait for you to name a price this time. 'You've already paid, in the way that matters to this house.' The information that would normally cost coin, or leverage, or the particular tension of a threat well judged, is simply offered, ledger opened without ceremony, because a debt of custom already runs the other way and he has no interest in pretending otherwise. There is nothing here to negotiate; only to receive.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-lender-pay",
+          "text": "Buy the information outright.",
+          "outcomes": {
+            "critical": "cc-act2-moneylender-deal",
+            "success": "cc-act2-moneylender-deal",
+            "partial": "cc-act2-moneylender-deal",
+            "failure": "cc-act2-moneylender-deal",
+            "fumble": "cc-act2-moneylender-deal"
+          }
+        },
+        {
+          "id": "cc-choice-lender-lean",
+          "text": "Simply ask — the courtesy owed you here needs no leaning.",
+          "outcomes": {
+            "critical": "cc-act2-moneylender-deal",
+            "success": "cc-act2-moneylender-deal",
+            "partial": "cc-act2-moneylender-deal",
+            "failure": "cc-act2-moneylender-deal",
+            "fumble": "cc-act2-moneylender-deal"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-var-halloway-seance",
+      "variantOf": "cc-act1-halloway-call",
+      "variantCondition": { "type": "hasFlag", "target": "ms-case-complete" },
+      "act": 1,
+      "narrative": "Lady Halloway receives callers in a drawing room still arranged for two, her husband's chair angled toward the fire as though he might yet return to fill it. You have not finished presenting your card before her expression changes — not the careful, rehearsed composure you expected to have to work past, but something more immediate: recognition.\n\n'You were at Lady Ashworth's circle,' she says, and it is not a question. She was there too, seated somewhere at the edge of that candlelit room in Mayfair, and whatever she witnessed there of your conduct in matters the drawing rooms of polite society do not usually admit exist has already told her more about you than any letter of introduction could. The wariness she would ordinarily hold in reserve for a stranger asking about her husband's last weeks simply is not summoned; she has already decided, on evidence you did not know you were furnishing, that you are the sort of caller who may be spoken to plainly.\n\n'Come through,' she says, rising before you have finished your bow, 'you needn't explain yourself to me twice in one lifetime.' She leads the way without waiting to see whether you follow, the doorstep formalities she would have insisted upon with anyone else already dispensed with entirely.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-halloway-card",
+          "text": "Follow her through to the parlour.",
+          "outcomes": {
+            "critical": "cc-act1-halloway-parlour",
+            "success": "cc-act1-halloway-parlour",
+            "partial": "cc-act1-halloway-parlour",
+            "failure": "cc-act1-halloway-parlour",
+            "fumble": "cc-act1-halloway-parlour"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-var-eyepiece-full",
+      "variantOf": "cc-act3-eyepiece-approach",
+      "variantCondition": { "type": "hasDeduction", "target": "cc-deduction-the-return" },
+      "act": 3,
+      "onEnter": [
+        { "type": "flag", "target": "cc-took-the-eyepiece", "value": true },
+        {
+          "type": "composure",
+          "delta": -2,
+          "description": "You held the figure in your head like a rail above a drop, and it held"
+        },
+        { "type": "flag", "target": "mythos-period-computed", "value": true }
+      ],
+      "narrative": "You take the eyepiece from Aster before he can object, or before you can let yourself think better of it, and lean in already knowing what looks back. Dr. Ost's figures, painstaking and precise, gave you the period; your own reconstruction, worked out over weeks of dates and sightlines and dead men's habits, gave you the shape the founders swore that period belonged to. You do not look blind. You look with a framework already built and waiting to receive whatever the glass shows you — and that framework, however terrible its contents, is a rail to hold as the ground drops away.\n\nWhat fills the glass is exactly as wrong as chair three's silence at dinner always suggested it would be — an angle where there should be a shape, a proximity that violates the reported scale, a presence that is looking back at you with the specific, unhurried attention of something that has been looked at by careless men many times before and has learned to wait for the careful ones. It is not less terrible for being understood. If anything, understanding sharpens it, gives it edges to press against. But you had already decided, before you ever raised the eyepiece, exactly how much of yourself you were willing to set against this and hold on to the rest.\n\nYou pull back from the eyepiece with your hands merely trembling, not shaking beyond your own control, and the framework, battered but intact, still standing where you left it.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-eyepiece-continue",
+          "text": "Step back from the dome, whatever you carry with you now.",
+          "outcomes": {
+            "critical": "cc-act3-ending-eyepiece",
+            "success": "cc-act3-ending-eyepiece",
+            "partial": "cc-act3-ending-eyepiece",
+            "failure": "cc-act3-ending-eyepiece",
+            "fumble": "cc-act3-ending-eyepiece"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-var-gathering-tickets",
+      "variantOf": "cc-act3-gathering",
+      "variantCondition": { "type": "hasDeduction", "target": "cc-deduction-numbered-tickets" },
+      "act": 3,
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": 1,
+          "description": "Understanding the order of it steadies you where the others only fear"
+        }
+      ],
+      "narrative": "The survivors assemble at Hampstead under a sky scoured clear for the occasion, the great dome open above them like a held breath. Fewer chairs than the founding wager remembers, and everyone present knows exactly why, whatever they say aloud about it. You know it better than they do now. It was never the seating that mattered — it was the order in which each man took the eyepiece up and looked, and the dates simply followed that order as faithfully as a ledger follows its entries.\n\nAster does not wait for niceties. He states his intent to the assembled club as plainly as he stated his commission to you weeks ago: he means to take the eyepiece tonight, at the exact moment of closest approach, and see the collection back the way the founders once saw it come. Whatever the wager promised the last man standing, he intends to collect it in full, tonight, in front of witnesses, before anyone can talk him out of it or beat him to it. You watch him say it and think: he does not know he is only the next entry.\n\nBriggs works the dome's gearing in silence. Ost stands very still near the eyepiece mount, not looking at it — has never looked at it, you understand now, not once in all these years, and that omission alone has kept him breathing. Across the gathered chairs, Mr. Corven stands a little apart from the others, unmarked, untouched, the only man here the pattern has never had occasion to reach for. His eyes find yours before you have decided to look for him, and something passes between you without a word offered on either side: he knows that you know why he is still alive. It is not gratitude in his face, and it is not fear. It is the particular, private relief of a man discovering he is no longer the only one who understands the ledger — and does not have to carry that understanding alone into whatever the dome does next.\n\nEveryone else watches Aster the way people watch a man walking toward a cliff edge they are too polite, or too frightened, to mention aloud.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-gathering-continue",
+          "text": "Step into whatever this is about to become.",
+          "outcomes": {
+            "critical": "cc-act3-nexus",
+            "success": "cc-act3-nexus",
+            "partial": "cc-act3-nexus",
+            "failure": "cc-act3-nexus",
+            "fumble": "cc-act3-nexus"
+          }
+        }
+      ]
+    }
+  ]
+}
