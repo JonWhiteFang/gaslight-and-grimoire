@@ -8,7 +8,9 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-11, fourth session (**context7 MCP scope conflict fixed — `.mcp.json`'s context7 entry switched from stdio `npx @upstash/context7-mcp` to the HTTP endpoint `https://mcp.context7.com/mcp`, and the duplicate user-scope registration removed (machine-local `~/.claude.json`), so the repo-shareable project scope (ADR-0004) is the single definition on the modern endpoint. First task run through the new ADR-0010 gates: Gate 1 caught a real ordering hazard (don't remove the working user entry before validating the project one — plan reordered), Gate 2 clean. Note: project-scope MCP servers show a one-time "Pending approval" trust prompt on next launch (same as playwright/github). Baseline 611/58 + 201/7 stands; `npm ci` still needed before next code session.**) — Prior (below, same day): Codex review gates (ADR-0010).
+_Last updated: 2026-07-12 (**The Comet Club authored — fourth main case, flagship scale ([ADR-0011](DECISIONS/ADR-0011-comet-club-fourth-main-case.md)), on PR #76 awaiting merge.** Built from the ideation doc's #1 pick via spec → Codex-gated plan → subagent-driven execution (7 implementer tasks, per-task reviews, 3 fix cycles) → content-integrity review → whole-branch review → Codex Gate 2 (1 MAJOR caught: a fixer mis-reported a flag removal; fixed, round-2 PASS). Catalog now **8 cases / 276 scenes / 74 clues / 40 NPCs**; the-comet-club = 75 scenes (67 base + 8 variants) / 16 clues / 10 NPCs / 4 deduction recipes. `mythos-period-computed` breadcrumb live (consumer: future Orrery Room). Baseline re-verified this session: **611/58 tests, lint clean, validator zero errors/warnings (8 cases)**; `node_modules` reinstalled. Next: merge PR #76 (merge commit, never squash), then The Orrery Room is the natural next build.)_
+
+_Prior update: 2026-07-11, fourth session (**context7 MCP scope conflict fixed — `.mcp.json`'s context7 entry switched from stdio `npx @upstash/context7-mcp` to the HTTP endpoint `https://mcp.context7.com/mcp`, and the duplicate user-scope registration removed (machine-local `~/.claude.json`), so the repo-shareable project scope (ADR-0004) is the single definition on the modern endpoint. First task run through the new ADR-0010 gates: Gate 1 caught a real ordering hazard (don't remove the working user entry before validating the project one — plan reordered), Gate 2 clean. Note: project-scope MCP servers show a one-time "Pending approval" trust prompt on next launch (same as playwright/github). Baseline 611/58 + 201/7 stands; `npm ci` still needed before next code session.**) — Prior (below, same day): Codex review gates (ADR-0010).
 
 _Prior update: 2026-07-11, third session (**Codex integrated as cross-provider adversarial reviewer — two mandatory review gates ([ADR-0010](DECISIONS/ADR-0010-codex-adversarial-review-gates.md)). Machine-side was already in place (Codex CLI 0.144.1 via brew, ChatGPT auth, user-scope `codex` MCP server, read-only sandbox verified by `codex doctor`; model `gpt-5.6-sol` smoke-tested working). Repo-side: CLAUDE.md gained the "Adversarial review with Codex" section — Gate 1: every non-trivial task's plan reviewed before any mutation; Gate 2: complete task diff vs. starting base reviewed before completion, run before `/checkpoint` (mechanical spine updates exempt). The gate text itself went through both Codex review rounds: round 1 found 5 loopholes (user approved the hardened variant), round 2 confirmed 4 fixed + 1 residual (untracked files; fixed with intent-to-add wording). Both gates verified live through the MCP tool — Gate 1 caught a real repo-specific trap (exact faction-key string). Docs-only in-repo; baseline 611/58 + 201/7 stands (`npm ci` still needed before next code session).**)
 **Standing rule (ADR-0010):** non-trivial work passes both Codex gates; reviewer unavailable → announce prominently, never silently skip. Replicate machine-side elsewhere: `brew install --cask codex && codex login && claude mcp add --scope user codex -- codex mcp-server` + top-level `sandbox_mode = "read-only"` / `approval_policy = "untrusted"` in `~/.codex/config.toml`. — Prior (below, same day): CLAUDE.md pointer-map trim.
@@ -131,7 +133,7 @@ build artifacts (`vite.config.js`/`.d.ts`) `tsconfig.node.json`'s `composite:tru
 
 ## Current position
 
-- **Stage:** Phases A–E complete and the game is playable end-to-end (7 cases). The **first** audit's backlog
+- **Stage:** Phases A–E complete and the game is playable end-to-end (8 cases once PR #76 merges; 7 on `main` today). The **first** audit's backlog
   (#1–#22, findings F-001…F-067) is fully cleared except **#20 (media assets)**. **Second audit (2026-07-09) backlog
   #53–#60 (F-101…F-123): CLEAR — both P0 gameplay blockers FIXED (#53 auto-succeed PR #62, #54 Mayfair true ending
   PR #63); all P1 FIXED (#55 save/reload PR #65, #56 scene-transition PR #64, #57 a11y/errors PR #66, #58 docs PR #61);
@@ -149,9 +151,9 @@ build artifacts (`vite.config.js`/`.d.ts`) `tsconfig.node.json`'s `composite:tru
   drops its `<6.1.0` peer cap). Runtime: React 19, framer-motion 12, zustand 5, immer 11. Toolchain: Vite 8 (Rolldown),
   Vitest 4, jsdom 29, Tailwind 4 (CSS-first `@theme`), ESLint 10. See ADR-0008 + [[dependabot-major-group-migration]] for
   the clustering approach and the emnapi lockfile gotcha.
-- **Branch focus:** `main` (at `0a72e7c`, **PRs #62–#70 merged**) — the entire audit-2 code backlog (#53–#60) is cleared.
-  No open code work; next substantive items are user-blocked (#20 media) or non-code (#52 interview). Prior: PR #51 (deps),
-  PRs #48/#49 (#47 deploy).
+- **Branch focus:** `docs/comet-club-spec` (at `c967878`) — **PR #76 open** (The Comet Club, content + docs only;
+  merge with a merge commit, never squash). On `main`: audit-2 code backlog (#53–#60) cleared; remaining items are
+  user-blocked (#20 media) or non-code. Prior: PR #51 (deps), PRs #48/#49 (#47 deploy).
 - **Verification:** 2026-07-09 — on merged `main`: `npm run test:run` → **611 passed (611)** across **58** files;
   `npm run lint` clean, validator clean (7 cases), `npm ci --ignore-scripts` + `npm run build` green (build now also
   type-checks `scripts/` + `vite.config.ts`; emits `dist/gaslight-and-grimoire/` + `dist/_headers`). **CI green on PR #68**
@@ -162,7 +164,9 @@ build artifacts (`vite.config.js`/`.d.ts`) `tsconfig.node.json`'s `composite:tru
   and 201/7 continue to stand; nothing re-run this session because `node_modules` is absent locally (`npm ci` needed before
   the next code session). **2026-07-11 (spine sync):** docs/`.claude` config only — no code/content touched, `node_modules`
   still absent, so the same baseline continues to stand. **2026-07-11 second session (CLAUDE.md trim):** likewise docs-only;
-  same baseline stands.
+  same baseline stands. **2026-07-12 (Comet Club, on PR #76 branch):** `node_modules` reinstalled; on `docs/comet-club-spec`
+  at `c967878`: `npm run test:run` → **611 passed (611)** / 58 files, `npm run lint` clean,
+  `node scripts/validateCase.mjs` → **276 scenes / 8 cases**, zero errors and zero warnings.
 
 ---
 
@@ -198,6 +202,7 @@ Source of truth for each phase's scope: [status.md](status.md) (systems present 
 | R2 | Audit-2 remediation — P1 (code) | `[x]` | **Complete.** **#55 — PR #65:** save/reload safety — `saveGame` try/catch + error toast (F-103), persisted `encounterState` (v3→v4) so reload doesn't re-roll the reaction check (F-105); 569→577. **#56 — PR #64:** scene-transition hygiene (F-118/F-104/F-106/F-108); 564→569. **#57 — PR #66:** a11y/errors — React-19 `inert={bool}` (F-007 regression), ErrorBoundary auto-save claim gated, loading fallbacks `role=status`, + `evaluateCondition` own-property guard (fixed a pre-existing flaky determinism test); 577→588. |
 | R2′ | Audit-2 remediation — P1 (docs #58) | `[x]` | **Done — PR #61 (`3dc49aa`).** F-119 `architecture.md` onEnter anti-pattern (+ F-013 flag drift); F-120 scene counts → 201; F-121 component count 16→17; F-122 choices/scene → ~1.77. Also closed the `.gitignore` `vite.config` emit-litter gap. Docs-only. |
 | R3 | Audit-2 remediation — P2 test quality (#59) | `[x]` | **Done — PR #67 (`629df31`), test-only.** F-112–F-116 + 2 correctness cross-check gaps: replaced copy-of-logic/transitive/smoke tests with real-unit, **mutation-verified** guards — npcBounds→real slice clamps, new worldSlice reputation ±10, Nerve-vs-Lore tiebreak, direct `resolveScene` variant tests, real eviction (oldest evicted + autosave protected), `applyEffects` flag-false result, mundane vitality-only branch. No production code changed. 588→611 (+23), 56→58 files. |
+| C1 | Content — The Comet Club (fourth main case) | `[~]` | **ADR-0011**, 2026-07-12: 75 scenes / 16 clues / 10 NPCs / 4 recipes; all review gates passed (per-task, content-integrity, whole-branch, Codex Gates 1+2); **PR #76 open** — merge-commit only. `[x]` on merge. |
 | R3′ | Audit-2 remediation — P3 CI type-check (#60) | `[x]` | **Done — PR #68 (`98d3ac9`).** New `tsconfig.scripts.json` (non-composite + `noEmit`, `lib ES2023`, `types:["node"]`) covering `scripts/**/*.ts` + `vite.config.ts`; `typecheck:scripts` npm script chained into `build`; `tsconfig.node.json` given explicit `target/lib` to fix the `TS2550` at root; `@types/node@^20` devDep. A type error in the validator source now fails the build (was exit 0). Emnapi lockfile trap on first push → clean regen. Baseline unchanged (611). |
 
 ---
@@ -209,10 +214,12 @@ user-blocked). No open code work. **#52 (agent-perspective interview) answered**
 all 11 questions is posted as a [comment on the issue](https://github.com/JonWhiteFang/gaslight-and-grimoire/issues/52#issuecomment-4926364394)
 (the blog draft itself is the user's to write; the issue can be closed once they've mined the answer).
 
-**Content track (new, optional):** [`content-ideas-2026-07-10.md`](content-ideas-2026-07-10.md) holds 10 vetted concepts
-awaiting a user pick. If green-lit, suggested order: **The Comet Club** (case) → **The Orrery Room** (Grey Dawn vignette —
-fills the one missing faction vignette) → The Drowned Archive → The Tidewaiter's Log; that makes the optional Mythos
-thread playable end-to-end after four builds. Ideation only — no JSON authored yet.
+**Content track (active):** **The Comet Club is BUILT** ([ADR-0011](DECISIONS/ADR-0011-comet-club-fourth-main-case.md)) —
+merge **PR #76** (merge commit, never squash). Remaining suggested order from
+[`content-ideas-2026-07-10.md`](content-ideas-2026-07-10.md): **The Orrery Room** (Grey Dawn vignette — fills the one
+missing faction vignette AND consumes the now-live `mythos-period-computed` flag) → The Drowned Archive → The
+Tidewaiter's Log. Small open decision from the build's reviews: three bookkeeping flags set but unread
+(`cc-tonic-dissolved`, `cc-ost-confided`, `cc-midpoint-passed`) — wire or drop at next content session.
 
 **Media track (partly user-blocked) — the practical next steps if resuming:**
 1. **User generates the 10 ambient loops** (Stable Audio/Suno per [`audio-asset-kit.md`](audio-asset-kit.md)) into `public/audio/ambient/`, exact filenames. *(Unblocked; user step.)*

@@ -109,7 +109,7 @@ lives in `docs/content-authoring.md` — read it before writing content. Non-neg
 
 ## Current Content
 
-7 cases (3 main, 4 side vignettes), all 4 factions active. The live inventory — per-case scene/clue/NPC
+8 cases (4 main, 4 side vignettes), all 4 factions active. The live inventory — per-case scene/clue/NPC
 counts, endings, unlock conditions, totals — is in `docs/status.md`; verify counts with
 `node scripts/validateCase.mjs`, don't quote from memory.
 

@@ -19,6 +19,14 @@
 
 ---
 
+## 2026-07-12 — The Comet Club authored: fourth main case, flagship scale (PR #76)
+
+- **Goal:** Build a new main case from the ideation doc's ranked pick (user chose The Comet Club, flagship scale, hybrid A+B expansion).
+- **Did:** Full pipeline on branch `docs/comet-club-spec`: brainstormed design (spec committed `84d7d49`) → implementation plan → **Codex Gate 1** (round 1: 3 blockers — sceneSource ordering, Influence-only diary route, best ending not requiring the unmasked murderer — + 6 more, all fixed; round 2: 3 small findings, fixed) → **subagent-driven execution** of 7 tasks (fresh implementer per task, per-task spec+quality reviews; 3 fix cycles across the run) → content-integrity review (0 blockers; numbered-tickets deduction wired to a payoff variant) → whole-branch review (2 Important fixed: `mythos-period-computed` mis-set on the blind eyepiece path; Reason retags. Recommendation to gate Act III on a deduction rejected — deduction = Reason roll = RNG gate) → **Codex Gate 2** (1 MAJOR: a fix subagent *reported* removing the flag but had only duplicated it — verified by grep, fixed directly `c967878`; round 2 PASS). Case: **75 scenes (67 base + 8 variants) / 16 clues / 10 NPCs / 4 deduction recipes**; catalog now 8 cases / 276 scenes / 74 clues / 40 NPCs. Pushed + **PR #76** opened (merge-commit only). ADR-0011 records the pick, scale, flag-semantics and rejected-alternative decisions. **Sweep:** fixed CLAUDE.md "7 cases (3 main…)" → "8 cases (4 main…)"; status.md was updated in-branch during the build (row + totals + two stale prose counts). Lesson recorded: subagent fix reports can be wrong — Gate 2 caught a misreported one-line fix; verify flag/effect placement by grep, not by report.
+- **Verified:** on `c967878`: `npm run test:run` → 611 passed (611) / 58 files; `npm run lint` clean; `node scripts/validateCase.mjs` → all 8 cases, zero errors **and zero warnings** (the-comet-club 75 scenes / 16 clues). Content-integrity reviewer ran this session (Task 8) — gate satisfied.
+- **Open / blockers:** merge PR #76 (merge commit, never squash — user action). Three bookkeeping flags set but unread (`cc-tonic-dissolved`, `cc-ost-confided`, `cc-midpoint-passed`) — wire or drop next content session. Accepted deviations: Mesmerist exclusive fires after a lost pursuit; Hampstead summons is an unmarked one-way door. Next build: The Orrery Room (consumes `mythos-period-computed`). Unchanged: #20 (media).
+- **Memory updated:** STATE ☑ · RUN_LOG ☑ · ADR ☑ (ADR-0011)
+
 ## 2026-07-11 (fourth session) — context7 MCP scope conflict fixed (first task through the ADR-0010 gates)
 
 - **Goal:** Resolve the `claude mcp list` diagnostic flagged last session: `context7` defined at user scope (HTTP `https://mcp.context7.com/mcp`) *and* project scope (stdio `npx -y @upstash/context7-mcp`) with different endpoints.
