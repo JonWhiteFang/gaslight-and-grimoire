@@ -7,8 +7,442 @@
       "cluesAvailable": [],
       "choices": [
         {
-          "id": "cc-choice-hub-wait",
-          "text": "Let the club talk around you.",
+          "id": "cc-choice-hub-sloane",
+          "text": "Call on Sloane.",
+          "outcomes": {
+            "critical": "cc-act2-sloane-study",
+            "success": "cc-act2-sloane-study",
+            "partial": "cc-act2-sloane-study",
+            "failure": "cc-act2-sloane-study",
+            "fumble": "cc-act2-sloane-study"
+          }
+        },
+        {
+          "id": "cc-choice-hub-moneylender",
+          "text": "Follow the smell of Sloane's money to its source.",
+          "requiresClue": "cc-clue-sash-weights",
+          "outcomes": {
+            "critical": "cc-act2-moneylender-den",
+            "success": "cc-act2-moneylender-den",
+            "partial": "cc-act2-moneylender-den",
+            "failure": "cc-act2-moneylender-den",
+            "fumble": "cc-act2-moneylender-den"
+          }
+        },
+        {
+          "id": "cc-choice-hub-chair6",
+          "text": "Watch Pemberton-Rhee's house — if the pattern holds, chair 6 is next.",
+          "requiresFlag": "cc-interval-grasped",
+          "outcomes": {
+            "critical": "cc-act2-chair6-watch",
+            "success": "cc-act2-chair6-watch",
+            "partial": "cc-act2-chair6-watch",
+            "failure": "cc-act2-chair6-watch",
+            "fumble": "cc-act2-chair6-watch"
+          }
+        },
+        {
+          "id": "cc-choice-hub-millbank",
+          "text": "The chaplain heard chair 2's last confession.",
+          "requiresClue": "cc-clue-quack-tonic",
+          "outcomes": {
+            "critical": "cc-act2-millbank-vestry",
+            "success": "cc-act2-millbank-vestry",
+            "partial": "cc-act2-millbank-vestry",
+            "failure": "cc-act2-millbank-vestry",
+            "fumble": "cc-act2-millbank-vestry"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-sloane-study",
+      "act": 2,
+      "narrative": "Sloane receives you in what he still calls his study, though the room has the threadbare correctness of a stage set — good decanters kept half full, a fire built up before you arrived, a cigar box offered with the flourish of a man demonstrating solvency rather than possessing it. He talks well, when he talks: club gossip, the wager, a fond anecdote about chair five that skirts wide of anything useful. It is a performance, and a practiced one, and beneath its polish you catch the same frayed-cuff economy Aster's dinner first showed you — a man dressing above what his purse allows, and dressing harder the closer you sit.\n\nHe watches your glass more than your face, refilling it before you ask, the attentiveness of a host who would rather you drink than think. Somewhere behind the performance is a man with debts, and debts, in a case built on a fortune waiting for the last survivor, are never merely private.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-sloane-press",
+          "text": "Name the moneylender and watch his face.",
+          "faculty": "influence",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "cc-act2-sloane-pressed",
+            "success": "cc-act2-sloane-pressed",
+            "partial": "cc-act2-sloane-stonewalled",
+            "failure": "cc-act2-sloane-stonewalled",
+            "fumble": "cc-act2-sloane-stonewalled"
+          }
+        },
+        {
+          "id": "cc-choice-sloane-ledger-route",
+          "text": "Withdraw and try his paper instead.",
+          "requiresFlag": "cc-sloane-pressed",
+          "outcomes": {
+            "critical": "cc-act2-sloane-ledger",
+            "success": "cc-act2-sloane-ledger",
+            "partial": "cc-act2-sloane-ledger",
+            "failure": "cc-act2-sloane-ledger",
+            "fumble": "cc-act2-sloane-ledger"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-sloane-pressed",
+      "act": 2,
+      "narrative": "You do not ask a question; you offer a name, quietly, the way one offers a card at whist — and something in Sloane's face comes apart before he can stop it. The cigar stalls halfway to his mouth. He recovers almost at once, laughing it off as club rumour, but the recovery is too fast and too loud, and he over-explains a payment nobody has accused him of making, a debt nobody has mentioned, dates that fit together too neatly for a man merely being slandered. He talks himself further into trouble with every sentence meant to talk himself out of it, until he seems to hear it too and stops, glass halfway refilled, the performance in ruins around him.\n\n'You should go,' he says, quite pleasantly, as though the last two minutes had not happened.",
+      "cluesAvailable": [],
+      "onEnter": [
+        { "type": "flag", "target": "cc-sloane-pressed", "value": true },
+        { "type": "suspicion", "target": "cc-npc-sloane", "delta": 2 }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-sloane-pressed-ledger",
+          "text": "His paper will tell what his mouth will not — try the ledger.",
+          "outcomes": {
+            "critical": "cc-act2-sloane-ledger",
+            "success": "cc-act2-sloane-ledger",
+            "partial": "cc-act2-sloane-ledger",
+            "failure": "cc-act2-sloane-ledger",
+            "fumble": "cc-act2-sloane-ledger"
+          }
+        },
+        {
+          "id": "cc-choice-sloane-pressed-return",
+          "text": "Leave him to compose himself and return to the club.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-sloane-stonewalled",
+      "act": 2,
+      "narrative": "The name lands and slides off. Sloane's smile does not so much as flicker; club courtesy, it turns out, is a better armor than composure ever was, a wall of good manners built specifically to survive exactly this sort of prying. He refills your glass, changes the subject to the weather over Hampstead, and asks after your own family with a warmth so evenly applied it might as well be a closed door with a brass knocker on it. Whatever is behind the manners stays behind them tonight.\n\nYou leave with nothing you did not bring, and the distinct sense that Sloane has had practice at this particular performance before you ever arrived to test it.",
+      "cluesAvailable": [],
+      "onEnter": [
+        { "type": "suspicion", "target": "cc-npc-sloane", "delta": 1 }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-sloane-stonewalled-return",
+          "text": "There are other ways to Sloane's money.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-sloane-ledger",
+      "act": 2,
+      "narrative": "Rattled, Sloane is easier to leave alone with his own study than he ought to be, and an hour is more than enough. His accounts sit in a locked desk whose lock has not troubled anyone seriously in years; behind it, the ledgers tell a plainer story than anything he was willing to say aloud. Columns of outgoing sums to an address you do not recognize but will learn to. Interest compounding on interest, the particular arithmetic of a man drowning slowly and pretending, even to himself, that he is only wading. And then, abruptly, the payments stop — a full column that simply ends, the week, you will realize on checking the date against Aster's chart, that chair five went out a landing window that had been prepared for him days in advance.\n\nA man's debts do not usually end themselves. Something ended these.",
+      "cluesAvailable": [
+        {
+          "clueId": "cc-clue-sloane-debts",
+          "method": "check",
+          "requiresFaculty": { "faculty": "reason", "minimum": 3 }
+        }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-sloane-ledger-return",
+          "text": "Return to the club with what the ledger shows.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-moneylender-den",
+      "act": 2,
+      "narrative": "The address the sash weights led you toward turns out to be a chandler's shop in a narrow street off the docks, unremarkable from the pavement, and a Court of Smoke counting-house from the moment its back room door swings shut behind you. No serpent is painted anywhere in sight; there does not need to be. The man behind the ledger desk has the unhurried patience of someone who has never once needed to raise his voice to collect what he is owed, and he regards your arrival with the mild interest of a merchant assessing a new customer rather than the wariness of a criminal assessing a threat.\n\n'Sloane,' he says, before you have finished asking, in the tone of a man confirming rather than revealing. 'Everyone eventually wants to know about Sloane.' The information, his manner makes plain, is a commodity like any other here, and commodities have prices — the only question is which currency you intend to pay in.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-lender-pay",
+          "text": "Buy the information outright.",
+          "outcomes": {
+            "critical": "cc-act2-moneylender-deal",
+            "success": "cc-act2-moneylender-deal",
+            "partial": "cc-act2-moneylender-deal",
+            "failure": "cc-act2-moneylender-deal",
+            "fumble": "cc-act2-moneylender-deal"
+          }
+        },
+        {
+          "id": "cc-choice-lender-lean",
+          "text": "Lean: the Yard would love this address.",
+          "faculty": "nerve",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "cc-act2-moneylender-deal",
+            "success": "cc-act2-moneylender-deal",
+            "partial": "cc-act2-moneylender-price",
+            "failure": "cc-act2-moneylender-price",
+            "fumble": "cc-act2-moneylender-price"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-moneylender-deal",
+      "act": 2,
+      "narrative": "Money changes hands, and the ledger-keeper opens, with the professional indifference of a man discussing the weather, an account that has nothing to do with weather at all. Sloane, it transpires, has owed this house a punishing sum for the better part of a year, an arrangement of increasing regularity and increasingly late payments — right up until a lump sum arrived, unexpectedly and entire, that settled the debt in full some five weeks past. He names the date without prompting, because to him it is only bookkeeping. You recognize it before he finishes speaking. It is the week chair five went out his landing window.\n\n'A man doesn't come into that kind of money honestly,' the ledger-keeper says, closing the book, 'but that's your trade to worry over, not mine.'",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-sloane-debts", "method": "dialogue" }
+      ],
+      "onEnter": [
+        { "type": "reputation", "target": "Court of Smoke", "delta": 2 }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-moneylender-deal-return",
+          "text": "Return to the club with what the Court has told you.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-moneylender-price",
+      "act": 2,
+      "narrative": "The Yard's name does not frighten anyone in this room, and the attempt to make it do so costs you rather than him. The ledger-keeper's patience thins to something colder; he gives you the same information — the punishing debt, the lump sum that closed it out the week chair five died — but names a price you did not choose and cannot easily refuse: a favour, unspecified, owed and collectable at a time and in a form of the Court's choosing. He does not write it down. Men like this do not need to.\n\nYou leave with the fact you came for and something you did not want to leave with — an obligation with no fixed shape yet, hanging over you the way debt hangs over every man who has ever sat across a table like the one you just left.",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-sloane-debts", "method": "dialogue" }
+      ],
+      "onEnter": [
+        { "type": "reputation", "target": "Court of Smoke", "delta": -2 },
+        { "type": "composure", "delta": -1, "description": "You leave owing the Court something unnamed" }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-moneylender-price-return",
+          "text": "Return to the club, the debt unpaid behind you.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-chair6-watch",
+      "act": 2,
+      "narrative": "Sir Julius Pemberton-Rhee's house stands dark and respectable across a square gone quiet after midnight, and you take up a watcher's post in the shadow of the plane trees opposite, coat collar up against the damp. If the interval holds — and Aster's shrinking dates say it will, more surely with every week that passes — chair six is due, and due sooner than the pattern's earlier victims were given warning. The house gives away nothing for hours: a light in an upper window, a servant's shadow crossing a curtain, the ordinary small movements of a household that has no idea it is being watched, or guarded, depending on which of those turns out to be true.\n\nThe cold works into your knees before it works into your patience, and somewhere around the second or third hour a stillness settles over the square that has nothing to do with the weather.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-watch-spot",
+          "text": "Hold the watch through the small hours.",
+          "faculty": "perception",
+          "difficulty": 11,
+          "outcomes": {
+            "critical": "cc-act2-rooftop-pursuit",
+            "success": "cc-act2-rooftop-pursuit",
+            "partial": "cc-act2-weir-lost",
+            "failure": "cc-act2-weir-lost",
+            "fumble": "cc-act2-weir-lost"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-rooftop-pursuit",
+      "act": 2,
+      "narrative": "A shape detaches itself from the guttering above Pemberton-Rhee's roofline sometime past two — unhurried, sure-footed, moving along the leads with the same practiced ease the chair-five housekeeper's girl once described to you. You are moving before you have finished deciding to, out through the square and up a drainpipe that groans under your weight, onto slates still slick with the evening's rain. The figure hears you and breaks into a run along the ridge line, and the chase that follows is conducted forty feet above the pavement, across a townscape of chimney pots and party walls never built to hold two men sprinting across them in the dark.",
+      "ambientAudio": "ambient-street",
+      "cluesAvailable": [],
+      "choices": [],
+      "encounter": {
+        "isSupernatural": false,
+        "rounds": [
+          {
+            "roundNumber": 1,
+            "isSupernatural": false,
+            "choices": [
+              {
+                "id": "cc-enc-roof-chase",
+                "text": "Take the parapet after him.",
+                "faculty": "vigor",
+                "difficulty": 11,
+                "outcomes": {
+                  "critical": "cc-act2-weir-caught",
+                  "success": "cc-act2-weir-caught",
+                  "partial": "cc-act2-weir-lost",
+                  "failure": "cc-act2-weir-lost",
+                  "fumble": "cc-act2-weir-lost"
+                },
+                "encounterDamage": {
+                  "vitalityDelta": -2
+                }
+              },
+              {
+                "id": "cc-enc-roof-cutoff",
+                "text": "Read the roofline — drop to the mews and cut him off.",
+                "faculty": "perception",
+                "difficulty": 10,
+                "outcomes": {
+                  "critical": "cc-act2-weir-caught",
+                  "success": "cc-act2-weir-caught",
+                  "partial": "cc-act2-weir-lost",
+                  "failure": "cc-act2-weir-lost",
+                  "fumble": "cc-act2-weir-lost"
+                },
+                "encounterDamage": {
+                  "vitalityDelta": -1
+                }
+              },
+              {
+                "id": "cc-enc-roof-break",
+                "text": "Let him go — mark his line of flight.",
+                "isEscapePath": true,
+                "outcomes": {
+                  "success": "cc-act2-weir-lost"
+                }
+              }
+            ]
+          },
+          {
+            "roundNumber": 2,
+            "isSupernatural": false,
+            "choices": [
+              {
+                "id": "cc-enc-roof-leap",
+                "text": "Follow him across the gap.",
+                "faculty": "vigor",
+                "difficulty": 12,
+                "outcomes": {
+                  "critical": "cc-act2-weir-caught",
+                  "success": "cc-act2-weir-caught",
+                  "partial": "cc-act2-weir-lost",
+                  "failure": "cc-act2-weir-lost",
+                  "fumble": "cc-act2-weir-lost"
+                },
+                "encounterDamage": {
+                  "vitalityDelta": -2
+                }
+              },
+              {
+                "id": "cc-enc-roof-anticipate",
+                "text": "He must come down at the corner stair — be there first.",
+                "faculty": "perception",
+                "difficulty": 12,
+                "outcomes": {
+                  "critical": "cc-act2-weir-caught",
+                  "success": "cc-act2-weir-caught",
+                  "partial": "cc-act2-weir-lost",
+                  "failure": "cc-act2-weir-lost",
+                  "fumble": "cc-act2-weir-lost"
+                },
+                "encounterDamage": {
+                  "vitalityDelta": -1
+                }
+              },
+              {
+                "id": "cc-enc-roof-abandon",
+                "text": "Break off — no testimony is worth the drop.",
+                "isEscapePath": true,
+                "outcomes": {
+                  "success": "cc-act2-weir-lost"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cc-act2-weir-caught",
+      "act": 2,
+      "narrative": "He goes down hard on the leads, whatever brought you to this rooftop — pursuit or a Court of Smoke informant's directions — finally spent its advantage, and there is nowhere left along this stretch of slate for him to run. Winded, cornered, weighing the drop against the alternative, he chooses talking. His name is Weir, he says, when pressed, and he was paid — well paid, in fact, better than the work seemed to warrant at the time he took it — for exactly one death among the three you have been chasing. Not the pattern entire. One killing, staged with real care to look like it belonged inside a sequence he had no hand in starting and no idea what was driving.\n\n'I don't know what's doing the other two,' he says, and something in the way he says it, glancing once toward the dark beyond the rooftops, suggests he would rather not know either. 'I only know what I was paid for. And I was paid for the window.'",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-weir-instructions", "method": "dialogue" }
+      ],
+      "onEnter": [
+        { "type": "suspicion", "target": "cc-npc-weir", "delta": 2 }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-weir-caught-return",
+          "text": "Return to the club with Weir's account.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-weir-lost",
+      "act": 2,
+      "narrative": "He goes over the far parapet and down some drop or stair you never find in the dark, and by the time you have picked your way back down to the square there is nothing left of him but the memory of how well he moved — the unhurried, practiced ease of a man who has crossed these roofs before and expects to cross them again. That practice is itself a kind of testimony. Whoever hired him did not hire an amateur, and men who work rooftops for a living answer to somebody, a paymaster who arranges these things through channels you already have reason to suspect.\n\nThe trail is not dead. It has simply gone underground, to the sort of counting-house where information changes hands for a price.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-lost-lender",
+          "text": "The Court brokered this hire. Go back to the counting-house and buy the rest.",
+          "requiresClue": "cc-clue-sloane-debts",
+          "outcomes": {
+            "critical": "cc-act2-weir-caught",
+            "success": "cc-act2-weir-caught",
+            "partial": "cc-act2-weir-caught",
+            "failure": "cc-act2-weir-caught",
+            "fumble": "cc-act2-weir-caught"
+          }
+        },
+        {
+          "id": "cc-choice-lost-return",
+          "text": "Return to the club for now.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cc-act2-millbank-vestry",
+      "act": 2,
+      "narrative": "The Reverend Dr. Millbank receives you in the cold vestry of his parish church, a room that smells of candle wax and the particular dust of unused hymnals, and speaks of chair two's last confession with the careful reluctance of a man weighing a dead parishioner's trust against a living investigation's need. He does not break the seal of it outright — he is too scrupulous for that — but he tells you enough, framing it as pastoral observation rather than confidence betrayed. Ambrose Quill, he says, chair two, had convinced himself for months that someone meant to poison him. He had grown so certain of it, so consumed by the fear, that he had taken to dosing himself against imagined threats with whatever patent remedy promised protection.\n\n'He feared poison so much,' Millbank says quietly, 'that he administered it. I told him as much, near the end, and I do not think he believed me. I am not sure I entirely believed myself.' The tonic in the sealed rooms, the arsenic in its dregs — not murder dressed as accident, but terror dressed as a cure, self-administered by a man too frightened to notice the remedy was worse than whatever he thought was hunting him.",
+      "cluesAvailable": [],
+      "onEnter": [
+        { "type": "flag", "target": "cc-tonic-dissolved", "value": true }
+      ],
+      "choices": [
+        {
+          "id": "cc-choice-millbank-return",
+          "text": "Return to the club with what Millbank has told you.",
           "outcomes": {
             "critical": "cc-act2-hub",
             "success": "cc-act2-hub",

@@ -65,6 +65,28 @@
       "description": "Chair 1, the Society's founding secretary, died 'of age' in 1885 — three years after the comet. The date fits the pattern as its first, earliest collection.",
       "status": "new",
       "isRevealed": false
+    },
+    {
+      "id": "cc-clue-sloane-debts",
+      "type": "physical",
+      "title": "Sloane's Ledger",
+      "sceneSource": "cc-act2-sloane-ledger",
+      "connectsTo": ["cc-clue-sash-weights", "cc-clue-weir-instructions", "cc-clue-quack-tonic"],
+      "tags": ["tontine", "court"],
+      "description": "An hour alone with Sloane's private accounts turns up ruinous debts to a Court of Smoke moneylender — and a run of payments that stops, abruptly, the week chair five died.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-weir-instructions",
+      "type": "testimony",
+      "title": "Weir's Account",
+      "sceneSource": "cc-act2-weir-caught",
+      "connectsTo": ["cc-clue-sash-weights", "cc-clue-sloane-debts"],
+      "tags": ["murder", "court"],
+      "description": "Cornered and out of road, Weir admits he was paid for one death only, staged with care to sit inside a pattern he did not create.",
+      "status": "new",
+      "isRevealed": false
     }
   ]
 }
