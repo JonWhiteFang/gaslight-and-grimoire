@@ -118,5 +118,5 @@ by `node scripts/validateCase.mjs`, which delegates to the shared
 `src/engine/contentValidation.ts` module (the same one the runtime
 `validateContent` uses) — checking scene-graph edges, clue references, condition
 targets, variant structure, `npcEffect` refs, encounter-round edges, and (CLI
-only) reachability across all seven cases — including that every clue required by
+only) reachability across all eight cases — including that every clue required by
 a *gated* key deduction is obtainable without a critical roll (F-102).
