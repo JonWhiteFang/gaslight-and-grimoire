@@ -363,8 +363,7 @@
       "act": 3,
       "narrative": "What you keep, in the end, is not knowledge. You never fixed the period, never wrote the date, never turned what you saw into anything a report could hold. What you keep instead is a direction — a felt, bodily certainty of orientation that arrived with the looking and has not left since, an instinct for which way a particular kind of deep water runs.\n\nYou will notice it again, unbidden, the next time you stand at the edge of an estuary, or a harbour, or any stretch of water that goes down further than the light follows: a small, cold, wordless awareness of which way it deepens, and which way, if something down there ever decided to come looking, it would come from. You did not ask for this. You do not know how to put it down. You will carry it, quietly, for the rest of your life.",
       "onEnter": [
-        { "type": "flag", "target": "cc-case-complete", "value": true },
-        { "type": "flag", "target": "mythos-period-computed", "value": true }
+        { "type": "flag", "target": "cc-case-complete", "value": true }
       ],
       "cluesAvailable": [],
       "choices": []
