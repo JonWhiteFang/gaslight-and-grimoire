@@ -1,1 +1,23 @@
-{ "scenes": [] }
+{
+  "scenes": [
+    {
+      "id": "cc-act2-hub",
+      "act": 2,
+      "narrative": "Aster's standing invitation makes the Aldebaran Society's rooms yours to haunt at any hour, and you take him up on it. The survivors have settled into new orbits since the dinner — Sloane at the sideboard more often than not, Sir Julius holding court in the reading room, Ost vanishing for hours toward the Hampstead dome and returning with chalk dust on his cuffs. Nobody here yet knows what you are. That will not last forever, but it has not run out tonight.\n\nThe club talks, if you let it. Every hour spent among these men in this room is an hour spent learning which of their orbits is worth following first.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-hub-wait",
+          "text": "Let the club talk around you.",
+          "outcomes": {
+            "critical": "cc-act2-hub",
+            "success": "cc-act2-hub",
+            "partial": "cc-act2-hub",
+            "failure": "cc-act2-hub",
+            "fumble": "cc-act2-hub"
+          }
+        }
+      ]
+    }
+  ]
+}
