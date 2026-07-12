@@ -1,0 +1,14 @@
+{
+  "npcs": [
+    { "id": "cc-npc-aster", "name": "Colonel Aster", "faction": null, "disposition": 3, "suspicion": 0, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "cc-npc-halloway", "name": "Lady Wren Halloway", "faction": null, "disposition": 0, "suspicion": 1, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "cc-npc-sloane", "name": "Mr. Pettifer Sloane", "faction": null, "disposition": -1, "suspicion": 3, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "cc-npc-ost", "name": "Dr. Ost", "faction": null, "disposition": 1, "suspicion": 0, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "cc-npc-corven", "name": "Mr. Corven", "faction": null, "disposition": 0, "suspicion": 0, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "cc-npc-pemberton-rhee", "name": "Sir Julius Pemberton-Rhee", "faction": null, "disposition": -2, "suspicion": 2, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "cc-npc-millbank", "name": "The Reverend Dr. Millbank", "faction": null, "disposition": 1, "suspicion": 0, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "cc-npc-featherstonehaugh", "name": "Mr. Featherstonehaugh", "faction": "Rationalists Circle", "disposition": 0, "suspicion": 1, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "cc-npc-briggs", "name": "Briggs", "faction": null, "disposition": -1, "suspicion": 0, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "cc-npc-weir", "name": "Mr. Weir", "faction": "Court of Smoke", "disposition": -3, "suspicion": 5, "memoryFlags": {}, "isAlive": true, "isAccessible": true }
+  ]
+}

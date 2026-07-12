@@ -1,0 +1,15 @@
+{
+  "scenes": [
+    {
+      "id": "cc-act1-dinner",
+      "act": 1,
+      "narrative": "The Aldebaran Society keeps its rooms above a chandler's shop in Pall Mall, a narrow stair climbing past brass instrument cases to a dining hall hung with star charts and the mounted skeleton of some long-dead comet-hunter's telescope. Colonel Aster meets you at the door himself, waistcoat straining, hand trembling faintly around his own. 'You'll sit at chair three,' he says, and does not explain further until you see it: a long table set for twelve, three of the settings dressed in black crepe, three empty chairs pushed back as though their occupants had merely stepped out and would return. They will not.\n\nThe seven who remain are cordial in the brittle way of men rehearsing normality. Lady Wren Halloway holds forth on comet tails to a politely glazed Mr. Corven. Sir Julius Pemberton-Rhee argues astronomy with the Reverend Dr. Millbank in the tone of men who have had the same argument for thirty years. Dr. Ost sits apart, recalculating something on a napkin. Mr. Featherstonehaugh watches the room with a Rationalist's careful skepticism, and Mr. Sloane drinks more than he eats, his eyes finding the black crepe again and again.\n\nWhen the port is poured, Aster rises. He toasts the founding wager of 1882 — the night the twelve of them sat this same table and swore the last man living would take the Hampstead observatory and all it held. The toast lands wrong; three men do not raise their glasses. On the wall behind him hangs the original seating chart, framed under glass, three dates inked beneath it in a hand you recognize as his own.\n\nAs the others rise from the table, Aster touches your sleeve. 'A private word,' he murmurs, 'before you go.'",
+      "ambientAudio": "ambient-club-dining",
+      "cluesAvailable": [
+        { "clueId": "cc-clue-seating-chart", "method": "automatic" },
+        { "clueId": "cc-clue-death-dates", "method": "automatic" }
+      ],
+      "choices": []
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "clues": [
+    {
+      "id": "cc-clue-seating-chart",
+      "type": "physical",
+      "title": "The Founding Seating Chart",
+      "sceneSource": "cc-act1-dinner",
+      "connectsTo": ["cc-clue-death-dates", "cc-clue-corven-absence", "cc-clue-halloway-diary"],
+      "tags": ["society", "pattern"],
+      "description": "The 1882 wager's seating chart, framed and yellowing. Three deaths are annotated in Aster's own hand — chairs 2, 3, and 5, each with a date.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-death-dates",
+      "type": "physical",
+      "title": "Three Dates in Five Weeks",
+      "sceneSource": "cc-act1-dinner",
+      "connectsTo": ["cc-clue-seating-chart", "cc-clue-quack-tonic"],
+      "tags": ["pattern"],
+      "description": "Heart, fall, fever — three causes of death inked beneath the chart. Each interval between them is shorter than the last.",
+      "status": "new",
+      "isRevealed": false
+    }
+  ]
+}
