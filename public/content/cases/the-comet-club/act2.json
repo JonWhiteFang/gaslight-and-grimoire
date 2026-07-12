@@ -391,7 +391,7 @@
       "id": "cc-act2-rooftop-pursuit",
       "act": 2,
       "narrative": "A shape detaches itself from the guttering above Pemberton-Rhee's roofline sometime past two — unhurried, sure-footed, moving along the leads with the same practiced ease the chair-five housekeeper's girl once described to you. You are moving before you have finished deciding to, out through the square and up a drainpipe that groans under your weight, onto slates still slick with the evening's rain. The figure hears you and breaks into a run along the ridge line, and the chase that follows is conducted forty feet above the pavement, across a townscape of chimney pots and party walls never built to hold two men sprinting across them in the dark.",
-      "ambientAudio": "ambient-street",
+      "ambientAudio": "ambient-london-street",
       "cluesAvailable": [],
       "choices": [],
       "encounter": {
@@ -880,7 +880,7 @@
           "id": "cc-choice-log-lore",
           "text": "Reason it as an archivist: where does a careful man hide what he cannot destroy?",
           "requiresClue": "cc-clue-1882-log",
-          "faculty": "lore",
+          "faculty": "reason",
           "difficulty": 12,
           "outcomes": {
             "critical": "cc-act2-razored-found",
@@ -1048,7 +1048,7 @@
       "id": "cc-act2-dome-night",
       "act": 2,
       "narrative": "You come back on one of Briggs's marked nights and find the dome, against every rule of the locked and shuttered building you toured by daylight, standing open to the sky — the great slit drawn back, the refractor swung to some bearing of its own choosing, and not a living soul anywhere about to have opened it. The instrument moves as you watch, by degrees too small to catch in the act and too large to have happened on their own, tracking something across a patch of sky that shows, to your own eye, nothing at all. The cold up here has a different quality than the cold on the grounds below, a stillness that settles into the copper dome and does not so much as stir when you cross the threshold.\n\nWhatever works this instrument on Briggs's marked nights is working it now, and you are no longer merely observing it from the lodge window.",
-      "ambientAudio": "ambient-observatory",
+      "ambientAudio": "ambient-observatory-night",
       "cluesAvailable": [],
       "choices": [],
       "encounter": {

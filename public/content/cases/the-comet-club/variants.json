@@ -210,7 +210,8 @@
           "type": "composure",
           "delta": -2,
           "description": "You held the figure in your head like a rail above a drop, and it held"
-        }
+        },
+        { "type": "flag", "target": "mythos-period-computed", "value": true }
       ],
       "narrative": "You take the eyepiece from Aster before he can object, or before you can let yourself think better of it, and lean in already knowing what looks back. Dr. Ost's figures, painstaking and precise, gave you the period; your own reconstruction, worked out over weeks of dates and sightlines and dead men's habits, gave you the shape the founders swore that period belonged to. You do not look blind. You look with a framework already built and waiting to receive whatever the glass shows you — and that framework, however terrible its contents, is a rail to hold as the ground drops away.\n\nWhat fills the glass is exactly as wrong as chair three's silence at dinner always suggested it would be — an angle where there should be a shape, a proximity that violates the reported scale, a presence that is looking back at you with the specific, unhurried attention of something that has been looked at by careless men many times before and has learned to wait for the careful ones. It is not less terrible for being understood. If anything, understanding sharpens it, gives it edges to press against. But you had already decided, before you ever raised the eyepiece, exactly how much of yourself you were willing to set against this and hold on to the rest.\n\nYou pull back from the eyepiece with your hands merely trembling, not shaking beyond your own control, and the framework, battered but intact, still standing where you left it.",
       "cluesAvailable": [],

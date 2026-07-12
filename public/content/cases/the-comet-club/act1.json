@@ -390,7 +390,7 @@
         {
           "id": "cc-choice-ras-compare",
           "text": "Compare the Society's published 1882 notices against what a private log ought to hold.",
-          "faculty": "lore",
+          "faculty": "reason",
           "difficulty": 10,
           "outcomes": {
             "critical": "cc-act1-ras-stacks",
