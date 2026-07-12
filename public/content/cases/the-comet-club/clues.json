@@ -87,6 +87,94 @@
       "description": "Cornered and out of road, Weir admits he was paid for one death only, staged with care to sit inside a pattern he did not create.",
       "status": "new",
       "isRevealed": false
+    },
+    {
+      "id": "cc-clue-halloway-diary",
+      "type": "testimony",
+      "title": "The Halloway Diary",
+      "sceneSource": "cc-act2-halloway-diary",
+      "connectsTo": ["cc-clue-seating-chart", "cc-clue-corven-absence"],
+      "tags": ["pattern", "chair3"],
+      "description": "Chair 3's last weeks, in his own hand: sleeping through daylight, waking at dusk, and twice speaking of 'his number coming round.'",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-corven-absence",
+      "type": "testimony",
+      "title": "The Skipped Chair",
+      "sceneSource": "cc-act2-corven-confides",
+      "connectsTo": ["cc-clue-seating-chart", "cc-clue-halloway-diary"],
+      "tags": ["pattern", "chair4"],
+      "description": "Corven was called from the eyepiece on the comet night by a misdirected telegram and never took his turn to look. The pattern of deaths has passed over his chair ever since.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-1882-log",
+      "type": "physical",
+      "title": "The Private Observation Log",
+      "sceneSource": "cc-act2-observatory-log",
+      "connectsTo": ["cc-clue-razored-page", "cc-clue-founder-death"],
+      "tags": ["observatory", "1882"],
+      "description": "The Society's own record of the comet night, kept apart from the published account. One page, three entries from the crucial night, has been razored cleanly from the spine.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-razored-page",
+      "type": "occult",
+      "title": "The Razored Page",
+      "sceneSource": "cc-act2-razored-found",
+      "connectsTo": ["cc-clue-ost-period", "cc-clue-1882-log"],
+      "tags": ["occult", "1882"],
+      "description": "The missing night's true entry, recovered from the founder's unread Bible: not the comet, but an object crossing between it and the Earth, sketched as an angular, wrong-jointed mark the pencil seems to have struggled to hold steady.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-ost-period",
+      "type": "occult",
+      "title": "Ost's Recomputation",
+      "sceneSource": "cc-act2-ost-confides",
+      "connectsTo": ["cc-clue-razored-page", "cc-clue-founder-death"],
+      "tags": ["occult", "astronomy"],
+      "description": "Ost's unreported recalculation of the object's orbit: it is periodic, not a passing comet, and its next perihelion is uncomfortably close at hand.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-briggs-nights",
+      "type": "testimony",
+      "title": "The Worked Dome",
+      "sceneSource": "cc-act2-briggs-lodge",
+      "connectsTo": ["cc-clue-dome-warmth"],
+      "tags": ["observatory"],
+      "description": "Briggs's private almanac of nights the dome is 'worked' though no one enters it — dates he has learned to mark down, and increasingly, to avoid.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-dome-warmth",
+      "type": "occult",
+      "title": "The Warm Refractor",
+      "sceneSource": "cc-act2-dome-witnessed",
+      "connectsTo": ["cc-clue-briggs-nights", "cc-clue-ost-period"],
+      "tags": ["occult", "observatory"],
+      "description": "On a marked night, the great refractor is warm to the touch — warm as a kettle recently off the boil, in a dome that stood unheated for hours before you entered it.",
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "cc-clue-aster-purchase",
+      "type": "physical",
+      "title": "Aster's Purchase",
+      "sceneSource": "cc-act2-aster-papers",
+      "connectsTo": ["cc-clue-founding-wager"],
+      "tags": ["tontine", "client"],
+      "description": "The formal assignment of chair 11's outstanding debts to Aster, dated the day before he engaged your services.",
+      "status": "new",
+      "isRevealed": false
     }
   ]
 }
