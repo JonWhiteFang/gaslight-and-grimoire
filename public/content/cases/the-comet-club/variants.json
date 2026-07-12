@@ -227,6 +227,34 @@
           }
         }
       ]
+    },
+    {
+      "id": "cc-var-gathering-tickets",
+      "variantOf": "cc-act3-gathering",
+      "variantCondition": { "type": "hasDeduction", "target": "cc-deduction-numbered-tickets" },
+      "act": 3,
+      "onEnter": [
+        {
+          "type": "composure",
+          "delta": 1,
+          "description": "Understanding the order of it steadies you where the others only fear"
+        }
+      ],
+      "narrative": "The survivors assemble at Hampstead under a sky scoured clear for the occasion, the great dome open above them like a held breath. Fewer chairs than the founding wager remembers, and everyone present knows exactly why, whatever they say aloud about it. You know it better than they do now. It was never the seating that mattered — it was the order in which each man took the eyepiece up and looked, and the dates simply followed that order as faithfully as a ledger follows its entries.\n\nAster does not wait for niceties. He states his intent to the assembled club as plainly as he stated his commission to you weeks ago: he means to take the eyepiece tonight, at the exact moment of closest approach, and see the collection back the way the founders once saw it come. Whatever the wager promised the last man standing, he intends to collect it in full, tonight, in front of witnesses, before anyone can talk him out of it or beat him to it. You watch him say it and think: he does not know he is only the next entry.\n\nBriggs works the dome's gearing in silence. Ost stands very still near the eyepiece mount, not looking at it — has never looked at it, you understand now, not once in all these years, and that omission alone has kept him breathing. Across the gathered chairs, Mr. Corven stands a little apart from the others, unmarked, untouched, the only man here the pattern has never had occasion to reach for. His eyes find yours before you have decided to look for him, and something passes between you without a word offered on either side: he knows that you know why he is still alive. It is not gratitude in his face, and it is not fear. It is the particular, private relief of a man discovering he is no longer the only one who understands the ledger — and does not have to carry that understanding alone into whatever the dome does next.\n\nEveryone else watches Aster the way people watch a man walking toward a cliff edge they are too polite, or too frightened, to mention aloud.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "cc-choice-gathering-continue",
+          "text": "Step into whatever this is about to become.",
+          "outcomes": {
+            "critical": "cc-act3-nexus",
+            "success": "cc-act3-nexus",
+            "partial": "cc-act3-nexus",
+            "failure": "cc-act3-nexus",
+            "fumble": "cc-act3-nexus"
+          }
+        }
+      ]
     }
   ]
 }

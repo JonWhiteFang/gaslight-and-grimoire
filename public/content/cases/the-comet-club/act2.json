@@ -716,7 +716,12 @@
       "narrative": "Sir Julius Pemberton-Rhee, chair six, receives you from behind a household arrangement that has quietly reorganized itself around his terror: food-tasters engaged for a man of no particular rank or fortune to warrant them, a will rewritten twice in as many months, and a manner so brittle with fear that your questions feel, more than once, like the final straw threatening to snap something already strained past its measure. He does not so much answer as testify, in the overwrought manner of a man rehearsing his own defense before a court that has not yet convened, offering more than you ask in the hope that volume might substitute for the composure he no longer has.\n\nHe watches you the whole time the way a man watches a physician he does not entirely trust to tell him the truth about his own prognosis, and your presence, however carefully you manage it, plainly unsettles rather than reassures him.",
       "cluesAvailable": [],
       "onEnter": [
-        { "type": "suspicion", "target": "cc-npc-pemberton-rhee", "delta": -1 }
+        {
+          "type": "suspicion",
+          "target": "cc-npc-pemberton-rhee",
+          "delta": -1,
+          "description": "His guard, such as it was, gives way entirely"
+        }
       ],
       "choices": [
         {
