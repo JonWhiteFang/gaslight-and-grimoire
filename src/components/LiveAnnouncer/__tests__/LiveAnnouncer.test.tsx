@@ -47,6 +47,16 @@ describe('<LiveAnnouncer>', () => {
     expect(secondHolder).not.toBe(firstHolder); // different node → re-announced
   });
 
+  it('re-announces a repeated identical assertive message by moving it to the other slot', () => {
+    const { container } = render(<LiveAnnouncer />);
+    const assertiveNodes = () => [...container.querySelectorAll('[aria-live="assertive"]')];
+    act(() => announce('Alarm', { assertive: true }));
+    const firstHolder = assertiveNodes().findIndex((n) => n.textContent === 'Alarm');
+    act(() => announce('Alarm', { assertive: true }));
+    const secondHolder = assertiveNodes().findIndex((n) => n.textContent === 'Alarm');
+    expect(secondHolder).not.toBe(firstHolder); // different node → re-announced
+  });
+
   // Prove the pre-existence contract: a message announced BEFORE mount must NOT be
   // present at first commit (it is queued), and must appear only after the mount
   // effect flips ready and flushes it.
