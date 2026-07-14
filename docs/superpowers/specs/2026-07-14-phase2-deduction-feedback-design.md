@@ -209,8 +209,10 @@ Baseline **635/60**; expect ~8–12 new tests.
 - **No** dice-legibility (DC/modifier surfacing) — that is Phase 3.
 - **No** touch/contrast/reduced-motion sweeps — that is Phase 4.
 
-## Codex gates
+## Cross-provider Codex review (file-based)
 
-Non-trivial → both gates apply. **Gate 1** on the implementation plan before any mutation; **Gate 2**
-on the complete diff vs. the start commit before completion. Reviewer context must include this spec,
+Per CLAUDE.md's file-based handoff, this work gets three independent Codex passes: **this spec**, the
+**implementation plan** (once written), and the **completed implementation** (final pass before
+merge, against the branch diff + built code). Each is a `codex/input/<date>-phase2-deduction-*.md`
+prompt the user runs; reviews land in `codex/output/`. Reviewer context must include this spec,
 ADR-0012, and the four touched files.
