@@ -1,11 +1,13 @@
 # Phase 2 — Deduction Feedback Legibility (design spec)
 
 > **Type:** Implementation design spec. Feeds a Codex-gated implementation plan (writing-plans next).
-> **Date:** 2026-07-14
+> **Date:** 2026-07-14 · **Revised:** 2026-07-14 after a Codex spec review
+> ([`codex/output/2026-07-14-phase2-deduction-feedback-review.md`](../../../codex/output/2026-07-14-phase2-deduction-feedback-review.md))
+> found the original tag-overlap correctness model unsound against shipped content (3 Blockers). This
+> version uses a **recipe-based** correctness oracle instead.
 > **Track:** UI/UX roadmap Phase 2 ([`docs/research/ui-ux-roadmap.md`](../../research/ui-ux-roadmap.md)),
 > backlog items **6** (deduction feedback) + **2** (`connected` colour-only fix, rides along).
-> **Enacts:** [ADR-0012](../../DECISIONS/ADR-0012-deduction-roll-semantics.md) — resolves the two design
-> questions that ADR explicitly deferred to "the Phase 2 spec".
+> **Enacts (with an amendment):** [ADR-0012](../../DECISIONS/ADR-0012-deduction-roll-semantics.md).
 > **Consumes:** the Phase 1 global announcer (`src/announcer.ts`, `announce()`), PR #80.
 
 ---
@@ -17,47 +19,66 @@ On the Evidence Board, connecting ≥2 clues and pressing **Attempt Deduction** 
 under its stable id, else a *generic* one) and marks the clues `deduced`; on
 `partial`/`failure`/`fumble` it marks them `contested`, reverting to `examined` after 2 s.
 
-Two problems (from the UI/UX research, finding D3):
+Two problems (UI/UX research finding D3):
 
-1. **The roll gatekeeps whether reasoning pays off at all.** A correct clue-set can fail on an unlucky
-   roll; a wrong set can pass on a lucky one. Players can't tell a reasoning error from bad luck.
-2. **Failure is binary and undirected.** Every non-success is a flat "contested" with no hint that the
-   player was *close* (Golden-Idol-style directional feedback is absent).
+1. **The roll gatekeeps whether reasoning pays off.** A correct set can fail on an unlucky roll; a wrong
+   set can pass on a lucky one. Players can't tell a reasoning error from bad luck.
+2. **Failure is binary and undirected.** Every non-success is a flat "contested" — no hint the player was
+   *close* (Golden-Idol-style directional feedback is absent).
 
-ADR-0012 already decided the governing principle — **correctness gates deduction formation; the roll
-only flavours the outcome** — but deferred two mechanics to this spec:
+ADR-0012 decided the principle — **correctness gates formation; the roll only flavours** — but deferred
+to this spec (1) what "correct" means for a non-recipe connection and (2) the tier→feedback mapping.
 
-- what counts as "correct" for a **generic** (non-recipe) connection (today: no modelled correctness), and
-- the exact roll-tier → on-board-feedback mapping.
+## What the Codex spec review changed (why this is a recipe-based model)
 
-## Decisions (resolving ADR-0012's deferrals)
+The first draft made **tag-overlap** the generic-correctness oracle. The Codex review proved that unsound
+against shipped content, and verification confirmed every point:
 
-1. **Generic-connection correctness = tag-overlap.** A non-recipe set is correct when all its clues
-   share at least one tag and none is a red herring. (Reuses the tag signal the board already computes
-   for `shouldBrighten`.)
-2. **Three correctness states**, not the raw 5-tier roll: `correct` / `partial` / `incorrect`.
-3. **The d20 roll only flavours a `correct` outcome** (crit → a sharper insight line). It is not even
-   rolled on `partial`/`incorrect`, so it can never gate — the ADR's core requirement.
-4. **No anti-spam cost in Phase 2.** A composure cost on repeated failed attempts is deferred to its
-   own decision (bigger blast radius; directional feedback already reduces blind guessing).
+- **`connectsTo` (not tags) is the authored clue-relationship field** (`src/types/index.ts:76`). Tags do
+  not track it. The Rationalist's Dilemma clues `rd-clue-experiment-log` ↔ `rd-clue-anomalous-readings`
+  are authored `connectsTo` partners with **zero shared tags**; The Whitechapel Cipher's
+  `wc-clue-cipher-note` + `wc-clue-cellar-ledger` share only the broad tag `paper` but are **not**
+  authored partners. Tag-overlap both misses real relationships and invents false ones. **(Blocker B1.)**
+- **A shipped recipe is authored *false*.** `cc-deduction-poisoner` is `isRedHerring: true` ("Coherent,
+  confident, and wrong") **and** gates a real branch (`the-comet-club/act3.json:24`,
+  `requiresDeduction`). "Every recipe is correct" was wrong; but making it `incorrect` would orphan that
+  branch. **(Blocker B2.)**
+- **`clearConnections()` runs on every outcome**, emptying `connectedIds` so `DeductionButton` unmounts —
+  the original design put the outcome message *in the button*, so it would vanish instantly and isolated
+  tests would false-green. **(Blocker B3.)**
 
-## Approach (chosen: A — engine-owned classification, thin UI)
+**Resolution:** correctness is now defined entirely by the **authored recipes**, and the transient
+outcome UI moves **out of the button into the board** (which owns connection lifecycle).
 
-A new pure engine function owns the correctness decision; `DeductionButton` renders and announces its
-result. Rejected alternatives: folding classification into `buildDeduction.ts` (muddies that module's
-single "construct a Deduction" purpose); keeping the roll as a co-driver (re-muddies reasoning-vs-luck,
-against ADR-0012).
+## Decisions
+
+1. **Recipe-based correctness oracle** (replaces tag-overlap). A connected set is classified by its
+   relationship to the case's authored `KeyDeduction` recipes only. **Generic (non-recipe) connections no
+   longer form a deduction** — they are directional feedback only.
+2. **Three correctness states:** `correct` / `partial` / `incorrect`.
+3. **Red-herring recipes still form**, but are **framed as a false/uneasy insight** (amber, not the green
+   "connection holds") — keeping their gated branches reachable while signalling the trap.
+4. **The d20 roll flavours a `correct`/`false` formation only** (crit → a sharper line). `partial` and
+   `incorrect` are deterministic and roll nothing. **This requires a one-line amendment to ADR-0012**
+   (see below), because the recipe model makes partial feedback deterministic rather than roll-driven.
+5. **No anti-spam cost** in Phase 2 (deferred — own decision).
+
+## Approach (A — engine-owned classification, thin UI)
+
+A pure engine function owns correctness; the **board** renders + announces the transient outcome and owns
+connection lifecycle; the **button** only triggers. Rejected alternatives unchanged from the prior draft
+(fold-into-buildDeduction muddies its purpose; roll-as-co-driver re-muddies reasoning-vs-luck).
 
 ---
 
 ## Component 1 — `src/engine/classifyConnection.ts` (new, pure)
 
 ```ts
-export type Correctness = 'correct' | 'partial' | 'incorrect';
+export type Correctness = 'correct' | 'false' | 'partial' | 'incorrect';
 
 export interface ConnectionClassification {
   correctness: Correctness;
-  recipe: KeyDeduction | null; // non-null only when a recipe subset-matched
+  recipe: KeyDeduction | null; // the matched recipe (correct|false), else null
 }
 
 export function classifyConnection(
@@ -67,152 +88,202 @@ export function classifyConnection(
 ): ConnectionClassification;
 ```
 
-**Rules, in order:**
+**Fail-closed guard first (Codex Major — unresolved/duplicate ids):** let `valid` be the set of
+`connectedIds` that (a) are distinct and (b) are an **own property** of `clues`
+(`Object.prototype.hasOwnProperty.call`, matching the repo's existing `ownValue` guard for prototype
+keys). If `valid.size < 2` → `{ correctness: 'incorrect', recipe: null }` before anything else.
 
-1. **Recipe subset-match** (reuse `matchDeduction(connectedIds, recipes)`): if a recipe matches →
-   `{ correctness: 'correct', recipe }`. A recipe is authored-correct by definition (ADR-0012's
-   "at minimum, matches a recipe").
-2. Otherwise compute over the connected clues (ignore ids that don't resolve in `clues`):
-   - `hasRedHerring` = any resolved clue's `type === 'redHerring'`
-   - `allShareATag` = ∃ a tag present on **every** connected clue
-   - `someShareATag` = ∃ a tag shared by **≥2** connected clues
-3. **`correct`** — `allShareATag && !hasRedHerring`
-4. **`partial`** — (`!hasRedHerring && someShareATag && !allShareATag`) — a coherent subset, ≥1 clue
-   doesn't belong — **or** (`hasRedHerring && someShareATag`) — a red herring smuggled into an
-   otherwise-coherent set ("some belong").
-5. **`incorrect`** — everything else (no shared tag at all; or a red herring with no coherence).
+**Recipe classification** (over `valid`, using `matchDeduction`'s subset semantics but resolved
+deterministically — Codex Major on ordering/multi-match):
 
-**Purity:** no store access, no `performCheck`, no `Date.now()`/`Math.random()`. Deterministic in its
-inputs. This is the function ADR-0012's *Confirmation* clause targets.
+1. **Full matches** = every recipe whose `requiredClues` are **all** in `valid`.
+   - If any full match exists, pick the winner deterministically: **non-red-herring recipes first**, then
+     **largest `requiredClues` count** (most specific), then **lowest `id` lexicographically** (stable
+     tiebreak independent of content-array order).
+   - Winner `isRedHerring === false` → `{ correctness: 'correct', recipe: winner }`.
+   - Winner `isRedHerring === true` → `{ correctness: 'false', recipe: winner }`.
+     *(A `false` classification still **forms** the deduction — it's a qualifying set — but is framed as a
+     trap. The non-red-herring-first ordering means a true recipe always wins over a red-herring superset
+     that shares clues, e.g. `cc-deduction-one-true-murder` beats `cc-deduction-poisoner` on a set
+     containing both, since they share `cc-clue-sloane-debts`.)*
+2. **Partial matches** = no full match, but some recipe has **≥1 but not all** of its `requiredClues` in
+   `valid`, **and** `valid` contains **no clue whose `type === 'redHerring'`** that isn't part of that
+   recipe. Simplest sound rule: `partial` iff (∃ recipe with `1 ≤ |req ∩ valid| < |req|`). → `{ partial,
+   null }`. *(Directional "you're on a thread but it's incomplete" — grounded in authored truth, not
+   tags.)*
+3. **`incorrect`** = otherwise (no recipe shares any clue with `valid`). → `{ incorrect, null }`.
 
-**Edge notes:** `connectedIds` always has ≥2 entries at the call site (`DeductionButton` returns null
-below 2). Ids absent from `clues` are skipped when computing tag/red-herring signals (defensive; the
-board only ever connects real clues).
-
----
-
-## Component 2 — `src/components/EvidenceBoard/DeductionButton.tsx` (rewrite of `handleAttempt`)
-
-```
-classification = classifyConnection(connectedClueIds, clues, recipes)
-
-if classification.correctness === 'correct':
-    roll = performCheck('reason', investigator, DEDUCTION_DC, false, false)   // FLAVOUR ONLY
-    deduction = classification.recipe
-        ? buildDeductionFromRecipe(classification.recipe, connectedClueIds)
-        : buildDeduction(connectedClueIds, clues)
-    addDeduction(deduction)
-    connectedClueIds.forEach(id => updateClueStatus(id, 'deduced'))
-    setPhase('success')
-    flavour = roll.tier === 'critical' ? 'sharp' : 'plain'
-    message = SUCCESS_MESSAGE[flavour]
-    announce(message)                        // polite; single SR announcement
-    setVisualMessage(message)                // local <p>, visual-only (no aria-live)
-    onResult('success')
-else:                                        // 'partial' | 'incorrect' — NO roll
-    connectedClueIds.forEach(id => updateClueStatus(id, 'contested'))
-    setPhase('failure')
-    message = FEEDBACK_MESSAGE[classification.correctness]
-    announce(message)
-    setVisualMessage(message)
-    onResult('failure')
-    setTimeout(() => { idsRef.current.forEach(id => updateClueStatus(id, 'examined')); setPhase('idle'); }, 2000)
-```
-
-**Messages** (measured, atmospheric, short *status* strings — never narrative, never campy):
-
-| correctness | roll flavour | message (local `<p>` **and** `announce()`) |
-|---|---|---|
-| `correct` | `critical` | `The connection holds — a sharp, decisive insight.` |
-| `correct` | any other | `The connection holds.` |
-| `partial` | — | `Some of these belong together, but the link isn't complete.` |
-| `incorrect` | — | `These clues don't connect.` |
-
-**Announcement path (resolves live-region flooding):** the authoritative message goes through the
-**global** `announce()` (polite — a deduction is not a halt/error). The local `<m.p>` keeps showing the
-same text for sighted users but **loses its `aria-live`** (becomes visual-only), so screen readers hear
-the outcome exactly once, from the always-mounted Phase-1 region.
-
-**Visual colour split:** the local `<p>` becomes three-way — green (`correct`) / amber (`partial`) /
-red (`incorrect`) — replacing today's binary green/red. Button text unchanged
-(`🧠 Attempt Deduction` → `Rolling…` → `🔒 Deduction Locked` / `🔴 Attempt Failed`; `Rolling…` shows
-briefly only on the correct path now).
-
-**Clue status:** `partial` and `incorrect` both reuse the existing `contested` state (❓ + red ring +
-2 s revert). **No new `ClueStatus` value** → zero save-migration surface.
+**Purity:** no store, no `performCheck`, no `Date.now()`/`Math.random()`. This is the function ADR-0012's
+*Confirmation* clause targets. **Note:** because formation is now purely a function of the connected set
+vs. recipes, the "forms regardless of roll" property holds by construction (the classifier never sees a
+roll) — the test asserts it explicitly anyway.
 
 ---
 
-## Component 3 — `src/components/EvidenceBoard/EvidenceBoard.tsx`
+## Component 2 — `src/components/EvidenceBoard/DeductionButton.tsx` (rewrite)
 
-`handleDeductionResult` keeps its `'success' | 'failure'` signature (minimal). `partial` and
-`incorrect` both surface as the existing failure ("slack threads" + `clearConnections`) — the
-directional signal lives in the message, not a distinct thread animation. A per-correctness thread
-animation is deferred polish, not load-bearing for Phase 2.
+The button becomes a **trigger only**. It no longer owns the outcome message, the `success/failure`
+phase colouring, or the `contested`→`examined` revert timer (all move to the board — fixes B3).
+
+```
+handleAttempt():
+  if busy: return
+  classification = classifyConnection(connectedClueIds, clues, recipes)
+  onAttempt(classification)   // hand the whole classification to the board
+```
+
+- **`onResult(result: 'success' | 'failure')`** is replaced by
+  **`onAttempt(classification: ConnectionClassification)`**.
+- The button keeps only a minimal disabled/label state driven by props from the board (e.g. a board-owned
+  `attemptPhase`), **not** its own outcome state. No local `<p>` message, no `AnimatePresence` tier label.
+- **Accessible label** becomes neutral — "Attempt Deduction — connect these clues" — dropping "perform a
+  Reason check" (Codex Minor: the roll no longer happens on most paths). The transient **"Rolling…"**
+  label is **removed** (Codex Minor: `performCheck` is synchronous, so it never renders — a batched no-op).
+- `connectedClueIds.length < 2` → render null (unchanged).
+
+**Where the roll happens:** on a `correct`/`false` classification the **board** (Component 3) calls
+`performCheck('reason', investigator, 14, false, false)` **once**, purely to pick a flavour word from
+`tier === 'critical'`. `partial`/`incorrect` roll nothing.
+
+---
+
+## Component 3 — `src/components/EvidenceBoard/EvidenceBoard.tsx` (owns outcome lifecycle)
+
+Replace `handleDeductionResult(result)` with `handleDeductionAttempt(classification)` that owns
+everything the button used to, so the message survives `clearConnections()` (B3):
+
+```
+handleDeductionAttempt(classification):
+  attemptedIds = [...connectedIds]                 // snapshot BEFORE clearing (B3 race fix)
+  switch classification.correctness:
+    case 'correct':
+    case 'false':
+      roll = performCheck('reason', investigator, 14, false, false)   // FLAVOUR ONLY
+      recipe = classification.recipe                                  // non-null here
+      deduction = buildDeductionFromRecipe(recipe, attemptedIds)      // stores under stable id
+      addDeduction(deduction)
+      recipe.requiredClues.forEach(id => updateClueStatus(id, 'deduced'))   // only the recipe clues…
+      extras = attemptedIds.filter(id => !recipe.requiredClues.includes(id))
+      extras.forEach(id => updateClueStatus(id, 'examined'))          // …extras revert (Codex Major: no noise-inflation)
+      flavour = roll.tier === 'critical' ? 'sharp' : 'plain'
+      key = classification.correctness === 'false' ? 'false' : `correct-${flavour}`
+      showOutcomeBanner(MESSAGE[key], tone[classification.correctness])  // board-owned transient, NOT the button
+      announce(MESSAGE[key])
+      clearConnections()                                             // safe now — banner is board state
+      // success threads handled as today
+    case 'partial':
+    case 'incorrect':
+      attemptedIds.forEach(id => updateClueStatus(id, 'contested'))
+      showOutcomeBanner(MESSAGE[classification.correctness], tone[classification.correctness])
+      announce(MESSAGE[classification.correctness])
+      setSlackConnections(...); clearConnections(); setTimeout(clear slack, 1400)   // existing failure anim
+      setTimeout(() => attemptedIds.forEach(id =>
+        (clues[id]?.status === 'contested') && updateClueStatus(id, 'examined')), 2000)  // revert, guarded
+```
+
+**Outcome banner:** a small board-owned transient region near the Attempt button (a `<p>`/`<div>` that
+lives in `EvidenceBoard`, which does **not** unmount when connections clear). It is **visual-only** (no
+`aria-live`) — the single screen-reader announcement is `announce()` (Codex/roadmap: exactly one SR
+announcement; no double-speak). Three-way `tone` colour: green (`correct`) / amber (`false` **and**
+`partial`) / red (`incorrect`). Auto-clears after a short delay (align with the existing 2 s revert).
+
+**Revert race fix (B3):** the timeout reverts `attemptedIds` (a captured snapshot), and only clues **still
+`contested`** (guard), so a clue re-connected during the window isn't yanked back to `examined`.
+
+**Message copy** (measured, atmospheric, short *status* strings — never narrative, never campy):
+
+| key | correctness | roll | message |
+|---|---|---|---|
+| `correct-sharp` | `correct` | `critical` | `The connection holds — a sharp, decisive insight.` |
+| `correct-plain` | `correct` | other | `The connection holds.` |
+| `false` | `false` | any | `A connection forms — coherent, but something about it feels wrong.` |
+| `partial` | `partial` | — | `Some of these belong together, but the link isn't complete.` |
+| `incorrect` | `incorrect` | — | `These clues don't connect.` |
+
+**Clue status:** `partial` and `incorrect` both reuse the existing `contested` state (❓ + red ring + 2 s
+revert). **No new `ClueStatus`, no save migration.**
 
 ---
 
 ## Component 4 — `src/components/EvidenceBoard/ClueCard.tsx` (backlog item 2, colour-only fix)
 
-The `connected` state is signalled by a yellow ring **alone** (WCAG SC 1.4.1 gap). Add a redundant
-non-colour cue matching the existing badge pattern:
+The `connected` state is signalled by a yellow ring **alone** (WCAG SC 1.4.1 gap). Add a redundant cue:
 
 - `StatusIndicator` gains a `connected` case → a `🔗` badge in the same top-right slot as
   NEW / 📌 / ❓ / ✓, with `aria-label="Connected"`.
 - Update the doc-comment header's six-state list to note the 🔗 badge.
 
-No logic change. The card-root `aria-label` already includes `status: connected`, so SR coverage is
-already correct; this fixes the *visual* colour-only gap.
+No logic change; the card-root `aria-label` already includes `status: connected`.
 
 ---
 
-## Testing (TDD — write RED first, watch it fail, then GREEN)
+## ADR-0012 amendment (required before promoting to Enacted)
 
-**`src/engine/__tests__/classifyConnection.test.ts`** — includes the ADR-0012 Confirmation assertions:
-- recipe-matching set (superset of `requiredClues`) → `correct`, `recipe` non-null. *(Pure fn: no roll
-  is involved, which is the point — assert the correctness is roll-independent.)*
-- non-qualifying set → never `correct` (assert `partial` / `incorrect` on representative sets).
-- `allShareATag && !redHerring` → `correct`; coherent-subset (`some && !all`) → `partial`;
-  red-herring + coherent → `partial`; red-herring-alone / no-overlap → `incorrect`.
-
-**`src/engine/__tests__/classifyConnection.property.test.ts`** (fast-check): any set that is a superset
-of some recipe's `requiredClues` classifies `correct`.
-
-**`DeductionButton` component test** (spy on the `announce` module):
-- a `correct` set forms a deduction (`addDeduction` called) and marks clues `deduced` **even when the
-  d20 is stubbed to a low/failing roll** (enacts ADR-0012: roll can't gate).
-- `partial` and `incorrect` sets never call `addDeduction`; mark clues `contested`; revert after 2 s.
-- `announce` is called exactly once per attempt, with the message matching the correctness/flavour.
-
-**`ClueCard` test:** a `connected` clue renders the 🔗 badge (colour-independence regression guard).
-
-Baseline **635/60**; expect ~8–12 new tests.
+ADR-0012's Decision says the roll "drives the Phase 2 partial-tier *directional* feedback." Under the
+recipe-based model, **partial feedback is deterministic** (some-but-not-all of a recipe), not roll-driven.
+Amend ADR-0012 with a dated **Amendment** note (its Decision body is frozen per MADR immutability, so add
+a note, don't rewrite): *"Phase 2 (2026-07-14) implements this with a recipe-based correctness oracle;
+generic tag-based correctness was rejected as unsound against shipped content. Consequently the roll
+flavours a **successful/false formation** only — partial/incorrect are deterministic and roll nothing.
+This narrows, and does not contradict, the principle: correctness still gates, the roll still only
+flavours."* Then promote status `Accepted → Enacted` and fill Commits/PRs. Codex's point that the literal
+"non-qualifying set + critical roll" confirmation can't run is **correct and accepted**: the classifier is
+roll-free, so the Confirmation test asserts formation is a pure function of set-vs-recipes (recipe set →
+`correct`/`false` and forms; non-recipe set → `partial`/`incorrect` and never forms), which is the
+substance of the clause.
 
 ---
 
-## Docs & ADR promotion (in the Phase 2 PR)
+## Testing (TDD — RED first, watch fail, then GREEN)
 
-- **Promote ADR-0012 `Accepted` → `Enacted`**; fill its *Commits / PRs* link. Its Confirmation clause
-  is satisfied by the `classifyConnection` roll-independence test + the removal of the
-  `tier === 'success' || 'critical'` gate in `DeductionButton`.
-- `docs/engine-reference.md`: add `classifyConnection` (signature + rules).
-- `CLAUDE.md`: update the `DeductionButton` note — it no longer rolls-to-gate (correctness gates; the
-  roll flavours).
-- `docs/status.md`: bump the test baseline.
-- Post-merge: tick roadmap Phase 2; update the `ui-ux-improvements.md` audit rows for items 6 and 2.
+**`src/engine/__tests__/classifyConnection.test.ts`** (ADR-0012 Confirmation lives here):
+- full non-herring recipe subset (incl. with extra clues) → `correct`, `recipe` = that recipe.
+- full **red-herring** recipe (`cc-deduction-poisoner`) → `false`, `recipe` set (still forms).
+- a set matching **both** a true and a red-herring recipe (shared `cc-clue-sloane-debts`) → `correct` with
+  the **true** recipe (non-herring-first ordering).
+- some-but-not-all of a recipe → `partial`; no recipe overlap → `incorrect`.
+- **fail-closed:** `<2` distinct valid ids, an id absent from `clues`, duplicate ids, a prototype key
+  (`toString`) → never `correct`/`false`.
+- formation is roll-independent by construction (pure fn — assert explicitly).
+
+**`src/engine/__tests__/classifyConnection.property.test.ts`** (fast-check): any superset of some
+non-red-herring recipe's `requiredClues` (with no higher-priority match) classifies `correct`.
+
+**`DeductionButton` test:** calls `onAttempt` with the classification; renders null below 2 clues; neutral
+label; no local outcome message.
+
+**`EvidenceBoard` integration test (Codex B3 — the critical one):**
+- after a `correct` attempt, the **board banner** shows the success message **even though
+  `clearConnections()` ran** (the button has unmounted); `addDeduction` called; only the recipe's clues are
+  `deduced`, extras reverted to `examined`.
+- a **second** deduction in the same board session works (no stuck "Deduction Locked").
+- a `partial`/`incorrect` attempt shows the directional banner, marks `contested`, reverts after 2 s; a
+  clue re-connected during the window is **not** reverted.
+- `false` (red-herring recipe) forms the stable deduction and shows the amber uneasy message.
+
+**`ClueCard` test:** `connected` renders the 🔗 badge.
+
+Baseline **635/60**; expect ~12–16 new tests.
+
+## Docs & ADR (in the Phase 2 PR)
+
+- ADR-0012: add the Amendment note; promote `Accepted → Enacted`; fill Commits/PRs.
+- `docs/engine-reference.md`: add `classifyConnection` (signature + recipe-based rules).
+- `CLAUDE.md`: update the `DeductionButton` architectural note — correctness (recipe-based) gates; the
+  board owns the outcome lifecycle; the roll flavours a formed deduction only.
+- `docs/status.md`: bump the test baseline. Post-merge: tick roadmap Phase 2; update `ui-ux-improvements.md`
+  rows for items 6 and 2.
 
 ## Scope boundaries (YAGNI)
 
-- **No** anti-spam / composure cost (deferred — own decision).
-- **No** new `ClueStatus`, **no** save-migration.
-- **No** widened `onResult` signature / per-correctness thread animation.
-- **No** dice-legibility (DC/modifier surfacing) — that is Phase 3.
-- **No** touch/contrast/reduced-motion sweeps — that is Phase 4.
+- **No** tag-based correctness (rejected as unsound); **no** `connectsTo`-graph oracle (recipe model
+  suffices for Phase 2).
+- **No** generic (non-recipe) deduction formation any more (behaviour change; nothing gates on generic
+  deductions — verified: only recipe ids appear in `hasDeduction`/`requiresDeduction`).
+- **No** anti-spam / composure cost; **no** new `ClueStatus`; **no** save migration.
+- **No** dice-legibility DC/modifier surfacing (Phase 3); **no** contrast/reduced-motion sweeps (Phase 4).
 
 ## Cross-provider Codex review (file-based)
 
-Per CLAUDE.md's file-based handoff, this work gets three independent Codex passes: **this spec**, the
-**implementation plan** (once written), and the **completed implementation** (final pass before
-merge, against the branch diff + built code). Each is a `codex/input/<date>-phase2-deduction-*.md`
-prompt the user runs; reviews land in `codex/output/`. Reviewer context must include this spec,
-ADR-0012, and the four touched files.
+Per CLAUDE.md's file-based handoff: this **spec** (revised here after round 1), the **plan** (next), and
+the **completed implementation** each get an independent Codex pass. Reviews land in `codex/output/`.
