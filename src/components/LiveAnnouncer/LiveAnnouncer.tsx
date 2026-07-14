@@ -6,26 +6,39 @@
  * (after the empty regions have committed). Mount this ONCE at the app root
  * (src/main.tsx), never inside a per-screen wrapper.
  */
-import { useSyncExternalStore, useEffect } from 'react';
+import { useSyncExternalStore, useEffect, useState } from 'react';
 import { subscribeAnnouncer, getAnnouncerSnapshot, markAnnouncerReady } from '../../announcer';
 
 export function LiveAnnouncer() {
   const snapshot = useSyncExternalStore(subscribeAnnouncer, getAnnouncerSnapshot);
 
-  // Mark ready AFTER the empty regions have committed, so the first DOM state is
-  // empty (screen readers only announce changes to a pre-existing region).
+  // Per-mount empty-commit gate. The store's `ready` flag + messages persist at
+  // module level, so on a remount (Fast Refresh, tests, a future root swap) the
+  // snapshot may already be non-empty. Without this gate the first commit of the
+  // new mount would render that text as *initial* region content, which screen
+  // readers do not announce. Starting empty every mount, then flipping this flag
+  // in the passive effect below, guarantees each mount's first commit is empty so
+  // the message renders as a *change* to a pre-existing region.
+  const [regionsCommitted, setRegionsCommitted] = useState(false);
+
+  // Runs AFTER the empty regions have committed: mark the store ready (flushing
+  // any pre-mount queued message) and open the local gate so the snapshot text
+  // can render.
   useEffect(() => {
     markAnnouncerReady();
+    setRegionsCommitted(true);
   }, []);
 
   const { polite, assertive, politeSlot, assertiveSlot } = snapshot;
+  const politeText = regionsCommitted ? polite : '';
+  const assertiveText = regionsCommitted ? assertive : '';
 
   return (
     <>
-      <div aria-live="polite" className="sr-only">{politeSlot === 0 ? polite : ''}</div>
-      <div aria-live="polite" className="sr-only">{politeSlot === 1 ? polite : ''}</div>
-      <div aria-live="assertive" className="sr-only">{assertiveSlot === 0 ? assertive : ''}</div>
-      <div aria-live="assertive" className="sr-only">{assertiveSlot === 1 ? assertive : ''}</div>
+      <div aria-live="polite" className="sr-only">{politeSlot === 0 ? politeText : ''}</div>
+      <div aria-live="polite" className="sr-only">{politeSlot === 1 ? politeText : ''}</div>
+      <div aria-live="assertive" className="sr-only">{assertiveSlot === 0 ? assertiveText : ''}</div>
+      <div aria-live="assertive" className="sr-only">{assertiveSlot === 1 ? assertiveText : ''}</div>
     </>
   );
 }

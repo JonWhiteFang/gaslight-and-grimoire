@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { useLayoutEffect } from 'react';
 import { render, act } from '@testing-library/react';
 import { LiveAnnouncer } from '../LiveAnnouncer';
-import { announce, __resetAnnouncer, getAnnouncerSnapshot } from '../../../announcer';
+import { announce, __resetAnnouncer, getAnnouncerSnapshot, markAnnouncerReady } from '../../../announcer';
 
 describe('<LiveAnnouncer>', () => {
   beforeEach(() => {
@@ -62,19 +62,47 @@ describe('<LiveAnnouncer>', () => {
   // effect flips ready and flushes it.
   it('does not render a pre-mount queued message at first commit; flushes it after mount', () => {
     announce('Early message'); // before <LiveAnnouncer> mounts
-    let textAtFirstCommit: string | null = null;
+    announce('Early alert', { assertive: true });
+    let textsAtFirstCommit: (string | null)[] | null = null;
     function Probe() {
       // useLayoutEffect runs after commit but before passive effects → observes the
       // first committed DOM state, before LiveAnnouncer's own (passive) mount effect.
       useLayoutEffect(() => {
-        textAtFirstCommit = document.querySelector('[aria-live="polite"]')?.textContent ?? null;
+        textsAtFirstCommit = [...document.querySelectorAll('[aria-live]')].map((n) => n.textContent);
       }, []);
       return null;
     }
     const { container } = render(<><LiveAnnouncer /><Probe /></>);
-    expect(textAtFirstCommit).toBe(''); // empty at first commit — the pre-existence guarantee
-    const texts = [...container.querySelectorAll('[aria-live="polite"]')].map((n) => n.textContent);
-    expect(texts).toContain('Early message'); // flushed after ready
+    // All four regions (both polite + both assertive) empty at first commit — the
+    // pre-existence guarantee across both channels.
+    expect(textsAtFirstCommit).toEqual(['', '', '', '']);
+    const polite = [...container.querySelectorAll('[aria-live="polite"]')].map((n) => n.textContent);
+    const assertive = [...container.querySelectorAll('[aria-live="assertive"]')].map((n) => n.textContent);
+    expect(polite).toContain('Early message'); // flushed after ready
+    expect(assertive).toContain('Early alert');
+  });
+
+  // Per-mount empty-commit gate: even when the store is ALREADY ready and holds a
+  // non-empty message (as after a remount), the fresh mount's first commit must be
+  // empty so the message re-announces as a change to a pre-existing region.
+  it('starts empty on a mount into an already-ready, non-empty store, then renders the message', () => {
+    markAnnouncerReady(); // store is already ready...
+    announce('Pre-existing'); // ...and already holds a message (as after a remount)
+    expect(getAnnouncerSnapshot().ready).toBe(true);
+    expect(getAnnouncerSnapshot().polite).toBe('Pre-existing');
+
+    let textsAtFirstCommit: (string | null)[] | null = null;
+    function Probe() {
+      useLayoutEffect(() => {
+        textsAtFirstCommit = [...document.querySelectorAll('[aria-live]')].map((n) => n.textContent);
+      }, []);
+      return null;
+    }
+    const { container } = render(<><LiveAnnouncer /><Probe /></>);
+    // Empty at first commit despite the store already being ready+non-empty.
+    expect(textsAtFirstCommit).toEqual(['', '', '', '']);
+    const polite = [...container.querySelectorAll('[aria-live="polite"]')].map((n) => n.textContent);
+    expect(polite).toContain('Pre-existing'); // rendered after the passive effect opens the gate
   });
 
   // A real screen-switch / error-boundary persistence guard: the announcer must sit

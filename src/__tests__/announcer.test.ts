@@ -107,8 +107,10 @@ describe('announcer store — readiness & queue', () => {
 
   it('does not populate the snapshot before ready', () => {
     announce('Early message');
+    announce('Early alert', { assertive: true });
     const s = getAnnouncerSnapshot();
     expect(s.polite).toBe(''); // queued, not rendered — first DOM commit stays empty
+    expect(s.assertive).toBe(''); // both channels stay empty pre-ready
     expect(s.ready).toBe(false);
   });
 
