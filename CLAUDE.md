@@ -207,3 +207,21 @@ Rules for both gates:
 - If the codex MCP tool is unavailable or errors, do not fail the task — but the gate does not
   silently vanish: tell the user immediately, and when presenting the plan or finished work, state
   prominently which review gate was skipped and why.
+
+### File-based Codex handoff (`codex/`)
+
+When the codex MCP tool is unusable (e.g. `codex exec` exhausts its budget exploring, or the user
+prefers to drive Codex themselves), use the committed `codex/` handoff directory instead:
+
+- **`codex/input/`** — the reviewer prompt(s). Claude writes a `<task>.md` prompt here.
+- **`codex/output/`** — Codex's review(s). This is the **only** location Codex may write to.
+
+The prompt file MUST open with operating rules that (1) tell Codex it has no memory and all context is
+in the file, (2) instruct it to **make no repository changes except writing the single named output
+file** under `codex/output/`, and (3) name that exact output path. Because Codex won't do its own
+retrieval reliably under a budget, **inline the key code excerpts and repo facts** in the prompt (the
+same "minimum context per call" rule as above — goal, starting revision, plan/diff, file paths,
+constraints), so it can confirm rather than hunt. The user feeds `codex/input/<task>.md` to Codex;
+Claude then reads `codex/output/<task>-review.md` and treats its findings exactly like any Gate 1/2
+review (same accept/push-back/two-round rules). This is a transport mechanism, not a new gate — the
+gate rules above still apply.

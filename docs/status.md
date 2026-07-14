@@ -106,10 +106,10 @@ ambient `*.mp3`, and no `*.png`/`*.jpg`/`*.webp` illustrations yet.
 
 ## Test baseline
 
-As of 2026-07-09, running `npm run test:run`:
+As of 2026-07-14, running `npm run test:run`:
 
-- **Tests: 611 passed (611)**
-- **Test Files: 58 passed (58)**
+- **Tests: 635 passed (635)**
+- **Test Files: 60 passed (60)**
 
 The suite includes property-based tests using fast-check (six
 `*.property.test.ts` files covering the dice engine, narrative engine, deduction
