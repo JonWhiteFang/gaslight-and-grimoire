@@ -56,11 +56,11 @@ export function announce(message: string, opts?: { assertive?: boolean }): void 
   if (!snapshot.ready) {
     // Queue the latest message per channel; do NOT populate the snapshot yet,
     // so the region's first DOM commit stays empty.
-    if (channel === 'polite') queuedPolite = message;
-    else queuedAssertive = message;
+    if (channel === 'polite') queuedPolite = text;
+    else queuedAssertive = text;
     return;
   }
-  write(channel, message);
+  write(channel, text);
 }
 
 export function markAnnouncerReady(): void {

@@ -3,6 +3,7 @@ import {
   announce,
   getAnnouncerSnapshot,
   markAnnouncerReady,
+  subscribeAnnouncer,
   __resetAnnouncer,
 } from '../announcer';
 
@@ -53,6 +54,19 @@ describe('announcer store — routing & snapshot', () => {
     announce('');
     announce('   ');
     expect(getAnnouncerSnapshot()).toBe(before); // unchanged, same reference
+  });
+
+  it('stores a padded message trimmed', () => {
+    announce('  Clue  ');
+    expect(getAnnouncerSnapshot().polite).toBe('Clue');
+  });
+
+  it('holds both channels simultaneously without clobbering the sibling', () => {
+    announce('polite msg');
+    announce('alert', { assertive: true });
+    const s = getAnnouncerSnapshot();
+    expect(s.polite).toBe('polite msg');
+    expect(s.assertive).toBe('alert');
   });
 });
 
@@ -115,5 +129,28 @@ describe('announcer store — readiness & queue', () => {
     const afterFirst = getAnnouncerSnapshot();
     markAnnouncerReady(); // second call must be a no-op
     expect(getAnnouncerSnapshot()).toBe(afterFirst); // same reference, no reset
+  });
+});
+
+describe('announcer store — subscription', () => {
+  beforeEach(() => {
+    __resetAnnouncer(); // reset BEFORE subscribing (reset clears listeners)
+  });
+
+  it('notifies subscribers on ready + announce, and stops after dispose', () => {
+    let calls = 0;
+    const off = subscribeAnnouncer(() => {
+      calls += 1;
+    });
+
+    markAnnouncerReady(); // ready transition fires listeners
+    expect(calls).toBe(1);
+
+    announce('x'); // a write fires listeners
+    expect(calls).toBe(2);
+
+    off(); // disposer removes the listener
+    announce('y'); // no further notifications
+    expect(calls).toBe(2);
   });
 });
