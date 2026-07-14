@@ -78,7 +78,7 @@ Verified by reading the components on `main`. **Status legend:** ✅ already sat
 | **Load / Case selection** (`LoadGameScreen.tsx`, `CaseSelection.tsx`) | Full-screen **route screens** (`<main>`), not overlays. Load has two-tap delete confirmation (F-054). | ⚠️ Route screens, not modals. Different a11y contract (see [Part III](#part-iii--surface-taxonomy-replaces-the-blanket-modal-recommendation)). |
 | **Narrative prose** (`SceneText.tsx`) | Typewriter with **click-to-skip + a real keyboard skip `<button>`**; `instant`/`reduced-motion` paths render full text immediately; `sr-only aria-live="polite"` exposes the full scene once (F-049, never mid-typewriter). | ✅ Self-paced prose is **already implemented**. Reframe as "preserve," not "add." |
 | **Reduced motion** | `AccessibilityProvider` detects the OS `prefers-reduced-motion` on mount and sets a store `reducedMotion` flag; adds a `.reduced-motion` class to `<html>`; the flag is **threaded via props** into `SceneText`, `DiceRollOverlay`, `DeductionButton`, `ConnectionThread`. App uses **`LazyMotion` + `domAnimation` + the `m` component** (`main.tsx`), **not** `MotionConfig`. | 🟡 A store-driven mechanism already exists (arguably better than `MotionConfig` because the `.reduced-motion` CSS class *can* also gate Tailwind/CSS animations). **Open:** verify the class actually disables CSS animations like `animate-pulse` (`ClueCard.tsx:42`, `CaseSelection.tsx:51`). |
-| **Global live announcer** (`AccessibilityProvider.tsx`) | Applies settings/classes only; **renders no announcer**. Live regions are component-local and several mount only when content exists. | ⭕ Open. A single always-mounted announcer would be a genuine improvement (see [Part IV](#part-iv--accessibility-acceptance-criteria-per-surface)). |
+| **Global live announcer** (`src/announcer.ts`, `src/components/LiveAnnouncer/`) | ✅ **Shipped (Phase 1, PR #80).** An always-mounted `<LiveAnnouncer>` (four `sr-only` `aria-live` slots, per-mount empty-commit gate) is mounted at the app root in `main.tsx` (outside `ErrorBoundary`); components call `announce()` from the framework-agnostic store. `AccessibilityProvider` still only applies settings/classes — it deliberately does not host the announcer (it remounts per screen). | ✅ Done. Phases 2/3 announce via `announce()` at points not already covered by a local region. |
 | **Deduction** (`DeductionButton.tsx`, `buildDeduction.ts`) | With ≥2 clues connected, an "Attempt Deduction" button rolls a **Reason check (d20 vs DC 14)**. Success/critical → build a deduction (recipe **subset-match** or generic) and mark clues `deduced`; partial/failure/fumble → mark `contested`, revert to `examined` after 2s. Tier label announced via `aria-live="polite"`. | 🟡 Verification is a **dice roll on a connected set**, *not* slot-fill or per-connection right/wrong. Golden-Idol/Obra-Dinn patterns need a G&G-specific bridge — see [Part V](#part-v--choice--deduction-from-abstract-to-acceptance-criteria). |
 | **Clue status cues** (`ClueCard.tsx`) | Six states. Most pair color with a redundant icon/badge (NEW badge, 📌 deduced, ❓ contested, ✓ spent). | 🟡 **`connected`** is signalled by a **yellow ring alone** (no icon/text) — a real, code-level color-only gap (see [G2](#g2--color-independence--contrast)). |
 
@@ -292,13 +292,13 @@ already met per Part I; ⭕ are open.
 - ⭕ Verify **background inertness** (`inert`/`aria-hidden` on the app root while an overlay is open).
 - ✅ Visible close control *(the `×` button)*.
 
-**Global live announcer** (currently ⭕ absent)
-- ⭕ Add one always-mounted `aria-live="polite"` region high in the tree (e.g. rendered by
-  `AccessibilityProvider`), plus an `assertive` region for halts/errors, with a tiny
-  `announce(message, {assertive?})` API.
-- ⭕ Route stat changes, deduction outcomes, and scene transitions through it (short *status* strings —
-  **not** full narrative text; see [Anti-patterns](#anti-patterns-to-avoid) #live-region-flooding).
-- ⭕ Test: the region node persists across scene navigation and store resets (never unmount/remount).
+**Global live announcer** — ✅ **shipped (Phase 1, PR #80)**
+- ✅ One always-mounted `aria-live="polite"` region (plus an `assertive` one for halts/errors) and an
+  `announce(message, {assertive?})` API — mounted at the app root in `main.tsx` (not
+  `AccessibilityProvider`, which remounts per screen), with a per-mount empty-commit gate.
+- ⭕ *(Phase 2/3)* Route deduction outcomes and dice/probability feedback through it (short *status*
+  strings — **not** full narrative text; see [Anti-patterns](#anti-patterns-to-avoid) #live-region-flooding). Stat/scene events are intentionally **not** routed — they already have local `aria-live` coverage.
+- ✅ Test: the region nodes persist across a screen switch and never unmount (covered by the Phase 1 suite).
 
 **Reduced motion** (🟡 mechanism exists; coverage unproven)
 - ⭕ Acceptance criterion **per animation source**: Motion (`m`) components ✅; **CSS/Tailwind**
@@ -367,8 +367,7 @@ deductions, and resume cleanly?) ranks alongside well-sourced plumbing — and s
 aren't presented as work. Ordered by *value*, annotated with *evidence strength* and *audit status*.
 
 **Do now — small, verified, real gaps:**
-1. **Global live announcer** (⭕; High-conf pattern) — one always-mounted region; route stat/deduction/
-   scene-change *status* strings through it. [Part IV](#part-iv--accessibility-acceptance-criteria-per-surface)
+1. ✅ **Global live announcer** — **done (Phase 1, PR #80):** `src/announcer.ts` + `<LiveAnnouncer>` at the app root. Phases 2/3 route deduction/dice feedback through `announce()`. [Part IV](#part-iv--accessibility-acceptance-criteria-per-surface)
 2. **`connected` clue-state color-only fix** (🟡; High-conf) — add an icon/text cue. [G2](#g2--color-independence--contrast)
 3. **Reduced-motion coverage audit** (🟡; High-conf) — confirm CSS animations respect the flag; add
    per-source criteria. [F1](#f1--reduced-motion-must-cover-every-animation-source-not-just-motion-components)

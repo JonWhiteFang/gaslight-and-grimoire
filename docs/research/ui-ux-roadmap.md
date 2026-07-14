@@ -39,8 +39,8 @@ Item numbers reference [`ui-ux-improvements.md` Part VI](ui-ux-improvements.md#p
 
 | Phase | Work | Backlog items | Rationale | Codex gates |
 |-------|------|---------------|-----------|-------------|
-| **0** | **Decision: deduction roll semantics** → ADR | gates 6 | Zero code, highest leverage; sets feel + informs Phase 3 | Gate 1 on the ADR reasoning |
-| **1** | **Global live announcer** — always-mounted `polite` + `assertive` regions and an `announce()` API in `AccessibilityProvider` | 1 | Substrate for Phases 2 & 3; small; hardens all 8 cases immediately | plan + diff |
+| **0** ✅ | **Decision: deduction roll semantics** → ADR | gates 6 | Zero code, highest leverage; sets feel + informs Phase 3 | Gate 1 on the ADR reasoning — **done: [ADR-0012](../DECISIONS/ADR-0012-deduction-roll-semantics.md), PR #79** |
+| **1** ✅ | **Global live announcer** — always-mounted `polite` + `assertive` regions and an `announce()` API. *(Mounted at the app root in `main.tsx`, outside `ErrorBoundary` — NOT in `AccessibilityProvider`, which remounts per screen; Gate-1 correction.)* | 1 | Substrate for Phases 2 & 3; small; hardens all 8 cases immediately | plan + diff — **done: `src/announcer.ts` + `LiveAnnouncer`, PR #80** |
 | **2** | **Deduction feedback legibility** (+ fold in the `connected` color-only fix) | 6, 2 | Top product value; work sits in `ClueCard`/`EvidenceBoard`/`DeductionButton`, so the redundant-cue fix rides along | plan + diff |
 | **3** | **Dice / probability legibility** — surface DC, modifier, advantage/disadvantage at the roll | 7 | Informed by Phase 0; broad — applies to **all** faculty checks, not only deduction | plan + diff |
 | **4** | **A11y hardening sweep** (batched) — reduced-motion coverage audit, focus-restore + background inertness across *all* overlays, contrast/focus-indicator pass | 3, 4, 5 | All "sweep the UI against a checklist," no design decisions, one coherent PR | plan + diff (once) |
