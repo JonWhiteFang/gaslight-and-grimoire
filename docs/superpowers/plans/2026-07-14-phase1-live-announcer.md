@@ -8,27 +8,25 @@
 
 **Tech Stack:** React 19 (`useSyncExternalStore`), TypeScript, Vitest 4 + React Testing Library (jsdom), Tailwind v4 (`sr-only` builtin).
 
-**Spec:** `docs/superpowers/specs/2026-07-14-phase1-live-announcer-design.md` (revised after Codex Gate 1).
+**Spec:** `docs/superpowers/specs/2026-07-14-phase1-live-announcer-design.md` (revised after Codex Gate 1). **Plan reviewed at Gate 1** — findings folded in (`codex/output/phase1-live-announcer-plan-gate1-review.md`): honest single RED→GREEN for the store (Task 1), corrected additive-scope diff check (Task 4), a real screen-switch/ErrorBoundary persistence test + a pre-mount-queue first-commit test (Task 2).
 
 ---
 
 ## File Structure
 
-- **Create `src/announcer.ts`** — the external announcer store. Owns state (`polite`, `assertive`, `politeSlot`, `assertiveSlot`, `ready`), the per-channel pre-ready queue, the cached snapshot, and the public API: `announce()`, `subscribeAnnouncer()`, `getAnnouncerSnapshot()`, `markAnnouncerReady()`, `__resetAnnouncer()`. No React, no Zustand.
-- **Create `src/components/LiveAnnouncer/LiveAnnouncer.tsx`** — the React component. Subscribes to the store, renders four `sr-only` `aria-live` nodes, calls `markAnnouncerReady()` on mount.
+- **Create `src/announcer.ts`** — the external announcer store. State (`polite`, `assertive`, `politeSlot`, `assertiveSlot`, `ready`), the per-channel pre-ready queue, the cached snapshot, and the API: `announce()`, `subscribeAnnouncer()`, `getAnnouncerSnapshot()`, `markAnnouncerReady()`, `__resetAnnouncer()`. No React, no Zustand.
+- **Create `src/components/LiveAnnouncer/LiveAnnouncer.tsx`** — React component; subscribes, renders four `sr-only` `aria-live` nodes, calls `markAnnouncerReady()` on mount.
 - **Create `src/components/LiveAnnouncer/index.ts`** — barrel export (repo convention).
 - **Create `src/__tests__/announcer.test.ts`** — store unit tests.
 - **Create `src/components/LiveAnnouncer/__tests__/LiveAnnouncer.test.tsx`** — component RTL tests.
 - **Modify `src/main.tsx`** — render `<LiveAnnouncer />` at the root, outside `ErrorBoundary`.
 
-Types/API defined once in `src/announcer.ts` and reused everywhere:
+Types/API defined once in `src/announcer.ts`:
 
 ```ts
 export interface AnnouncerSnapshot {
-  polite: string;
-  assertive: string;
-  politeSlot: 0 | 1;
-  assertiveSlot: 0 | 1;
+  polite: string; assertive: string;
+  politeSlot: 0 | 1; assertiveSlot: 0 | 1;
   ready: boolean;
 }
 export function announce(message: string, opts?: { assertive?: boolean }): void;
@@ -40,13 +38,17 @@ export function __resetAnnouncer(): void;
 
 ---
 
-## Task 1: Announcer store — polite/assertive routing & cached snapshot
+## Task 1: Announcer store (routing, cached snapshot, two-slot re-announce, readiness+queue)
+
+The store is one small module, so it gets **one honest RED→GREEN**: write the full test suite first
+(all fail — module doesn't exist), then implement the whole store to green. (Gate-1 finding 4: no
+fake "already-passing" RED steps.)
 
 **Files:**
 - Create: `src/announcer.ts`
 - Test: `src/__tests__/announcer.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [ ] **Step 1: Write the full failing test suite**
 
 ```ts
 // src/__tests__/announcer.test.ts
@@ -61,11 +63,11 @@ import {
 describe('announcer store — routing & snapshot', () => {
   beforeEach(() => {
     __resetAnnouncer();
-    markAnnouncerReady(); // most tests operate post-ready; readiness itself is tested in Task 3
+    markAnnouncerReady(); // these tests operate post-ready; readiness itself tested below
   });
 
   it('starts empty', () => {
-    __resetAnnouncer();
+    __resetAnnouncer(); // undo the beforeEach ready
     const s = getAnnouncerSnapshot();
     expect(s.polite).toBe('');
     expect(s.assertive).toBe('');
@@ -89,7 +91,7 @@ describe('announcer store — routing & snapshot', () => {
   it('returns a stable snapshot reference when nothing changed', () => {
     const a = getAnnouncerSnapshot();
     const b = getAnnouncerSnapshot();
-    expect(a).toBe(b); // same object identity — required by useSyncExternalStore
+    expect(a).toBe(b); // same identity — required by useSyncExternalStore
   });
 
   it('returns a new snapshot reference after a change', () => {
@@ -107,14 +109,76 @@ describe('announcer store — routing & snapshot', () => {
     expect(getAnnouncerSnapshot()).toBe(before); // unchanged, same reference
   });
 });
+
+describe('announcer store — two-slot re-announce', () => {
+  beforeEach(() => {
+    __resetAnnouncer();
+    markAnnouncerReady();
+  });
+
+  it('flips the polite slot on each write so a repeat lands in a new node', () => {
+    announce('Clue added');
+    const first = getAnnouncerSnapshot().politeSlot;
+    announce('Clue added'); // identical message
+    const second = getAnnouncerSnapshot().politeSlot;
+    expect(second).not.toBe(first);
+    expect(getAnnouncerSnapshot().polite).toBe('Clue added'); // text unchanged, no nonce chars
+  });
+
+  it('keeps accessible text exactly equal to the message (no hidden chars)', () => {
+    announce('Suspicion rising');
+    expect(getAnnouncerSnapshot().polite).toBe('Suspicion rising');
+    announce('Suspicion rising');
+    expect(getAnnouncerSnapshot().polite).toBe('Suspicion rising');
+  });
+
+  it('flips the assertive slot independently of the polite slot', () => {
+    const startAssertive = getAnnouncerSnapshot().assertiveSlot;
+    announce('halt', { assertive: true });
+    expect(getAnnouncerSnapshot().assertiveSlot).not.toBe(startAssertive);
+    expect(getAnnouncerSnapshot().politeSlot).toBe(0); // polite untouched
+  });
+});
+
+describe('announcer store — readiness & queue', () => {
+  beforeEach(() => {
+    __resetAnnouncer(); // NOTE: no markAnnouncerReady() — testing pre-ready behavior
+  });
+
+  it('does not populate the snapshot before ready', () => {
+    announce('Early message');
+    const s = getAnnouncerSnapshot();
+    expect(s.polite).toBe(''); // queued, not rendered — first DOM commit stays empty
+    expect(s.ready).toBe(false);
+  });
+
+  it('flushes the latest queued message per channel on ready', () => {
+    announce('First polite');
+    announce('Second polite'); // latest wins per channel
+    announce('An alert', { assertive: true });
+    markAnnouncerReady();
+    const s = getAnnouncerSnapshot();
+    expect(s.ready).toBe(true);
+    expect(s.polite).toBe('Second polite');
+    expect(s.assertive).toBe('An alert');
+  });
+
+  it('markAnnouncerReady is idempotent', () => {
+    markAnnouncerReady();
+    announce('After ready');
+    const afterFirst = getAnnouncerSnapshot();
+    markAnnouncerReady(); // second call must be a no-op
+    expect(getAnnouncerSnapshot()).toBe(afterFirst); // same reference, no reset
+  });
+});
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [ ] **Step 2: Run the suite to verify it fails**
 
 Run: `npx vitest run src/__tests__/announcer.test.ts`
-Expected: FAIL — `Cannot find module '../announcer'` / exports undefined.
+Expected: FAIL — `Cannot find module '../announcer'` / exports undefined (all 12 tests red).
 
-- [ ] **Step 3: Write the minimal store implementation**
+- [ ] **Step 3: Write the store implementation**
 
 ```ts
 // src/announcer.ts
@@ -161,17 +225,9 @@ function emit(): void {
 /** Write a message into a channel, flipping that channel's active slot. */
 function write(channel: 'polite' | 'assertive', message: string): void {
   if (channel === 'polite') {
-    snapshot = {
-      ...snapshot,
-      polite: message,
-      politeSlot: snapshot.politeSlot === 0 ? 1 : 0,
-    };
+    snapshot = { ...snapshot, polite: message, politeSlot: snapshot.politeSlot === 0 ? 1 : 0 };
   } else {
-    snapshot = {
-      ...snapshot,
-      assertive: message,
-      assertiveSlot: snapshot.assertiveSlot === 0 ? 1 : 0,
-    };
+    snapshot = { ...snapshot, assertive: message, assertiveSlot: snapshot.assertiveSlot === 0 ? 1 : 0 };
   }
   emit();
 }
@@ -219,7 +275,11 @@ export function getAnnouncerSnapshot(): AnnouncerSnapshot {
   return snapshot;
 }
 
-/** Test-only: restore initial state. */
+/**
+ * Test-only: restore initial state. NOTE: this clears listeners, so never call
+ * it after rendering a live subscriber within the same test — it silently drops
+ * that subscription. Planned tests only call it in beforeEach(), before render.
+ */
 export function __resetAnnouncer(): void {
   snapshot = EMPTY;
   queuedPolite = null;
@@ -228,151 +288,21 @@ export function __resetAnnouncer(): void {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [ ] **Step 4: Run the suite to verify it passes**
 
 Run: `npx vitest run src/__tests__/announcer.test.ts`
-Expected: PASS (6 tests).
+Expected: PASS (12 tests).
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add src/announcer.ts src/__tests__/announcer.test.ts
-git commit -m "feat: announcer store — polite/assertive routing + cached snapshot"
+git commit -m "feat: announcer store (routing, slots, readiness queue, cached snapshot)"
 ```
 
 ---
 
-## Task 2: Announcer store — two-slot re-announce (repeat handling)
-
-**Files:**
-- Modify: `src/announcer.ts` (no code change expected — this task proves the slot behavior; if a test fails, fix here)
-- Test: `src/__tests__/announcer.test.ts` (add a `describe` block)
-
-- [ ] **Step 1: Write the failing tests**
-
-```ts
-// append to src/__tests__/announcer.test.ts
-describe('announcer store — two-slot re-announce', () => {
-  beforeEach(() => {
-    __resetAnnouncer();
-    markAnnouncerReady();
-  });
-
-  it('flips the polite slot on each write so a repeat lands in a new node', () => {
-    announce('Clue added');
-    const first = getAnnouncerSnapshot().politeSlot;
-    announce('Clue added'); // identical message
-    const second = getAnnouncerSnapshot().politeSlot;
-    expect(second).not.toBe(first); // slot toggled → different DOM node → re-announced
-    expect(getAnnouncerSnapshot().polite).toBe('Clue added'); // text unchanged, no nonce chars
-  });
-
-  it('keeps the accessible text exactly equal to the message (no hidden chars)', () => {
-    announce('Suspicion rising');
-    expect(getAnnouncerSnapshot().polite).toBe('Suspicion rising');
-    announce('Suspicion rising');
-    expect(getAnnouncerSnapshot().polite).toBe('Suspicion rising');
-  });
-
-  it('flips the assertive slot independently of the polite slot', () => {
-    const startAssertive = getAnnouncerSnapshot().assertiveSlot;
-    announce('halt', { assertive: true });
-    expect(getAnnouncerSnapshot().assertiveSlot).not.toBe(startAssertive);
-    expect(getAnnouncerSnapshot().politeSlot).toBe(0); // polite untouched
-  });
-});
-```
-
-- [ ] **Step 2: Run tests to verify status**
-
-Run: `npx vitest run src/__tests__/announcer.test.ts`
-Expected: PASS (the Task 1 `write()` already toggles slots). If any FAIL, fix `write()` in `src/announcer.ts` until green — do not weaken the tests.
-
-- [ ] **Step 3: (Only if a test failed) fix `write()`**
-
-If the slot toggle was wrong, the fix is in the `write()` function from Task 1: ensure each write sets the channel's slot to the opposite of its current value. No new code otherwise.
-
-- [ ] **Step 4: Run tests to verify they pass**
-
-Run: `npx vitest run src/__tests__/announcer.test.ts`
-Expected: PASS (9 tests total).
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/__tests__/announcer.test.ts src/announcer.ts
-git commit -m "test: announcer two-slot re-announce keeps text == message"
-```
-
----
-
-## Task 3: Announcer store — readiness & pre-mount queue
-
-**Files:**
-- Modify: `src/announcer.ts` (no change expected — Task 1 implemented this; prove it)
-- Test: `src/__tests__/announcer.test.ts` (add a `describe` block)
-
-- [ ] **Step 1: Write the failing tests**
-
-```ts
-// append to src/__tests__/announcer.test.ts
-describe('announcer store — readiness & queue', () => {
-  beforeEach(() => {
-    __resetAnnouncer(); // NOTE: no markAnnouncerReady() here — testing pre-ready behavior
-  });
-
-  it('does not populate the snapshot before ready', () => {
-    announce('Early message');
-    const s = getAnnouncerSnapshot();
-    expect(s.polite).toBe(''); // queued, not rendered — first DOM commit stays empty
-    expect(s.ready).toBe(false);
-  });
-
-  it('flushes the latest queued message per channel on ready', () => {
-    announce('First polite');
-    announce('Second polite'); // latest wins per channel
-    announce('An alert', { assertive: true });
-    markAnnouncerReady();
-    const s = getAnnouncerSnapshot();
-    expect(s.ready).toBe(true);
-    expect(s.polite).toBe('Second polite');
-    expect(s.assertive).toBe('An alert');
-  });
-
-  it('markAnnouncerReady is idempotent', () => {
-    markAnnouncerReady();
-    announce('After ready');
-    const afterFirst = getAnnouncerSnapshot();
-    markAnnouncerReady(); // second call must be a no-op
-    expect(getAnnouncerSnapshot()).toBe(afterFirst); // same reference, no reset
-  });
-});
-```
-
-- [ ] **Step 2: Run tests to verify status**
-
-Run: `npx vitest run src/__tests__/announcer.test.ts`
-Expected: PASS (Task 1 already implements readiness + queue + idempotence). If FAIL, fix `announce()`/`markAnnouncerReady()` in `src/announcer.ts`.
-
-- [ ] **Step 3: (Only if failed) fix readiness logic**
-
-Ensure: pre-ready `announce()` writes to `queuedPolite`/`queuedAssertive` and leaves `snapshot` empty; `markAnnouncerReady()` sets `ready`, emits, then flushes queued messages; a second `markAnnouncerReady()` returns early.
-
-- [ ] **Step 4: Run tests to verify they pass**
-
-Run: `npx vitest run src/__tests__/announcer.test.ts`
-Expected: PASS (12 tests total).
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/__tests__/announcer.test.ts src/announcer.ts
-git commit -m "test: announcer readiness gate + pre-mount queue flush"
-```
-
----
-
-## Task 4: `<LiveAnnouncer>` component
+## Task 2: `<LiveAnnouncer>` component
 
 **Files:**
 - Create: `src/components/LiveAnnouncer/LiveAnnouncer.tsx`
@@ -384,6 +314,7 @@ git commit -m "test: announcer readiness gate + pre-mount queue flush"
 ```tsx
 // src/components/LiveAnnouncer/__tests__/LiveAnnouncer.test.tsx
 import { describe, it, expect, beforeEach } from 'vitest';
+import { useState, useLayoutEffect } from 'react';
 import { render, act } from '@testing-library/react';
 import { LiveAnnouncer } from '../LiveAnnouncer';
 import { announce, __resetAnnouncer, getAnnouncerSnapshot } from '../../../announcer';
@@ -393,14 +324,10 @@ describe('<LiveAnnouncer>', () => {
     __resetAnnouncer();
   });
 
-  it('renders four sr-only aria-live nodes (two polite, two assertive), empty on first commit', () => {
+  it('renders four sr-only aria-live nodes (two polite, two assertive)', () => {
     const { container } = render(<LiveAnnouncer />);
-    const polite = container.querySelectorAll('[aria-live="polite"]');
-    const assertive = container.querySelectorAll('[aria-live="assertive"]');
-    expect(polite.length).toBe(2);
-    expect(assertive.length).toBe(2);
-    // All empty at first paint (the pre-exist requirement).
-    [...polite, ...assertive].forEach((n) => expect(n.textContent).toBe(''));
+    expect(container.querySelectorAll('[aria-live="polite"]').length).toBe(2);
+    expect(container.querySelectorAll('[aria-live="assertive"]').length).toBe(2);
   });
 
   it('marks the announcer ready on mount', () => {
@@ -411,10 +338,9 @@ describe('<LiveAnnouncer>', () => {
   it('renders a polite announcement into exactly one polite slot', () => {
     const { container } = render(<LiveAnnouncer />);
     act(() => announce('Composure restored'));
-    const polite = container.querySelectorAll('[aria-live="polite"]');
-    const texts = [...polite].map((n) => n.textContent);
+    const texts = [...container.querySelectorAll('[aria-live="polite"]')].map((n) => n.textContent);
     expect(texts).toContain('Composure restored');
-    expect(texts.filter((t) => t === 'Composure restored').length).toBe(1); // only one slot holds it
+    expect(texts.filter((t) => t === 'Composure restored').length).toBe(1);
   });
 
   it('renders an assertive announcement into an assertive slot only', () => {
@@ -433,17 +359,48 @@ describe('<LiveAnnouncer>', () => {
     const firstHolder = politeNodes().findIndex((n) => n.textContent === 'Clue added');
     act(() => announce('Clue added'));
     const secondHolder = politeNodes().findIndex((n) => n.textContent === 'Clue added');
-    expect(secondHolder).not.toBe(firstHolder); // different node → screen reader re-announces
+    expect(secondHolder).not.toBe(firstHolder); // different node → re-announced
   });
 
-  it('keeps the same DOM nodes across a parent re-render (persistence guard)', () => {
-    const { container, rerender } = render(
-      <div><LiveAnnouncer /></div>,
-    );
+  // Gate-1 finding 3: prove the pre-existence contract, not just "empty when nothing was sent".
+  // A message announced BEFORE mount must NOT be present at first commit (it is queued), and must
+  // appear only after the mount effect flips ready and flushes it.
+  it('does not render a pre-mount queued message at first commit; flushes it after mount', () => {
+    announce('Early message'); // before <LiveAnnouncer> mounts
+    let textAtFirstCommit: string | null = null;
+    function Probe() {
+      // useLayoutEffect runs after commit but before passive effects → observes the
+      // first committed DOM state, before LiveAnnouncer's own (passive) mount effect.
+      useLayoutEffect(() => {
+        textAtFirstCommit = document.querySelector('[aria-live="polite"]')?.textContent ?? null;
+      }, []);
+      return null;
+    }
+    const { container } = render(<><LiveAnnouncer /><Probe /></>);
+    expect(textAtFirstCommit).toBe(''); // empty at first commit — the pre-existence guarantee
+    const texts = [...container.querySelectorAll('[aria-live="polite"]')].map((n) => n.textContent);
+    expect(texts).toContain('Early message'); // flushed after ready
+  });
+
+  // Gate-1 finding 2: a real screen-switch / error-boundary persistence guard. The announcer must
+  // sit ABOVE a conditionally-rendered app subtree and survive that subtree being swapped out.
+  it('keeps its live-region nodes when a sibling app subtree is swapped (screen switch / error)', () => {
+    function Harness({ screen }: { screen: 'a' | 'b' }) {
+      return (
+        <>
+          <LiveAnnouncer />
+          {screen === 'a' ? <div data-testid="screen-a">A</div> : <div data-testid="screen-b">B</div>}
+        </>
+      );
+    }
+    const { container, rerender } = render(<Harness screen="a" />);
     const before = container.querySelector('[aria-live="polite"]');
-    rerender(<div><LiveAnnouncer /></div>); // simulate a surrounding re-render / screen switch
+    act(() => announce('Persisted'));
+    rerender(<Harness screen="b" />); // sibling subtree replaced, as on a screen change
     const after = container.querySelector('[aria-live="polite"]');
-    expect(after).toBe(before); // identical node — never unmounted
+    expect(after).toBe(before); // same node — announcer never unmounted
+    const texts = [...container.querySelectorAll('[aria-live="polite"]')].map((n) => n.textContent);
+    expect(texts).toContain('Persisted'); // and its content survived the swap
   });
 });
 ```
@@ -466,17 +423,13 @@ Expected: FAIL — `Cannot find module '../LiveAnnouncer'`.
  * (src/main.tsx), never inside a per-screen wrapper.
  */
 import { useSyncExternalStore, useEffect } from 'react';
-import {
-  subscribeAnnouncer,
-  getAnnouncerSnapshot,
-  markAnnouncerReady,
-} from '../../announcer';
+import { subscribeAnnouncer, getAnnouncerSnapshot, markAnnouncerReady } from '../../announcer';
 
 export function LiveAnnouncer() {
   const snapshot = useSyncExternalStore(subscribeAnnouncer, getAnnouncerSnapshot);
 
-  // Mark ready AFTER the empty regions have committed, so the first DOM state
-  // is empty (screen readers only announce changes to a pre-existing region).
+  // Mark ready AFTER the empty regions have committed, so the first DOM state is
+  // empty (screen readers only announce changes to a pre-existing region).
   useEffect(() => {
     markAnnouncerReady();
   }, []);
@@ -502,9 +455,11 @@ export { LiveAnnouncer } from './LiveAnnouncer';
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run src/components/LiveAnnouncer/__tests__/LiveAnnouncer.test.tsx`
-Expected: PASS (6 tests).
+Expected: PASS (7 tests).
 
-Note on the slot logic: after the first `announce('Clue added')`, `politeSlot` toggled to `1`, so the message renders in the *second* node (`politeSlot === 1 ? polite`). After the repeat, `politeSlot` toggles to `0`, rendering in the *first* node. Each write lands in the opposite node — the re-announce guarantee.
+Slot-logic note (verified at Gate 1): initial `politeSlot=0`; first `announce('Clue added')` flips it
+to `1`, rendering in the *second* polite node (`politeSlot === 1 ? polite`); the repeat flips to `0`,
+rendering in the *first* node. Each write lands in the opposite node — the re-announce guarantee.
 
 - [ ] **Step 5: Commit**
 
@@ -515,7 +470,7 @@ git commit -m "feat: LiveAnnouncer component (four sr-only slots, ready-on-mount
 
 ---
 
-## Task 5: Mount `<LiveAnnouncer>` at the app root
+## Task 3: Mount `<LiveAnnouncer>` at the app root
 
 **Files:**
 - Modify: `src/main.tsx`
@@ -585,11 +540,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 - [ ] **Step 3: Verify the app still builds and the full suite is green**
 
 Run: `npm run lint && npx vitest run && npm run build`
-Expected: lint clean; all tests pass (including the new announcer + LiveAnnouncer suites); build succeeds.
+Expected: lint clean; all tests pass (incl. new announcer + LiveAnnouncer suites); build succeeds.
 
 - [ ] **Step 4: Manually verify in the browser (evidence before completion)**
 
-Run: `npm run dev`, open the app, and in DevTools confirm four `[aria-live]` nodes exist at the root (siblings of the app container) and are empty on load. Optionally, in the console: `import('/src/announcer.ts').then(m => m.announce('test'))` is not available in prod build — instead trigger a real path in a later phase. For Phase 1, DOM presence + empty-on-load is the observable behavior.
+Run: `npm run dev`, open the app, and in DevTools confirm four `[aria-live]` nodes exist at the root
+(siblings of the app container) and are empty on load. For Phase 1, DOM presence + empty-on-load is
+the observable behavior (real announcements arrive when Phases 2/3 add callers).
 
 - [ ] **Step 5: Commit**
 
@@ -600,7 +557,7 @@ git commit -m "feat: mount LiveAnnouncer at app root (outside ErrorBoundary)"
 
 ---
 
-## Task 6: Full-suite regression + docs
+## Task 4: Full-suite regression + additive-scope guard
 
 **Files:**
 - (No source changes) — verification + optional status note.
@@ -608,14 +565,27 @@ git commit -m "feat: mount LiveAnnouncer at app root (outside ErrorBoundary)"
 - [ ] **Step 1: Run the full CI-equivalent battery**
 
 Run: `npm run lint && node scripts/validateCase.mjs && npm run test:run && npm run build`
-Expected: all green. Record the new test count (previous baseline 611 + the new announcer/LiveAnnouncer tests).
+Expected: all green. Record the new test count (previous baseline 611 + the 19 new announcer/LiveAnnouncer tests = ~630).
 
-- [ ] **Step 2: Confirm no existing `aria-live` region changed**
+- [ ] **Step 2: Prove no existing `aria-live` region changed (Gate-1 finding 1)**
 
-Run: `git diff main --stat -- src/components src/store | grep -vE 'LiveAnnouncer|announcer'`
-Expected: only `src/main.tsx` appears (plus non-`aria-live` files if any). No edits to `SceneText`, meters, `EffectFeedback`, save toast, `DiceRollOverlay`, etc. (additive-scope guarantee).
+The additive-scope guarantee is that no existing live/status/alert region was edited. Run **both** checks:
 
-- [ ] **Step 3: Commit any doc/status note (if the repo's status.md tracks the test baseline)**
+```bash
+# (a) No aria-live / role="status" / role="alert" line changed anywhere except the new component.
+git diff main -U0 -- src/App.tsx src/components ':!src/components/LiveAnnouncer' \
+  | rg 'aria-live|role="status"|role="alert"'
+```
+Expected: **no output**.
+
+```bash
+# (b) The source diff is limited to the new files + the single main.tsx mount line.
+git diff main --name-only -- src ':!src/**/__tests__/**'
+```
+Expected: exactly `src/announcer.ts`, `src/components/LiveAnnouncer/LiveAnnouncer.tsx`,
+`src/components/LiveAnnouncer/index.ts`, and `src/main.tsx` — nothing else.
+
+- [ ] **Step 3: Commit any doc/status note (only if the repo's status.md tracks the test baseline)**
 
 ```bash
 # only if you updated docs/status.md test baseline
@@ -627,14 +597,15 @@ git commit -m "docs: bump test baseline for Phase 1 announcer"
 
 ## Review gates
 
-- **Gate 1 (this plan):** submit to Codex via `codex/input/` before starting Task 1; address findings; re-review if needed.
+- **Gate 1 (this plan):** DONE — reviewed via `codex/output/phase1-live-announcer-plan-gate1-review.md`; all four findings folded in.
 - **Gate 2 (the diff):** before declaring complete, submit the full diff vs. the start commit to Codex via `codex/input/`. Tell it the Gate-1 plan so it can flag divergence.
-- Standard TDD throughout: every implementation step is preceded by a failing test (RED watched), then made green.
+- Standard TDD: Task 1 and Task 2 each write the full failing test set first (RED watched), then implement to green. (No task claims a pre-passing test.)
 
 ---
 
 ## Self-review notes
 
-- **Spec coverage:** announcer store (Tasks 1–3), `<LiveAnnouncer>` (Task 4), `main.tsx` mount outside `ErrorBoundary` (Task 5), no store-subscription (absent by design), readiness/queue (Task 3), two-slot re-announce (Tasks 2, 4), cached snapshot (Task 1), StrictMode-idempotent ready (Task 3 + Task 4 mount), additive-scope guard (Task 6 Step 2). All spec sections map to a task.
-- **Types consistent:** `AnnouncerSnapshot`, `announce`, `subscribeAnnouncer`, `getAnnouncerSnapshot`, `markAnnouncerReady`, `__resetAnnouncer` are defined once in Task 1 and used identically in Tasks 2–5.
+- **Spec coverage:** store — routing/cached-snapshot/two-slot/readiness+queue (Task 1); `<LiveAnnouncer>` four slots + ready-on-mount (Task 2); `main.tsx` root mount outside `ErrorBoundary` (Task 3); no store-subscription (absent by design); pre-existence + screen-switch persistence proven by real tests (Task 2 finding-2/3 tests); additive-scope guard (Task 4 finding-1 checks). All spec sections map to a task.
+- **Types consistent:** `AnnouncerSnapshot`, `announce`, `subscribeAnnouncer`, `getAnnouncerSnapshot`, `markAnnouncerReady`, `__resetAnnouncer` defined once in Task 1 and used identically in Tasks 2–4.
+- **TDD honesty (Gate-1 finding 4):** the three former store tasks are merged into one Task 1 with a single RED→GREEN; no step claims to "write a failing test" that actually passes on arrival.
 - **Determinism:** no `Date.now()`/`Math.random()`; slot toggle is a deterministic boolean flip.
