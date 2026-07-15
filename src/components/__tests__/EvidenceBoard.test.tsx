@@ -2,7 +2,7 @@
  * EvidenceBoard component tests.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { useStore } from '../../store';
 
 vi.mock('../../engine/hintEngine', () => ({
@@ -136,36 +136,54 @@ describe('EvidenceBoard — deduction outcome banner (Phase 2a)', () => {
     fireEvent.click(screen.getByRole('button', { name: /Attempt Deduction/i }));
   }
 
-  it('shows a green success banner and announces once, even after connections clear', () => {
+  // Every tier: exactly one announcement, the right message + tone, and the
+  // visual banner is aria-hidden (so announce() is the single SR path).
+  const tierCases: Array<{ tier: string; message: string; tone: string }> = [
+    { tier: 'success', message: 'The connection holds.', tone: 'green' },
+    { tier: 'critical', message: 'The connection holds — a sharp, decisive insight.', tone: 'green' },
+    { tier: 'partial', message: "Some of these belong together, but the reasoning won't quite hold.", tone: 'amber' },
+    { tier: 'failure', message: "These clues don't connect — not like this.", tone: 'red' },
+    { tier: 'fumble', message: "These clues don't connect — not like this.", tone: 'red' },
+  ];
+
+  it.each(tierCases)(
+    'tier "$tier" → one announcement, aria-hidden banner, tone "$tone"',
+    ({ tier, message, tone }) => {
+      attempt(tier);
+      const banner = screen.getByText(message);
+      expect(banner).toHaveAttribute('data-tone', tone);
+      expect(banner).toHaveAttribute('aria-hidden', 'true');
+      expect(announce).toHaveBeenCalledTimes(1);
+      expect(announce).toHaveBeenCalledWith(message);
+    },
+  );
+
+  it('clears connections when the banner shows (banner survives the clear)', () => {
     attempt('success');
     expect(useStore.getState().connections).toHaveLength(0);
-    const banner = screen.getByText('The connection holds.');
-    expect(banner).toBeTruthy();
-    expect(banner).toHaveAttribute('data-tone', 'green');
-    expect(announce).toHaveBeenCalledTimes(1);
-    expect(announce).toHaveBeenCalledWith('The connection holds.');
+    expect(screen.getByText('The connection holds.')).toBeTruthy();
   });
 
-  it('shows the critical-success line on a critical-tier success', () => {
-    attempt('critical');
-    expect(screen.getByText('The connection holds — a sharp, decisive insight.')).toBeTruthy();
-  });
+  it('auto-dismisses the banner after 2.5s and a new attempt replaces the old timer', () => {
+    vi.useFakeTimers();
+    try {
+      // First attempt (success) shows the green banner.
+      (performCheck as any).mockReturnValue({ roll: 10, modifier: 0, total: 10, dc: 14, tier: 'success' });
+      initStore(connectedPair, [{ fromId: 'c1', toId: 'c2' }]);
+      render(<EvidenceBoard onClose={() => {}} />);
+      fireEvent.click(screen.getByRole('button', { name: /Attempt Deduction/i }));
+      expect(screen.getByText('The connection holds.')).toBeTruthy();
 
-  it('shows the directional AMBER message on a partial-tier failure', () => {
-    attempt('partial');
-    const banner = screen.getByText("Some of these belong together, but the reasoning won't quite hold.");
-    expect(banner).toHaveAttribute('data-tone', 'amber');
-    expect(announce).toHaveBeenCalledWith("Some of these belong together, but the reasoning won't quite hold.");
-  });
+      // Just before 2.5s it is still shown.
+      act(() => { vi.advanceTimersByTime(2400); });
+      expect(screen.queryByText('The connection holds.')).toBeTruthy();
 
-  it('shows the RED hard-failure message on a plain failure', () => {
-    attempt('failure');
-    expect(screen.getByText("These clues don't connect — not like this.")).toHaveAttribute('data-tone', 'red');
-  });
-
-  it('treats a fumble as a hard (red) failure', () => {
-    attempt('fumble');
-    expect(screen.getByText("These clues don't connect — not like this.")).toHaveAttribute('data-tone', 'red');
+      // After 2.5s it auto-dismisses.
+      act(() => { vi.advanceTimersByTime(200); });
+      expect(screen.queryByText('The connection holds.')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('a success still forms exactly one deduction and marks both clues deduced', () => {

@@ -259,22 +259,6 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
             <ProgressSummary clueCount={clueCount} deductionCount={deductionCount} />
           </div>
           <div className="flex items-center gap-4">
-            {outcomeBanner && (
-              <span
-                aria-hidden="true"
-                data-tone={outcomeBanner.tone}
-                className={[
-                  'text-xs font-medium max-w-[16rem] leading-snug',
-                  outcomeBanner.tone === 'green'
-                    ? 'text-green-400'
-                    : outcomeBanner.tone === 'amber'
-                      ? 'text-amber-300'
-                      : 'text-red-400',
-                ].join(' ')}
-              >
-                {outcomeBanner.message}
-              </span>
-            )}
             <DeductionButton
               connectedClueIds={connectedIds}
               onResult={handleDeductionResult}
@@ -283,12 +267,32 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
               type="button"
               aria-label="Close Evidence Board"
               onClick={onClose}
-              className="text-amber-300 hover:text-white text-2xl font-bold leading-none w-11 h-11 flex items-center justify-center rounded-lg hover:bg-amber-800/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="shrink-0 text-amber-300 hover:text-white text-2xl font-bold leading-none w-11 h-11 flex items-center justify-center rounded-lg hover:bg-amber-800/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               ×
             </button>
           </div>
         </div>
+
+        {/* Deduction outcome banner — a full-width row below the toolbar so it
+            never displaces the close/deduction controls (incl. at narrow
+            widths). Visual-only; the screen-reader path is announce(). */}
+        {outcomeBanner && (
+          <div
+            aria-hidden="true"
+            data-tone={outcomeBanner.tone}
+            className={[
+              'px-6 py-2 text-xs font-medium leading-snug border-b border-amber-900/60 bg-amber-950/80',
+              outcomeBanner.tone === 'green'
+                ? 'text-green-400'
+                : outcomeBanner.tone === 'amber'
+                  ? 'text-amber-300'
+                  : 'text-red-400',
+            ].join(' ')}
+          >
+            {outcomeBanner.message}
+          </div>
+        )}
 
         {/* Corkboard area */}
         <div
