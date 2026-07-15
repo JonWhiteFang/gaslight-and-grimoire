@@ -44,6 +44,20 @@ describe('ClueCard — data-status attribute', () => {
   });
 });
 
+describe('ClueCard — connected redundant cue (WCAG 1.4.1)', () => {
+  it('renders a link badge with an accessible label for the connected state', () => {
+    render(<ClueCard clue={makeClue({ status: 'connected' })} />);
+    const badge = screen.getByLabelText('Connected');
+    expect(badge).toBeInTheDocument();
+    expect(badge.textContent).toBe('🔗');
+  });
+
+  it('does not render the connected badge for examined clues', () => {
+    render(<ClueCard clue={makeClue({ status: 'examined' })} />);
+    expect(screen.queryByLabelText('Connected')).not.toBeInTheDocument();
+  });
+});
+
 // ─── "new" — pulsing amber glow + "NEW" badge ─────────────────────────────────
 
 describe('ClueCard — new status', () => {
@@ -92,10 +106,9 @@ describe('ClueCard — connected status', () => {
     expect(card.className).toMatch(/ring-yellow/);
   });
 
-  it('renders no badge or icon', () => {
+  it('renders the 🔗 connected badge', () => {
     render(<ClueCard clue={makeClue({ status: 'connected' })} />);
-    expect(screen.queryByText('NEW')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Deduced')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Connected')).toBeInTheDocument();
   });
 });
 

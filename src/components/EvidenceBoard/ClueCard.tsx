@@ -4,7 +4,7 @@
  * Status states:
  *   new       — pulsing amber glow + "NEW" badge
  *   examined  — standard appearance
- *   connected — gold border indicator
+ *   connected — gold border indicator + link icon (🔗)
  *   deduced   — brass pin icon (📌) + green glow
  *   contested — red border + question mark icon (❓)
  *   spent     — greyed out (opacity-50) + checkmark (✓)
@@ -66,6 +66,12 @@ function StatusIndicator({ status }: { status: Clue['status'] }) {
           aria-label="New clue"
         >
           NEW
+        </span>
+      );
+    case 'connected':
+      return (
+        <span className="absolute -top-2 -right-2 text-lg" aria-label="Connected">
+          🔗
         </span>
       );
     case 'deduced':
