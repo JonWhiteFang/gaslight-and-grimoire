@@ -2,15 +2,17 @@
  * DeductionButton — triggers a Reason Faculty_Check to form a Deduction.
  */
 import { useState, useRef } from 'react';
-import { m, AnimatePresence } from 'framer-motion';
+import { m } from 'framer-motion';
 import { performCheck } from '../../engine/diceEngine';
 import { useStore, useInvestigator, useSettings } from '../../store';
 import { buildDeduction, buildDeductionFromRecipe, matchDeduction } from '../../engine/buildDeduction';
+import type { OutcomeTier } from '../../types';
 
 interface DeductionButtonProps {
   connectedClueIds: string[];
-  /** Called with 'success' | 'failure' so EvidenceBoard can animate threads */
-  onResult: (result: 'success' | 'failure') => void;
+  /** Called after an attempt with the outcome and the roll tier so the board can
+   *  render + announce the message. `tier` is the raw performCheck tier. */
+  onResult: (result: 'success' | 'failure', tier: OutcomeTier) => void;
 }
 
 type Phase = 'idle' | 'rolling' | 'success' | 'failure';
@@ -32,7 +34,6 @@ export function DeductionButton({ connectedClueIds, onResult }: DeductionButtonP
   const updateClueStatus = useStore((s) => s.updateClueStatus);
 
   const [phase, setPhase] = useState<Phase>('idle');
-  const [lastTier, setLastTier] = useState<string | null>(null);
   const idsRef = useRef(connectedClueIds);
   idsRef.current = connectedClueIds;
 
@@ -43,7 +44,6 @@ export function DeductionButton({ connectedClueIds, onResult }: DeductionButtonP
     setPhase('rolling');
 
     const result = performCheck('reason', investigator, DEDUCTION_DC, false, false);
-    setLastTier(result.tier);
 
     if (result.tier === 'success' || result.tier === 'critical') {
       // Prefer a named key-deduction recipe (stored under its stable authored id
@@ -55,26 +55,18 @@ export function DeductionButton({ connectedClueIds, onResult }: DeductionButtonP
       addDeduction(deduction);
       connectedClueIds.forEach((id) => updateClueStatus(id, 'deduced'));
       setPhase('success');
-      onResult('success');
+      onResult('success', result.tier);
     } else {
       // Failure or partial — mark contested, reset to examined after 2s
       connectedClueIds.forEach((id) => updateClueStatus(id, 'contested'));
       setPhase('failure');
-      onResult('failure');
+      onResult('failure', result.tier);
       setTimeout(() => {
         idsRef.current.forEach((id) => updateClueStatus(id, 'examined'));
         setPhase('idle');
       }, 2000);
     }
   }
-
-  const tierLabel: Record<string, string> = {
-    critical: 'Critical Success!',
-    success: 'Success!',
-    partial: 'Partial — not enough...',
-    failure: 'Failed.',
-    fumble: 'Fumble!',
-  };
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -102,24 +94,6 @@ export function DeductionButton({ connectedClueIds, onResult }: DeductionButtonP
               ? '🔴 Attempt Failed'
               : '🧠 Attempt Deduction'}
       </m.button>
-
-      <AnimatePresence>
-        {lastTier && phase !== 'idle' && (
-          <m.p
-            key={lastTier}
-            initial={reducedMotion ? false : { opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reducedMotion ? { opacity: 1 } : { opacity: 0 }}
-            className={[
-              'text-xs font-medium',
-              phase === 'success' ? 'text-green-400' : 'text-red-400',
-            ].join(' ')}
-            aria-live="polite"
-          >
-            {tierLabel[lastTier] ?? lastTier}
-          </m.p>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
