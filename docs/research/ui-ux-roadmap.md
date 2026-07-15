@@ -27,9 +27,9 @@ dependencies reorder it:
    game feel across all 8 cases and dictates how much of Phase 3 applies to deduction. It costs
    nothing to decide and unblocks everything downstream — so it is Phase 0.
 
-**Batching rationale.** Every non-trivial item pays the Codex double-gate (plan + diff), so items are
-bundled by files-touched / coherence rather than shipped one-per-PR. This turns 9 backlog items into
-~5 gated PRs plus one decision.
+**Batching rationale.** Every non-trivial item pays the cross-provider Codex review passes (spec, plan,
+completed implementation — CLAUDE.md), so items are bundled by files-touched / coherence rather than
+shipped one-per-PR. This turns 9 backlog items into ~5 reviewed PRs plus one decision.
 
 ---
 

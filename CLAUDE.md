@@ -158,70 +158,25 @@ Things to be aware of when making changes:
 - **`processChoice` navigates before returning** — It calls `actions.goToScene()` internally, then returns `ChoiceResult`. The caller shows the dice overlay after the scene has already changed. Use `computeChoiceResult` for the pure computation without side effects.
 - **`onEnter` effects are applied from `goToScene`, once per resolved scene** — `goToScene` resolves the scene and calls `worldSlice.applyEffects(onEnter)`, gated on `narrativeSlice.visitedScenes` **keyed by the resolved scene id** (base or variant), so effects fire exactly once per playthrough — never re-firing on save-load or re-navigation (F-006), yet still firing a variant's distinct `onEnter` once when its condition first becomes true (F-118). Feedback text is written to `narrativeSlice.lastEffectMessages`; `NarrativePanel` only reads it. Do **not** re-add effect application to the view layer. `goToScene` also clears `lastCheckResult` on a real cross-scene navigation so the dice overlay can't leak onto the next scene (F-106). `visitedScenes` resets on case/vignette load (as does `currentScene`, F-104) and round-trips through save (migration v3).
 - **Evidence Board connections persist in store** — `evidenceSlice.connections` holds ID pairs. DOM points are recomputed on render. Connections cleared on case/vignette load and on deduction (success or failure).
+- **Deduction outcome message lives on `EvidenceBoard`, not `DeductionButton`** (Phase 2a) — `DeductionButton` still owns the roll + formation and reports `onResult(result, tier)` (`tier: OutcomeTier`); the board maps that to a transient, `aria-hidden`, tone-coloured banner (`outcomeToBanner`) and makes the single screen-reader announcement via `announce()` (`src/announcer.ts`). The message is on the board because the button returns `null` below 2 connected clues, so its subtree disappears when connections clear. **Phase 2a is legibility only — it did NOT change what forms a deduction and did NOT enact [ADR-0012](docs/DECISIONS/ADR-0012-deduction-roll-semantics.md)** (still `Accepted`; the deferred correctness-oracle rework is Phase 2b, see the spec's Part B). **Known latent bug (deferred to 2b):** after a failed attempt the 2 s `contested`→`examined` revert in `DeductionButton` never fires — `clearConnections()` empties the button's `idsRef` before the timer runs, so failed clues stay `contested`.
 - **`adjustDisposition` has a hidden cross-slice call** — After updating NPC disposition, it calls `get().adjustReputation(faction, delta * 0.5)` for faction-aligned NPCs. This coupling is in `src/store/slices/npcSlice.ts`.
 - **Faction reputation is clamped** — Disposition [-10,+10], suspicion [0,10], composure/vitality [0,10], faction reputation [-10,+10]. All numeric state is now bounded.
 - **`Object.keys(data.scenes)[0]` is the fallback for first scene** — In `loadAndStartCase`. Used only when `meta.json` lacks a `firstScene` field. All cases now have `firstScene` set explicitly.
 - **9 SFX ship; ambient loops & illustrations pending** — The 9 SFX `.mp3`s live in `public/audio/sfx/` (git-tracked). Howler silently handles the still-missing ambient loops and illustrations. SFX is triggered via a store subscription in `src/store/audioSubscription.ts` (initialized in `main.tsx`), not from slice actions.
 - **`Date.now()` and `Math.random()` used directly** — In `diceEngine.rollD20()`, `hintEngine`, `metaSlice.saveGame` (save ID), `buildDeduction`. Not injectable. Tests work around this. (`saveManager` uses neither `Date.now()` nor `Math.random()`; it stamps a save's `timestamp` with `new Date().toISOString()`.)
 
-## Adversarial review with Codex (plans and code)
+## Cross-provider review with Codex (file-based handoff)
 
-Codex (via the codex MCP tool) is this project's adversarial reviewer. **Every non-trivial task passes
-both gates** — the gates attach to the *work*, not to whether a plan was formally declared:
+Codex (a different model provider) gives an independent adversarial review at three checkpoints: the **latest spec**, the **latest plan**, and — new — the **completed implementation** (a final cross-provider pass before merge/PR). Because the Codex MCP tool's auth to its Bedrock backend is unreliable in-session, the handoff is **file-based** (see [`codex/README.md`](codex/README.md)): Claude writes a prompt file, the user runs Codex in their own terminal, Codex writes a review file back. **Do not use the `codex` MCP tool for this** — use the files.
 
-**Gate 1 — plans.** Every non-trivial task gets a plan, and the plan is reviewed **before any
-mutation** (file edit, commit, config change). This applies whether or not plan mode was used — a
-"direct edit" of non-trivial scope still requires a stated plan and its review first. Submit the full
-plan to Codex and instruct it to attack: assume at least one flawed assumption, missed requirement,
-ordering hazard, or simpler alternative, and find it. Revise the plan for valid findings before
-starting work.
+**Scope:** the three sanctioned targets are (a) a spec, (b) a plan (both `docs/superpowers/*`), and (c) a **completed, self-contained implementation** — a finished sub-project / merge-ready branch, reviewed against its actual committed diff + built code as the last gate before it ships. This is **not** for reviewing arbitrary mid-flight code diffs — those stay with the normal (in-session subagent) review flow. The implementation pass is the final independent look *after* the internal reviews pass and the gate is green, not a substitute for them.
 
-**Gate 2 — code changes.** Before declaring any non-trivial implementation task complete, submit the
-**complete task diff against the starting base** — the recorded start commit, with untracked task
-files staged intent-to-add first (`git add -N`) so `git diff <start>` shows their full contents; it
-must cover committed *and* uncommitted work, and incremental commits during the task do not shrink
-the reviewed diff. Instruct Codex to perform an adversarial review: assume the code contains at least one
-bug, security issue, or missed edge case, and find it. Tell Codex what the Gate-1 plan was so it can
-also flag divergence from it. **Ordering vs. `/checkpoint`:** run Gate 2 after the task's edits and
-before checkpoint; the checkpoint's mechanical spine updates (STATE/RUN_LOG/ADR text, verified drift
-fixes) are exempt, but if checkpoint makes substantive non-spine changes, those need their own review.
+**The loop (same for all three targets):**
+1. **Write the prompt** to `codex/input/<yyyy-mm-dd>-<name>.md`. It must be fully self-contained — Codex has **no** conversation memory — carrying: the goal, exactly what to review, the codebase files to ground claims against, project constraints, an adversarial charge, and an explicit instruction to **write the review to `codex/output/<yyyy-mm-dd>-<name>-review.md`**. Tailor the target + charge:
+   - **Spec/plan:** the spec/plan path; charge = "assume it contains at least one real defect — a correctness hole, unimplementable/self-contradictory claim, determinism/collision hazard, or dangerous ambiguity — and find it."
+   - **Implementation:** the **branch + diff range** (e.g. `git diff <base>..<head>`) and the **production files** to read, plus the spec + plan paths so Codex can check **fidelity** (does the code do what the spec said?). Charge = "assume the implementation contains at least one real defect the internal reviews missed — a correctness bug, an integration/seam defect, an unmapped exception / error-taxonomy hole, a determinism violation, a false-green or missing test, or a place the code silently diverges from its spec — and find it. Ground every finding in the actual committed code." Tell Codex to run the build/tests **only if its sandbox allows** (read-only is fine — it can reason from the code) and to cite `file:line`.
+2. **Tell the user** the prompt is ready and to run Codex against it (read-only sandbox — never grant Codex write access for a review). Then wait.
+3. **Read the review** from `codex/output/<yyyy-mm-dd>-<name>-review.md` once the user says it's done.
+4. **Address all valid findings** before presenting the work as ready (for an implementation pass: fix on the branch, keep the gate green, re-verify). If you disagree with a finding, say so explicitly and explain why rather than silently ignoring it.
 
-**Minimum context per call** (Codex has no memory between calls — never assume it remembers a prior
-gate): the goal, the starting revision, the full plan or complete diff under review, the file paths
-touched, and the applicable constraints (relevant CLAUDE.md rules / ADRs). Omitting the file or
-constraint that would expose a defect voids the review — when in doubt, include it.
-
-Rules for both gates:
-
-- **Completion is blocked while accepted findings are unfixed.** Address all valid findings, then
-  re-submit for re-review. At most two review rounds per gate (initial + one re-review); after that,
-  anything still disputed, any accepted-but-unfixed finding, and any new valid defect from the
-  re-review goes to the user as an explicit open question — do not keep arguing with Codex, do not
-  silently pick a side, and do not declare the task complete until the user decides.
-- If you disagree with a finding, say so explicitly to the user and explain why rather than silently
-  ignoring it.
-- Codex runs in read-only sandbox mode for reviews. Never grant Codex write access for a review task.
-- "Non-trivial" means anything beyond a purely mechanical, semantics-preserving change (local typo
-  fixes, comment-only edits, verified no-op renames). Renames and config changes that can alter
-  behaviour are non-trivial. When unsure, get the review.
-- If the codex MCP tool is unavailable or errors, do not fail the task — but the gate does not
-  silently vanish: tell the user immediately, and when presenting the plan or finished work, state
-  prominently which review gate was skipped and why.
-
-### File-based Codex handoff (`codex/`)
-
-When the codex MCP tool is unusable (e.g. `codex exec` exhausts its budget exploring, or the user
-prefers to drive Codex themselves), use the committed `codex/` handoff directory instead:
-
-- **`codex/input/`** — the reviewer prompt(s). Claude writes a `<task>.md` prompt here.
-- **`codex/output/`** — Codex's review(s). This is the **only** location Codex may write to.
-
-The prompt file MUST open with operating rules that (1) tell Codex it has no memory and all context is
-in the file, (2) instruct it to **make no repository changes except writing the single named output
-file** under `codex/output/`, and (3) name that exact output path. Because Codex won't do its own
-retrieval reliably under a budget, **inline the key code excerpts and repo facts** in the prompt (the
-same "minimum context per call" rule as above — goal, starting revision, plan/diff, file paths,
-constraints), so it can confirm rather than hunt. The user feeds `codex/input/<task>.md` to Codex;
-Claude then reads `codex/output/<task>-review.md` and treats its findings exactly like any Gate 1/2
-review (same accept/push-back/two-round rules). This is a transport mechanism, not a new gate — the
-gate rules above still apply.
+**Naming** — `<name>` disambiguates the target so a sub-project's three reviews don't collide: use the spec/plan name for those, and suffix the implementation pass with `-impl` (e.g. `codex/input/2026-07-13-sp2-world-document-store-impl.md` → `codex/output/2026-07-13-sp2-world-document-store-impl-review.md`). Dates are the day the review is requested; input and output share the same date+name (output adds the `-review` suffix). Both prompt and review are committed as a durable review trail. If Codex is unavailable, say so and continue — do not fail the task because the reviewer is offline.

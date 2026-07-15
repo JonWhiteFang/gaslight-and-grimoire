@@ -5,6 +5,8 @@ import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useClues, useDeductions, useConnections, useSettings, useStore } from '../../store';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { trackActivity } from '../../engine/hintEngine';
+import { announce } from '../../announcer';
+import type { OutcomeTier } from '../../types';
 import { ClueCard } from './ClueCard';
 import { ProgressSummary } from './ProgressSummary';
 import { ConnectionThread, type Connection, type ThreadPoint } from './ConnectionThread';
@@ -12,6 +14,36 @@ import { DeductionButton } from './DeductionButton';
 
 export interface EvidenceBoardProps {
   onClose: () => void;
+}
+
+const DEDUCTION_MESSAGES = {
+  criticalSuccess: 'The connection holds — a sharp, decisive insight.',
+  success: 'The connection holds.',
+  partial: "Some of these belong together, but the reasoning won't quite hold.",
+  failure: "These clues don't connect — not like this.",
+} as const;
+
+interface OutcomeBanner {
+  message: string;
+  tone: 'green' | 'amber' | 'red';
+}
+
+/**
+ * Maps a deduction outcome to its banner message + tone in one place, so the
+ * two can never desync. Formation is decided in DeductionButton; this only
+ * frames the already-decided result (success/failure) by roll tier.
+ */
+function outcomeToBanner(result: 'success' | 'failure', tier: OutcomeTier): OutcomeBanner {
+  if (result === 'success') {
+    return {
+      message: tier === 'critical' ? DEDUCTION_MESSAGES.criticalSuccess : DEDUCTION_MESSAGES.success,
+      tone: 'green',
+    };
+  }
+  if (tier === 'partial') {
+    return { message: DEDUCTION_MESSAGES.partial, tone: 'amber' };
+  }
+  return { message: DEDUCTION_MESSAGES.failure, tone: 'red' };
 }
 
 /** Returns the centre point of a DOM element relative to a container. */
@@ -35,6 +67,8 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
 
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
   const [slackConnections, setSlackConnections] = useState<Connection[]>([]);
+  const [outcomeBanner, setOutcomeBanner] = useState<OutcomeBanner | null>(null);
+  const bannerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [mousePos, setMousePos] = useState<ThreadPoint | null>(null);
   // Trigger re-computation of thread positions
   const [pointsVersion, setPointsVersion] = useState(0);
@@ -45,6 +79,13 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
   // Track board visit for hint engine
   useEffect(() => {
     trackActivity({ type: 'boardVisit' });
+  }, []);
+
+  // Clean up the pending banner-dismiss timer on unmount.
+  useEffect(() => {
+    return () => {
+      if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
+    };
   }, []);
 
   const revealedClues = Object.values(clues).filter((c) => c.isRevealed);
@@ -177,8 +218,18 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
     return !!target && src.tags.some((t) => target.tags.includes(t));
   }
 
-  // Deduction result handler
-  function handleDeductionResult(result: 'success' | 'failure') {
+  // Deduction result handler — formation happens in DeductionButton; the board
+  // owns the transient outcome banner (survives clearConnections) + the single
+  // screen-reader announcement. This does NOT change what forms a deduction
+  // (still the DC-14 Reason roll); it only surfaces the existing outcome legibly.
+  function handleDeductionResult(result: 'success' | 'failure', tier: OutcomeTier) {
+    const banner = outcomeToBanner(result, tier);
+
+    setOutcomeBanner(banner);
+    announce(banner.message);
+    if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
+    bannerTimerRef.current = setTimeout(() => setOutcomeBanner(null), 2500);
+
     if (result === 'failure') {
       setSlackConnections(
         connections.map((c) => ({ ...c, state: 'slack' as const })),
@@ -216,12 +267,32 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
               type="button"
               aria-label="Close Evidence Board"
               onClick={onClose}
-              className="text-amber-300 hover:text-white text-2xl font-bold leading-none w-11 h-11 flex items-center justify-center rounded-lg hover:bg-amber-800/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="shrink-0 text-amber-300 hover:text-white text-2xl font-bold leading-none w-11 h-11 flex items-center justify-center rounded-lg hover:bg-amber-800/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               ×
             </button>
           </div>
         </div>
+
+        {/* Deduction outcome banner — a full-width row below the toolbar so it
+            never displaces the close/deduction controls (incl. at narrow
+            widths). Visual-only; the screen-reader path is announce(). */}
+        {outcomeBanner && (
+          <div
+            aria-hidden="true"
+            data-tone={outcomeBanner.tone}
+            className={[
+              'px-6 py-2 text-xs font-medium leading-snug border-b border-amber-900/60 bg-amber-950/80',
+              outcomeBanner.tone === 'green'
+                ? 'text-green-400'
+                : outcomeBanner.tone === 'amber'
+                  ? 'text-amber-300'
+                  : 'text-red-400',
+            ].join(' ')}
+          >
+            {outcomeBanner.message}
+          </div>
+        )}
 
         {/* Corkboard area */}
         <div

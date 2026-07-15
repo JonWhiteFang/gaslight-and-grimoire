@@ -1,9 +1,15 @@
 ---
-status: "Enacted"
+status: "Superseded by ADR-0013"
 date: "2026-07-11"
 deciders: "Jon White (directed the integration + approved the hardened variant), Claude (setup), Codex (adversarially reviewed its own gate text)"
 phase: "Tooling / process"
+superseded-by: "ADR-0013"
 ---
+
+> **Superseded by [ADR-0013](ADR-0013-codex-file-based-review-handoff.md) (2026-07-14).** The MCP
+> two-gate model below is no longer operative: Codex review is now a **file-based** handoff at three
+> checkpoints (spec, plan, completed implementation), and the `codex` MCP tool is not used for reviews.
+> This record is preserved for the decision trail; do not follow its procedure.
 
 # ADR-0010: Codex as cross-provider adversarial reviewer — two mandatory gates
 
