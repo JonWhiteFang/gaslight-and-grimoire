@@ -4,7 +4,7 @@
 
 **Goal:** Make the existing deduction beat legible — a redundant cue for the `connected` clue state, and a board-owned, screen-reader-announced outcome banner with atmospheric directional copy — **without changing how deductions form**.
 
-**Architecture:** Three small, isolated changes. (1) `ClueCard` gets a 🔗 badge for `connected` (WCAG 1.4.1). (2) `DeductionButton` keeps its roll + formation exactly as today but stops rendering its own outcome text and hands `(result, tier)` up. (3) `EvidenceBoard` renders a transient outcome banner (it stays mounted when connections clear — fixing the button-unmount message loss) and routes the message through the Phase-1 `announce()` API. **No correctness-model change, no clue-status-lifecycle change, does NOT enact ADR-0012.**
+**Architecture:** Three small, isolated changes. (1) `ClueCard` gets a 🔗 badge for `connected` (WCAG 1.4.1). (2) `DeductionButton` keeps its roll + formation exactly as today but stops rendering its own outcome text and hands `(result, tier)` up. (3) `EvidenceBoard` renders a transient outcome banner and routes the message through the Phase-1 `announce()` API. The message must live on the board because it belongs in `DeductionButton`'s rendered subtree today, and that subtree disappears when connections clear (the button returns `null` below 2 clues — the component stays mounted, but renders nothing). **No correctness-model change, no clue-status-lifecycle change, does NOT enact ADR-0012.**
 
 **Tech Stack:** React 19, Zustand, Vitest 4 + React Testing Library, Tailwind v4, framer-motion (`m`).
 
@@ -34,7 +34,7 @@
 
 - [ ] **Step 1: Write the failing test**
 
-Add to `src/components/__tests__/ClueCard.test.tsx` (after the `data-status` describe block):
+Add a new describe block to `src/components/__tests__/ClueCard.test.tsx` (after the `data-status` block):
 
 ```tsx
 describe('ClueCard — connected redundant cue (WCAG 1.4.1)', () => {
@@ -42,6 +42,7 @@ describe('ClueCard — connected redundant cue (WCAG 1.4.1)', () => {
     render(<ClueCard clue={makeClue({ status: 'connected' })} />);
     // A non-colour cue must exist for `connected`, mirroring NEW/📌/❓/✓.
     expect(screen.getByLabelText('Connected')).toBeTruthy();
+    expect(screen.getByLabelText('Connected').textContent).toBe('🔗');
   });
 
   it('does not render the connected badge for examined clues', () => {
@@ -50,6 +51,21 @@ describe('ClueCard — connected redundant cue (WCAG 1.4.1)', () => {
   });
 });
 ```
+
+**Also rewrite the existing contradictory test (Codex plan-review finding 5).** The current
+`describe('ClueCard — connected status')` block (around lines 86-100) has a test
+`it('renders no badge or icon', ...)` that becomes false after this task. Replace that test body so it
+asserts the new indicator instead of the absence of one:
+
+```tsx
+  it('renders the 🔗 connected badge', () => {
+    render(<ClueCard clue={makeClue({ status: 'connected' })} />);
+    expect(screen.getByLabelText('Connected')).toBeInTheDocument();
+  });
+```
+
+Leave the sibling `it('applies yellow/gold ring class', ...)` test unchanged (the ring is still correct;
+the badge is an *additional* redundant cue, not a replacement).
 
 - [ ] **Step 2: Run test to verify it fails**
 
@@ -93,11 +109,12 @@ git commit -m "feat(evidence): add 🔗 redundant cue for connected clue state (
 
 ## Task 2: `DeductionButton` — surface tier, drop the local outcome label
 
-Keep the roll, formation, and status writes exactly as on `main`. Only change: remove the local `<m.p>` label (the piece that unmounts with the button — this is why the message must move to the board) and pass the roll `tier` up through `onResult`.
+Keep the roll, formation, and status writes exactly as on `main`. Only change: remove the local `<m.p>` label (it's in the button's rendered subtree, which disappears when connections clear — that's why the message must move to the board) and pass the roll `tier` up through `onResult`.
 
 **Files:**
 - Modify: `src/components/EvidenceBoard/DeductionButton.tsx`
-- Test: covered by the `EvidenceBoard` integration test in Task 3 (the button's own contract is the callback shape; assert it there to avoid brittle isolated-render mocking of the store).
+- Test: `src/components/__tests__/DeductionButton.test.tsx` (new — a focused test that pins the callback
+  tuple AND proves the local `aria-live` outcome node is gone; Codex plan-review finding 3).
 
 - [ ] **Step 1: Widen the callback type**
 
@@ -131,20 +148,75 @@ In `handleAttempt`, update the two `onResult(...)` calls to include `result.tier
 
 Delete the entire trailing `<AnimatePresence>…</AnimatePresence>` block that renders the `lastTier` `<m.p>` (the element with `aria-live="polite"`), and remove the now-unused `lastTier`/`setLastTier` state and the `tierLabel` map. Keep everything else (the `m.button`, phase state, `idsRef`, roll, formation, status writes) unchanged. Remove the `AnimatePresence` import if it is no longer referenced.
 
-- [ ] **Step 4: Typecheck**
+- [ ] **Step 4: Write a focused DeductionButton test (finding 3 — prove the aria-live node is gone)**
 
-Run: `npx tsc -p tsconfig.json --noEmit`
-Expected: no errors (if `AnimatePresence`/`lastTier` left dangling, fix the unused symbol).
+Create `src/components/__tests__/DeductionButton.test.tsx`. This pins the callback tuple **and** asserts
+no `aria-live` outcome node remains after a click (a call-count check alone can't catch a leftover local
+live region — that would be a false-green a11y regression):
 
-- [ ] **Step 5: Commit**
+```tsx
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { useStore } from '../../store';
+
+vi.mock('../../engine/diceEngine', () => ({
+  performCheck: vi.fn(() => ({ roll: 10, modifier: 0, total: 10, dc: 14, tier: 'success' })),
+  calculateModifier: () => 0,
+  getTrainedBonus: () => 0,
+}));
+
+import { DeductionButton } from '../EvidenceBoard/DeductionButton';
+
+function initInvestigator() {
+  useStore.setState({
+    investigator: {
+      name: 'T', archetype: 'deductionist', abilityUsed: false,
+      faculties: { reason: 10, perception: 10, nerve: 10, vigor: 10, influence: 10, lore: 10 },
+      composure: 10, vitality: 10,
+    },
+    clues: {
+      a: { id: 'a', type: 'physical', title: 'A', description: '', sceneSource: 's', tags: [], status: 'connected', isRevealed: true },
+      b: { id: 'b', type: 'physical', title: 'B', description: '', sceneSource: 's', tags: [], status: 'connected', isRevealed: true },
+    },
+    deductions: {}, caseData: null,
+  } as any);
+}
+
+beforeEach(() => { vi.clearAllMocks(); initInvestigator(); });
+
+describe('DeductionButton (Phase 2a)', () => {
+  it('renders null below two connected clues', () => {
+    const { container } = render(<DeductionButton connectedClueIds={['a']} onResult={vi.fn()} />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('calls onResult with (result, tier) and renders no aria-live outcome node', () => {
+    const onResult = vi.fn();
+    const { container } = render(<DeductionButton connectedClueIds={['a', 'b']} onResult={onResult} />);
+    fireEvent.click(screen.getByRole('button', { name: /Attempt Deduction/i }));
+    expect(onResult).toHaveBeenCalledTimes(1);
+    expect(onResult).toHaveBeenCalledWith('success', 'success');
+    // The local live region must be gone — announcements now come from the board via announce().
+    expect(container.querySelector('[aria-live]')).toBeNull();
+  });
+});
+```
+
+- [ ] **Step 5: Typecheck + run the new test**
+
+Run: `npx tsc -p tsconfig.json --noEmit && npx vitest run src/components/__tests__/DeductionButton.test.tsx`
+Expected: no type errors; both tests PASS. (If `AnimatePresence`/`lastTier` left dangling, fix the unused symbol.)
+
+- [ ] **Step 6: Commit**
 
 ```bash
-git add src/components/EvidenceBoard/DeductionButton.tsx
+git add src/components/EvidenceBoard/DeductionButton.tsx src/components/__tests__/DeductionButton.test.tsx
 git commit -m "refactor(evidence): DeductionButton passes roll tier up, drops local outcome label
 
-The local aria-live <p> unmounts when connections clear (the button returns null
-below 2 clues), so the outcome message must live on the always-mounted board.
-Formation/roll/status writes are unchanged. onResult now carries (result, tier)."
+The local aria-live <p> is inside the button's rendered subtree, which disappears
+when connections clear (the button returns null below 2 clues), so the outcome
+message must live on the always-mounted board. Formation/roll/status writes are
+unchanged. onResult now carries (result, tier)."
 ```
 
 ---
@@ -168,6 +240,13 @@ vi.mock('../../announcer', () => ({
 import { announce } from '../../announcer';
 ```
 
+Also import the mocked `performCheck` at the top (beside the existing `import { EvidenceBoard }`), so the
+helper below can set the tier per test:
+
+```tsx
+import { performCheck } from '../../engine/diceEngine';
+```
+
 Then add this describe block:
 
 ```tsx
@@ -178,50 +257,71 @@ describe('EvidenceBoard — deduction outcome banner (Phase 2a)', () => {
     'c2': { id: 'c2', type: 'testimony', title: 'Witness Account', description: 'y', sceneSource: 's2', connectsTo: ['c1'], tags: ['paper'], status: 'connected', isRevealed: true },
   };
 
-  it('shows a success banner and announces once, even after connections clear', async () => {
-    const { performCheck } = await import('../../engine/diceEngine');
-    (performCheck as any).mockReturnValue({ roll: 10, modifier: 0, total: 10, tier: 'success' });
+  function attempt(tier: string) {
+    (performCheck as any).mockReturnValue({ roll: 10, modifier: 0, total: 10, dc: 14, tier });
     initStore(connectedPair, [{ fromId: 'c1', toId: 'c2' }]);
     render(<EvidenceBoard onClose={() => {}} />);
-
     fireEvent.click(screen.getByRole('button', { name: /Attempt Deduction/i }));
+  }
 
+  it('shows a green success banner and announces once, even after connections clear', () => {
+    attempt('success');
     // Connections are cleared by handleDeductionResult, but the board banner persists.
     expect(useStore.getState().connections).toHaveLength(0);
-    expect(screen.getByText('The connection holds.')).toBeTruthy();
+    const banner = screen.getByText('The connection holds.');
+    expect(banner).toBeTruthy();
+    expect(banner).toHaveAttribute('data-tone', 'green');
     expect(announce).toHaveBeenCalledTimes(1);
     expect(announce).toHaveBeenCalledWith('The connection holds.');
   });
 
-  it('shows the critical-success line on a natural 20', async () => {
-    const { performCheck } = await import('../../engine/diceEngine');
-    (performCheck as any).mockReturnValue({ roll: 20, modifier: 0, total: 20, tier: 'critical' });
-    initStore(connectedPair, [{ fromId: 'c1', toId: 'c2' }]);
-    render(<EvidenceBoard onClose={() => {}} />);
-    fireEvent.click(screen.getByRole('button', { name: /Attempt Deduction/i }));
+  it('shows the critical-success line on a natural 20', () => {
+    attempt('critical');
     expect(screen.getByText('The connection holds — a sharp, decisive insight.')).toBeTruthy();
   });
 
-  it('shows the directional (amber) message on a partial-tier failure', async () => {
-    const { performCheck } = await import('../../engine/diceEngine');
-    (performCheck as any).mockReturnValue({ roll: 11, modifier: 0, total: 11, tier: 'partial' });
-    initStore(connectedPair, [{ fromId: 'c1', toId: 'c2' }]);
-    render(<EvidenceBoard onClose={() => {}} />);
-    fireEvent.click(screen.getByRole('button', { name: /Attempt Deduction/i }));
-    expect(screen.getByText("Some of these belong together, but the reasoning won't quite hold.")).toBeTruthy();
+  it('shows the directional AMBER message on a partial-tier failure', () => {
+    attempt('partial');
+    const banner = screen.getByText("Some of these belong together, but the reasoning won't quite hold.");
+    expect(banner).toHaveAttribute('data-tone', 'amber');
     expect(announce).toHaveBeenCalledWith("Some of these belong together, but the reasoning won't quite hold.");
   });
 
-  it('shows the hard-failure message on a plain failure', async () => {
-    const { performCheck } = await import('../../engine/diceEngine');
-    (performCheck as any).mockReturnValue({ roll: 3, modifier: 0, total: 3, tier: 'failure' });
-    initStore(connectedPair, [{ fromId: 'c1', toId: 'c2' }]);
-    render(<EvidenceBoard onClose={() => {}} />);
-    fireEvent.click(screen.getByRole('button', { name: /Attempt Deduction/i }));
-    expect(screen.getByText("These clues don't connect — not like this.")).toBeTruthy();
+  it('shows the RED hard-failure message on a plain failure', () => {
+    attempt('failure');
+    expect(screen.getByText("These clues don't connect — not like this.")).toHaveAttribute('data-tone', 'red');
+  });
+
+  it('treats a fumble as a hard (red) failure', () => {
+    attempt('fumble');
+    expect(screen.getByText("These clues don't connect — not like this.")).toHaveAttribute('data-tone', 'red');
+  });
+
+  // Scope-boundary regression guards (Codex plan-review finding 2): 2a must NOT change formation.
+  it('a success still forms exactly one deduction and marks both clues deduced', () => {
+    attempt('success');
+    const st = useStore.getState();
+    expect(Object.keys(st.deductions)).toHaveLength(1);
+    expect(st.clues.c1.status).toBe('deduced');
+    expect(st.clues.c2.status).toBe('deduced');
+  });
+
+  it('a failure forms no deduction and marks the clues contested', () => {
+    attempt('failure');
+    const st = useStore.getState();
+    expect(Object.keys(st.deductions)).toHaveLength(0);
+    expect(st.clues.c1.status).toBe('contested');
+    expect(st.clues.c2.status).toBe('contested');
   });
 });
 ```
+
+> **Note on the revert timer:** these tests deliberately do **not** assert that `contested` clues revert
+> to `examined`. Today's code sets a 2 s timer, but after `clearConnections()` the button re-renders with
+> an emptied `idsRef`, so the revert never actually fires (a pre-existing latent bug — see the spec's
+> Part B / 2b). 2a is legibility-only and does not touch that lifecycle; asserting the intended-but-broken
+> revert would either lock in the bug or fail. The immediate `contested` write above is the real
+> current behaviour.
 
 - [ ] **Step 2: Run tests to verify they fail**
 
@@ -311,6 +411,7 @@ In the header bar's right-hand `<div className="flex items-center gap-4">`, imme
             {outcomeBanner && (
               <span
                 aria-hidden="true"
+                data-tone={outcomeBanner.tone}
                 className={[
                   'text-xs font-medium max-w-[16rem] leading-snug',
                   outcomeBanner.tone === 'green'
@@ -370,7 +471,7 @@ Change the test baseline line to the new count from Step 1 (e.g. `635/60 → <ne
 
 - [ ] **Step 4: Update `CLAUDE.md` DeductionButton architectural note**
 
-In the Architectural Warnings section, add/adjust the note to record: the deduction **outcome banner + `announce()` live on `EvidenceBoard`** (not `DeductionButton`, which unmounts when connections clear); `DeductionButton.onResult` carries `(result, tier)`. Explicitly note **Phase 2a did NOT change formation and did NOT enact ADR-0012** (still `Accepted`; 2b enacts it).
+In the Architectural Warnings section, add/adjust the note to record: the deduction **outcome banner + `announce()` live on `EvidenceBoard`** (not `DeductionButton`, whose rendered subtree disappears when connections clear — it returns `null` below 2 connected clues); `DeductionButton.onResult` carries `(result, tier)`. Explicitly note **Phase 2a did NOT change formation and did NOT enact ADR-0012** (still `Accepted`; 2b enacts it). Also note the **known latent bug** (deferred to 2b): after a failed attempt the 2 s `contested`→`examined` revert never fires because `clearConnections()` empties `idsRef` before the timer runs.
 
 - [ ] **Step 5: Commit docs**
 

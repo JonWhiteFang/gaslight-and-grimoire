@@ -149,6 +149,11 @@ own spec → Codex-gated plan. It must resolve the following, all verified again
 - **N2 — revert timer ownership.** A single board-scoped token can't own disjoint attempts' timers and dies
   on board remount. 2b needs **per-clue attempt ownership** (generation token in state) that survives
   remounts, with timeout cleanup.
+- **Pre-existing latent revert bug (found in the 2a plan review).** Today `DeductionButton`'s failure path
+  sets a 2 s timer to revert `contested`→`examined`, but the callback closes over `idsRef.current`, which
+  the board empties via `clearConnections()` before the timer fires — so **failed-attempt clues never
+  revert; they stay `contested`**. 2a deliberately does not touch this (legibility-only). 2b's status
+  lifecycle rework must fix it (snapshot attempt-scoped ids, restore to *prior* status per N1/N5).
 - **N3 — seed correctness.** A last-connected-id seed can go stale after its component is removed, misfiring
   a later attempt on a different component as `incorrect`. 2b needs an explicit last-added-edge that is
   validated against current edges and cleared after removal.
