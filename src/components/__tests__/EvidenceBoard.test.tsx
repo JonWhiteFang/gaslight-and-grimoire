@@ -15,7 +15,13 @@ vi.mock('../../engine/diceEngine', () => ({
   getTrainedBonus: () => 0,
 }));
 
+vi.mock('../../announcer', () => ({
+  announce: vi.fn(),
+}));
+
 import { EvidenceBoard } from '../EvidenceBoard';
+import { announce } from '../../announcer';
+import { performCheck } from '../../engine/diceEngine';
 
 function initStore(clues: Record<string, any> = {}, connections: any[] = []) {
   useStore.setState({
@@ -114,5 +120,67 @@ describe('EvidenceBoard', () => {
     render(<EvidenceBoard onClose={() => {}} />);
     const dialog = screen.getByRole('dialog');
     expect(dialog.contains(document.activeElement)).toBe(true);
+  });
+});
+
+describe('EvidenceBoard — deduction outcome banner (Phase 2a)', () => {
+  const connectedPair = {
+    'c1': { id: 'c1', type: 'physical', title: 'Cipher Note', description: 'x', sceneSource: 's1', connectsTo: ['c2'], tags: ['paper'], status: 'connected', isRevealed: true },
+    'c2': { id: 'c2', type: 'testimony', title: 'Witness Account', description: 'y', sceneSource: 's2', connectsTo: ['c1'], tags: ['paper'], status: 'connected', isRevealed: true },
+  };
+
+  function attempt(tier: string) {
+    (performCheck as any).mockReturnValue({ roll: 10, modifier: 0, total: 10, dc: 14, tier });
+    initStore(connectedPair, [{ fromId: 'c1', toId: 'c2' }]);
+    render(<EvidenceBoard onClose={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: /Attempt Deduction/i }));
+  }
+
+  it('shows a green success banner and announces once, even after connections clear', () => {
+    attempt('success');
+    expect(useStore.getState().connections).toHaveLength(0);
+    const banner = screen.getByText('The connection holds.');
+    expect(banner).toBeTruthy();
+    expect(banner).toHaveAttribute('data-tone', 'green');
+    expect(announce).toHaveBeenCalledTimes(1);
+    expect(announce).toHaveBeenCalledWith('The connection holds.');
+  });
+
+  it('shows the critical-success line on a critical-tier success', () => {
+    attempt('critical');
+    expect(screen.getByText('The connection holds — a sharp, decisive insight.')).toBeTruthy();
+  });
+
+  it('shows the directional AMBER message on a partial-tier failure', () => {
+    attempt('partial');
+    const banner = screen.getByText("Some of these belong together, but the reasoning won't quite hold.");
+    expect(banner).toHaveAttribute('data-tone', 'amber');
+    expect(announce).toHaveBeenCalledWith("Some of these belong together, but the reasoning won't quite hold.");
+  });
+
+  it('shows the RED hard-failure message on a plain failure', () => {
+    attempt('failure');
+    expect(screen.getByText("These clues don't connect — not like this.")).toHaveAttribute('data-tone', 'red');
+  });
+
+  it('treats a fumble as a hard (red) failure', () => {
+    attempt('fumble');
+    expect(screen.getByText("These clues don't connect — not like this.")).toHaveAttribute('data-tone', 'red');
+  });
+
+  it('a success still forms exactly one deduction and marks both clues deduced', () => {
+    attempt('success');
+    const st = useStore.getState();
+    expect(Object.keys(st.deductions)).toHaveLength(1);
+    expect(st.clues.c1.status).toBe('deduced');
+    expect(st.clues.c2.status).toBe('deduced');
+  });
+
+  it('a failure forms no deduction and marks the clues contested', () => {
+    attempt('failure');
+    const st = useStore.getState();
+    expect(Object.keys(st.deductions)).toHaveLength(0);
+    expect(st.clues.c1.status).toBe('contested');
+    expect(st.clues.c2.status).toBe('contested');
   });
 });
