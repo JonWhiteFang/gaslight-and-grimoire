@@ -108,7 +108,7 @@ ambient `*.mp3`, and no `*.png`/`*.jpg`/`*.webp` illustrations yet.
 
 As of 2026-07-15, running `npm run test:run`:
 
-- **Tests: 647 passed (647)**
+- **Tests: 649 passed (649)**
 - **Test Files: 61 passed (61)**
 
 The suite includes property-based tests using fast-check (six
