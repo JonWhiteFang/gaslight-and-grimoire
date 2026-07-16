@@ -139,13 +139,20 @@ For a single d20 where nat-20 is always a critical success and nat-1 is always a
 - `p = (21 - needed) / 20`, then **clamped to [1/20, 19/20]** — nat-1 always fails, nat-20 always succeeds, so a
   check can never read 0% or 100%.
 
-**Partial-tier policy is surface-dependent (Codex finding 2).** The event the band predicts differs by surface:
+**Partial-tier policy is surface-dependent (Codex spec-review finding 2; refined by impl-review Major 1).** The
+event the band predicts differs by surface, and — for choices — by the choice's *authored routing*:
 
-- **Choices / encounter round choices** — `partial` routes to a *distinct* outcome scene (not success), so the band
-  predicts the strict `{success, critical}` event: `needed = dc - modifier`.
+- **Choices / encounter round choices** — `partialCountsAsSuccess` is **data-driven**, not a blanket `false`. A
+  choice's `partial` tier routes to a scene the author chose: sometimes a *distinct* (worse) outcome, but in ~43% of
+  shipped faculty choices (74 of 171) `outcomes.partial` is the **same scene** as `outcomes.success` or
+  `outcomes.critical`. `ChoiceCard` therefore passes `partialCountsAsSuccess: outcomes.partial != null &&
+  (outcomes.partial === outcomes.success || outcomes.partial === outcomes.critical)`. When partial reaches the
+  successful destination the band predicts `{partial, success, critical}` (`needed = dc - 3 - modifier`); when
+  partial routes elsewhere it predicts the strict `{success, critical}` (`needed = dc - modifier`). This keeps the
+  displayed band honest about *reaching the good outcome*, which is what the player cares about.
 - **Scene clue-check prompts** — `SceneCluePrompts.handleCheck` discovers the clue on **any tier except
-  failure/fumble**, so `partial` is success-equivalent *there*. The band must predict `{partial, success, critical}`:
-  the lowest passing natural roll is `needed = dc - 3 - modifier` (mirroring `resolveCheck`'s `total >= dc - 3`).
+  failure/fumble**, so `partial` is always success-equivalent there: hard-coded `partialCountsAsSuccess: true`,
+  `needed = dc - 3 - modifier` (mirroring `resolveCheck`'s `total >= dc - 3`).
 
 `computeCheckOdds` takes `partialCountsAsSuccess: boolean` and computes `needed` accordingly; clue prompts pass
 `true`, choices/encounters pass `false`. This removes the "band understates the real prospect" gap Codex flagged
@@ -196,7 +203,8 @@ Today: `Reason +2 · Proficient`, **no DC**. Adds a decorative `CheckOddsTag` + 
 - `hasAdvantage` from the already-plumbed prop (`computeAdvantage`, F-014),
 - `hasDisadvantage` = `false` (no content grants disadvantage today; the field exists for completeness),
 - `autoSucceeds` = `checkAutoSucceeds(choice.faculty, gameState.flags)` (§2.2),
-- `partialCountsAsSuccess: false` (partial routes to a distinct outcome here).
+- `partialCountsAsSuccess` is **data-driven** — `true` iff `outcomes.partial` equals `outcomes.success` or
+  `outcomes.critical` (partial reaches the successful scene), else `false` (§3.1, impl-review Major 1).
 
 **Renders the Prospects tag only when the choice is a real check (Codex finding 5):**
 `choice.faculty && (choice.difficulty !== undefined || choice.dynamicDifficulty)` — the same predicate the resolver
