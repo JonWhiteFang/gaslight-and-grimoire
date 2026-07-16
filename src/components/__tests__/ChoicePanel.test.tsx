@@ -582,7 +582,10 @@ describe('ChoicePanel — Veil Sight advantage badge (parent wiring)', () => {
     };
     render(<ChoicePanel choices={[loreChoice]} />);
     expect(screen.getByText('Read the sigils')).toBeInTheDocument();
-    expect(screen.getByLabelText(/advantage/i)).toBeInTheDocument();
+    // Target the ◈ badge specifically: the button's own accessible name now also
+    // carries the pre-roll odds phrase (which includes ", advantage"), so a broad
+    // /advantage/i match would be ambiguous (T5).
+    expect(screen.getByLabelText('Advantage on this check')).toBeInTheDocument();
   });
 
   it('does NOT show the Advantage badge for the same Lore choice when veil-sight is inactive and no clue is held', () => {

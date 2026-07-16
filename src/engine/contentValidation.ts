@@ -24,6 +24,7 @@ import type {
   SceneNode,
 } from '../types';
 import { FACTIONS, OUTCOME_TIERS } from './constants';
+import { isFacultyCheck } from './diceEngine';
 
 // ─── Bundle shape ──────────────────────────────────────────────────────────
 
@@ -378,7 +379,7 @@ function validateChoice(choice: Choice, where: string, ctx: Ctx): void {
     ctx.errors.push(`${at} -> requiresFaculty references invalid faculty "${choice.requiresFaculty.faculty}"`);
   }
 
-  const isCheck = !!choice.faculty && (choice.difficulty !== undefined || !!choice.dynamicDifficulty);
+  const isCheck = isFacultyCheck(choice);
 
   // Tier completeness for faculty checks (fixed OR dynamic difficulty).
   if (isCheck) {
@@ -502,7 +503,7 @@ function nonCriticalOutgoingEdges(scene: SceneNode): string[] {
   const targets: string[] = [];
   for (const choice of allChoices(scene)) {
     const outcomes = choice.outcomes ?? {};
-    const isCheck = !!choice.faculty && (choice.difficulty !== undefined || !!choice.dynamicDifficulty);
+    const isCheck = isFacultyCheck(choice);
     if (isCheck) {
       for (const [tier, target] of Object.entries(outcomes)) {
         if (tier !== 'critical' && target) targets.push(target);

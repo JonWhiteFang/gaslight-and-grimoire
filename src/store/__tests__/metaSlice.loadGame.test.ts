@@ -100,6 +100,22 @@ describe('metaSlice.loadGame — result signalling', () => {
     expect(useStore.getState().caseData?.meta.id).toBe('test-case');
   });
 
+  it('clears lastCheckResult on load so a stale roll/DC overlay cannot leak onto the loaded scene', async () => {
+    useStore.setState({
+      investigator: baseInvestigator(), currentScene: 's1', currentCase: 'test-case',
+      clues: {}, deductions: {}, npcs: {}, flags: {}, factionReputation: {},
+      sceneHistory: [], connections: [],
+    });
+    SaveManager.save('roll', snapshotGameState(useStore.getState()));
+
+    // Seed a stale roll result (incl. the Phase 3 `dc`) that would otherwise
+    // leak through this direct-assign load path (F-106's clear lives in goToScene).
+    useStore.setState({ lastCheckResult: { roll: 12, modifier: 2, total: 14, tier: 'success', dc: 13 } });
+    const ok = await useStore.getState().loadGame('roll');
+    expect(ok).toBe(true);
+    expect(useStore.getState().lastCheckResult).toBeNull();
+  });
+
   it('restores visitedScenes so an already-entered scene does not re-fire onEnter on load (F-006)', async () => {
     useStore.setState({
       investigator: baseInvestigator(), currentScene: 's1', currentCase: 'test-case',

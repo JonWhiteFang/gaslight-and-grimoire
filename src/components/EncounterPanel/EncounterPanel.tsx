@@ -10,6 +10,8 @@ import {
   getEncounterChoices,
 } from '../../engine/narrativeEngine';
 import { computeAdvantage } from '../../engine/advantage';
+import { checkAutoSucceeds } from '../../engine/flags';
+import { resolveDC, isFacultyCheck } from '../../engine/diceEngine';
 import { ChoiceCard } from '../ChoicePanel/ChoiceCard';
 import type { Choice, EncounterRound, EncounterState } from '../../types';
 
@@ -26,6 +28,9 @@ export function EncounterPanel({ sceneId, rounds, isSupernatural, onComplete }: 
   const deductions = useStore((s) => s.deductions);
   const setCheckResult = useStore((s) => s.setCheckResult);
   const setStoreEncounterState = useStore((s) => s.setEncounterState);
+  // Reactive flags source for the pre-roll odds tag (auto-succeed → "Assured").
+  // Must be reactive, not the non-reactive buildGameState() render snapshot.
+  const flags = useStore((s) => s.flags);
 
   const [encounterState, setEncounterStateLocal] = useState<EncounterState | null>(null);
   const [reactionMessage, setReactionMessage] = useState<string | null>(null);
@@ -89,6 +94,9 @@ export function EncounterPanel({ sceneId, rounds, isSupernatural, onComplete }: 
           modifier: result.modifier ?? 0,
           total: result.total ?? result.roll,
           tier: result.tier,
+          dc: isFacultyCheck(choice)
+            ? resolveDC(choice, gameState.investigator)
+            : undefined,
         });
       }
 
@@ -144,6 +152,7 @@ export function EncounterPanel({ sceneId, rounds, isSupernatural, onComplete }: 
             revealedClueIds={revealedClueIds}
             deductionIds={deductionIds}
             hasAdvantage={computeAdvantage(choice, gameState)}
+            autoSucceeds={choice.faculty ? checkAutoSucceeds(choice.faculty, flags) : false}
             onSelect={handleChoiceSelect}
           />
         ))}

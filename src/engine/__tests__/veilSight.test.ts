@@ -11,6 +11,7 @@ vi.mock('../diceEngine', () => ({
   resolveDC: (_choice: unknown, _inv: unknown) => 12,
   calculateModifier: () => 0,
   getTrainedBonus: () => 0,
+  isFacultyCheck: (c: any) => c.faculty != null && (c.difficulty !== undefined || c.dynamicDifficulty != null),
 }));
 
 import { computeChoiceResult } from '../narrativeEngine';

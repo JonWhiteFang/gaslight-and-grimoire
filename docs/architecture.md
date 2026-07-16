@@ -51,12 +51,17 @@ every screen in `<AccessibilityProvider>`.
 `GameContent` renders `NarrativePanel` and then chooses the body: a terminal
 "Case Complete" button when the scene has no choices and no encounter, an
 `EncounterPanel` when `scene.encounter` is set, an `InvestigationHalted` screen
-when composure or vitality hits 0, otherwise `ChoicePanel`. All 17
-component directories under `src/components/` are represented above
+when composure or vitality hits 0, otherwise `ChoicePanel`. The 19
+component directories under `src/components/` are
 (`AccessibilityProvider`, `AmbientAudio`, `CaseCompletion`, `CaseJournal`,
 `CaseSelection`, `CharacterCreation`, `ChoicePanel`, `EncounterPanel`,
 `ErrorBoundary`, `EvidenceBoard`, `HeaderBar`, `InvestigationHalted`,
-`NPCGallery`, `NarrativePanel`, `SettingsPanel`, `StatusBar`, `TitleScreen`).
+`LiveAnnouncer`, `NPCGallery`, `NarrativePanel`, `SettingsPanel`, `StatusBar`,
+`TitleScreen`, `shared`). `LiveAnnouncer` mounts at the app root in `main.tsx`
+(outside the tree above); `shared/` holds cross-surface presentational pieces —
+currently `CheckOddsTag`, the decorative pre-roll odds tag (`aria-hidden`) that
+`ChoiceCard`, `ChoicePanel`, `EncounterPanel`, and `SceneCluePrompts` render, with
+the odds phrase folded into each host's own button `aria-label` (Phase 3).
 
 ## Store: six slices
 
@@ -139,8 +144,10 @@ CaseSelection → loadAndStartCase(id)  (or loadAndStartVignette)
       stale lastCheckResult on cross-scene nav (F-106); apply onEnter effects
       once per resolved scene (gated on visitedScenes, base-or-variant — F-006/F-118)
       → NarrativePanel renders scene (auto-discovers clues; shows lastEffectMessages)
-      → ChoicePanel → processChoice(choice, state, actions)
+      → ChoicePanel → each ChoiceCard shows pre-roll odds (checkOdds.computeCheckOdds,
+          gated on diceEngine.isFacultyCheck) → processChoice(choice, state, actions)
           → diceEngine (resolveDC, performCheck / rollD20)
+          → setCheckResult({...roll, dc}) → NarrativePanel's DiceRollOverlay shows "vs DC N"
           → actions.goToScene(nextSceneId) + NPC/effect mutations
       → store mutation → React re-render
 ```

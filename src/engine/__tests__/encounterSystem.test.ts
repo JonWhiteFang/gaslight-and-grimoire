@@ -42,6 +42,7 @@ vi.mock('../diceEngine', () => ({
   // computeChoiceResult unit (F-107). Faithful enough for these tests: honour
   // dynamicDifficulty's baseDC, else the fixed difficulty.
   resolveDC: (c: any) => (c.dynamicDifficulty ? c.dynamicDifficulty.baseDC : (c.difficulty ?? 12)),
+  isFacultyCheck: (c: any) => c.faculty != null && (c.difficulty !== undefined || c.dynamicDifficulty != null),
 }));
 
 import {

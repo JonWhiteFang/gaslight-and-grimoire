@@ -58,6 +58,7 @@ Pure dice math: d20 rolls, faculty modifiers, DC resolution, and outcome tiers.
 - `getTrainedBonus(faculty: Faculty, archetype: Archetype): number` — `+1` when `faculty` is the archetype's primary faculty, else `0`. Primary map: deductionist→reason, occultist→lore, operator→vigor, mesmerist→influence.
 - `resolveCheck(roll: number, modifier: number, dc: number): OutcomeTier` — maps a roll to a tier: natural 20 → `critical`, natural 1 → `fumble`, else `total = roll + modifier`: `total >= dc` → `success`, `total >= dc - 3` → `partial`, otherwise `failure`.
 - `resolveDC(choice: Choice, investigator: Investigator): number` — the effective DC. If `choice.dynamicDifficulty` is set, returns `highDC` when the investigator's `scaleFaculty` score `>= highThreshold`, else `baseDC`. Otherwise `choice.difficulty ?? 12`.
+- `isFacultyCheck(choice: Choice): choice is Choice & { faculty: Faculty }` — the **single source of truth** for "will the engine roll a d20 for this choice?": `choice.faculty != null && (choice.difficulty !== undefined || choice.dynamicDifficulty != null)`. A type guard so callers narrow `choice.faculty` to non-null. Gates **both** the roll (`resolveCheckOutcome`), the content validator's check detection, and the pre-roll odds UI (`ChoiceCard`/`ChoicePanel`/`EncounterPanel`), so the "is a check" question can't drift between engine and UI (Phase 3 T6b).
 - `performCheck(faculty: Faculty, investigator: Investigator, dc: number, hasAdvantage: boolean, hasDisadvantage: boolean): CheckResult` — the full pipeline. Advantage and disadvantage cancel (if both true, a straight `rollD20`); otherwise rolls with the active edge. Modifier is `calculateModifier(score) + getTrainedBonus(...)`. Returns the roll, modifier, total, `dc`, and resolved `tier`.
 
 ## contentLoader.ts
@@ -103,6 +104,15 @@ barrel.
 ## advantage.ts
 
 - `computeAdvantage(choice: Choice, state: GameState): boolean` — the **single source of truth** for whether a check rolls with advantage (F-014). Two grants OR'd together: any of the choice's `advantageIf` clue IDs is revealed, **or** a `lore` check while the Veil Sight flag (`FLAGS.veilSight`) is active. Used by regular checks (`computeChoiceResult`), encounter checks (`processEncounterChoice`), and the UI Advantage badge (via the parents that hold `GameState`), so all three agree.
+
+## checkOdds.ts
+
+Pure pre-roll odds classifier — turns a faculty check into a diegetic "Prospects" band and an accessible-name phrase, for the Phase 3 dice-legibility UI. No RNG, no `Date.now`. Consumed by `ChoiceCard`, `ChoicePanel`, `EncounterPanel`, and `SceneCluePrompts` (never by the engine's roll path — it only *describes* odds, it doesn't resolve them).
+
+- `type ProspectsBand = 'favourable' | 'uncertain' | 'forbidding'`.
+- `interface CheckOdds { faculty; modifier; dc; hasAdvantage; hasDisadvantage; autoSucceeds; band }`.
+- `computeCheckOdds(args: { faculty, investigator, dc, hasAdvantage, hasDisadvantage, autoSucceeds, partialCountsAsSuccess }): CheckOdds` — modifier via `calculateModifier + getTrainedBonus` (matches the real roll). Success probability `p = clamp((21 - needed) / 20, 1/20, 19/20)` where `needed = (partialCountsAsSuccess ? dc - 3 : dc) - modifier` — the clamp encodes nat-1-always-fails / nat-20-always-succeeds. Advantage folds `pEff = 1 - (1 - p)²`, disadvantage `pEff = p²`, both-true cancels. Band thresholds: `pEff >= 0.65` favourable, `>= 0.35` uncertain, else forbidding. `autoSucceeds` short-circuits to `band: 'favourable'` (the guaranteed-critical case). **`partialCountsAsSuccess` is surface-dependent**: `false` on `Choice`-based checks (partial routes to a distinct outcome), `true` on scene clue-check prompts (a partial tier still discovers the clue) — enacts spec §3.1 / §4.2.
+- `describeCheckOdds(odds: CheckOdds): string` — the screen-reader phrase, e.g. `"Reason check, modifier +2, difficulty 14, prospects uncertain, advantage"`, or `"Reason check, assured success"` when `autoSucceeds`. Parents append this to their **own button `aria-label`** (the visual `CheckOddsTag` is `aria-hidden`, since a button's explicit label overrides descendant text).
 
 ## contentValidation.ts
 
@@ -212,6 +222,7 @@ flag literal is duplicated across the engine and store.
 
 - `const FLAGS` — the named engine flags: `breakdownOccurred` (`'breakdown-occurred'`), `incapacitated` (`'incapacitated'`), `veilSight` (`'ability-veil-sight-active'`).
 - `abilityAutoSucceedFlag(faculty: Faculty): string | undefined` — the auto-succeed flag for a faculty, or `undefined` if that faculty has no ability (only `reason`/`vigor`/`influence` do).
+- `checkAutoSucceeds(faculty: Faculty, flags: Record<string, boolean>): boolean` — `true` when the faculty has an auto-succeed ability **and** its flag is active. The shared predicate `resolveCheckOutcome` uses to short-circuit to a guaranteed `critical`, and the Phase-3 pre-roll odds UI uses to show the **"Assured"** treatment instead of dice odds — so a guaranteed check never displays ordinary probabilities (Phase 3 T1).
 - `vignetteUnlockedFlag(vignetteId: string): string` — `` `vignette-unlocked-${vignetteId}` ``.
 - `const CASE_LOAD_CLEARED_FLAGS: readonly string[]` — the flags wiped when a new case/vignette starts (breakdown/incapacitation, the three auto-succeed flags, veil sight). The former `last-critical-faculty` flag is **gone** — the reward is now the typed `investigator.lastCriticalFaculty` field, reset directly in the load actions (F-013).
 - `const ARCHETYPE_ABILITY_FLAG: Record<Archetype, string>` — each archetype's ability flag (deductionist→auto-succeed-reason, occultist→veil-sight, operator→auto-succeed-vigor, mesmerist→auto-succeed-influence). Set by `App` when the once-per-case ability is activated.

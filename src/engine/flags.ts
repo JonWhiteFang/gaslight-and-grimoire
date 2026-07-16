@@ -17,6 +17,16 @@ export function abilityAutoSucceedFlag(faculty: Faculty): string | undefined {
   return ABILITY_AUTO_SUCCEED[faculty];
 }
 
+/**
+ * True when `faculty` has an auto-succeed ability whose flag is currently active.
+ * Shared by resolveCheckOutcome (guaranteed critical) and the Phase 3 pre-roll
+ * odds display so the UI never shows dice odds for a guaranteed check.
+ */
+export function checkAutoSucceeds(faculty: Faculty, flags: Record<string, boolean>): boolean {
+  const flag = abilityAutoSucceedFlag(faculty);
+  return !!flag && !!flags[flag];
+}
+
 export function vignetteUnlockedFlag(vignetteId: string): string {
   return `vignette-unlocked-${vignetteId}`;
 }

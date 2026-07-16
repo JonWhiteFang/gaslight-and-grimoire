@@ -21,6 +21,7 @@ vi.mock('../../engine/diceEngine', () => ({
   calculateModifier: () => 0,
   getTrainedBonus: () => 0,
   resolveDC: () => 12,
+  isFacultyCheck: (c: any) => c.faculty != null && (c.difficulty !== undefined || c.dynamicDifficulty != null),
 }));
 
 import { EncounterPanel } from '../EncounterPanel';

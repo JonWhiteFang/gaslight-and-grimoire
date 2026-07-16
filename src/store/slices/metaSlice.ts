@@ -135,6 +135,10 @@ export const createMetaSlice: StateCreator<
         // re-roll/re-apply the reaction damage (F-105). Absent in pre-v4 saves → null.
         state.encounterState = gameState.encounterState ?? null;
         state.lastEffectMessages = [];
+        // Clear any stale roll result so a prior scene's dice/DC overlay can't leak
+        // onto the loaded scene. This path assigns currentScene directly (not via
+        // goToScene, where F-106's cross-scene clear lives), so it must clear here.
+        state.lastCheckResult = null;
         state.settings = gameState.settings;
         state.caseData = caseData;
       });
