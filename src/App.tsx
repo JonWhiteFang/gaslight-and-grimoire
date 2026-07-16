@@ -232,13 +232,19 @@ export default function App() {
   if (screen === 'title') {
     return (
       <AccessibilityProvider>
-        <TitleScreen
-          onNewGame={() => setScreen('character-creation')}
-          onLoadGame={() => setScreen('load-game')}
-          onSettings={() => setIsSettingsOpen(true)}
-          loadError={loadError}
-          onDismissError={() => setLoadError(null)}
-        />
+        {/* Background is inert while Settings is open, so focus/pointer/AT
+            cannot reach the title behind the overlay. Gate on the state (not the
+            resolved lazy chunk) so isolation holds during the Suspense fallback.
+            React 19 sets/removes the real `inert` boolean attribute. */}
+        <div data-testid="title-inert-region" inert={isSettingsOpen}>
+          <TitleScreen
+            onNewGame={() => setScreen('character-creation')}
+            onLoadGame={() => setScreen('load-game')}
+            onSettings={() => setIsSettingsOpen(true)}
+            loadError={loadError}
+            onDismissError={() => setLoadError(null)}
+          />
+        </div>
         <Suspense fallback={<OverlayFallback />}>
           {isSettingsOpen && (
             <SettingsPanel onClose={() => setIsSettingsOpen(false)} />

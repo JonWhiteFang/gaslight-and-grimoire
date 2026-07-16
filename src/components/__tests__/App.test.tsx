@@ -191,6 +191,30 @@ describe('App — modal background is inert while an overlay is open (#57)', () 
   });
 });
 
+// Phase 4 WS2 (Codex Major 1 + Major 4): opening Settings from the TITLE screen
+// must make the title content inert — gated on state, so it holds DURING the
+// Suspense fallback, not only after the lazy panel resolves.
+describe('App — title-screen background is inert while Settings is open (Phase 4)', () => {
+  afterEach(() => { vi.unstubAllGlobals(); vi.stubGlobal('localStorage', makeLocalStorageMock()); });
+
+  it('is inert together with the Loading fallback, and clears on close', async () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: /settings/i }));
+
+    // Synchronous window: the inert region and the OverlayFallback ("Loading…")
+    // coexist before the lazy chunk resolves (inert is bound to state, not chunk).
+    const region = screen.getByTestId('title-inert-region');
+    expect(region.hasAttribute('inert')).toBe(true);
+    expect(screen.getByText(/^Loading…$/)).toBeInTheDocument();
+
+    // After the chunk resolves, still inert; then close removes it.
+    fireEvent.click(await screen.findByRole('button', { name: /close settings/i }));
+    await waitFor(() =>
+      expect(screen.getByTestId('title-inert-region').hasAttribute('inert')).toBe(false),
+    );
+  });
+});
+
 // #57: the loading fallbacks are visual-only (animate-pulse text). Screen-reader
 // users get no feedback during async content/overlay loads. Both must be a
 // polite live status region.
