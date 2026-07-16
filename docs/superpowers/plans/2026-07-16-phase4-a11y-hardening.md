@@ -693,7 +693,7 @@ Resolved sRGB hex (oklch→sRGB via OKLab, cross-checked against the compiled `d
 | amber-300 / gaslight-ink | heading/accent | 11.79 | 4.5:1 (1.4.3) | ✅ PASS | — |
 | stone-200 / gaslight-ink | body text | 13.59 | 4.5:1 (1.4.3) | ✅ PASS | — |
 | stone-400 / gaslight-ink | muted text | 6.60 | 4.5:1 (1.4.3) | ✅ PASS | — |
-| red-400 / stone-900 | destructive confirm ring | 5.92 | 3:1 (1.4.11) | ✅ PASS | retained exception — red is semantic for destructive; ratio clears 3:1 comfortably |
+| red-400 / stone-900 | destructive confirm ring | 6.05 | 3:1 (1.4.11) | ✅ PASS | retained exception — red is semantic for destructive; ratio clears 3:1 comfortably |
 | white / gaslight-amber | skip-link ring on amber bg | 2.20 | 3:1 (1.4.11) | ⚠️ FAIL vs amber bg | retained exception — see note below |
 
 **Standardized amber-400 focus ring:** every migrated control uses `focus-visible:ring-2 focus-visible:ring-amber-400` (`#ffb900`) on a dark ink/stone surface — 9.9–11.5:1, far above the 3:1 non-text-contrast floor (1.4.11), so the ring itself is never the weak link.
