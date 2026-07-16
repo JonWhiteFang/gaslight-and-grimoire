@@ -174,6 +174,19 @@ describe('EvidenceBoard — oracle-driven formation (Phase 2b, ADR-0012)', () =>
     expect(st.deductions.poisoner.isRedHerring).toBe(true);
   });
 
+  it('marks ONLY recipe members deduced — a noise clue lassoed in stays un-deduced', () => {
+    // Player connects the recipe pair a-b PLUS an unrelated clue c into one cluster.
+    const clues = { a: clue('a'), b: clue('b'), c: clue('c') };
+    attempt('success', clues, [{ fromId: 'a', toId: 'b' }, { fromId: 'b', toId: 'c' }], [recipe]);
+    const st = useStore.getState();
+    expect(st.deductions.r1).toBeDefined();
+    expect([...st.deductions.r1.clueIds].sort()).toEqual(['a', 'b']); // c not in the deduction
+    expect(st.clues.a.status).toBe('deduced');
+    expect(st.clues.b.status).toBe('deduced');
+    // c was lassoed in but is not a recipe member → must NOT get a permanent 📌.
+    expect(st.clues.c.status).not.toBe('deduced');
+  });
+
   it('a generic correct component (all connectsTo) forms one generic deduction', () => {
     const clues = { a: clue('a', { connectsTo: ['b'] }), b: clue('b') };
     attempt('success', clues, [{ fromId: 'a', toId: 'b' }], []);

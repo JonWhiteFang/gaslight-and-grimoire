@@ -296,20 +296,30 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
     let anyFailed = false;
     for (const comp of components) {
       if (comp.correctness === 'correct' || comp.correctness === 'false') {
+        // Mark 'deduced' ONLY the clues that are actually members of a formed
+        // deduction — a noise clue lassoed into a recipe component but not part
+        // of any recipe must not get a permanent 📌 it can't justify (card↔Journal
+        // divergence). On the recipe path that's the union of matched recipes'
+        // requiredClues; on the generic path the whole component IS the deduction.
+        let deducedIds: string[];
         if (comp.recipes.length > 0) {
           // Blocker 1: form EVERY matched recipe, not just one.
+          const members = new Set<string>();
           for (const r of comp.recipes) {
             addDeduction(buildDeductionFromRecipe(r, comp.clueIds));
+            for (const id of r.requiredClues) members.add(id);
             formedCount += 1;
           }
+          deducedIds = [...members];
         } else {
           addDeduction(buildDeduction(comp.clueIds, clues));
+          deducedIds = comp.clueIds;
           formedCount += 1;
         }
         // Atomic success: invalidates any pending contested token for these clues
         // AND sets 'deduced' in one set — a stale revert from an earlier failed
         // attempt can't clobber it (Task 4 markCluesDeduced).
-        markCluesDeduced(comp.clueIds);
+        markCluesDeduced(deducedIds);
       } else {
         // contestClues captures each clue's baseline prior itself (carry-forward safe).
         contestClues(comp.clueIds);
