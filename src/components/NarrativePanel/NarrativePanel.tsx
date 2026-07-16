@@ -126,6 +126,7 @@ export function NarrativePanel() {
         roll={lastCheckResult?.roll}
         modifier={lastCheckResult?.modifier}
         total={lastCheckResult?.total}
+        dc={lastCheckResult?.dc}
         visible={diceVisible}
         reducedMotion={reducedMotion}
       />

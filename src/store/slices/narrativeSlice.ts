@@ -79,6 +79,7 @@ export interface CheckResult {
   modifier: number;
   total: number;
   tier: OutcomeTier;
+  dc?: number;
 }
 
 export interface NarrativeSlice {

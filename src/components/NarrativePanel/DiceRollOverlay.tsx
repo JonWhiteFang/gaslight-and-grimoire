@@ -10,6 +10,7 @@ export interface DiceRollOverlayProps {
   roll?: number;
   modifier?: number;
   total?: number;
+  dc?: number;
   visible?: boolean;
   reducedMotion?: boolean;
 }
@@ -18,6 +19,7 @@ export function DiceRollOverlay({
   roll,
   modifier = 0,
   total,
+  dc,
   visible = false,
   reducedMotion = false,
 }: DiceRollOverlayProps) {
@@ -26,13 +28,16 @@ export function DiceRollOverlay({
   const modifierLabel =
     modifier >= 0 ? `+${modifier}` : `${modifier}`;
 
+  const rollLabel = `Dice roll: ${roll} ${modifierLabel} = ${total}`;
+  const ariaLabel = dc == null ? rollLabel : `${rollLabel}, versus difficulty ${dc}`;
+
   return (
     <AnimatePresence>
       <m.div
         key="dice-overlay"
         role="status"
         aria-live="polite"
-        aria-label={`Dice roll: ${roll} ${modifierLabel} = ${total}`}
+        aria-label={ariaLabel}
         className="flex flex-col items-center gap-2 p-4 rounded-lg bg-gaslight-slate/80 border border-gaslight-amber/30"
         initial={reducedMotion ? false : { opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -64,8 +69,17 @@ export function DiceRollOverlay({
           >
             {total}
           </span>
+          {dc != null && (
+            <>
+              <span className="text-gaslight-fog/60" aria-hidden="true">vs</span>
+              <span className="text-gaslight-fog/80" aria-hidden="true">DC {dc}</span>
+            </>
+          )}
         </div>
 
+        {/* The container's aria-label is the authoritative announcement (incl. DC);
+            this sr-only line is a static fallback and intentionally omits the DC to
+            avoid a duplicated DOM reading. */}
         <p className="text-xs text-gaslight-fog/50 sr-only">
           Roll {roll}, modifier {modifierLabel}, total {total}
         </p>
