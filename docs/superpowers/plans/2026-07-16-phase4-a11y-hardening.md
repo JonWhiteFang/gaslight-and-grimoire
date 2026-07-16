@@ -43,7 +43,7 @@ An audit of `main` at spec time found the codebase **more complete than the road
 | `src/components/__tests__/overlayFocusTrap.test.tsx` | Modify | Add consumer focus-restore for CaseJournal + NPCGallery |
 | `src/components/__tests__/EvidenceBoard.test.tsx` | Modify | Add consumer focus-restore |
 | `src/components/__tests__/App.test.tsx` | Modify | Title→Settings inert add/remove; success-toast roles |
-| `src/components/__tests__/reducedMotion.coverage.test.tsx` | Create | Structural CSS guard + ConnectionThread + OutcomeBanner reduced-motion DOM tests + coverage table |
+| `src/components/__tests__/reducedMotion.coverage.test.tsx` | Create | framer-motion mock + direct per-component reduced-motion guards (every gate) + structural CSS guard + coverage table |
 | `src/components/__tests__/focusRing.test.tsx` | Create | Class-presence assertions on migrated controls |
 | `src/components/__tests__/EvidenceBoard.test.tsx` | Modify | Keyboard (Enter/Space) connect preserve test |
 | `src/components/__tests__/DiceRollOverlay.status.test.tsx` | Create | Dice-as-status: role=status, non-interactive |
@@ -108,11 +108,45 @@ describe('SettingsPanel — focus management (WS2)', () => {
   });
 
   it('closes on Escape', () => {
+    // SettingsPanel now listens on window (Task 1 refactor, Codex Major 5), so a
+    // window-dispatched Escape reaches the handler.
     initStore();
     let closed = false;
     render(<SettingsPanel onClose={() => { closed = true; }} />);
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(closed).toBe(true);
+  });
+
+  it('wraps Tab from the last focusable to the first (Codex Major 5)', () => {
+    initStore();
+    render(<SettingsPanel onClose={() => {}} />);
+    const dialog = screen.getByRole('dialog');
+    const focusables = Array.from(
+      dialog.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
+    );
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    last.focus();
+    fireEvent.keyDown(last, { key: 'Tab' });
+    expect(document.activeElement).toBe(first);
+  });
+
+  it('wraps Shift+Tab from the first focusable to the last (Codex Major 5)', () => {
+    initStore();
+    render(<SettingsPanel onClose={() => {}} />);
+    const dialog = screen.getByRole('dialog');
+    const focusables = Array.from(
+      dialog.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
+    );
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    first.focus();
+    fireEvent.keyDown(first, { key: 'Tab', shiftKey: true });
+    expect(document.activeElement).toBe(last);
   });
 });
 ```
@@ -120,7 +154,7 @@ describe('SettingsPanel — focus management (WS2)', () => {
 - [ ] **Step 2: Run the test — verify RED**
 
 Run: `npm run test:run -- src/components/__tests__/SettingsPanel.a11y.test.tsx`
-Expected: the *restores focus* test FAILS (`document.activeElement` is `<body>`, not the invoker) because the inline trap does not restore. The other two should pass.
+Expected RED against the **pre-refactor** panel: the *restores focus* test FAILS (activeElement is `<body>` — the inline trap never restores), and the *closes on Escape* test FAILS (the test dispatches on `window` but the old handler listens on `document`, so it won't fire). The *initial focus to close button* and the two *Tab-wrap* tests should PASS (the inline trap already does both). All five go green after Step 3.
 
 - [ ] **Step 3: Refactor SettingsPanel to `useFocusTrap`**
 
@@ -142,17 +176,21 @@ Replace the ref + three effects (`:21-64`) — the `panelRef`/`closeButtonRef` r
   const panelRef = useFocusTrap<HTMLDivElement>();
 
   // Close on Escape. useFocusTrap owns focus-in, Tab-wrap, and focus-restore;
-  // it does not own Escape, so keep this handler.
+  // it does not own Escape, so keep this handler. Listen on `window` to match
+  // the other three overlays (CaseJournal/NPCGallery/EvidenceBoard all use
+  // window.addEventListener) — Codex Major 5: a window-dispatched Escape does
+  // not propagate down to a document listener, so consistency matters for tests
+  // and for real keydowns that bubble to window.
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose();
     }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 ```
 
-Remove the `ref={closeButtonRef}` attribute from the close `<button>` (`:95`). The inner panel `<div>` keeps `ref={panelRef}` (`:84`) — now the hook's ref. The close button is the first focusable descendant of that panel (the `<h2>` heading precedes it but is not focusable), so initial focus lands on it exactly as before.
+Remove the `ref={closeButtonRef}` attribute from the close `<button>` (`:95`). The inner panel `<div>` keeps `ref={panelRef}` (`:84`) — now the hook's ref. The close button is the first focusable descendant of that panel (the `<h2>` heading precedes it but is not focusable — Codex-verified), so initial focus lands on it exactly as before.
 
 - [ ] **Step 4: Run the test — verify GREEN**
 
@@ -181,34 +219,37 @@ git commit -m "fix(a11y): SettingsPanel restores focus via shared useFocusTrap (
 
 - [ ] **Step 1: Write the failing test**
 
-Add to `src/components/__tests__/App.test.tsx` (near the existing `#57` inert describe). Match the file's existing helpers (`stubCaseFetch`, `makeLocalStorageMock`, `render(<App />)`); the title screen is the initial render, so no `reachGameScreen()` needed:
+Add to `src/components/__tests__/App.test.tsx` (near the existing `#57` inert describe). The title screen is the initial render, so no `reachGameScreen()` needed.
+
+**Codex Major 4 — the test must prove inert holds DURING the Suspense fallback, not only after the lazy panel resolves.** A plain `waitFor` on inert would pass even if a future impl set inert only once the close button appeared. Because `inert` is gated on the synchronous `isSettingsOpen` state (not the resolved chunk), it flips in the **same commit** as the fallback — so assert synchronously right after the click that the `OverlayFallback` ("Loading…") and the inert title region coexist, *then* resolve and verify close removes inert:
 
 ```tsx
-// Phase 4 WS2 (Codex Major 1): opening Settings from the TITLE screen must make
-// the title content inert — the title branch previously rendered TitleScreen and
-// SettingsPanel side-by-side with no inert wrapper.
+// Phase 4 WS2 (Codex Major 1 + Major 4): opening Settings from the TITLE screen
+// must make the title content inert — gated on state, so it holds DURING the
+// Suspense fallback, not only after the lazy panel resolves.
 describe('App — title-screen background is inert while Settings is open (Phase 4)', () => {
   afterEach(() => { vi.unstubAllGlobals(); vi.stubGlobal('localStorage', makeLocalStorageMock()); });
 
-  it('marks the title content inert when Settings opens, and clears it on close', async () => {
+  it('is inert together with the Loading fallback, and clears on close', async () => {
     render(<App />);
-    // Open Settings from the title screen.
     fireEvent.click(screen.getByRole('button', { name: /settings/i }));
 
-    await waitFor(() => {
-      const titleContent = screen.getByTestId('title-inert-region');
-      expect(titleContent.hasAttribute('inert')).toBe(true);
-    });
+    // Synchronous window: the inert region and the OverlayFallback ("Loading…")
+    // coexist before the lazy chunk resolves (inert is bound to state, not chunk).
+    const region = screen.getByTestId('title-inert-region');
+    expect(region.hasAttribute('inert')).toBe(true);
+    expect(screen.getByText(/^Loading…$/)).toBeInTheDocument();
 
-    // Close Settings.
+    // After the chunk resolves, still inert; then close removes it.
     fireEvent.click(await screen.findByRole('button', { name: /close settings/i }));
-    await waitFor(() => {
-      const titleContent = screen.getByTestId('title-inert-region');
-      expect(titleContent.hasAttribute('inert')).toBe(false);
-    });
+    await waitFor(() =>
+      expect(screen.getByTestId('title-inert-region').hasAttribute('inert')).toBe(false),
+    );
   });
 });
 ```
+
+**Fallback if flaky:** if module caching from an earlier test in the file makes the chunk resolve before the synchronous assertion (no `Loading…`), make the assertion deterministic by mocking the lazy import with a manually-resolved (deferred) promise so the fallback window is held open; assert coexistence, then resolve. Note which approach you used in the commit message.
 
 - [ ] **Step 2: Run the test — verify RED**
 
@@ -322,12 +363,14 @@ git commit -m "test(a11y): consumer focus-restore guards for all overlays (Phase
 
 ---
 
-## Task 4: Reduced-motion coverage — structural CSS guard + DOM-divergent gates + coverage table
+## Task 4: Reduced-motion coverage — direct guards for EVERY Motion gate + structural CSS guard
 
-**Honest scope (Codex Major 3 + Minor 7):** the transition-prop-only gates (Dice overlay, ClueDiscoveryCard, EffectFeedback, HintButton, DeductionButton, meter width) render **identical DOM** under reduced-motion — only Framer transition params differ, which jsdom cannot observe. We directly test the **DOM-divergent** gates (ConnectionThread, OutcomeBanner) + the structural CSS guard, and **document** the transition-only gates in a coverage table with their live-check verification, rather than pretend a jsdom test guards them.
+**Corrected scope (Codex Major 1).** The earlier draft classified the transition-prop-only gates as "DOM-identical, untestable in jsdom" and skipped them. That was wrong: even when only Framer *props* differ (`initial`/`animate`/`exit`/`transition`/`whileTap`), a test can **mock the Framer primitive to capture the props** and assert the reduced-motion branch passes motion-free values. The spec requires a direct guard for every reveal/idle gate, so we mock `framer-motion`'s `m` in this file and assert per-component. Only the **ghost thread** stays exempt (pointer-tracking direct-manipulation feedback, not a reveal), documented in the coverage table. The `.reduced-motion` CSS rule keeps a **structural** deletion guard (Minor 7 — jsdom applies no styles).
 
 **Files:**
 - Create: `src/components/__tests__/reducedMotion.coverage.test.tsx`
+
+**Mock strategy.** `vi.mock('framer-motion')` with a factory that returns an `m` proxy whose every tag renders a plain host element **spreading a `data-*` capture of the motion props**, plus pass-through `AnimatePresence`/`LazyMotion`/`domAnimation`. Then each component's reduced-motion branch is asserted by reading the captured props (e.g. `initial` is `false`/`{opacity:...}` with no `x`, `transition.duration` is `0`, `whileTap` absent). Components that switch to a **plain** element under reduced motion (ConnectionThread, OutcomeBanner) are asserted by the **absence** of the captured `data-motion` marker.
 
 - [ ] **Step 1: Write the coverage tests**
 
@@ -339,28 +382,65 @@ Create `src/components/__tests__/reducedMotion.coverage.test.tsx`:
  *
  * COVERAGE TABLE — every animation source, its mechanism, and how it is guarded:
  *
- *   Source                         | Mechanism                        | Guard here
- *   -------------------------------|----------------------------------|------------------------
- *   .reduced-motion * (index.css)  | CSS 0ms anim/transition          | structural CSS test ↓
- *   ConnectionThread m.path        | reducedMotion → plain <path>     | DOM test ↓
- *   OutcomeBanner AnimatePresence  | reducedMotion → plain status div | DOM test ↓
- *   StatusBar meter animate-pulse  | prop-gated off reducedMotion     | StatusBar.test.tsx (kept)
- *   SceneText typewriter           | instant/reduced path            | SceneText.test.tsx (kept)
- *   DiceRollOverlay, ClueDiscovery |                                  |
- *     Card, EffectFeedback,        | reducedMotion transition params  | DOM-identical → NOT jsdom-
- *     HintButton, DeductionButton, | (initial:false / duration:0)     | observable; verified by the
- *     meter width m.div            |                                  | live in-browser check (Task 9)
- *   Ghost thread m.path            | EXEMPT — pointer-tracking direct- | documented exemption (no test)
- *                                  | manipulation feedback, not reveal |
+ *   Source                              | Mechanism                       | Guard here
+ *   ------------------------------------|---------------------------------|-------------------------
+ *   .reduced-motion * (index.css)       | CSS 0ms anim/transition         | structural CSS test
+ *   ConnectionThread m.path             | reducedMotion → plain <path>    | absence-of-m marker
+ *   OutcomeBanner AnimatePresence       | reducedMotion → plain div       | absence-of-m marker
+ *   DiceRollOverlay (card + die)        | initial/exit/animate gated      | captured-props assert
+ *   ClueDiscoveryCard                   | initial/exit x gated            | captured-props assert
+ *   EffectFeedback                      | initial gated                   | captured-props assert
+ *   HintButton (button + popover)       | initial/exit + transition gated | captured-props assert
+ *   DeductionButton                     | whileTap removed                | captured-props assert
+ *   ComposureMeter/VitalityMeter width  | transition duration → 0         | captured-props assert
+ *   StatusBar meter animate-pulse       | prop-gated CSS class            | StatusBar.test.tsx (kept)
+ *   SceneText typewriter                | instant/reduced path            | SceneText.test.tsx (kept)
+ *   Ghost thread m.path                 | EXEMPT — pointer-tracking direct | documented, no test
+ *                                       | manipulation feedback, not reveal|
  *
- * All local m.* branches were verified gated at plan time; a sweep for ungated
- * initial=/whileHover= reveal paths returned zero.
+ * Approach (Codex Major 1): mock framer-motion so every `m.<tag>` renders a plain
+ * host element that serializes its motion props into data-* attributes we can read.
+ * Components that switch to a *plain* element under reduced motion (ConnectionThread,
+ * OutcomeBanner) are asserted by the ABSENCE of the data-motion marker.
  */
-import { describe, it, expect } from 'vitest';
-import { render, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import cssRaw from '../../index.css?raw';
+
+// --- framer-motion mock: capture motion props on a plain host element ---------
+vi.mock('framer-motion', () => {
+  const React = require('react');
+  const makeTag = (tag: string) =>
+    React.forwardRef((props: any, ref: any) => {
+      const { initial, animate, exit, transition, whileTap, whileHover, children, ...rest } = props;
+      return React.createElement(
+        tag,
+        {
+          ...rest,
+          ref,
+          'data-motion': 'true',
+          'data-initial': JSON.stringify(initial ?? null),
+          'data-transition': JSON.stringify(transition ?? null),
+          'data-whiletap': JSON.stringify(whileTap ?? null),
+        },
+        children,
+      );
+    });
+  const m = new Proxy({}, { get: (_t, tag: string) => makeTag(tag) });
+  return {
+    m,
+    motion: m,
+    AnimatePresence: ({ children }: any) => children,
+    LazyMotion: ({ children }: any) => children,
+    domAnimation: {},
+  };
+});
+
+// Imports AFTER the mock so the components pick up the mocked `m`.
 import { ConnectionThread } from '../EvidenceBoard/ConnectionThread';
 import { OutcomeBanner } from '../NarrativePanel/OutcomeBanner';
+import { DiceRollOverlay } from '../NarrativePanel/DiceRollOverlay';
+import { ClueDiscoveryCard } from '../NarrativePanel/ClueDiscoveryCard';
 
 describe('reduced-motion — structural CSS guard (Minor 7: structural, not behavioral)', () => {
   it('index.css keeps the .reduced-motion rule zeroing animation + transition duration', () => {
@@ -373,141 +453,221 @@ describe('reduced-motion — structural CSS guard (Minor 7: structural, not beha
   });
 });
 
-describe('reduced-motion — ConnectionThread (DOM-divergent gate)', () => {
-  // Connection.state is 'active' | 'slack' (see ConnectionThread.tsx:11-18); the
-  // reducedMotion non-slack branch renders a plain <path>.
-  const conn = [{ fromId: 'a', toId: 'b', fromPoint: { x: 0, y: 0 }, toPoint: { x: 10, y: 10 }, state: 'active' as const }];
-
-  it('renders a plain <path> (no framer m.path) when reducedMotion is true', () => {
-    const { container } = render(
-      <ConnectionThread connections={conn as any} ghostFrom={null} ghostTo={null} reducedMotion />,
-    );
+describe('reduced-motion — plain-element gates (absence of the motion marker)', () => {
+  it('ConnectionThread renders a plain <path> (no data-motion) when reducedMotion', () => {
+    // ghostFrom/ghostTo are ThreadPoint | undefined (NOT null — ConnectionThread.tsx:23-24).
+    const conn = [{ fromId: 'a', toId: 'b', fromPoint: { x: 0, y: 0 }, toPoint: { x: 10, y: 10 }, state: 'active' as const }];
+    const { container } = render(<ConnectionThread connections={conn} reducedMotion />);
     const path = container.querySelector('path');
     expect(path).not.toBeNull();
-    // Framer's m.path adds a style attribute for its animation; the plain path does not.
-    expect(path!.getAttribute('style')).toBeNull();
+    expect(path!.getAttribute('data-motion')).toBeNull();
+  });
+
+  it('OutcomeBanner renders a plain status div (no data-motion) when reducedMotion', () => {
+    render(<OutcomeBanner tier="success" visible reducedMotion />);
+    const el = document.querySelector('[role="status"][aria-label^="Outcome"]');
+    expect(el).not.toBeNull();
+    expect(el!.getAttribute('data-motion')).toBeNull();
   });
 });
 
-describe('reduced-motion — OutcomeBanner (DOM-divergent gate)', () => {
-  it('renders a plain status banner (no AnimatePresence) when reducedMotion is true', async () => {
-    // The reduced-motion branch gates on an internal `shown` state set in a
-    // useEffect (OutcomeBanner.tsx), so wait for it rather than assert sync.
-    render(<OutcomeBanner tier="success" visible reducedMotion />);
-    await waitFor(() => {
-      const el = document.querySelector('[role="status"][aria-label^="Outcome"]');
-      expect(el).not.toBeNull();
-    });
+describe('reduced-motion — captured-prop gates (motion params neutralized)', () => {
+  it('DiceRollOverlay: die shake transition is duration 0 and card initial is false', () => {
+    const { container } = render(
+      <DiceRollOverlay roll={14} modifier={2} total={16} visible reducedMotion />,
+    );
+    const motionEls = Array.from(container.querySelectorAll('[data-motion]'));
+    expect(motionEls.length).toBeGreaterThan(0);
+    // Every motion element's transition must be duration:0 (or the die's animate {} → transition {duration:0}).
+    for (const el of motionEls) {
+      const t = JSON.parse(el.getAttribute('data-transition') || 'null');
+      if (t && typeof t === 'object' && 'duration' in t) {
+        expect(t.duration).toBe(0);
+      }
+    }
+    // The card's initial is `false` under reduced motion (DiceRollOverlay.tsx:42).
+    const initials = motionEls.map((el) => el.getAttribute('data-initial'));
+    expect(initials).toContain('false');
+  });
+
+  it('ClueDiscoveryCard: initial has no x offset under reduced motion', () => {
+    const clue = { id: 'c1', title: 'A Clue', type: 'document', status: 'new' } as any;
+    render(<ClueDiscoveryCard clue={clue} visible reducedMotion />);
+    const el = document.querySelector('[data-motion]');
+    expect(el).not.toBeNull();
+    const initial = JSON.parse(el!.getAttribute('data-initial') || 'null');
+    // Reduced motion uses { opacity: 0 } with NO x (ClueDiscoveryCard.tsx:35).
+    expect(initial).not.toBeNull();
+    expect(initial.x).toBeUndefined();
   });
 });
 ```
 
-**Note:** verify `ConnectionThread`'s prop shape against `src/components/EvidenceBoard/ConnectionThread.tsx` and `OutcomeBanner`'s props against `src/components/NarrativePanel/OutcomeBanner.tsx` before running; adjust the `conn` object and `OutcomeBanner` props to match the real interfaces (e.g. the exact `state` union and `tier` values). If `OutcomeBanner` uses an internal `shown` delay even in the reduced-motion branch, wrap the assertion in `waitFor`.
+**Notes for the implementer:**
+- Verify each component's exact prop interface before running (`ConnectionThread` `Connection`/`ThreadPoint`; `OutcomeBanner` `tier`/`visible`; `DiceRollOverlay` requires `visible && roll != null && total != null`; `ClueDiscoveryCard` `clue`/`visible`/`reducedMotion`/`variant`). Adjust fixtures to match.
+- `OutcomeBanner`'s reduced-motion branch gates on an internal `shown` state (a `useEffect`). If the status div is not present synchronously, wrap that assertion in `await waitFor(...)` (import `waitFor`).
+- The `require('react')` inside the mock factory is needed because `vi.mock` factories are hoisted above imports; if the project's ESLint forbids `require`, use `await vi.importActual('react')` in an async factory instead.
+- **EffectFeedback / HintButton / DeductionButton / the meter width `m.div`** follow the same captured-props pattern — add one assertion each (EffectFeedback: `initial` has no `x`; HintButton popover: `transition.duration` 0; DeductionButton: `whileTap` is `null`; meters: render `<ComposureMeter value={2} reducedMotion />` and assert the `composure-bar` element's `data-transition` duration is 0). Write them following the two examples above; each is ~6 lines.
 
-- [ ] **Step 2: Run — verify GREEN (adjust props if a shape mismatch fails it)**
+- [ ] **Step 2: Run — verify GREEN**
 
 Run: `npm run test:run -- src/components/__tests__/reducedMotion.coverage.test.tsx`
-Expected: all PASS. If a prop-shape error fails a test, fix the test's props to match the real interface (this is characterization of existing behaviour — the components are correct).
+Expected: all PASS. If a captured-prop assertion fails, first confirm it reflects the component's *actual* reduced-motion branch (read the source) — the branches are already correct, so a failure means the assertion's expectation is off, not the component.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 3: Mutation-check two guards (prove they're not false-green)**
+
+Temporarily break one reduced-motion branch (e.g. in `DiceRollOverlay.tsx` change `initial={reducedMotion ? false : {...}}` to always the object), run the test, watch the DiceRollOverlay assertion FAIL, then restore. Do the same for ConnectionThread (force the `m.path` branch). This is the honest RED for already-correct code.
+
+- [ ] **Step 4: Commit**
 
 ```bash
 git add src/components/__tests__/reducedMotion.coverage.test.tsx
-git commit -m "test(a11y): reduced-motion coverage table + DOM-divergent gate guards (Phase 4 WS1)"
+git commit -m "test(a11y): direct reduced-motion guards for every Motion gate + structural CSS guard (Phase 4 WS1, Codex Major 1)"
 ```
 
 ---
 
-## Task 5: Focus-ring standardization
+## Task 5: Focus-ring standardization (all keyboard controls)
 
-Migrate low-contrast stone rings and thin `ring-1` to the standard `focus-visible:ring-2 focus-visible:ring-amber-400`. **Preserve** the red autofocus ring on the LoadGameScreen delete-confirm (Minor 5) and the intentional `focus:ring-white` skip-link.
+**Corrected scope (Codex Major 2).** The spec standard is `focus-visible:ring-2 focus-visible:ring-amber-400`, and it requires migrating **ordinary keyboard-focusable controls off bare `focus:ring-*`** — not only the stone/thin outliers. So this task migrates **every** bare `focus:ring-*` on a keyboard-operable control to the `focus-visible:` amber standard, with two documented exceptions, and a **source-inventory test** that fails if any un-excepted bare-focus ring remains.
+
+**Full site inventory (verified at plan time — re-grep before editing).** Migrate the ring classes at each:
+
+| File:line | Current | Migrate to |
+|-----------|---------|-----------|
+| `App.tsx:76` | `focus:ring-2 focus:ring-amber-400` | `focus-visible:ring-2 focus-visible:ring-amber-400` |
+| `App.tsx:102` | `focus:ring-2 focus:ring-amber-400` | same |
+| `components/ErrorBoundary/ErrorBoundary.tsx:38` | `focus:ring-2 focus:ring-amber-400` | same |
+| `components/TitleScreen/TitleScreen.tsx:63` | `focus:ring-2 focus:ring-amber-400` | same |
+| `components/TitleScreen/TitleScreen.tsx:77` | `focus:ring-2 focus:ring-stone-400` | same (also fixes low-contrast) |
+| `components/TitleScreen/TitleScreen.tsx:86` | `focus:ring-2 focus:ring-stone-600` | same |
+| `components/TitleScreen/LoadGameScreen.tsx:89` | `focus:ring-2 focus:ring-amber-400` | same |
+| `components/TitleScreen/LoadGameScreen.tsx:136` | `focus:ring-2 focus:ring-stone-600` | same |
+| `components/CaseSelection/CaseSelection.tsx:40` | `focus:ring-2 focus:ring-stone-600` | same |
+| `components/CaseSelection/CaseSelection.tsx:83` | `focus:ring-2 focus:ring-amber-400` | same |
+| `components/CaseSelection/CaseSelection.tsx:105` | `focus:ring-2 focus:ring-amber-400` | same |
+| `components/CaseSelection/CaseSelection.tsx:130` | `focus:ring-2 focus:ring-stone-600` | same |
+| `components/CaseCompletion/CaseCompletion.tsx:72` | `focus:ring-2 focus:ring-amber-400` | same |
+| `components/ChoicePanel/ChoiceCard.tsx:131` | `focus:ring-2 focus:ring-gaslight-amber/60` | `focus-visible:ring-2 focus-visible:ring-amber-400` |
+| `components/NarrativePanel/ClueDiscoveryCard.tsx:57` | `focus-visible:ring-1 focus-visible:ring-amber-400` | `focus-visible:ring-2 focus-visible:ring-amber-400` (thin→2) |
+| `components/HeaderBar/HintButton.tsx:105` | `focus-visible:ring-1 focus-visible:ring-amber-400` | same (thin→2) |
+
+**Do NOT migrate (documented exceptions — the inventory test must allowlist these):**
+- `components/TitleScreen/LoadGameScreen.tsx` delete `✕` + autofocus `Confirm?` buttons — keep `focus:ring-2 focus:ring-red-400` (Minor 5: `autoFocus` fires programmatically and may not match `:focus-visible`; red is semantic for a destructive action).
+- `App.tsx` skip-to-content link — keeps `focus:ring-2 focus:ring-white` (needs `focus:` so it shows on programmatic focus after activation; white-on-amber is high-contrast).
 
 **Files:**
-- Modify: `src/components/TitleScreen/TitleScreen.tsx:77,86`
-- Modify: `src/components/TitleScreen/LoadGameScreen.tsx:136`
-- Modify: `src/components/CaseSelection/CaseSelection.tsx:40,130`
-- Modify: `src/components/NarrativePanel/ClueDiscoveryCard.tsx:57`
-- Modify: `src/components/HeaderBar/HintButton.tsx:105`
-- Test: `src/components/__tests__/focusRing.test.tsx` (create)
+- Modify: the 16 sites above.
+- Test: `src/components/__tests__/focusRing.test.tsx` (create) — a **source-inventory** guard + a rendered spot-check.
 
-- [ ] **Step 1: Write the failing class-presence test**
+- [ ] **Step 1: Write the failing inventory + spot-check test**
 
-Create `src/components/__tests__/focusRing.test.tsx`:
+Create `src/components/__tests__/focusRing.test.tsx`. The inventory test reads component **source** via `?raw` and fails if any bare `focus:ring-` survives outside the allowlist — this is what makes "standardize *all* rings" enforceable, not just one spot-check (Codex Major 2).
 
 ```tsx
 /**
- * Focus-ring standardization (Phase 4 WS3). Low-contrast stone rings and thin
- * ring-1 indicators migrated to the standard focus-visible:ring-2 ring-amber-400.
- * Class-presence assertions (jsdom can't compute contrast — that's the live check).
+ * Focus-ring standardization (Phase 4 WS3, Codex Major 2).
+ * All keyboard-focusable controls use focus-visible:ring-2 ring-amber-400.
+ * The inventory test reads source and fails if a bare `focus:ring-` remains
+ * outside the two documented exceptions (red autofocus confirm, white skip-link).
+ * jsdom can't compute contrast — that's the live check (Task 8).
  */
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { TitleScreen } from '../TitleScreen/TitleScreen';
 
+// Component sources scanned for stray bare-focus rings.
+import appRaw from '../../App.tsx?raw';
+import titleRaw from '../TitleScreen/TitleScreen.tsx?raw';
+import loadRaw from '../TitleScreen/LoadGameScreen.tsx?raw';
+import caseSelRaw from '../CaseSelection/CaseSelection.tsx?raw';
+import caseComplRaw from '../CaseCompletion/CaseCompletion.tsx?raw';
+import choiceRaw from '../ChoicePanel/ChoiceCard.tsx?raw';
+import errBoundaryRaw from '../ErrorBoundary/ErrorBoundary.tsx?raw';
+
 afterEach(cleanup);
 
-describe('focus rings — standardized amber, no low-contrast stone (WS3)', () => {
-  it('TitleScreen Load Game button uses amber-400, not a stone ring', () => {
+// A bare `focus:ring-<color>` (not focus-visible:) on a keyboard control is a
+// finding UNLESS it is one of the allowlisted intentional exceptions.
+function strayBareFocusRings(src: string): string[] {
+  const matches = src.match(/(?<!focus-visible:)\bfocus:ring-[a-z0-9/-]+/g) ?? [];
+  return matches.filter((m) => {
+    if (m.startsWith('focus:ring-red-')) return false;   // red autofocus confirm (Minor 5)
+    if (m === 'focus:ring-white') return false;          // skip-link
+    if (m === 'focus:ring-2') return false;              // the width utility, paired with focus-visible color
+    return true;
+  });
+}
+
+describe('focus rings — inventory: no stray bare focus:ring on keyboard controls (WS3)', () => {
+  const sources: Array<[string, string]> = [
+    ['App', appRaw], ['TitleScreen', titleRaw], ['LoadGameScreen', loadRaw],
+    ['CaseSelection', caseSelRaw], ['CaseCompletion', caseComplRaw],
+    ['ChoiceCard', choiceRaw], ['ErrorBoundary', errBoundaryRaw],
+  ];
+  for (const [name, src] of sources) {
+    it(`${name} has no stray bare focus:ring color utility`, () => {
+      expect(strayBareFocusRings(src)).toEqual([]);
+    });
+  }
+});
+
+describe('focus rings — no low-contrast stone / thin ring-1 anywhere scanned (WS3)', () => {
+  const all = [appRaw, titleRaw, loadRaw, caseSelRaw, caseComplRaw, choiceRaw, errBoundaryRaw].join('\n');
+  it('no ring-stone-400 / ring-stone-600 focus ring remains', () => {
+    expect(all).not.toMatch(/ring-stone-[46]00/);
+  });
+});
+
+describe('focus rings — rendered spot-check (WS3)', () => {
+  it('TitleScreen New Investigation button uses focus-visible amber-400', () => {
     render(
       <TitleScreen
         onNewGame={() => {}} onLoadGame={() => {}} onSettings={() => {}}
         loadError={null} onDismissError={() => {}}
       />,
     );
-    const load = screen.getByRole('button', { name: /load|continue/i });
-    expect(load.className).toMatch(/ring-amber-400/);
-    expect(load.className).not.toMatch(/ring-stone-[46]00/);
+    // Use the New-game button — always enabled (the Load button's accessible name
+    // is "No saved investigations available" when there are no saves, Codex Major 2).
+    const newGame = screen.getByRole('button', { name: /new investigation|new game/i });
+    expect(newGame.className).toMatch(/focus-visible:ring-amber-400/);
+    expect(newGame.className).not.toMatch(/(?<!focus-visible:)\bfocus:ring-amber-400/);
   });
 });
 ```
 
-**Note:** confirm the exact accessible name of the Load button in `TitleScreen.tsx` and adjust the `name` matcher; if Load is disabled with no saves, render with a state that enables it or assert on the Settings/New Game button that carries the migrated ring.
+**Notes:** confirm the New-game button's accessible name in `TitleScreen.tsx` and adjust the matcher. Confirm the `ChoiceCard` ring is on a keyboard-focusable element (it is a choice button). If the regex lookbehind is unsupported in the project's Node, replace `strayBareFocusRings` with a split-and-filter that excludes `focus-visible:` occurrences.
 
 - [ ] **Step 2: Run — verify RED**
 
 Run: `npm run test:run -- src/components/__tests__/focusRing.test.tsx`
-Expected: FAIL — the button still has `ring-stone-400`/`ring-stone-600`.
+Expected: multiple FAILs — the inventory finds bare `focus:ring-amber-400`/`focus:ring-stone-*`/`focus:ring-gaslight-amber` across the scanned files.
 
-- [ ] **Step 3: Migrate the rings**
-
-In each site, replace the focus-ring classes as follows (leave all other classes intact):
-
-- `TitleScreen.tsx:77` — `focus:outline-none focus:ring-2 focus:ring-stone-400` → `focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400`
-- `TitleScreen.tsx:86` — `focus:outline-none focus:ring-2 focus:ring-stone-600` → `focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400`
-- `LoadGameScreen.tsx:136` — `focus:outline-none focus:ring-2 focus:ring-stone-600` → `focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400`
-- `CaseSelection.tsx:40` — `focus:outline-none focus:ring-2 focus:ring-stone-600` → `focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400`
-- `CaseSelection.tsx:130` — `focus:outline-none focus:ring-2 focus:ring-stone-600` → `focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400`
-- `ClueDiscoveryCard.tsx:57` — `focus-visible:ring-1 focus-visible:ring-amber-400` → `focus-visible:ring-2 focus-visible:ring-amber-400`
-- `HintButton.tsx:105` — `focus-visible:ring-1 focus-visible:ring-amber-400` → `focus-visible:ring-2 focus-visible:ring-amber-400`
-
-**Do NOT touch** (documented exceptions):
-- `LoadGameScreen.tsx:106-123` — the delete `✕` and autofocus `Confirm?` buttons keep `focus:ring-2 focus:ring-red-400` (Minor 5: programmatic `autoFocus` is not guaranteed to match `:focus-visible`; red is semantically intentional for a destructive action).
-- `App.tsx:339` — the skip-link keeps `focus:ring-2 focus:ring-white` (intentional `focus:` so it shows on programmatic focus; white on the amber focus background is high-contrast).
+- [ ] **Step 3: Migrate all 16 sites** per the inventory table above (replace each `focus:ring-<x>` → `focus-visible:ring-2 focus-visible:ring-amber-400`, keeping every other class). Leave the two exceptions untouched.
 
 - [ ] **Step 4: Run — verify GREEN**
 
 Run: `npm run test:run -- src/components/__tests__/focusRing.test.tsx`
-Expected: PASS.
+Expected: all PASS.
 
-- [ ] **Step 5: Compute contrast ratios for the findings table**
+- [ ] **Step 5: Compute contrast ratios from RESOLVED token values (Codex Major 3)**
 
-Run this one-liner (WCAG relative-luminance formula) to fill the findings table below:
+The plan must measure the **actual resolved** colors, not sRGB guesses. Resolve each token first:
+- `amber-400` is Tailwind `oklch(82.8% 0.189 84.429)` — convert to sRGB hex (use a converter, or read the compiled value from the built CSS after `npm run build`: `grep -o 'oklch([^)]*84.429[^)]*)' dist/**/*.css` then convert, or compute via `culori` if available).
+- `gaslight-amber` = `#d4a853`, `gaslight-gold` = `#c9a84c` (from `src/index.css:11-16`), `gaslight-ink` = `#1a1a2e`, `gaslight-fog` = `#b8c5d0`.
+- `amber-300`, `stone-200`, `stone-400`, `stone-950` — resolve from Tailwind's `theme.css` (all oklch) to sRGB.
+
+Then compute WCAG ratios (fill the table). Helper (feed **resolved** hex values):
 
 ```bash
 node -e '
 const L=h=>{const c=[h.slice(1,3),h.slice(3,5),h.slice(5,7)].map(x=>{let v=parseInt(x,16)/255;return v<=0.03928?v/12.92:((v+0.055)/1.055)**2.4});return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2]};
 const R=(a,b)=>{const l1=L(a),l2=L(b);return((Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05)).toFixed(2)};
-const ink="#1a1a2e",stone950="#0c0a09",amber400="#f5b544",fog="#b8c5d0",stone200="#e7e5e4",stone400="#a8a29e",amber300="#fcd34d";
+// REPLACE the amber400 hex with the resolved oklch→sRGB value before running.
+const ink="#1a1a2e",amber400="RESOLVE_ME";
 console.log("ring amber-400 on ink:",R(amber400,ink),"(need >=3)");
-console.log("ring amber-400 on stone-950:",R(amber400,stone950),"(need >=3)");
-console.log("body fog on ink:",R(fog,ink),"(need >=4.5)");
-console.log("stone-200 on ink:",R(stone200,ink),"(need >=4.5)");
-console.log("stone-400 muted on ink:",R(stone400,ink),"(need >=4.5 / >=3 large)");
-console.log("amber-300 heading on ink:",R(amber300,ink),"(need >=4.5)");
 '
 ```
-
-Record results in the findings table in the plan's Contrast section below (fill the ratio + pass/fail). `amber-400`'s exact hex is Tailwind's `oklch(82.8% 0.189 84.429)`; the `#f5b544` above is a close sRGB approximation — if any ring result is marginal (near 3.0), resolve the exact sRGB from the built CSS before deciding.
 
 - [ ] **Step 6: Run lint + commit**
 
@@ -515,22 +675,26 @@ Run: `npm run lint`
 Expected: clean.
 
 ```bash
-git add src/components/TitleScreen/TitleScreen.tsx src/components/TitleScreen/LoadGameScreen.tsx src/components/CaseSelection/CaseSelection.tsx src/components/NarrativePanel/ClueDiscoveryCard.tsx src/components/HeaderBar/HintButton.tsx src/components/__tests__/focusRing.test.tsx
-git commit -m "fix(a11y): standardize focus rings on amber-400; keep red autofocus + skip-link exceptions (Phase 4 WS3)"
+git add src/App.tsx src/components/ErrorBoundary/ErrorBoundary.tsx src/components/TitleScreen/TitleScreen.tsx src/components/TitleScreen/LoadGameScreen.tsx src/components/CaseSelection/CaseSelection.tsx src/components/CaseCompletion/CaseCompletion.tsx src/components/ChoicePanel/ChoiceCard.tsx src/components/NarrativePanel/ClueDiscoveryCard.tsx src/components/HeaderBar/HintButton.tsx src/components/__tests__/focusRing.test.tsx
+git commit -m "fix(a11y): standardize ALL keyboard focus rings on focus-visible amber-400; keep red autofocus + skip-link (Phase 4 WS3, Codex Major 2)"
 ```
 
-### Contrast findings table (fill from Step 5)
+### Contrast findings table (fill from Step 5 with RESOLVED values)
 
 | Pair | Purpose | Ratio | Threshold | Pass? | Action |
 |------|---------|:-----:|:---------:|:-----:|--------|
 | amber-400 / gaslight-ink | focus ring | _fill_ | 3:1 (1.4.11) | _fill_ | — |
 | amber-400 / stone-950 | focus ring | _fill_ | 3:1 (1.4.11) | _fill_ | — |
 | gaslight-fog / gaslight-ink | body prose | _fill_ | 4.5:1 (1.4.3) | _fill_ | — |
+| gaslight-amber / gaslight-ink | accent (heading/label) | _fill_ | 4.5:1 (1.4.3) | _fill_ | document if fail |
+| gaslight-gold / gaslight-ink | accent | _fill_ | 4.5:1 (1.4.3) | _fill_ | document if fail |
+| amber-300 / gaslight-ink | heading/accent | _fill_ | 4.5:1 (1.4.3) | _fill_ | — |
 | stone-200 / gaslight-ink | body text | _fill_ | 4.5:1 (1.4.3) | _fill_ | — |
 | stone-400 / gaslight-ink | muted text | _fill_ | 4.5:1 (1.4.3) | _fill_ | document if fail |
-| amber-300 / gaslight-ink | heading/accent | _fill_ | 4.5:1 (1.4.3) | _fill_ | — |
+| red-400 / stone-900 | destructive confirm ring | _fill_ | 3:1 (1.4.11) | _fill_ | retained exception — justify |
+| white / gaslight-amber | skip-link ring on amber bg | _fill_ | 3:1 (1.4.11) | _fill_ | retained exception — justify |
 
-Fix clear failures; **document** any marginal residual here rather than leave it silent.
+Fix clear failures; **document** any marginal residual and justify each retained exception's ratio here rather than leave it silent.
 
 ---
 
@@ -565,6 +729,14 @@ describe('App — successful save toast is a polite status (F-052 preserve)', ()
 ```
 
 **Note:** confirm the Save button's accessible name and the success message text against `App.tsx`; the toast element carrying `role`/`aria-live` is the container — if `findByText` returns an inner node, walk to the `role`-bearing ancestor (`toast.closest('[role]')`).
+
+**Also (Codex Minor 7):** the existing *failure*-toast test (`App.test.tsx:241-261`) asserts `role="alert"` + message but **not** `aria-live="assertive"`, though the component sets both. Add that missing assertion to the existing failure test:
+
+```tsx
+    // (inside the existing failure-toast test, after finding the alert)
+    expect(alert.getAttribute('aria-live')).toBe('assertive');
+```
+Locate the alert element the existing test already grabs (or `screen.getByRole('alert')`) and add the line.
 
 - [ ] **Step 2: Keyboard-connect preserve test (EvidenceBoard.test.tsx)**
 
@@ -603,9 +775,11 @@ describe('DiceRollOverlay — passive status, not a modal (preserve)', () => {
     const status = container.querySelector('[role="status"]');
     expect(status).not.toBeNull();
     expect(status!.getAttribute('aria-live')).toBe('polite');
-    // Not a dialog and traps nothing: no dialog role, no focusable controls.
+    // Not a dialog and traps nothing: no dialog role, no focusable control of ANY
+    // kind (Codex Minor 7 — use the full focusable selector, not just button/a/input).
     expect(container.querySelector('[role="dialog"]')).toBeNull();
-    expect(container.querySelector('button, a[href], input')).toBeNull();
+    const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';
+    expect(container.querySelector(FOCUSABLE)).toBeNull();
   });
 });
 ```
@@ -697,6 +871,7 @@ Create `codex/input/2026-07-16-phase4-a11y-hardening-impl.md`: self-contained, c
 ## Self-review notes (author)
 
 - **Spec coverage:** WS1 → Task 4 (+ kept StatusBar/SceneText tests); WS2 → Tasks 1–3 (SettingsPanel refactor, title inert, consumer restore); WS3 → Task 5 + Task 8 live check; WS4 → Task 6 (+ SceneText already covered). All six §6 success criteria map to a task.
-- **Honest deviations from the spec's optimism:** all local Motion branches were already gated (WS1 has no code-gating work, only tests) and SceneText's skip control is already tested — both stated up front so the implementer doesn't invent work or misread green as incomplete.
-- **jsdom limits** (transition-only reduced-motion, contrast) are handled by the coverage-table documentation + the live check (Task 8), not pretend unit tests — consistent with Codex Minor 7 and the repo's existing stance.
+- **Honest deviations from the spec's optimism:** all local Motion branches were already `reducedMotion`-gated (WS1 has no code-gating work — only tests, now *direct* guards per Codex Major 1) and SceneText's skip control is already tested — both stated up front so the implementer doesn't invent work or misread green as incomplete.
+- **Codex plan-review (2026-07-16) folded — 6 Major + 1 Minor, all verified:** Major 1 → Task 4 now mocks framer-motion and directly guards **every** Motion gate (not just DOM-divergent ones) + mutation-checks two; Major 2 → Task 5 migrates **all** bare-focus keyboard controls with a source-inventory test + fixes the Load-button-name false-green; Major 3 → contrast table computed from **resolved** oklch→sRGB values + adds the named accent pairs + exception rows; Major 4 → title-inert test asserts inert coexists with the Suspense fallback (state-gated, synchronous); Major 5 → SettingsPanel Escape moved to `window` (matches the other 3 overlays) so the window-dispatched test fires + Tab-wrap tests added; Major 6 → ConnectionThread test passes `undefined`/omits (not `null`) to satisfy the `npm run build` typecheck; Minor 7 → failure-toast `aria-live="assertive"` assertion + broadened dice focusable selector.
+- **jsdom limits** (contrast measurement) are handled by resolved-value computation + the live check (Task 8), not pretend unit tests. The `.reduced-motion` CSS rule keeps a structural deletion guard only.
 - **Type/name consistency:** test prop shapes are flagged "confirm against the real interface" wherever the plan couldn't guarantee them from the audit (ConnectionThread, OutcomeBanner, DiceRollOverlay, TitleScreen button name) — the implementer verifies before running rather than trusting a guessed shape.
