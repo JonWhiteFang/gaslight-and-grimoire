@@ -3,7 +3,9 @@
  * proficiency colour + text label, Advantage indicator, and key icon.
  */
 import React from 'react';
-import { calculateModifier, getTrainedBonus } from '../../engine/diceEngine';
+import { calculateModifier, getTrainedBonus, resolveDC } from '../../engine/diceEngine';
+import { computeCheckOdds, describeCheckOdds } from '../../engine/checkOdds';
+import { CheckOddsTag } from '../shared';
 import type { Choice, Faculty, Investigator } from '../../types';
 
 // ─── Proficiency helpers ──────────────────────────────────────────────────────
@@ -54,6 +56,8 @@ export interface ChoiceCardProps {
    * Sight), so the badge always matches the engine's roll (F-014).
    */
   hasAdvantage: boolean;
+  /** Whether an active auto-succeed ability guarantees this check (spec §2.2). */
+  autoSucceeds?: boolean;
   onSelect: (choiceId: string) => void;
 }
 
@@ -65,6 +69,7 @@ function ChoiceCardComponent({
   revealedClueIds,
   deductionIds,
   hasAdvantage,
+  autoSucceeds = false,
   onSelect,
 }: ChoiceCardProps) {
   const isUnlockedByPreparation =
@@ -94,6 +99,22 @@ function ChoiceCardComponent({
     );
   }
 
+  // Pre-roll odds — only for a real check (faculty + a difficulty the engine rolls against).
+  const isCheck =
+    choice.faculty != null && (choice.difficulty !== undefined || choice.dynamicDifficulty != null);
+  const odds =
+    isCheck && choice.faculty
+      ? computeCheckOdds({
+          faculty: choice.faculty,
+          investigator,
+          dc: resolveDC(choice, investigator),
+          hasAdvantage,
+          hasDisadvantage: false,
+          autoSucceeds,
+          partialCountsAsSuccess: false,
+        })
+      : null;
+
   return (
     <button
       type="button"
@@ -102,7 +123,7 @@ function ChoiceCardComponent({
                  bg-gaslight-ink/60 hover:bg-gaslight-ink/90 hover:border-gaslight-amber/60
                  focus:outline-none focus:ring-2 focus:ring-gaslight-amber/60
                  transition-colors duration-150 group"
-      aria-label={choice.text}
+      aria-label={odds ? `${choice.text}. ${describeCheckOdds(odds)}` : choice.text}
     >
       <div className="flex items-start justify-between gap-3">
         {/* Choice text */}
@@ -137,9 +158,10 @@ function ChoiceCardComponent({
       </div>
 
       {/* Faculty tag row */}
-      {facultyTag && (
-        <div className="mt-2">
+      {(facultyTag || odds) && (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
           {facultyTag}
+          {odds && <CheckOddsTag odds={odds} />}
         </div>
       )}
     </button>
