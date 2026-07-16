@@ -260,6 +260,22 @@ describe('App — loading fallbacks are announced to screen readers (#57)', () =
   });
 });
 
+// Phase 4 WS4 (preserve): a successful manual save is a POLITE status, not an alert.
+describe('App — successful save toast is a polite status (F-052 preserve)', () => {
+  afterEach(() => { vi.unstubAllGlobals(); vi.stubGlobal('localStorage', makeLocalStorageMock()); });
+
+  it('renders role=status / aria-live=polite on save success', async () => {
+    stubCaseFetch();
+    render(<App />);
+    await reachGameScreen();
+    fireEvent.click(screen.getByRole('button', { name: /save game/i }));
+    const toast = await screen.findByText(/Game saved/i);
+    const region = toast.closest('[role]') ?? toast;
+    expect(region.getAttribute('role')).toBe('status');
+    expect(region.getAttribute('aria-live')).toBe('polite');
+  });
+});
+
 // F-103: a manual save that fails (localStorage throw) must surface an error,
 // not a false "Game saved" confirmation.
 describe('App — manual save failure surfaces an error toast (F-103)', () => {
@@ -281,6 +297,7 @@ describe('App — manual save failure surfaces an error toast (F-103)', () => {
     await waitFor(() => {
       const alert = screen.getByRole('alert');
       expect(alert.textContent).toMatch(/save failed/i);
+      expect(alert.getAttribute('aria-live')).toBe('assertive');
     });
     expect(screen.queryByText(/^Game saved/)).toBeNull();
   });

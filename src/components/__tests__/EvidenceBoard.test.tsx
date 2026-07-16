@@ -117,6 +117,16 @@ describe('EvidenceBoard', () => {
     expect(screen.getAllByLabelText('Connected')).toHaveLength(2);
   });
 
+  it('connects two clues via keyboard (Enter) — no pointer (WCAG 2.5.7 preserve)', () => {
+    initStore(sampleClues);
+    render(<EvidenceBoard onClose={() => {}} />);
+    const a = screen.getByRole('button', { name: /Cipher Note/i });
+    const b = screen.getByRole('button', { name: /Witness Account/i });
+    fireEvent.keyDown(a, { key: 'Enter' });
+    fireEvent.keyDown(b, { key: 'Enter' });
+    expect(useStore.getState().connections).toContainEqual({ fromId: 'c1', toId: 'c2' });
+  });
+
   it('clicking the same card twice cancels the pending connection', () => {
     initStore(sampleClues);
     render(<EvidenceBoard onClose={() => {}} />);
