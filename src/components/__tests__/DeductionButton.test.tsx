@@ -18,39 +18,49 @@ function initInvestigator() {
       composure: 10, vitality: 10,
     },
     clues: {
-      a: { id: 'a', type: 'physical', title: 'A', description: '', sceneSource: 's', tags: [], status: 'connected', isRevealed: true },
-      b: { id: 'b', type: 'physical', title: 'B', description: '', sceneSource: 's', tags: [], status: 'connected', isRevealed: true },
+      a: { id: 'a', type: 'physical', title: 'A', description: '', sceneSource: 's', connectsTo: [], tags: [], status: 'examined', isRevealed: true },
+      b: { id: 'b', type: 'physical', title: 'B', description: '', sceneSource: 's', connectsTo: [], tags: [], status: 'examined', isRevealed: true },
     },
     deductions: {}, caseData: null,
-  } as any);
+  } as never);
 }
 
 beforeEach(() => { vi.clearAllMocks(); initInvestigator(); });
 
-describe('DeductionButton (Phase 2a)', () => {
+describe('DeductionButton (Phase 2b — roll only)', () => {
   it('renders null below two connected clues', () => {
     const { container } = render(<DeductionButton connectedClueIds={['a']} onResult={vi.fn()} />);
     expect(container.firstChild).toBeNull();
   });
 
-  it('threads the distinct roll tier through onResult and renders no aria-live outcome node', async () => {
-    // A critical roll (tier !== result) proves the tier is threaded, not echoed.
+  it('rolls and reports only the tier — forms nothing, writes no clue status', async () => {
     const { performCheck } = await import('../../engine/diceEngine');
-    (performCheck as any).mockReturnValue({ roll: 20, modifier: 0, total: 20, dc: 14, tier: 'critical' });
-    const onResult = vi.fn();
-    const { container } = render(<DeductionButton connectedClueIds={['a', 'b']} onResult={onResult} />);
-    fireEvent.click(screen.getByRole('button', { name: /Attempt Deduction/i }));
-    expect(onResult).toHaveBeenCalledTimes(1);
-    expect(onResult).toHaveBeenCalledWith('success', 'critical');
-    expect(container.querySelector('[aria-live]')).toBeNull();
-  });
-
-  it('reports failure with the failure tier', async () => {
-    const { performCheck } = await import('../../engine/diceEngine');
-    (performCheck as any).mockReturnValue({ roll: 3, modifier: 0, total: 3, dc: 14, tier: 'failure' });
+    (performCheck as ReturnType<typeof vi.fn>).mockReturnValue({ roll: 3, modifier: 0, total: 3, dc: 14, tier: 'failure' });
     const onResult = vi.fn();
     render(<DeductionButton connectedClueIds={['a', 'b']} onResult={onResult} />);
     fireEvent.click(screen.getByRole('button', { name: /Attempt Deduction/i }));
-    expect(onResult).toHaveBeenCalledWith('failure', 'failure');
+    expect(onResult).toHaveBeenCalledTimes(1);
+    expect(onResult).toHaveBeenCalledWith('failure'); // tier only, no result arg
+    expect(useStore.getState().deductions).toEqual({}); // button forms nothing now
+    expect(useStore.getState().clues.a.status).toBe('examined'); // no status writes
+  });
+
+  it('threads the raw critical tier through onResult', async () => {
+    const { performCheck } = await import('../../engine/diceEngine');
+    (performCheck as ReturnType<typeof vi.fn>).mockReturnValue({ roll: 20, modifier: 0, total: 20, dc: 14, tier: 'critical' });
+    const onResult = vi.fn();
+    render(<DeductionButton connectedClueIds={['a', 'b']} onResult={onResult} />);
+    fireEvent.click(screen.getByRole('button', { name: /Attempt Deduction/i }));
+    expect(onResult).toHaveBeenCalledWith('critical');
+  });
+
+  it('does not stay locked after an attempt (Major 5) — the button re-enables', async () => {
+    const { performCheck } = await import('../../engine/diceEngine');
+    (performCheck as ReturnType<typeof vi.fn>).mockReturnValue({ roll: 10, modifier: 0, total: 10, dc: 14, tier: 'success' });
+    render(<DeductionButton connectedClueIds={['a', 'b']} onResult={vi.fn()} />);
+    const btn = screen.getByRole('button', { name: /Attempt Deduction/i });
+    fireEvent.click(btn);
+    // Still labelled "Attempt Deduction" and enabled — no sticky 'Deduction Locked'.
+    expect(screen.getByRole('button', { name: /Attempt Deduction/i })).not.toBeDisabled();
   });
 });

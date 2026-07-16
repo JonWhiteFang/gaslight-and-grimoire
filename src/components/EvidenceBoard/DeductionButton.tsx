@@ -1,71 +1,52 @@
 /**
- * DeductionButton — triggers a Reason Faculty_Check to form a Deduction.
+ * DeductionButton — rolls a Reason Faculty_Check for an attempted deduction.
+ *
+ * Phase 2b: the button NO LONGER forms deductions or writes clue status. It only
+ * rolls the d20 and reports the raw tier via `onResult(tier)`; the board runs the
+ * correctness oracle and owns all formation, status changes, and the outcome
+ * banner (enacts ADR-0012 — correctness gates formation, the roll only flavours
+ * it). The button carries no terminal phase, so a second attempt on a fresh
+ * connection set is never blocked (Major 5).
  */
-import { useState, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { m } from 'framer-motion';
 import { performCheck } from '../../engine/diceEngine';
-import { useStore, useInvestigator, useSettings } from '../../store';
-import { buildDeduction, buildDeductionFromRecipe, matchDeduction } from '../../engine/buildDeduction';
+import { useInvestigator, useSettings } from '../../store';
 import type { OutcomeTier } from '../../types';
 
 interface DeductionButtonProps {
   connectedClueIds: string[];
-  /** Called after an attempt with the outcome and the roll tier so the board can
-   *  render + announce the message. `tier` is the raw performCheck tier. */
-  onResult: (result: 'success' | 'failure', tier: OutcomeTier) => void;
+  /** Called after the roll with the raw performCheck tier; the board decides the
+   *  outcome from the oracle, not from this tier. */
+  onResult: (tier: OutcomeTier) => void;
 }
 
-type Phase = 'idle' | 'rolling' | 'success' | 'failure';
-
 const DEDUCTION_DC = 14;
-
-// Stable empty-array reference for the recipes selector. Returning a fresh `[]`
-// from a Zustand selector re-triggers a render every time (v5 uses strict
-// Object.is snapshot caching), which loops under React 19 — so the fallback
-// must be a single shared reference, not a new literal per render.
-const NO_RECIPES: never[] = [];
 
 export function DeductionButton({ connectedClueIds, onResult }: DeductionButtonProps) {
   const investigator = useInvestigator();
   const reducedMotion = useSettings().reducedMotion;
-  const clues = useStore((s) => s.clues);
-  const addDeduction = useStore((s) => s.addDeduction);
-  const recipes = useStore((s) => s.caseData?.recipes ?? NO_RECIPES);
-  const updateClueStatus = useStore((s) => s.updateClueStatus);
 
-  const [phase, setPhase] = useState<Phase>('idle');
-  const idsRef = useRef(connectedClueIds);
-  idsRef.current = connectedClueIds;
+  // Only a synchronous guard against a double-click mid-roll — NOT a terminal
+  // phase. The board-owned banner carries the outcome; the button re-enables as
+  // soon as the roll returns so a new connection set can be attempted (Major 5).
+  const [rolling, setRolling] = useState(false);
+
+  // Reset the transient guard whenever the connection set changes, so a fresh
+  // set always presents an enabled button.
+  const idsSignature = connectedClueIds.join('|');
+  useEffect(() => {
+    setRolling(false);
+  }, [idsSignature]);
 
   if (connectedClueIds.length < 2) return null;
 
   function handleAttempt() {
-    if (phase === 'rolling') return;
-    setPhase('rolling');
-
+    if (rolling) return;
+    setRolling(true);
     const result = performCheck('reason', investigator, DEDUCTION_DC, false, false);
-
-    if (result.tier === 'success' || result.tier === 'critical') {
-      // Prefer a named key-deduction recipe (stored under its stable authored id
-      // so hasDeduction gates resolve); otherwise fall back to a generic deduction.
-      const recipe = matchDeduction(connectedClueIds, recipes);
-      const deduction = recipe
-        ? buildDeductionFromRecipe(recipe, connectedClueIds)
-        : buildDeduction(connectedClueIds, clues);
-      addDeduction(deduction);
-      connectedClueIds.forEach((id) => updateClueStatus(id, 'deduced'));
-      setPhase('success');
-      onResult('success', result.tier);
-    } else {
-      // Failure or partial — mark contested, reset to examined after 2s
-      connectedClueIds.forEach((id) => updateClueStatus(id, 'contested'));
-      setPhase('failure');
-      onResult('failure', result.tier);
-      setTimeout(() => {
-        idsRef.current.forEach((id) => updateClueStatus(id, 'examined'));
-        setPhase('idle');
-      }, 2000);
-    }
+    onResult(result.tier);
+    setRolling(false);
   }
 
   return (
@@ -73,26 +54,16 @@ export function DeductionButton({ connectedClueIds, onResult }: DeductionButtonP
       <m.button
         type="button"
         onClick={handleAttempt}
-        disabled={phase === 'rolling' || phase === 'success'}
+        disabled={rolling}
         aria-label="Attempt Deduction — perform a Reason check to connect these clues"
         whileTap={reducedMotion ? undefined : { scale: 0.96 }}
         className={[
           'px-5 py-2.5 rounded-lg font-semibold text-sm tracking-wide',
           'border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white',
-          phase === 'success'
-            ? 'bg-green-800 border-green-600 text-green-200 cursor-default'
-            : phase === 'failure'
-              ? 'bg-red-900 border-red-700 text-red-200 cursor-default'
-              : 'bg-amber-800 border-amber-600 text-amber-100 hover:bg-amber-700 cursor-pointer',
+          'bg-amber-800 border-amber-600 text-amber-100 hover:bg-amber-700 cursor-pointer',
         ].join(' ')}
       >
-        {phase === 'rolling'
-          ? 'Rolling…'
-          : phase === 'success'
-            ? '🔒 Deduction Locked'
-            : phase === 'failure'
-              ? '🔴 Attempt Failed'
-              : '🧠 Attempt Deduction'}
+        {rolling ? 'Rolling…' : '🧠 Attempt Deduction'}
       </m.button>
     </div>
   );

@@ -6,7 +6,9 @@ import { useClues, useDeductions, useConnections, useSettings, useStore } from '
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { trackActivity } from '../../engine/hintEngine';
 import { announce } from '../../announcer';
-import type { OutcomeTier } from '../../types';
+import { classifyBoard } from '../../engine/deductionOracle';
+import { buildDeduction, buildDeductionFromRecipe } from '../../engine/buildDeduction';
+import type { DeductionCorrectness, OutcomeTier } from '../../types';
 import { ClueCard } from './ClueCard';
 import { ProgressSummary } from './ProgressSummary';
 import { ConnectionThread, type Connection, type ThreadPoint } from './ConnectionThread';
@@ -16,11 +18,16 @@ export interface EvidenceBoardProps {
   onClose: () => void;
 }
 
+// Stable empty-array reference for the recipes selector — a fresh `[]` from a
+// Zustand selector re-renders every store update (strict Object.is caching).
+const NO_RECIPES: never[] = [];
+
 const DEDUCTION_MESSAGES = {
   criticalSuccess: 'The connection holds — a sharp, decisive insight.',
-  success: 'The connection holds.',
+  correct: 'The connection holds.',
+  false: 'A connection forms — but an uneasy, questionable one.',
   partial: "Some of these belong together, but the reasoning won't quite hold.",
-  failure: "These clues don't connect — not like this.",
+  incorrect: "These clues don't connect — not like this.",
 } as const;
 
 interface OutcomeBanner {
@@ -28,22 +35,54 @@ interface OutcomeBanner {
   tone: 'green' | 'amber' | 'red';
 }
 
+/** Better-of ordering for aggregating a multi-component attempt's correctness. */
+const CORRECTNESS_RANK: Record<DeductionCorrectness, number> = {
+  correct: 3,
+  false: 2,
+  partial: 1,
+  incorrect: 0,
+};
+
+/** Picks the better of two correctness values (correct > false > partial > incorrect). */
+function betterCorrectness(a: DeductionCorrectness, b: DeductionCorrectness): DeductionCorrectness {
+  return CORRECTNESS_RANK[a] >= CORRECTNESS_RANK[b] ? a : b;
+}
+
 /**
- * Maps a deduction outcome to its banner message + tone in one place, so the
- * two can never desync. Formation is decided in DeductionButton; this only
- * frames the already-decided result (success/failure) by roll tier.
+ * Maps the aggregate oracle correctness (+ roll tier for flavour) to the banner
+ * message + tone in one place. The roll only sharpens the copy of a `correct`
+ * best — it never changes the outcome (enacts ADR-0012). A `count > 1` result
+ * appends how many deductions formed.
  */
-function outcomeToBanner(result: 'success' | 'failure', tier: OutcomeTier): OutcomeBanner {
-  if (result === 'success') {
-    return {
-      message: tier === 'critical' ? DEDUCTION_MESSAGES.criticalSuccess : DEDUCTION_MESSAGES.success,
-      tone: 'green',
-    };
+function correctnessToBanner(
+  best: DeductionCorrectness,
+  tier: OutcomeTier,
+  formedCount: number,
+): OutcomeBanner {
+  let message: string;
+  let tone: OutcomeBanner['tone'];
+  switch (best) {
+    case 'correct':
+      message = tier === 'critical' ? DEDUCTION_MESSAGES.criticalSuccess : DEDUCTION_MESSAGES.correct;
+      tone = 'green';
+      break;
+    case 'false':
+      message = DEDUCTION_MESSAGES.false;
+      tone = 'amber';
+      break;
+    case 'partial':
+      message = DEDUCTION_MESSAGES.partial;
+      tone = 'amber';
+      break;
+    default:
+      message = DEDUCTION_MESSAGES.incorrect;
+      tone = 'red';
+      break;
   }
-  if (tier === 'partial') {
-    return { message: DEDUCTION_MESSAGES.partial, tone: 'amber' };
+  if (formedCount > 1) {
+    message = `${message} (${formedCount} deductions formed.)`;
   }
-  return { message: DEDUCTION_MESSAGES.failure, tone: 'red' };
+  return { message, tone };
 }
 
 /** Returns the centre point of a DOM element relative to a container. */
@@ -61,9 +100,12 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
   const deductions = useDeductions();
   const storeConnections = useConnections();
   const reducedMotion = useSettings().reducedMotion;
-  const updateClueStatus = useStore((s) => s.updateClueStatus);
   const addConnection = useStore((s) => s.addConnection);
   const clearConnections = useStore((s) => s.clearConnections);
+  const addDeduction = useStore((s) => s.addDeduction);
+  const markCluesDeduced = useStore((s) => s.markCluesDeduced);
+  const contestClues = useStore((s) => s.contestClues);
+  const recipes = useStore((s) => s.caseData?.recipes ?? NO_RECIPES);
 
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
   const [slackConnections, setSlackConnections] = useState<Connection[]>([]);
@@ -190,13 +232,14 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
         setConnectingFrom(null);
         return;
       }
+      // Phase 2b: only record the connection. The connected cue is DERIVED from
+      // membership (ClueCard isConnected) — writing a 'connected' status would
+      // overwrite a clue's semantic status (N1). No updateClueStatus here.
       addConnection(connectingFrom, clueId);
-      updateClueStatus(connectingFrom, 'connected');
-      updateClueStatus(clueId, 'connected');
       trackActivity({ type: 'connectionAttempt' });
       setConnectingFrom(null);
     },
-    [connectingFrom, addConnection, updateClueStatus],
+    [connectingFrom, addConnection],
   );
 
   // Ghost thread source point
@@ -218,24 +261,68 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
     return !!target && src.tags.some((t) => target.tags.includes(t));
   }
 
-  // Deduction result handler — formation happens in DeductionButton; the board
-  // owns the transient outcome banner (survives clearConnections) + the single
-  // screen-reader announcement. This does NOT change what forms a deduction
-  // (still the DC-14 Reason roll); it only surfaces the existing outcome legibly.
-  function handleDeductionResult(result: 'success' | 'failure', tier: OutcomeTier) {
-    const banner = outcomeToBanner(result, tier);
-
+  // Deduction attempt handler (enacts ADR-0012). The button only rolls and hands
+  // up the raw `tier`; the board runs the correctness ORACLE and forms every
+  // qualifying deduction regardless of the roll. Correctness gates formation;
+  // the roll only sharpens the copy of a `correct` result. The board owns the
+  // transient banner (survives clearConnections) + the single announce().
+  function showBanner(best: DeductionCorrectness, tier: OutcomeTier, formedCount: number) {
+    const banner = correctnessToBanner(best, tier, formedCount);
     setOutcomeBanner(banner);
     announce(banner.message);
     if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
     bannerTimerRef.current = setTimeout(() => setOutcomeBanner(null), 2500);
+  }
 
-    if (result === 'failure') {
-      setSlackConnections(
-        connections.map((c) => ({ ...c, state: 'slack' as const })),
-      );
-      clearConnections();
-      setTimeout(() => setSlackConnections([]), 1400);
+  function slackAndClear() {
+    setSlackConnections(connections.map((c) => ({ ...c, state: 'slack' as const })));
+    clearConnections();
+    setTimeout(() => setSlackConnections([]), 1400);
+  }
+
+  function handleDeductionAttempt(tier: OutcomeTier) {
+    const components = classifyBoard(storeConnections, clues, recipes);
+
+    // Minor 5: an attempt with no classifiable component (every edge stale/
+    // malformed) → a single incorrect outcome. Never a silent no-op.
+    if (components.length === 0) {
+      showBanner('incorrect', tier, 0);
+      slackAndClear();
+      return;
+    }
+
+    let formedCount = 0;
+    let best: DeductionCorrectness = 'incorrect';
+    let anyFailed = false;
+    for (const comp of components) {
+      if (comp.correctness === 'correct' || comp.correctness === 'false') {
+        if (comp.recipes.length > 0) {
+          // Blocker 1: form EVERY matched recipe, not just one.
+          for (const r of comp.recipes) {
+            addDeduction(buildDeductionFromRecipe(r, comp.clueIds));
+            formedCount += 1;
+          }
+        } else {
+          addDeduction(buildDeduction(comp.clueIds, clues));
+          formedCount += 1;
+        }
+        // Atomic success: invalidates any pending contested token for these clues
+        // AND sets 'deduced' in one set — a stale revert from an earlier failed
+        // attempt can't clobber it (Task 4 markCluesDeduced).
+        markCluesDeduced(comp.clueIds);
+      } else {
+        // contestClues captures each clue's baseline prior itself (carry-forward safe).
+        contestClues(comp.clueIds);
+        anyFailed = true;
+      }
+      best = betterCorrectness(best, comp.correctness);
+    }
+
+    showBanner(best, tier, formedCount);
+    // A partial/incorrect component slack-animates on the way out; otherwise a
+    // clean clear. Either way connections are cleared after an attempt (as today).
+    if (anyFailed) {
+      slackAndClear();
     } else {
       clearConnections();
     }
@@ -261,7 +348,7 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
           <div className="flex items-center gap-4">
             <DeductionButton
               connectedClueIds={connectedIds}
-              onResult={handleDeductionResult}
+              onResult={handleDeductionAttempt}
             />
             <button
               type="button"
@@ -323,6 +410,7 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
                     onInitiateConnection={handleInitiateConnection}
                     isConnecting={connectingFrom === clue.id}
                     isBrightened={shouldBrighten(clue.id)}
+                    isConnected={connectedIds.includes(clue.id)}
                   />
                 </div>
               ))}
