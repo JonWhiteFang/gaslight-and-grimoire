@@ -215,6 +215,35 @@ describe('App — title-screen background is inert while Settings is open (Phase
   });
 });
 
+// Task 9b: focus must RETURN to the Settings trigger after Settings closes, not
+// be dumped on <body>. In production an `inert` ancestor blurs the invoker to
+// <body> BEFORE the focus trap mounts, so a mount-time activeElement capture
+// restored to <body> (WCAG 2.4.3 violation). App now captures the invoker at
+// open-time and threads it to the trap via restoreFocusTo. jsdom does NOT
+// implement inert's auto-blur, so this guards the WIRING (that App captures +
+// passes the real invoker and focus lands back on it), which is the honest
+// production path the standalone-overlay tests can't exercise.
+describe('App — Settings restores focus to its trigger on close (Task 9b)', () => {
+  afterEach(() => { vi.unstubAllGlobals(); vi.stubGlobal('localStorage', makeLocalStorageMock()); });
+
+  it('returns focus to the title-screen Settings button after closing Settings', async () => {
+    render(<App />);
+    const settingsBtn = screen.getByRole('button', { name: /settings/i });
+    settingsBtn.focus();
+    expect(document.activeElement).toBe(settingsBtn);
+
+    fireEvent.click(settingsBtn);
+    const closeBtn = await screen.findByRole('button', { name: /close settings/i });
+    fireEvent.click(closeBtn);
+
+    // After close, focus is restored to the invoking Settings button — NOT body.
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /settings/i })).toBe(document.activeElement);
+    });
+    expect(document.activeElement).not.toBe(document.body);
+  });
+});
+
 // #57: the loading fallbacks are visual-only (animate-pulse text). Screen-reader
 // users get no feedback during async content/overlay loads. Both must be a
 // polite live status region.

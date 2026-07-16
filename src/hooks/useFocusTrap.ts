@@ -15,15 +15,19 @@ import { useEffect, useRef } from 'react';
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-export function useFocusTrap<T extends HTMLElement>() {
+export function useFocusTrap<T extends HTMLElement>(options?: { restoreTo?: HTMLElement | null }) {
   const containerRef = useRef<T>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Remember what had focus so we can restore it on close.
-    const previouslyFocused = document.activeElement as HTMLElement | null;
+    // Remember what to restore focus to on close. Prefer the caller-supplied
+    // target (captured at OPEN time, before an `inert` ancestor blurs the
+    // invoker to <body>); fall back to whatever had focus at mount otherwise.
+    // Captured into this effect's closure so the `[]` deps stay honest — the
+    // value is stable for the overlay's lifetime, so no re-run is needed.
+    const previouslyFocused = (options?.restoreTo ?? document.activeElement) as HTMLElement | null;
 
     function focusables(): HTMLElement[] {
       return Array.from(container!.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
@@ -70,6 +74,10 @@ export function useFocusTrap<T extends HTMLElement>() {
         previouslyFocused.focus();
       }
     };
+    // `restoreTo` is intentionally NOT a dependency: it is captured once at open
+    // time (stable for the overlay's lifetime) and adding it would re-run the
+    // whole trap — re-stealing focus mid-interaction.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return containerRef;

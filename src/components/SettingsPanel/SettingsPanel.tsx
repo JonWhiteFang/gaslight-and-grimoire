@@ -14,12 +14,13 @@ import type { GameSettings } from '../../types';
 
 interface SettingsPanelProps {
   onClose: () => void;
+  restoreFocusTo?: HTMLElement | null;
 }
 
-export function SettingsPanel({ onClose }: SettingsPanelProps) {
+export function SettingsPanel({ onClose, restoreFocusTo }: SettingsPanelProps) {
   const settings = useSettings();
   const { updateSettings } = useMetaActions();
-  const panelRef = useFocusTrap<HTMLDivElement>();
+  const panelRef = useFocusTrap<HTMLDivElement>({ restoreTo: restoreFocusTo });
 
   // Close on Escape. useFocusTrap owns focus-in, Tab-wrap, and focus-restore;
   // it does not own Escape, so keep this handler. Listen on `window` to match

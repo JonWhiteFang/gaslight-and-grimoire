@@ -59,4 +59,29 @@ describe('useFocusTrap', () => {
     unmount();
     expect(document.activeElement).toBe(trigger);
   });
+
+  // Task 9b: when an `inert` ancestor blurs the invoker to <body> BEFORE the
+  // trap mounts, the mount-time document.activeElement capture is <body>. The
+  // caller instead captures the real invoker at open-time and passes it as
+  // `restoreTo`; the trap must restore to THAT, not to whatever had focus at mount.
+  it('restores to the explicit restoreTo target, not document.activeElement at mount', () => {
+    render(<button type="button" data-testid="real-invoker">Invoker</button>);
+    const invoker = screen.getByTestId('real-invoker');
+    // Simulate the invoker being blurred (as inert does) BEFORE the trap mounts:
+    // pass it as restoreTo while focus is actually on body.
+    (document.activeElement as HTMLElement)?.blur?.();
+    expect(document.activeElement).toBe(document.body);
+
+    const RestoreDialog = () => {
+      const ref = useFocusTrap<HTMLDivElement>({ restoreTo: invoker });
+      return (
+        <div ref={ref} role="dialog">
+          <button type="button">Only</button>
+        </div>
+      );
+    };
+    const { unmount } = render(<RestoreDialog />);
+    unmount();
+    expect(document.activeElement).toBe(invoker);
+  });
 });
