@@ -69,7 +69,7 @@ export function CaseCompletion({ facultyBonusGranted, vignettesUnlocked, endingN
         <button
           type="button"
           onClick={onContinue}
-          className="px-8 py-3 bg-amber-700 hover:bg-amber-600 text-amber-50 font-serif text-lg rounded border border-amber-500 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400"
+          className="px-8 py-3 bg-amber-700 hover:bg-amber-600 text-amber-50 font-serif text-lg rounded border border-amber-500 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
         >
           Return to London
         </button>

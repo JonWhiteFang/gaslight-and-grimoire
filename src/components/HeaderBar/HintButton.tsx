@@ -102,7 +102,7 @@ export function HintButton({ gameState }: HintButtonProps) {
                 className="
                   shrink-0 w-5 h-5 flex items-center justify-center
                   text-stone-500 hover:text-stone-300
-                  focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded
                 "
               >
                 ✕

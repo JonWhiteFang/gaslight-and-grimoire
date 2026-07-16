@@ -41,7 +41,7 @@ export function InvestigationHalted({ reason, onReturn }: InvestigationHaltedPro
         <button
           type="button"
           onClick={onReturn}
-          className="px-8 py-3 bg-stone-800 hover:bg-stone-700 text-gaslight-fog font-serif text-lg rounded border border-stone-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gaslight-crimson"
+          className="px-8 py-3 bg-stone-800 hover:bg-stone-700 text-gaslight-fog font-serif text-lg rounded border border-stone-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
         >
           Return to Case List
         </button>

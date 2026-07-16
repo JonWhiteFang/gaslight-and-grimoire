@@ -54,7 +54,7 @@ export function ClueDiscoveryCard({ clue, visible = false, reducedMotion = false
                 type="button"
                 aria-label="Dismiss"
                 onClick={onDismiss}
-                className="shrink-0 text-stone-500 hover:text-stone-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded"
+                className="shrink-0 text-stone-500 hover:text-stone-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
               >
                 ✕
               </button>

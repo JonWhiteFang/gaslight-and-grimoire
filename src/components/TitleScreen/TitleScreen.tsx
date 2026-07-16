@@ -60,7 +60,7 @@ export function TitleScreen({ onNewGame, onLoadGame, onSettings, loadError, onDi
             type="button"
             onClick={onNewGame}
             aria-label="Start a new investigation"
-            className="w-full min-h-[44px] px-6 py-3 bg-amber-700 hover:bg-amber-600 active:bg-amber-800 text-amber-50 font-serif text-lg rounded border border-amber-500 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400"
+            className="w-full min-h-[44px] px-6 py-3 bg-amber-700 hover:bg-amber-600 active:bg-amber-800 text-amber-50 font-serif text-lg rounded border border-amber-500 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           >
             New Investigation
           </button>
@@ -74,7 +74,7 @@ export function TitleScreen({ onNewGame, onLoadGame, onSettings, loadError, onDi
                 ? 'Continue a saved investigation'
                 : 'No saved investigations available'
             }
-            className="w-full min-h-[44px] px-6 py-3 bg-stone-800 hover:bg-stone-700 active:bg-stone-900 text-stone-200 font-serif text-lg rounded border border-stone-600 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-400 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-stone-800"
+            className="w-full min-h-[44px] px-6 py-3 bg-stone-800 hover:bg-stone-700 active:bg-stone-900 text-stone-200 font-serif text-lg rounded border border-stone-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-stone-800"
           >
             Continue Investigation
           </button>
@@ -83,7 +83,7 @@ export function TitleScreen({ onNewGame, onLoadGame, onSettings, loadError, onDi
             type="button"
             onClick={onSettings}
             aria-label="Open settings"
-            className="w-full min-h-[44px] px-6 py-3 bg-transparent hover:bg-stone-900 active:bg-stone-950 text-stone-500 hover:text-stone-300 font-serif text-base rounded border border-stone-800 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-600"
+            className="w-full min-h-[44px] px-6 py-3 bg-transparent hover:bg-stone-900 active:bg-stone-950 text-stone-500 hover:text-stone-300 font-serif text-base rounded border border-stone-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           >
             Settings
           </button>

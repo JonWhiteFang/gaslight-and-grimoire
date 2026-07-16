@@ -681,20 +681,24 @@ git commit -m "fix(a11y): standardize ALL keyboard focus rings on focus-visible 
 
 ### Contrast findings table (fill from Step 5 with RESOLVED values)
 
+Resolved sRGB hex (oklch→sRGB via OKLab, cross-checked against the compiled `dist` `--color-*` tokens): `amber-400 = #ffb900`, `amber-300 = #ffd230`, `stone-200 = #e7e5e4`, `stone-400 = #a6a09b`, `stone-950 = #0c0a09`, `stone-900 = #1c1917`, `red-400 = #ff6467`, `white = #ffffff`. Project tokens: `gaslight-ink = #1a1a2e`, `gaslight-fog = #b8c5d0`, `gaslight-amber = #d4a853`, `gaslight-gold = #c9a84c`.
+
 | Pair | Purpose | Ratio | Threshold | Pass? | Action |
 |------|---------|:-----:|:---------:|:-----:|--------|
-| amber-400 / gaslight-ink | focus ring | _fill_ | 3:1 (1.4.11) | _fill_ | — |
-| amber-400 / stone-950 | focus ring | _fill_ | 3:1 (1.4.11) | _fill_ | — |
-| gaslight-fog / gaslight-ink | body prose | _fill_ | 4.5:1 (1.4.3) | _fill_ | — |
-| gaslight-amber / gaslight-ink | accent (heading/label) | _fill_ | 4.5:1 (1.4.3) | _fill_ | document if fail |
-| gaslight-gold / gaslight-ink | accent | _fill_ | 4.5:1 (1.4.3) | _fill_ | document if fail |
-| amber-300 / gaslight-ink | heading/accent | _fill_ | 4.5:1 (1.4.3) | _fill_ | — |
-| stone-200 / gaslight-ink | body text | _fill_ | 4.5:1 (1.4.3) | _fill_ | — |
-| stone-400 / gaslight-ink | muted text | _fill_ | 4.5:1 (1.4.3) | _fill_ | document if fail |
-| red-400 / stone-900 | destructive confirm ring | _fill_ | 3:1 (1.4.11) | _fill_ | retained exception — justify |
-| white / gaslight-amber | skip-link ring on amber bg | _fill_ | 3:1 (1.4.11) | _fill_ | retained exception — justify |
+| amber-400 / gaslight-ink | focus ring | 9.90 | 3:1 (1.4.11) | ✅ PASS | — |
+| amber-400 / stone-950 | focus ring | 11.47 | 3:1 (1.4.11) | ✅ PASS | — |
+| gaslight-fog / gaslight-ink | body prose | 9.69 | 4.5:1 (1.4.3) | ✅ PASS | — |
+| gaslight-amber / gaslight-ink | accent (heading/label) | 7.74 | 4.5:1 (1.4.3) | ✅ PASS | — |
+| gaslight-gold / gaslight-ink | accent | 7.46 | 4.5:1 (1.4.3) | ✅ PASS | — |
+| amber-300 / gaslight-ink | heading/accent | 11.79 | 4.5:1 (1.4.3) | ✅ PASS | — |
+| stone-200 / gaslight-ink | body text | 13.59 | 4.5:1 (1.4.3) | ✅ PASS | — |
+| stone-400 / gaslight-ink | muted text | 6.60 | 4.5:1 (1.4.3) | ✅ PASS | — |
+| red-400 / stone-900 | destructive confirm ring | 5.92 | 3:1 (1.4.11) | ✅ PASS | retained exception — red is semantic for destructive; ratio clears 3:1 comfortably |
+| white / gaslight-amber | skip-link ring on amber bg | 2.20 | 3:1 (1.4.11) | ⚠️ FAIL vs amber bg | retained exception — see note below |
 
-Fix clear failures; **document** any marginal residual and justify each retained exception's ratio here rather than leave it silent.
+**Standardized amber-400 focus ring:** every migrated control uses `focus-visible:ring-2 focus-visible:ring-amber-400` (`#ffb900`) on a dark ink/stone surface — 9.9–11.5:1, far above the 3:1 non-text-contrast floor (1.4.11), so the ring itself is never the weak link.
+
+**Documented residual — skip-link white ring:** the white (`#ffffff`) ring on the skip-link's `gaslight-amber` (`#d4a853`) focus background is only **2.20:1**, below the 3:1 non-text floor when measured *against the button's own amber fill*. This is a **retained exception**, justified because (a) the ring's outer edge sits against the near-black page background (`stone-950`, white/stone-950 ≈ 20:1), where it is extremely legible, and (b) the skip-link needs bare `focus:` (not `focus-visible:`) so it appears on programmatic focus after activation. The ring remains clearly perceivable in practice; flagged here rather than hidden. (Ratios computed with the WCAG relative-luminance helper from resolved hex; jsdom cannot compute contrast, so this is confirmed live in Task 8.)
 
 ---
 

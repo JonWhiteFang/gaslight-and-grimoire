@@ -73,7 +73,7 @@ export function GameContent({ onCompleteCase, onHalt, reviewSceneId, onDismissRe
             <button
               type="button"
               onClick={onDismissReview}
-              className="self-center px-6 py-2 bg-amber-800 hover:bg-amber-700 text-amber-100 font-serif rounded border border-amber-600 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="self-center px-6 py-2 bg-amber-800 hover:bg-amber-700 text-amber-100 font-serif rounded border border-amber-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             >
               Return to present
             </button>
@@ -99,7 +99,7 @@ export function GameContent({ onCompleteCase, onHalt, reviewSceneId, onDismissRe
             <button
               type="button"
               onClick={onCompleteCase}
-              className="px-8 py-3 bg-amber-700 hover:bg-amber-600 text-amber-50 font-serif text-lg rounded border border-amber-500 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="px-8 py-3 bg-amber-700 hover:bg-amber-600 text-amber-50 font-serif text-lg rounded border border-amber-500 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             >
               Case Complete
             </button>
