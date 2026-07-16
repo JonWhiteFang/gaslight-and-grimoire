@@ -72,6 +72,13 @@ export function isValidGameState(state: unknown): state is GameState {
   for (const key of ['clues', 'deductions', 'npcs', 'flags', 'factionReputation'] as const) {
     if (!isPlainObject(state[key])) return false;
   }
+  // Entity-record VALUES must themselves be objects: a `clues: { bad: null }` record
+  // is structurally invalid and would break rendering (and any status traversal).
+  for (const key of ['clues', 'deductions', 'npcs'] as const) {
+    for (const value of Object.values(state[key] as Record<string, unknown>)) {
+      if (!isPlainObject(value)) return false;
+    }
+  }
   if (!Array.isArray(state.sceneHistory)) return false;
   if (!isPlainObject(state.settings)) return false;
 
@@ -136,7 +143,16 @@ export const SaveManager = {
     // hand-edited) would otherwise crash `migrate`'s `...state` spread (F-036).
     if (!isPlainObject(parsed) || !isPlainObject(parsed.state)) return null;
 
-    const migrated = SaveManager.migrate(parsed as unknown as SaveFile);
+    // Migration walks clue/deduction VALUES (Phase 2b status hygiene); a malformed
+    // entry (e.g. `clues: { bad: null }`) that slips past the envelope guard must
+    // surface as a clean null, not an escaping TypeError, so the load UI shows the
+    // established corrupt-save failure rather than a rejected action.
+    let migrated: SaveFile;
+    try {
+      migrated = SaveManager.migrate(parsed as unknown as SaveFile);
+    } catch {
+      return null;
+    }
     // Reject a structurally-invalid save rather than committing garbage to the
     // store (F-036). Migration backfills optional fields; this checks the
     // required ones survived.
@@ -192,8 +208,11 @@ export const SaveManager = {
       let touched = false;
       const clues = { ...(sf.state.clues as Record<string, unknown>) };
       for (const [id, clue] of Object.entries(clues)) {
-        if ((clue as { status?: string }).status === 'contested') {
-          clues[id] = { ...(clue as object), status: 'examined' };
+        // Skip a non-object clue value (null / scalar) — dereferencing .status
+        // would throw; isValidGameState is left to reject the malformed record.
+        if (!isPlainObject(clue)) continue;
+        if (clue.status === 'contested') {
+          clues[id] = { ...clue, status: 'examined' };
           touched = true;
         }
       }
@@ -260,13 +279,15 @@ export const SaveManager = {
       if (isPlainObject(state.clues)) {
         const deducedClueIds = new Set<string>();
         for (const d of Object.values(state.deductions ?? {})) {
-          for (const id of (d as { clueIds?: string[] }).clueIds ?? []) deducedClueIds.add(id);
+          if (!isPlainObject(d)) continue;
+          for (const id of (d.clueIds as string[] | undefined) ?? []) deducedClueIds.add(id);
         }
         const clues = { ...(state.clues as Record<string, unknown>) };
         for (const [id, clue] of Object.entries(clues)) {
-          const c = clue as { status?: string };
-          if (c.status === 'connected') {
-            clues[id] = { ...c, status: deducedClueIds.has(id) ? 'deduced' : 'examined' };
+          // Skip a non-object clue value (see normalizeContested).
+          if (!isPlainObject(clue)) continue;
+          if (clue.status === 'connected') {
+            clues[id] = { ...clue, status: deducedClueIds.has(id) ? 'deduced' : 'examined' };
           }
         }
         state = { ...state, clues } as GameState;

@@ -51,13 +51,15 @@ function betterCorrectness(a: DeductionCorrectness, b: DeductionCorrectness): De
 /**
  * Maps the aggregate oracle correctness (+ roll tier for flavour) to the banner
  * message + tone in one place. The roll only sharpens the copy of a `correct`
- * best — it never changes the outcome (enacts ADR-0012). A `count > 1` result
- * appends how many deductions formed.
+ * best — it never changes the outcome (enacts ADR-0012). When more than one
+ * component was evaluated, the copy appends how many deductions formed (spec
+ * §Banner), so a mixed `[correct, incorrect]` attempt still reports its count.
  */
 function correctnessToBanner(
   best: DeductionCorrectness,
   tier: OutcomeTier,
   formedCount: number,
+  evaluatedCount: number,
 ): OutcomeBanner {
   let message: string;
   let tone: OutcomeBanner['tone'];
@@ -79,8 +81,9 @@ function correctnessToBanner(
       tone = 'red';
       break;
   }
-  if (formedCount > 1) {
-    message = `${message} (${formedCount} deductions formed.)`;
+  if (evaluatedCount > 1) {
+    const noun = formedCount === 1 ? 'deduction' : 'deductions';
+    message = `${message} (${formedCount} ${noun} formed.)`;
   }
   return { message, tone };
 }
@@ -266,16 +269,25 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
   // qualifying deduction regardless of the roll. Correctness gates formation;
   // the roll only sharpens the copy of a `correct` result. The board owns the
   // transient banner (survives clearConnections) + the single announce().
-  function showBanner(best: DeductionCorrectness, tier: OutcomeTier, formedCount: number) {
-    const banner = correctnessToBanner(best, tier, formedCount);
+  function showBanner(best: DeductionCorrectness, tier: OutcomeTier, formedCount: number, evaluatedCount: number) {
+    const banner = correctnessToBanner(best, tier, formedCount, evaluatedCount);
     setOutcomeBanner(banner);
     announce(banner.message);
     if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
     bannerTimerRef.current = setTimeout(() => setOutcomeBanner(null), 2500);
   }
 
-  function slackAndClear() {
-    setSlackConnections(connections.map((c) => ({ ...c, state: 'slack' as const })));
+  /**
+   * Slack-animate only the connections whose BOTH endpoints belong to a failed
+   * component (so a `correct` component's threads in a mixed attempt don't turn
+   * red), then clear every persisted connection. `failedIds === null` slacks all
+   * (the empty-classified-result path, where no component was formed).
+   */
+  function slackAndClear(failedIds: Set<string> | null) {
+    const toSlack = failedIds === null
+      ? connections
+      : connections.filter((c) => failedIds.has(c.fromId) && failedIds.has(c.toId));
+    setSlackConnections(toSlack.map((c) => ({ ...c, state: 'slack' as const })));
     clearConnections();
     setTimeout(() => setSlackConnections([]), 1400);
   }
@@ -286,14 +298,14 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
     // Minor 5: an attempt with no classifiable component (every edge stale/
     // malformed) → a single incorrect outcome. Never a silent no-op.
     if (components.length === 0) {
-      showBanner('incorrect', tier, 0);
-      slackAndClear();
+      showBanner('incorrect', tier, 0, 0);
+      slackAndClear(null);
       return;
     }
 
     let formedCount = 0;
     let best: DeductionCorrectness = 'incorrect';
-    let anyFailed = false;
+    const failedIds = new Set<string>();
     for (const comp of components) {
       if (comp.correctness === 'correct' || comp.correctness === 'false') {
         // Mark 'deduced' ONLY the clues that are actually members of a formed
@@ -323,16 +335,17 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
       } else {
         // contestClues captures each clue's baseline prior itself (carry-forward safe).
         contestClues(comp.clueIds);
-        anyFailed = true;
+        for (const id of comp.clueIds) failedIds.add(id);
       }
       best = betterCorrectness(best, comp.correctness);
     }
 
-    showBanner(best, tier, formedCount);
-    // A partial/incorrect component slack-animates on the way out; otherwise a
-    // clean clear. Either way connections are cleared after an attempt (as today).
-    if (anyFailed) {
-      slackAndClear();
+    showBanner(best, tier, formedCount, components.length);
+    // A partial/incorrect component slack-animates its own threads on the way out
+    // (not a sibling correct component's); a clean clear when nothing failed.
+    // Either way every persisted connection is cleared after the attempt.
+    if (failedIds.size > 0) {
+      slackAndClear(failedIds);
     } else {
       clearConnections();
     }

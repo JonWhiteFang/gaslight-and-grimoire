@@ -180,6 +180,33 @@ describe('SaveManager.migrate — v4 → v5 (clue status normalization)', () => 
   it('stamps the migrated file at the current version', () => {
     expect(SaveManager.migrate(base({}) as unknown as SaveFile).version).toBe(5);
   });
+
+  it('does not throw on a null clue value — migrate skips it (Codex Major)', () => {
+    // A hand-edited/corrupt save with a null clue value must not crash the
+    // status-hygiene traversal; migrate returns cleanly and isValidGameState
+    // (via load) rejects it downstream.
+    const sf = base({ bad: null });
+    expect(() => SaveManager.migrate(sf as unknown as SaveFile)).not.toThrow();
+  });
+
+  it('does not throw on a null clue value at CURRENT version (early-return path)', () => {
+    const sf = {
+      version: CURRENT_SAVE_VERSION, timestamp: 't',
+      state: { ...makeV1StateWithoutNewFields(), clues: { bad: null }, deductions: {}, connections: [] },
+    };
+    expect(() => SaveManager.migrate(sf as unknown as SaveFile)).not.toThrow();
+  });
+
+  it('load() returns null (not a thrown error) for a save with a null clue value', () => {
+    localStorageMock.clear();
+    const blob = {
+      version: CURRENT_SAVE_VERSION, timestamp: 't',
+      state: { ...makeV1StateWithoutNewFields(), clues: { bad: null }, deductions: {}, connections: [] },
+    };
+    localStorageMock.setItem('gg_save_nullclue', JSON.stringify(blob));
+    expect(() => SaveManager.load('nullclue')).not.toThrow();
+    expect(SaveManager.load('nullclue')).toBeNull();
+  });
 });
 
 describe('SaveManager — chained v0 → current migration (F-031)', () => {

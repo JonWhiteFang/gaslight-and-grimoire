@@ -206,6 +206,20 @@ describe('EvidenceBoard — oracle-driven formation (Phase 2b, ADR-0012)', () =>
     }
   });
 
+  it('mixed [correct, incorrect] attempt: forms the correct one, contests the incorrect one, count-bearing green banner', () => {
+    // Two disjoint components: authored a-b (correct) + unauthored x-y (incorrect).
+    const clues = { a: clue('a', { connectsTo: ['b'] }), b: clue('b'), x: clue('x'), y: clue('y') };
+    attempt('success', clues, [{ fromId: 'a', toId: 'b' }, { fromId: 'x', toId: 'y' }], []);
+    const st = useStore.getState();
+    expect(st.deductions['deduction-generic-a+b']).toBeDefined();
+    expect(st.clues.a.status).toBe('deduced');
+    expect(st.clues.x.status).toBe('contested'); // incorrect component contested
+    // Best-outcome-led green banner, count-bearing because >1 component was evaluated.
+    const banner = screen.getByText('The connection holds. (1 deduction formed.)');
+    expect(banner).toHaveAttribute('data-tone', 'green');
+    expect(announce).toHaveBeenCalledTimes(1);
+  });
+
   it('empty classified result (all edges stale) → red banner, forms nothing, clears (Minor 5)', () => {
     attempt('success', { a: clue('a'), b: clue('b') }, [{ fromId: 'a', toId: 'missing' }], []);
     const st = useStore.getState();
