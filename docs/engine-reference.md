@@ -31,11 +31,12 @@ per-function API surface.
 
 ## Determinism
 
-`rollD20`, `buildDeduction`'s id, and `hintEngine`'s dwell tracking call
-`Math.random()` / `Date.now()` directly and are not injectable; tests work
-around this. The exact call sites (`file:line`) and the "zero store imports in
-engine" verification are in the Determinism and Verification sections of
-[architecture.md](./architecture.md).
+`rollD20` and `hintEngine`'s dwell tracking call `Math.random()` / `Date.now()`
+directly and are not injectable; tests work around this. (`buildDeduction`'s id
+is now a pure function of the sorted clue set — Phase 2b removed its
+`Date.now()`/`Math.random()` call.) The exact call sites (`file:line`) and the
+"zero store imports in engine" verification are in the Determinism and
+Verification sections of [architecture.md](./architecture.md).
 
 ---
 
