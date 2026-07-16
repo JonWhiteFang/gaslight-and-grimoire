@@ -21,7 +21,7 @@ export function buildDeduction(
   const description = `${prefix}: ${formatClueList(titles)}`;
 
   return {
-    id: `deduction-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    id: `deduction-generic-${[...clueIds].sort().join('+')}`,
     clueIds,
     description,
     isRedHerring,
