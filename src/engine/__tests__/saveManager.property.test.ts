@@ -65,12 +65,15 @@ const arbClueType = fc.constantFrom(
   'redHerring' as const,
 );
 
+// 'contested' is a 2s transient that SaveManager.migrate normalizes to 'examined'
+// on every load (Phase 2b), so it is intentionally excluded here: the "migrate
+// preserves state when already current" property only holds for persistable
+// statuses. 'connected' is likewise deprecated (never written after 2b) but a v5
+// save never carries it, so it need not appear either — omit it for the same reason.
 const arbClueStatus = fc.constantFrom(
   'new' as const,
   'examined' as const,
-  'connected' as const,
   'deduced' as const,
-  'contested' as const,
   'spent' as const,
 );
 

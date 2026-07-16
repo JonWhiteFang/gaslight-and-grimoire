@@ -127,6 +127,61 @@ describe('SaveManager v4 migration — encounterState (F-105)', () => {
   });
 });
 
+describe('SaveManager.migrate — v4 → v5 (clue status normalization)', () => {
+  const base = (clues: Record<string, unknown>, deductions: Record<string, unknown> = {}) => ({
+    version: 4,
+    timestamp: 't',
+    state: { ...makeV1StateWithoutNewFields(), clues, deductions, connections: [] },
+  });
+
+  it('restores a connected clue REFERENCED by a persisted deduction to deduced', () => {
+    const sf = base(
+      { c1: { id: 'c1', status: 'connected' } },
+      { d: { id: 'd', clueIds: ['c1'], description: '', isRedHerring: false } },
+    );
+    const out = SaveManager.migrate(sf as unknown as SaveFile);
+    expect((out.state.clues as Record<string, { status: string }>).c1.status).toBe('deduced');
+  });
+
+  it('maps a connected clue NOT referenced by any deduction to examined', () => {
+    const sf = base({ c2: { id: 'c2', status: 'connected' } });
+    const out = SaveManager.migrate(sf as unknown as SaveFile);
+    expect((out.state.clues as Record<string, { status: string }>).c2.status).toBe('examined');
+  });
+
+  it('maps a persisted contested clue to examined on a v4 save', () => {
+    const sf = base({ c3: { id: 'c3', status: 'contested' } });
+    const out = SaveManager.migrate(sf as unknown as SaveFile);
+    expect((out.state.clues as Record<string, { status: string }>).c3.status).toBe('examined');
+  });
+
+  it('ALSO normalizes contested→examined on a CURRENT-version (v5) save (Codex Major 4)', () => {
+    // migrate() returns early when version === CURRENT, so contested hygiene must run
+    // on every load regardless of version — not only inside the v4→v5 step.
+    const sf = {
+      version: CURRENT_SAVE_VERSION,
+      timestamp: 't',
+      state: { ...makeV1StateWithoutNewFields(), clues: { c3: { id: 'c3', status: 'contested' } }, deductions: {}, connections: [] },
+    };
+    const out = SaveManager.migrate(sf as unknown as SaveFile);
+    expect((out.state.clues as Record<string, { status: string }>).c3.status).toBe('examined');
+  });
+
+  it('is idempotent — migrating an already-migrated file changes nothing further', () => {
+    const once = SaveManager.migrate(base(
+      { c1: { id: 'c1', status: 'connected' } },
+      { d: { id: 'd', clueIds: ['c1'], description: '', isRedHerring: false } },
+    ) as unknown as SaveFile);
+    const twice = SaveManager.migrate(once as unknown as SaveFile);
+    expect((twice.state.clues as Record<string, { status: string }>).c1.status).toBe('deduced');
+    expect(twice.version).toBe(5);
+  });
+
+  it('stamps the migrated file at the current version', () => {
+    expect(SaveManager.migrate(base({}) as unknown as SaveFile).version).toBe(5);
+  });
+});
+
 describe('SaveManager — chained v0 → current migration (F-031)', () => {
   // A v0 blob predates factionReputation, sceneHistory, connections, and
   // visitedScenes. One migrate() call must walk every step and backfill them all.

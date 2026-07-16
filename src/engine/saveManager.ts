@@ -186,8 +186,11 @@ export const SaveManager = {
     // Version-independent load hygiene: 'contested' is a 2s transient with no timer
     // after reload — normalize to 'examined' on EVERY load, including current version.
     const normalizeContested = (sf: SaveFile): SaveFile => {
+      // Leave a malformed (non-plain-object) `clues` untouched so isValidGameState
+      // can still reject it — spreading an array into {} would mask the defect (F-036).
+      if (!isPlainObject(sf.state.clues)) return sf;
       let touched = false;
-      const clues = { ...((sf.state.clues ?? {}) as Record<string, unknown>) };
+      const clues = { ...(sf.state.clues as Record<string, unknown>) };
       for (const [id, clue] of Object.entries(clues)) {
         if ((clue as { status?: string }).status === 'contested') {
           clues[id] = { ...(clue as object), status: 'examined' };
@@ -252,18 +255,22 @@ export const SaveManager = {
     // Journal. Restore: referenced by any persisted deduction → 'deduced', else
     // → 'examined'. (This recovery is v4-specific — do NOT run it on v5.)
     if (version < 5) {
-      const deducedClueIds = new Set<string>();
-      for (const d of Object.values(state.deductions ?? {})) {
-        for (const id of (d as { clueIds?: string[] }).clueIds ?? []) deducedClueIds.add(id);
-      }
-      const clues = { ...((state.clues ?? {}) as Record<string, unknown>) };
-      for (const [id, clue] of Object.entries(clues)) {
-        const c = clue as { status?: string };
-        if (c.status === 'connected') {
-          clues[id] = { ...c, status: deducedClueIds.has(id) ? 'deduced' : 'examined' };
+      // Guard a malformed `clues` (spreading an array/scalar into {} would mask a
+      // structural defect isValidGameState must catch, F-036).
+      if (isPlainObject(state.clues)) {
+        const deducedClueIds = new Set<string>();
+        for (const d of Object.values(state.deductions ?? {})) {
+          for (const id of (d as { clueIds?: string[] }).clueIds ?? []) deducedClueIds.add(id);
         }
+        const clues = { ...(state.clues as Record<string, unknown>) };
+        for (const [id, clue] of Object.entries(clues)) {
+          const c = clue as { status?: string };
+          if (c.status === 'connected') {
+            clues[id] = { ...c, status: deducedClueIds.has(id) ? 'deduced' : 'examined' };
+          }
+        }
+        state = { ...state, clues } as GameState;
       }
-      state = { ...state, clues } as GameState;
       version = 5;
     }
 
