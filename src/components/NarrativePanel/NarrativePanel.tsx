@@ -97,12 +97,13 @@ export function NarrativePanel() {
     setTimeout(() => setClueCardVisible(false), 4000);
   }
 
-  function handleCheckResult(result: { roll: number; modifier: number; total: number; tier: string }) {
+  function handleCheckResult(result: { roll: number; modifier: number; total: number; tier: string; dc?: number }) {
     setCheckResult({
       roll: result.roll,
       modifier: result.modifier,
       total: result.total,
       tier: result.tier as import('../../types').OutcomeTier,
+      dc: result.dc,
     });
   }
 

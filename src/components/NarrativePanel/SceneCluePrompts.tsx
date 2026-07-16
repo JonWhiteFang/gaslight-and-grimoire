@@ -6,6 +6,8 @@ import React, { useState, useEffect } from 'react';
 import { canDiscoverClue } from '../../engine/narrativeEngine';
 import { getCluePromptText } from '../../engine/cluePrompts';
 import { performCheck, calculateModifier, getTrainedBonus } from '../../engine/diceEngine';
+import { computeCheckOdds, describeCheckOdds } from '../../engine/checkOdds';
+import { CheckOddsTag } from '../shared';
 import type { ClueDiscovery, Clue, GameState, Investigator, Faculty } from '../../types';
 
 type ProficiencyTier = 'strong' | 'moderate' | 'weak';
@@ -34,7 +36,7 @@ export interface SceneCluePromptsProps {
   gameState: GameState;
   investigator: Investigator;
   onClueDiscovered: (clue: Clue) => void;
-  onCheckResult: (result: { roll: number; modifier: number; total: number; tier: string }) => void;
+  onCheckResult: (result: { roll: number; modifier: number; total: number; tier: string; dc?: number }) => void;
   discoverClue: (clueId: string) => void;
 }
 
@@ -79,7 +81,7 @@ export function SceneCluePrompts({
     if (!discovery.requiresFaculty) return;
     const { faculty, minimum: dc } = discovery.requiresFaculty;
     const result = performCheck(faculty, investigator, dc, false, false);
-    onCheckResult({ roll: result.roll, modifier: result.modifier, total: result.total, tier: result.tier });
+    onCheckResult({ roll: result.roll, modifier: result.modifier, total: result.total, tier: result.tier, dc });
     setClicked((s) => new Set(s).add(discovery.clueId));
 
     if (result.tier === 'failure' || result.tier === 'fumble') {
@@ -105,17 +107,32 @@ export function SceneCluePrompts({
           const mod = calculateModifier(investigator.faculties[faculty]) + getTrainedBonus(faculty, investigator.archetype);
           const tier = getProficiencyTier(mod);
           const modStr = mod >= 0 ? `+${mod}` : `${mod}`;
+          const odds = computeCheckOdds({
+            faculty,
+            investigator,
+            dc: minimum,
+            hasAdvantage: false,
+            hasDisadvantage: false,
+            // autoSucceeds is HARD false here (spec §4.2): handleCheck calls performCheck
+            // directly and does NOT honor/consume the auto-succeed ability, so an "Assured"
+            // tag would lie. Do NOT read the flag.
+            autoSucceeds: false,
+            partialCountsAsSuccess: true,
+          });
           return (
             <button
               key={d.clueId}
               type="button"
               onClick={() => handleCheck(d)}
               className="text-left pl-4 py-2 border-l-2 border-gaslight-amber/50 italic font-serif text-gaslight-fog/80 hover:text-gaslight-fog hover:border-gaslight-amber transition-colors cursor-pointer"
-              aria-label={`Examine: ${FACULTY_DISPLAY[faculty]} check, DC ${minimum}`}
+              aria-label={`Examine: ${describeCheckOdds(odds)}`}
             >
               <span>{promptText}</span>
-              <span className={`inline-flex items-center gap-1 ml-2 px-2 py-0.5 rounded border text-xs font-medium not-italic ${PROFICIENCY_STYLES[tier]}`}>
-                {FACULTY_DISPLAY[faculty]} {modStr}
+              <span className="inline-flex flex-wrap items-center gap-1 ml-2 align-middle not-italic">
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-xs font-medium not-italic ${PROFICIENCY_STYLES[tier]}`}>
+                  {FACULTY_DISPLAY[faculty]} {modStr}
+                </span>
+                <CheckOddsTag odds={odds} />
               </span>
             </button>
           );
