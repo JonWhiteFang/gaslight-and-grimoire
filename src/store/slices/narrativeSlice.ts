@@ -3,6 +3,7 @@ import type { WritableDraft } from 'immer';
 import type { GameStore } from '../types';
 import type { CaseData, EncounterState, OutcomeTier, VignetteData } from '../../types';
 import { CaseProgression, type CaseCompletionResult } from '../../engine/caseProgression';
+import { clearRevertTimers } from './evidenceSlice';
 import { loadCase, loadVignette, resolveScene, validateContent } from '../../engine/narrativeEngine';
 import { CASE_LOAD_CLEARED_FLAGS } from '../../engine/flags';
 import { generateEffectMessages } from '../../engine/effectMessages';
@@ -55,6 +56,12 @@ export function resetForNewCase(state: WritableDraft<GameStore>, data: CaseData)
   state.npcs = {};
   state.deductions = {};
   state.connections = [];
+  // Contested-revert ownership is case-scoped: clear the serialisable fields here.
+  // The module-level timer registry is cancelled by the load actions (below)
+  // BEFORE this reset runs, so no pending revert survives a case load.
+  state.contestedTokens = {};
+  state.contestedPrior = {};
+  state.attemptSeq = 0;
   state.lastCheckResult = null;
   state.encounterState = null;
 
@@ -208,6 +215,9 @@ export const createNarrativeSlice: StateCreator<
       return Object.keys(data.scenes)[0];
     })();
 
+    // Cancel any pending contested-revert timer before wiping state, so a stale
+    // timer from the previous case can't fire against a freshly loaded same-id clue.
+    clearRevertTimers();
     set((state) => {
       resetForNewCase(state, data);
     });
@@ -231,6 +241,7 @@ export const createNarrativeSlice: StateCreator<
       return Object.keys(data.scenes)[0];
     })();
 
+    clearRevertTimers();
     set((state) => {
       resetForNewCase(state, asCaseData);
     });
