@@ -32,6 +32,45 @@ vi.stubGlobal('localStorage', makeLocalStorageMock());
 beforeEach(() => localStorage.clear());
 afterEach(cleanup);
 
+// Model a real browser's `inert` behaviour, which jsdom does NOT implement: an
+// `inert` subtree cannot hold focus — the instant it becomes inert any focused
+// descendant is blurred to <body>, and focus can never re-enter it while it stays
+// inert. This matters because App's overlays are lazy: the panel (and its
+// useFocusTrap mount effect) commits AFTER the open click flush, so a one-shot
+// blur at commit gets undone by a stray refocus before the trap captures. A
+// persistent focusin guard faithfully models inert: it keeps blurring anything
+// focused inside an `[inert]` ancestor. So by the time the trap mounts, the
+// invoker is at <body> — a mount-time activeElement capture would restore <body>,
+// and ONLY App's open-time capture (restoreFocusTo) can restore the real trigger.
+// Returns a teardown fn.
+function simulateInertBlur(): () => void {
+  // (a) When a subtree becomes inert (React 19 applies `inert` via setAttribute —
+  // jsdom exposes no `inert` property), blur a focused descendant immediately.
+  // The invoker was focused BEFORE inert applied, so no focusin fires for it —
+  // this branch is what evicts it.
+  const originalSetAttribute = Element.prototype.setAttribute;
+  Element.prototype.setAttribute = function (name: string, value: string) {
+    originalSetAttribute.call(this, name, value);
+    if (name === 'inert') {
+      const active = document.activeElement as HTMLElement | null;
+      if (active && active !== document.body && this.contains(active)) active.blur();
+    }
+  };
+  // (b) And keep focus OUT of any inert subtree for as long as it stays inert: a
+  // stray refocus of the invoker (e.g. React restoring focus during the flush)
+  // is blurred straight back to <body>, so the invoker is at <body> by the time
+  // the lazy overlay's useFocusTrap mount effect runs.
+  const guard = (e: Event) => {
+    const t = e.target as HTMLElement | null;
+    if (t && t !== document.body && t.closest('[inert]')) t.blur();
+  };
+  document.addEventListener('focusin', guard, true);
+  return () => {
+    Element.prototype.setAttribute = originalSetAttribute;
+    document.removeEventListener('focusin', guard, true);
+  };
+}
+
 describe('App — ability flag mapping (F-020)', () => {
   it('maps every archetype to its ability flag', () => {
     const expected: Record<Archetype, string> = {
@@ -215,24 +254,43 @@ describe('App — title-screen background is inert while Settings is open (Phase
   });
 });
 
-// Task 9b: focus must RETURN to the Settings trigger after Settings closes, not
-// be dumped on <body>. In production an `inert` ancestor blurs the invoker to
-// <body> BEFORE the focus trap mounts, so a mount-time activeElement capture
-// restored to <body> (WCAG 2.4.3 violation). App now captures the invoker at
-// open-time and threads it to the trap via restoreFocusTo. jsdom does NOT
-// implement inert's auto-blur, so this guards the WIRING (that App captures +
-// passes the real invoker and focus lands back on it), which is the honest
-// production path the standalone-overlay tests can't exercise.
-describe('App — Settings restores focus to its trigger on close (Task 9b)', () => {
-  afterEach(() => { vi.unstubAllGlobals(); vi.stubGlobal('localStorage', makeLocalStorageMock()); });
+// Task 9b/9c: focus must RETURN to the invoking trigger after an overlay closes,
+// not be dumped on <body>. In production an `inert` ancestor blurs the invoker to
+// <body> BEFORE the focus trap mounts, so a mount-time activeElement capture would
+// restore to <body> (WCAG 2.4.3 violation). App fixes this by capturing the invoker
+// at OPEN time (in the click handler, before inert commits) and threading it to the
+// trap via restoreFocusTo.
+//
+// jsdom does NOT implement inert's auto-blur, so a naive test would false-green on
+// the mount-time fallback path (the exact pre-fix bug). To make the test REQUIRE the
+// open-time capture wiring, we SIMULATE inert by explicitly blurring the invoker
+// after the overlay opens — forcing document.activeElement to <body> while the
+// overlay is up. Only if App captured the real invoker at open time (not the
+// blurred <body>) does focus land back on the trigger on close. Removing any
+// `restoreFocusTo={invokerRef.current}` prop makes the trap fall back to the
+// now-<body> activeElement and these tests fail.
+describe('App — Settings restores focus to its trigger on close (Task 9b/9c)', () => {
+  let restoreInert: (() => void) | null = null;
+  afterEach(() => {
+    restoreInert?.(); restoreInert = null;
+    vi.unstubAllGlobals(); vi.stubGlobal('localStorage', makeLocalStorageMock());
+  });
 
-  it('returns focus to the title-screen Settings button after closing Settings', async () => {
+  it('returns focus to the title-screen Settings button after closing Settings (inert simulated)', async () => {
+    restoreInert = simulateInertBlur();
     render(<App />);
     const settingsBtn = screen.getByRole('button', { name: /settings/i });
     settingsBtn.focus();
     expect(document.activeElement).toBe(settingsBtn);
 
+    // Opening Settings marks the title region inert; simulateInertBlur blurs the
+    // invoker to <body> DURING the commit, before useFocusTrap's mount effect —
+    // modelling the real browser. useFocusTrap's mount then moves focus into the
+    // panel, so the mount-time activeElement fallback would have captured <body>
+    // (the blurred invoker), NOT the Settings button. Only App's open-time capture
+    // (restoreFocusTo) still holds the real trigger, so it alone can restore it.
     fireEvent.click(settingsBtn);
+
     const closeBtn = await screen.findByRole('button', { name: /close settings/i });
     fireEvent.click(closeBtn);
 
@@ -242,6 +300,55 @@ describe('App — Settings restores focus to its trigger on close (Task 9b)', ()
     });
     expect(document.activeElement).not.toBe(document.body);
   });
+});
+
+// Task 9c (Codex Major 1): the same open-time-capture wiring must hold for the four
+// GAME-screen overlays, each opened from a distinct HeaderBar trigger and each
+// threading its own restoreFocusTo. Table-driven over all four; each row simulates
+// inert's blur after opening and asserts focus returns to its triggering button.
+// Removing any one overlay's restoreFocusTo prop makes its row fail.
+describe('App — game-screen overlays restore focus to their trigger on close (Task 9c)', () => {
+  let restoreInert: (() => void) | null = null;
+  afterEach(() => {
+    restoreInert?.(); restoreInert = null;
+    vi.unstubAllGlobals(); vi.stubGlobal('localStorage', makeLocalStorageMock());
+  });
+
+  const overlays = [
+    { openName: /^open evidence board$/i, closeName: /^close evidence board$/i },
+    { openName: /^open case journal$/i, closeName: /^close case journal$/i },
+    { openName: /^open npc gallery$/i, closeName: /^close npc gallery$/i },
+    { openName: /^open settings$/i, closeName: /^close settings$/i },
+  ] as const;
+
+  for (const { openName, closeName } of overlays) {
+    it(`returns focus to the ${String(openName)} trigger after close (inert simulated)`, async () => {
+      stubCaseFetch();
+      render(<App />);
+      await reachGameScreen();
+      // Arm the inert-blur simulation only for the interaction (reachGameScreen
+      // itself toggles no inert regions, but keep the window tight regardless).
+      restoreInert = simulateInertBlur();
+
+      const trigger = screen.getByRole('button', { name: openName });
+      trigger.focus();
+      expect(document.activeElement).toBe(trigger);
+
+      // Opening the overlay marks the game background inert; simulateInertBlur
+      // blurs the invoker to <body> DURING commit, before the panel's focus trap
+      // mounts — so the mount-time activeElement fallback would capture <body>,
+      // not the trigger. Only App's open-time capture restores the trigger.
+      fireEvent.click(trigger);
+
+      const closeBtn = await screen.findByRole('button', { name: closeName });
+      fireEvent.click(closeBtn);
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: openName })).toBe(document.activeElement);
+      });
+      expect(document.activeElement).not.toBe(document.body);
+    });
+  }
 });
 
 // #57: the loading fallbacks are visual-only (animate-pulse text). Screen-reader

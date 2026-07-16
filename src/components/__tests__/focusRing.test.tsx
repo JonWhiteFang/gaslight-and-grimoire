@@ -40,6 +40,27 @@ function walkTsx(dir: string): string[] {
 // Single derived file list, referenced by both describes (Minor 2).
 const FILES = walkTsx(SRC_ROOT);
 
+// False-green hardening (Codex Minor 3): prove the walk actually found the tree.
+// If a bad SRC_ROOT or an over-eager exclude silently emptied FILES, every scan
+// below would vacuously pass. The repo has far more than 10 .tsx components.
+it('the src walk found the component tree (not an empty glob)', () => {
+  expect(FILES.length).toBeGreaterThan(10);
+});
+
+// Intentional non-amber focus-visible rings, documented so the inventory is AWARE
+// of them rather than silently accepting them (Codex Minor 3). These use a
+// different ring colour by design on their own surface and are NOT migrated:
+//   - CaseJournal close button: focus-visible:ring-white on the dark dialog chrome
+//     (matches the journal's white ×/hover treatment).
+//   - SceneText skip-animation link: focus-visible:ring-gaslight-amber (the brand
+//     amber token, a deliberate variant of the amber-400 utility).
+// Any NEW low-contrast (stone) focus-visible ring is still a finding; only these
+// exact colour/site pairs are allowlisted.
+const INTENTIONAL_NON_AMBER_RINGS: ReadonlyArray<{ file: string; ring: string }> = [
+  { file: 'components/CaseJournal/CaseJournal.tsx', ring: 'focus-visible:ring-white' },
+  { file: 'components/NarrativePanel/SceneText.tsx', ring: 'focus-visible:ring-gaslight-amber' },
+];
+
 afterEach(cleanup);
 
 // A bare `focus:ring-<color>` (NOT focus-visible:) on a keyboard control is a
@@ -65,9 +86,22 @@ describe('focus rings — no stray bare focus:ring anywhere under src/ (WS3)', (
 });
 
 describe('focus rings — no low-contrast stone ring remains (WS3)', () => {
-  it('no ring-stone-400 / ring-stone-600 focus ring anywhere under src/', () => {
+  it('no low-contrast stone ring under src/ on EITHER focus: or focus-visible:', () => {
+    // Broadened (Codex Minor 3): the earlier scan only caught bare `focus:` and
+    // missed a future `focus-visible:ring-stone-600`. Catch both prefixes.
     const all = FILES.map(readSrc).join('\n');
-    expect(all).not.toMatch(/focus:ring-stone-[46]00/);
+    expect(all).not.toMatch(/(?:focus|focus-visible):ring-stone-[46]00/);
+  });
+
+  it('the documented intentional non-amber focus-visible rings are still present (visible to the inventory)', () => {
+    // These are deliberately allowlisted (see INTENTIONAL_NON_AMBER_RINGS). Assert
+    // they exist so the inventory tracks them explicitly — if one is removed or
+    // moved this row fails and the allowlist must be revisited, rather than the
+    // ring silently drifting.
+    for (const { file, ring } of INTENTIONAL_NON_AMBER_RINGS) {
+      const src = readSrc(resolve(SRC_ROOT, file));
+      expect(src, `${file} should still contain ${ring}`).toContain(ring);
+    }
   });
 });
 
