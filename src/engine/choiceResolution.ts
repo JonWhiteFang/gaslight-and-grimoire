@@ -11,7 +11,7 @@ import type {
 } from '../types';
 import type { EngineActions } from './engineActions';
 import { performCheck, resolveDC } from './diceEngine';
-import { abilityAutoSucceedFlag } from './flags';
+import { abilityAutoSucceedFlag, checkAutoSucceeds } from './flags';
 import { computeAdvantage } from './advantage';
 
 // ─── Choice Processing ────────────────────────────────────────────────────────
@@ -47,7 +47,7 @@ export function resolveCheckOutcome(
 ): CheckOutcome {
   if (choice.faculty && (choice.difficulty !== undefined || choice.dynamicDifficulty)) {
     const abilityFlag = abilityAutoSucceedFlag(choice.faculty);
-    if (abilityFlag && state.flags[abilityFlag]) {
+    if (abilityFlag && checkAutoSucceeds(choice.faculty, state.flags)) {
       return {
         result: { nextSceneId: choice.outcomes['critical'], tier: 'critical' },
         consumedAbilityFlag: abilityFlag,
