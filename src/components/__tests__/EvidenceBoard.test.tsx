@@ -132,6 +132,17 @@ describe('EvidenceBoard', () => {
     const dialog = screen.getByRole('dialog');
     expect(dialog.contains(document.activeElement)).toBe(true);
   });
+
+  it('restores focus to the invoker on close (WS2)', () => {
+    initStore(sampleClues);
+    render(<button type="button" data-testid="invoker">Open board</button>);
+    const invoker = screen.getByTestId('invoker');
+    invoker.focus();
+    const { unmount } = render(<EvidenceBoard onClose={() => {}} />);
+    expect(document.activeElement).not.toBe(invoker);
+    unmount();
+    expect(document.activeElement).toBe(invoker);
+  });
 });
 
 describe('EvidenceBoard — oracle-driven formation (Phase 2b, ADR-0012)', () => {

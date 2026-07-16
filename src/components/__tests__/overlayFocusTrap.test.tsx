@@ -42,6 +42,16 @@ describe('CaseJournal — focus trap (F-007)', () => {
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(closed).toBe(true);
   });
+
+  it('restores focus to the invoker on close', () => {
+    render(<button type="button" data-testid="invoker">Open journal</button>);
+    const invoker = screen.getByTestId('invoker');
+    invoker.focus();
+    const { unmount } = render(<CaseJournal onClose={() => {}} />);
+    expect(document.activeElement).not.toBe(invoker);
+    unmount();
+    expect(document.activeElement).toBe(invoker);
+  });
 });
 
 describe('NPCGallery — focus trap (F-007)', () => {
@@ -56,5 +66,15 @@ describe('NPCGallery — focus trap (F-007)', () => {
     render(<NPCGallery onClose={() => { closed = true; }} />);
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(closed).toBe(true);
+  });
+
+  it('restores focus to the invoker on close', () => {
+    render(<button type="button" data-testid="invoker">Open gallery</button>);
+    const invoker = screen.getByTestId('invoker');
+    invoker.focus();
+    const { unmount } = render(<NPCGallery onClose={() => {}} />);
+    expect(document.activeElement).not.toBe(invoker);
+    unmount();
+    expect(document.activeElement).toBe(invoker);
   });
 });
