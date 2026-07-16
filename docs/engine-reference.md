@@ -117,9 +117,23 @@ Pure content validator shared by the runtime `validateContent` and the CLI (`scr
 
 Pure builders for `Deduction`s, plus the key-deduction recipe matcher.
 
-- `buildDeduction(clueIds: string[], clues: Record<string, Clue>): Deduction` — sets `isRedHerring: true` if any connected clue is of type `redHerring`. Builds a `description` from clue titles (`"Connection: A ↔ B"`, or `"Questionable connection: ..."` when a red herring; 3+ titles are comma-joined with a trailing "and"). Generates a unique id from `Date.now()` + `Math.random()`.
-- `matchDeduction(connectedIds: string[], recipes: KeyDeduction[]): KeyDeduction | null` — **subset** match: returns the first recipe whose `requiredClues` are all present in `connectedIds` (extra connected clues allowed), else `null`. Empty recipes or empty set → `null` (vignette-safe). Pure.
-- `buildDeductionFromRecipe(recipe: KeyDeduction, _connectedIds: string[]): Deduction` — builds a `Deduction` stored under the recipe's **stable authored id** (so `hasDeduction`/`requiresDeduction` gates resolve), with the recipe's `description`/`isRedHerring` and `clueIds` = the recipe's `requiredClues`. `DeductionButton` prefers this on a successful Reason check when a recipe matches, falling back to `buildDeduction` otherwise.
+- `buildDeduction(clueIds: string[], clues: Record<string, Clue>): Deduction` — sets `isRedHerring: true` if any connected clue is of type `redHerring`. Builds a `description` from clue titles (`"Connection: A ↔ B"`, or `"Questionable connection: ..."` when a red herring; 3+ titles are comma-joined with a trailing "and"). **The id is a canonical stable signature** `` `deduction-generic-${[...clueIds].sort().join('+')}` `` (Phase 2b, N5) — re-forming the same set upserts one deduction (`addDeduction` keys by id), so the Journal never inflates. No `Date.now()`/`Math.random()`. Safe because clue ids are validated `^[a-z0-9-]+$` (no `+`), so the signature can't collide, and the `deduction-generic-` namespace is reserved against authored recipe ids by the content validator.
+- `matchDeduction(connectedIds: string[], recipes: KeyDeduction[]): KeyDeduction | null` — **subset** match: returns the first recipe whose `requiredClues` are all present in `connectedIds` (extra connected clues allowed), else `null`. Empty recipes or empty set → `null` (vignette-safe). Pure. (Superseded on the board by `deductionOracle.classifyBoard`, which matches **all** recipes per component; retained for any single-recipe callers.)
+- `buildDeductionFromRecipe(recipe: KeyDeduction, _connectedIds: string[]): Deduction` — builds a `Deduction` stored under the recipe's **stable authored id** (so `hasDeduction`/`requiresDeduction` gates resolve), with the recipe's `description`/`isRedHerring` and `clueIds` = the recipe's `requiredClues`. `EvidenceBoard` forms one per matched recipe in a qualifying component.
+
+## deductionOracle.ts
+
+Pure classification of the evidence board's player-connected components (Phase 2b — enacts
+[ADR-0012](DECISIONS/ADR-0012-deduction-roll-semantics.md)). No store/React access; no
+`Date.now()`/`Math.random()`.
+
+- `classifyBoard(connections: ClueConnection[], clues: Record<string, Clue>, recipes: KeyDeduction[]): ClassifiedComponent[]` —
+  1. **Fail-closed** filter: keep only edges whose *both* endpoints are own-property (`hasOwnProperty` guard), revealed clues; drop self-edges and edges into missing/unrevealed/inherited (`toString`) ids.
+  2. **Union-find** over the surviving edges → connected components; a component with `< 2` distinct clues is dropped (forms nothing).
+  3. **Classify** each component (size ≥ 2) into `DeductionCorrectness = 'correct' | 'false' | 'partial' | 'incorrect'`:
+     - **Recipe path** — every recipe whose `requiredClues ⊆ S` (matched against the **player's topology**, never `connectsTo` — 2 of 7 shipped recipes aren't `connectsTo`-connected). `correct` if any matched recipe is non-red-herring, else `false`. `recipes` carries **all** matches (Blocker 1), ordered for presentation only (non-red-herring → most required → lowest id).
+     - **Generic path** (no recipe matched — the only path for vignettes) — classify the component's player-edges against **undirected** `connectsTo`: all authored → `correct` (or `false` if the cluster contains a `redHerring` clue, N4); some authored → `partial`; none → `incorrect`. `recipes: []`.
+  `correct`/`false` components form deductions; `partial`/`incorrect` form nothing. The roll never enters this function — it only flavours the banner copy of a formed `correct` result (ADR-0012).
 
 ## caseProgression.ts
 
@@ -161,13 +175,13 @@ index at `gg_save_index` (array of `SaveSummary`, sorted by timestamp desc).
 > calls neither `Date.now()` nor `Math.random()`; the save id is generated in
 > `metaSlice`.
 
-- `const CURRENT_SAVE_VERSION = 4`.
+- `const CURRENT_SAVE_VERSION = 5`.
 - `interface SaveSummary { id: string; timestamp: string; caseName: string; investigatorName: string }`.
 - `SaveManager.save(saveId: string, state: GameState, caseTitle?: string): void` — wraps `state` in a `SaveFile` (`version`, ISO `timestamp`, `state`), writes it, and upserts the index entry (re-sorted desc). `caseTitle`, when supplied, becomes the summary's readable `caseName` (else it falls back to `state.currentCase`).
 - `SaveManager.load(saveId: string): GameState | null` — reads and parses the save, runs `migrate`, returns the migrated `state` (or `null` if missing/unparseable).
 - `SaveManager.listSaves(): SaveSummary[]` — returns the index.
 - `SaveManager.deleteSave(saveId: string): void` — removes the save and its index entry.
-- `SaveManager.migrate(saveFile: SaveFile): SaveFile` — idempotent upgrade to the current version (**4**). **v0→v1**: default `factionReputation` to `{}`. **v1→v2**: backfill `sceneHistory` and `connections` to `[]` (a missing `sceneHistory` otherwise crashes the first `goToScene` after load). **v2→v3**: backfill `visitedScenes` from `sceneHistory + currentScene`, so reloading a pre-v3 save doesn't re-fire `onEnter` on scenes already seen (F-006). **v3→v4**: default `encounterState` to `null`, so a pre-v4 save resumes as "not in an encounter" rather than restarting/re-rolling a mid-encounter reaction check (F-105).
+- `SaveManager.migrate(saveFile: SaveFile): SaveFile` — idempotent upgrade to the current version (**5**). **v0→v1**: default `factionReputation` to `{}`. **v1→v2**: backfill `sceneHistory` and `connections` to `[]` (a missing `sceneHistory` otherwise crashes the first `goToScene` after load). **v2→v3**: backfill `visitedScenes` from `sceneHistory + currentScene`, so reloading a pre-v3 save doesn't re-fire `onEnter` on scenes already seen (F-006). **v3→v4**: default `encounterState` to `null`, so a pre-v4 save resumes as "not in an encounter" rather than restarting/re-rolling a mid-encounter reaction check (F-105). **v4→v5** (Phase 2b): `'connected'` is no longer a written clue status. The v4 bug overwrote a re-wired clue to `'connected'`, so a persisted deduction may still reference it — restore each `'connected'` clue to `'deduced'` if any persisted `deductions[*].clueIds` references it, else `'examined'` (no gate/Journal desync; an original `new`/`spent` overwritten to `connected` is a documented cosmetic loss). **Every-version load hygiene** (not just v4→v5): any `clue.status === 'contested'` → `'examined'` — `contested` is a 2 s transient with no owning timer after reload, so a save taken mid-attempt can't strand a clue. A malformed (non-plain-object) `clues` is left untouched so `isValidGameState` still rejects it (F-036).
 
 ## audioManager.ts
 
