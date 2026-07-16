@@ -22,16 +22,23 @@
  * guarded by inspecting the captured (serialized) motion props.
  */
 /// <reference types="node" />
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 // Read src/index.css as source text. NOTE: Vite's `?raw` query resolves to an
 // EMPTY string under Vitest (the CSS pipeline strips it), so we read the source
 // off disk instead — this test is a source-deletion guard, not a behavioral one
-// (jsdom applies no styles anyway). Resolve from the Vitest cwd (project root).
-const cssRaw = readFileSync(resolve(process.cwd(), 'src/index.css'), 'utf8');
+// (jsdom applies no styles anyway). Resolve relative to THIS module (not cwd) so
+// the read is independent of where Vitest is invoked from. `resolve` pops the
+// filename first, so from src/components/__tests__/<file> the three `..` climb
+// file → __tests__ → components → src, landing on src/index.css.
+const cssRaw = readFileSync(
+  resolve(fileURLToPath(import.meta.url), '../../../index.css'),
+  'utf8',
+);
 
 vi.mock('framer-motion', async () => {
   const React = await vi.importActual<typeof import('react')>('react');
@@ -90,13 +97,39 @@ import { HintButton } from '../HeaderBar/HintButton';
 import { DeductionButton } from '../EvidenceBoard/DeductionButton';
 import { ComposureMeter } from '../StatusBar/ComposureMeter';
 import { useStore } from '../../store';
-import type { Clue, GameState } from '../../types';
+import type { Clue, GameSettings, GameState, Investigator } from '../../types';
 
-// Mock diceEngine so DeductionButton's click is deterministic (not exercised here,
-// but keeps the import inert).
-vi.mock('../../engine/diceEngine', () => ({
-  performCheck: vi.fn(() => ({ roll: 10, modifier: 0, total: 10, dc: 14, tier: 'success' })),
-}));
+// Baselines for the store-touching tests (HintButton, DeductionButton). Typed so a
+// future Investigator/GameSettings shape change is caught at compile time rather
+// than silently accepted (avoids `as never`).
+const baseInvestigator: Investigator = {
+  name: 'T',
+  archetype: 'deductionist',
+  abilityUsed: false,
+  faculties: { reason: 10, perception: 10, nerve: 10, vigor: 10, influence: 10, lore: 10 },
+  composure: 10,
+  vitality: 10,
+};
+
+const baseSettings: GameSettings = {
+  fontSize: 'standard',
+  highContrast: false,
+  reducedMotion: false,
+  textSpeed: 'typewriter',
+  hintsEnabled: true,
+  autoSaveFrequency: 'scene',
+  audioVolume: { ambient: 0.6, sfx: 0.8 },
+};
+
+// Reset barrier: the store is a shared singleton, so tests that mutate settings /
+// investigator must not bleed into siblings. Restore a clean baseline after each.
+afterEach(() => {
+  useStore.setState({ settings: { ...baseSettings }, investigator: { ...baseInvestigator } });
+});
+
+// NOTE: no diceEngine mock — the DeductionButton test only inspects the rendered
+// `data-whiletap` attribute and never clicks, so performCheck is never called.
+// diceEngine has no import-time side effects, so the real module imports cleanly.
 
 const parse = (el: Element | null, attr: string): unknown =>
   JSON.parse(el?.getAttribute(attr) ?? 'null');
@@ -208,16 +241,7 @@ describe('reduced-motion — captured motion props are neutralized', () => {
   });
 
   it('DeductionButton: reduced-motion removes whileTap (captured as null)', () => {
-    useStore.setState({
-      investigator: {
-        name: 'T',
-        archetype: 'deductionist',
-        abilityUsed: false,
-        faculties: { reason: 10, perception: 10, nerve: 10, vigor: 10, influence: 10, lore: 10 },
-        composure: 10,
-        vitality: 10,
-      },
-    } as never);
+    useStore.setState({ investigator: { ...baseInvestigator } });
     useStore.getState().updateSettings({ reducedMotion: true });
     render(<DeductionButton connectedClueIds={['a', 'b']} onResult={vi.fn()} />);
     const btn = screen.getByRole('button', { name: /Attempt Deduction/i });
