@@ -4,6 +4,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { useStore } from '../../store';
+import type { Clue, ClueConnection, KeyDeduction } from '../../types';
 
 vi.mock('../../engine/hintEngine', () => ({
   trackActivity: vi.fn(),
@@ -23,7 +24,11 @@ import { EvidenceBoard } from '../EvidenceBoard';
 import { announce } from '../../announcer';
 import { performCheck } from '../../engine/diceEngine';
 
-function initStore(clues: Record<string, any> = {}, connections: any[] = []) {
+function initStore(
+  clues: Record<string, Clue> = {},
+  connections: ClueConnection[] = [],
+  recipes: KeyDeduction[] = [],
+) {
   useStore.setState({
     investigator: {
       name: 'Test', archetype: 'deductionist', abilityUsed: false,
@@ -33,17 +38,24 @@ function initStore(clues: Record<string, any> = {}, connections: any[] = []) {
     clues,
     deductions: {},
     connections,
+    contestedTokens: {}, contestedPrior: {}, attemptSeq: 0,
     currentScene: 's1', currentCase: 'test', sceneHistory: [],
     npcs: {}, flags: {}, factionReputation: {},
     settings: { fontSize: 'standard', highContrast: false, reducedMotion: false, textSpeed: 'typewriter', hintsEnabled: true, autoSaveFrequency: 'scene', audioVolume: { ambient: 0.5, sfx: 0.5 } },
-    caseData: null, lastCheckResult: null,
-  });
+    caseData: recipes.length ? ({ recipes } as never) : null,
+    lastCheckResult: null,
+  } as never);
 }
 
-const sampleClues = {
-  'c1': { id: 'c1', type: 'physical', title: 'Cipher Note', description: 'A coded message', sceneSource: 's1', connectsTo: ['c2'], tags: ['paper'], status: 'new', isRevealed: true },
-  'c2': { id: 'c2', type: 'testimony', title: 'Witness Account', description: 'A witness saw...', sceneSource: 's2', connectsTo: ['c1'], tags: ['testimony'], status: 'new', isRevealed: true },
-  'c3': { id: 'c3', type: 'physical', title: 'Hidden Clue', description: 'Not found yet', sceneSource: 's3', connectsTo: [], tags: [], status: 'new', isRevealed: false },
+const clue = (id: string, over: Partial<Clue> = {}): Clue => ({
+  id, type: 'physical', title: id.toUpperCase(), description: 'x', sceneSource: 's1',
+  connectsTo: [], tags: [], status: 'examined', isRevealed: true, ...over,
+});
+
+const sampleClues: Record<string, Clue> = {
+  c1: clue('c1', { title: 'Cipher Note', connectsTo: ['c2'], tags: ['paper'] }),
+  c2: clue('c2', { type: 'testimony', title: 'Witness Account', connectsTo: ['c1'], tags: ['paper'] }),
+  c3: clue('c3', { title: 'Hidden Clue', isRevealed: false }),
 };
 
 beforeEach(() => { vi.clearAllMocks(); });
@@ -77,12 +89,9 @@ describe('EvidenceBoard', () => {
     expect(screen.getByRole('dialog')).toBeTruthy();
   });
 
-  // ─── F-002: connection works on click/tap + persistent first-time hint ───────
-
   it('shows a persistent connection hint when the board opens with clues and no connection in progress', () => {
     initStore(sampleClues);
     render(<EvidenceBoard onClose={() => {}} />);
-    // A first-time prompt must be visible before any Space press.
     expect(screen.getByText(/select two clues to connect/i)).toBeTruthy();
   });
 
@@ -92,7 +101,7 @@ describe('EvidenceBoard', () => {
     expect(screen.queryByText(/select two clues to connect/i)).toBeNull();
   });
 
-  it('clicking two clue cards connects them and marks both connected', () => {
+  it('clicking two clue cards connects them and writes NO connected status (N1)', () => {
     initStore(sampleClues);
     render(<EvidenceBoard onClose={() => {}} />);
     fireEvent.click(screen.getByRole('button', { name: /Cipher Note/i }));
@@ -100,8 +109,11 @@ describe('EvidenceBoard', () => {
 
     const state = useStore.getState();
     expect(state.connections).toContainEqual({ fromId: 'c1', toId: 'c2' });
-    expect(state.clues.c1.status).toBe('connected');
-    expect(state.clues.c2.status).toBe('connected');
+    // Status stays semantic — the connected cue is derived, not stored (N1).
+    expect(state.clues.c1.status).toBe('examined');
+    expect(state.clues.c2.status).toBe('examined');
+    // Both cards render the derived Connected cue.
+    expect(screen.getAllByLabelText('Connected')).toHaveLength(2);
   });
 
   it('clicking the same card twice cancels the pending connection', () => {
@@ -113,8 +125,6 @@ describe('EvidenceBoard', () => {
     expect(useStore.getState().connections).toHaveLength(0);
   });
 
-  // ─── F-007: focus trap ───────────────────────────────────────────────────────
-
   it('moves focus inside the dialog on open', () => {
     initStore(sampleClues);
     render(<EvidenceBoard onClose={() => {}} />);
@@ -123,82 +133,155 @@ describe('EvidenceBoard', () => {
   });
 });
 
-describe('EvidenceBoard — deduction outcome banner (Phase 2a)', () => {
-  const connectedPair = {
-    'c1': { id: 'c1', type: 'physical', title: 'Cipher Note', description: 'x', sceneSource: 's1', connectsTo: ['c2'], tags: ['paper'], status: 'connected', isRevealed: true },
-    'c2': { id: 'c2', type: 'testimony', title: 'Witness Account', description: 'y', sceneSource: 's2', connectsTo: ['c1'], tags: ['paper'], status: 'connected', isRevealed: true },
+describe('EvidenceBoard — oracle-driven formation (Phase 2b, ADR-0012)', () => {
+  const recipePair: Record<string, Clue> = {
+    a: clue('a'), b: clue('b'),
   };
+  const recipe: KeyDeduction = { id: 'r1', requiredClues: ['a', 'b'], title: 'R', description: 'R desc', isRedHerring: false };
 
-  function attempt(tier: string) {
-    (performCheck as any).mockReturnValue({ roll: 10, modifier: 0, total: 10, dc: 14, tier });
-    initStore(connectedPair, [{ fromId: 'c1', toId: 'c2' }]);
+  function attempt(tier: string, clues: Record<string, Clue>, connections: ClueConnection[], recipes: KeyDeduction[] = []) {
+    (performCheck as ReturnType<typeof vi.fn>).mockReturnValue({ roll: 10, modifier: 0, total: 10, dc: 14, tier });
+    initStore(clues, connections, recipes);
     render(<EvidenceBoard onClose={() => {}} />);
     fireEvent.click(screen.getByRole('button', { name: /Attempt Deduction/i }));
   }
 
-  // Every tier: exactly one announcement, the right message + tone, and the
-  // visual banner is aria-hidden (so announce() is the single SR path).
-  const tierCases: Array<{ tier: string; message: string; tone: string }> = [
-    { tier: 'success', message: 'The connection holds.', tone: 'green' },
-    { tier: 'critical', message: 'The connection holds — a sharp, decisive insight.', tone: 'green' },
-    { tier: 'partial', message: "Some of these belong together, but the reasoning won't quite hold.", tone: 'amber' },
-    { tier: 'failure', message: "These clues don't connect — not like this.", tone: 'red' },
-    { tier: 'fumble', message: "These clues don't connect — not like this.", tone: 'red' },
-  ];
-
-  it.each(tierCases)(
-    'tier "$tier" → one announcement, aria-hidden banner, tone "$tone"',
-    ({ tier, message, tone }) => {
-      attempt(tier);
-      const banner = screen.getByText(message);
-      expect(banner).toHaveAttribute('data-tone', tone);
-      expect(banner).toHaveAttribute('aria-hidden', 'true');
-      expect(announce).toHaveBeenCalledTimes(1);
-      expect(announce).toHaveBeenCalledWith(message);
-    },
-  );
-
-  it('clears connections when the banner shows (banner survives the clear)', () => {
-    attempt('success');
-    expect(useStore.getState().connections).toHaveLength(0);
-    expect(screen.getByText('The connection holds.')).toBeTruthy();
+  it('CONFIRMATION: a recipe-matching component forms its deduction on a FAILURE roll', () => {
+    attempt('failure', recipePair, [{ fromId: 'a', toId: 'b' }], [recipe]);
+    const st = useStore.getState();
+    expect(st.deductions.r1).toBeDefined(); // formed despite the failure roll
+    expect(st.clues.a.status).toBe('deduced');
+    expect(st.clues.b.status).toBe('deduced');
   });
 
-  it('auto-dismisses the banner after 2.5s and a new attempt replaces the old timer', () => {
+  it('CONFIRMATION: a non-qualifying set forms NOTHING on a CRITICAL roll', () => {
+    // no recipe; a-b not connectsTo → incorrect
+    attempt('critical', { a: clue('a'), b: clue('b') }, [{ fromId: 'a', toId: 'b' }], []);
+    const st = useStore.getState();
+    expect(Object.keys(st.deductions)).toHaveLength(0);
+  });
+
+  it('forms BOTH deductions when a component matches two recipes (Blocker 1)', () => {
+    const clues = { w: clue('w'), s: clue('s'), q: clue('q'), d: clue('d') };
+    const recipes: KeyDeduction[] = [
+      { id: 'one-true-murder', requiredClues: ['w', 's'], title: 'M', description: 'M', isRedHerring: false },
+      { id: 'poisoner', requiredClues: ['q', 's', 'd'], title: 'P', description: 'P', isRedHerring: true },
+    ];
+    attempt('success', clues, [{ fromId: 'w', toId: 's' }, { fromId: 's', toId: 'q' }, { fromId: 'q', toId: 'd' }], recipes);
+    const st = useStore.getState();
+    expect(st.deductions['one-true-murder']).toBeDefined();
+    expect(st.deductions.poisoner).toBeDefined();
+    expect(st.deductions.poisoner.isRedHerring).toBe(true);
+  });
+
+  it('marks ONLY recipe members deduced — a noise clue lassoed in stays un-deduced', () => {
+    // Player connects the recipe pair a-b PLUS an unrelated clue c into one cluster.
+    const clues = { a: clue('a'), b: clue('b'), c: clue('c') };
+    attempt('success', clues, [{ fromId: 'a', toId: 'b' }, { fromId: 'b', toId: 'c' }], [recipe]);
+    const st = useStore.getState();
+    expect(st.deductions.r1).toBeDefined();
+    expect([...st.deductions.r1.clueIds].sort()).toEqual(['a', 'b']); // c not in the deduction
+    expect(st.clues.a.status).toBe('deduced');
+    expect(st.clues.b.status).toBe('deduced');
+    // c was lassoed in but is not a recipe member → must NOT get a permanent 📌.
+    expect(st.clues.c.status).not.toBe('deduced');
+  });
+
+  it('a generic correct component (all connectsTo) forms one generic deduction', () => {
+    const clues = { a: clue('a', { connectsTo: ['b'] }), b: clue('b') };
+    attempt('success', clues, [{ fromId: 'a', toId: 'b' }], []);
+    const st = useStore.getState();
+    expect(st.deductions['deduction-generic-a+b']).toBeDefined();
+  });
+
+  it('an incorrect attempt marks clues contested then the store reverts them (fake timers)', () => {
     vi.useFakeTimers();
     try {
-      // First attempt (success) shows the green banner.
-      (performCheck as any).mockReturnValue({ roll: 10, modifier: 0, total: 10, dc: 14, tier: 'success' });
-      initStore(connectedPair, [{ fromId: 'c1', toId: 'c2' }]);
-      render(<EvidenceBoard onClose={() => {}} />);
-      fireEvent.click(screen.getByRole('button', { name: /Attempt Deduction/i }));
-      expect(screen.getByText('The connection holds.')).toBeTruthy();
-
-      // Just before 2.5s it is still shown.
-      act(() => { vi.advanceTimersByTime(2400); });
-      expect(screen.queryByText('The connection holds.')).toBeTruthy();
-
-      // After 2.5s it auto-dismisses.
-      act(() => { vi.advanceTimersByTime(200); });
-      expect(screen.queryByText('The connection holds.')).toBeNull();
+      attempt('failure', { a: clue('a'), b: clue('b') }, [{ fromId: 'a', toId: 'b' }], []);
+      expect(useStore.getState().clues.a.status).toBe('contested');
+      act(() => { vi.advanceTimersByTime(2000); });
+      expect(useStore.getState().clues.a.status).toBe('examined');
     } finally {
       vi.useRealTimers();
     }
   });
 
-  it('a success still forms exactly one deduction and marks both clues deduced', () => {
-    attempt('success');
+  it('mixed [correct, incorrect] attempt: forms the correct one, contests the incorrect one, count-bearing green banner', () => {
+    // Two disjoint components: authored a-b (correct) + unauthored x-y (incorrect).
+    const clues = { a: clue('a', { connectsTo: ['b'] }), b: clue('b'), x: clue('x'), y: clue('y') };
+    attempt('success', clues, [{ fromId: 'a', toId: 'b' }, { fromId: 'x', toId: 'y' }], []);
     const st = useStore.getState();
-    expect(Object.keys(st.deductions)).toHaveLength(1);
-    expect(st.clues.c1.status).toBe('deduced');
-    expect(st.clues.c2.status).toBe('deduced');
+    expect(st.deductions['deduction-generic-a+b']).toBeDefined();
+    expect(st.clues.a.status).toBe('deduced');
+    expect(st.clues.x.status).toBe('contested'); // incorrect component contested
+    // Best-outcome-led green banner, count-bearing because >1 component was evaluated.
+    const banner = screen.getByText('The connection holds. (1 deduction formed.)');
+    expect(banner).toHaveAttribute('data-tone', 'green');
+    expect(announce).toHaveBeenCalledTimes(1);
   });
 
-  it('a failure forms no deduction and marks the clues contested', () => {
-    attempt('failure');
+  it('empty classified result (all edges stale) → red banner, forms nothing, clears (Minor 5)', () => {
+    attempt('success', { a: clue('a'), b: clue('b') }, [{ fromId: 'a', toId: 'missing' }], []);
     const st = useStore.getState();
     expect(Object.keys(st.deductions)).toHaveLength(0);
-    expect(st.clues.c1.status).toBe('contested');
-    expect(st.clues.c2.status).toBe('contested');
+    expect(st.connections).toHaveLength(0);
+    expect(announce).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("These clues don't connect — not like this.")).toBeTruthy();
+  });
+
+  it('REPEAT ATTEMPT (Major 5): after forming one deduction, a new pair can be attempted without reopening', () => {
+    (performCheck as ReturnType<typeof vi.fn>).mockReturnValue({ roll: 10, modifier: 0, total: 10, dc: 14, tier: 'success' });
+    const clues = { a: clue('a', { connectsTo: ['b'] }), b: clue('b'), c: clue('c', { connectsTo: ['d'] }), d: clue('d') };
+    initStore(clues, [{ fromId: 'a', toId: 'b' }], []);
+    render(<EvidenceBoard onClose={() => {}} />);
+    // 1st attempt forms a-b, clears connections.
+    fireEvent.click(screen.getByRole('button', { name: /Attempt Deduction/i }));
+    expect(useStore.getState().deductions['deduction-generic-a+b']).toBeDefined();
+    expect(useStore.getState().connections).toHaveLength(0);
+    // 2nd: connect a different pair c-d in the same mounted board.
+    fireEvent.click(screen.getByRole('button', { name: /^Clue: C/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^Clue: D/i }));
+    // Button is enabled again (not stuck 'Deduction Locked').
+    const btn = screen.getByRole('button', { name: /Attempt Deduction/i });
+    expect(btn).not.toBeDisabled();
+    fireEvent.click(btn);
+    expect(useStore.getState().deductions['deduction-generic-c+d']).toBeDefined();
+  });
+});
+
+describe('EvidenceBoard — banner tone by correctness (Phase 2b)', () => {
+  function attempt(tier: string, clues: Record<string, Clue>, connections: ClueConnection[], recipes: KeyDeduction[] = []) {
+    (performCheck as ReturnType<typeof vi.fn>).mockReturnValue({ roll: 10, modifier: 0, total: 10, dc: 14, tier });
+    initStore(clues, connections, recipes);
+    render(<EvidenceBoard onClose={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: /Attempt Deduction/i }));
+  }
+
+  it('correct → green banner + one announce', () => {
+    attempt('success', { a: clue('a', { connectsTo: ['b'] }), b: clue('b') }, [{ fromId: 'a', toId: 'b' }], []);
+    const banner = screen.getByText('The connection holds.');
+    expect(banner).toHaveAttribute('data-tone', 'green');
+    expect(banner).toHaveAttribute('aria-hidden', 'true');
+    expect(announce).toHaveBeenCalledTimes(1);
+  });
+
+  it('correct + critical → sharper green copy', () => {
+    attempt('critical', { a: clue('a', { connectsTo: ['b'] }), b: clue('b') }, [{ fromId: 'a', toId: 'b' }], []);
+    expect(screen.getByText('The connection holds — a sharp, decisive insight.')).toHaveAttribute('data-tone', 'green');
+  });
+
+  it('false (red-herring cluster) → amber uneasy banner', () => {
+    attempt('success', { a: clue('a', { connectsTo: ['b'] }), b: clue('b', { type: 'redHerring' }) }, [{ fromId: 'a', toId: 'b' }], []);
+    expect(screen.getByText('A connection forms — but an uneasy, questionable one.')).toHaveAttribute('data-tone', 'amber');
+  });
+
+  it('partial → amber directional banner', () => {
+    attempt('success', { a: clue('a', { connectsTo: ['b'] }), b: clue('b'), c: clue('c') }, [{ fromId: 'a', toId: 'b' }, { fromId: 'b', toId: 'c' }], []);
+    expect(screen.getByText("Some of these belong together, but the reasoning won't quite hold.")).toHaveAttribute('data-tone', 'amber');
+  });
+
+  it('incorrect → red banner', () => {
+    attempt('success', { a: clue('a'), b: clue('b') }, [{ fromId: 'a', toId: 'b' }], []);
+    expect(screen.getByText("These clues don't connect — not like this.")).toHaveAttribute('data-tone', 'red');
   });
 });

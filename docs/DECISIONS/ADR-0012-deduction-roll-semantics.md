@@ -1,5 +1,5 @@
 ---
-status: Accepted
+status: Enacted
 date: 2026-07-14
 deciders: Jon White (decision); Claude Code (framing)
 phase: UI/UX track (Phase 0 — gates Phase 2, see docs/research/ui-ux-roadmap.md)
@@ -83,10 +83,19 @@ promote the status to `Enacted` in the Phase 2 PR that adds that test. A doc-dri
 checking that `DeductionButton.tsx` no longer conditions deduction formation solely on
 `tier === 'success' || tier === 'critical'`.
 
+**Enacted 2026-07-16 (Phase 2b).** The correctness oracle
+(`src/engine/deductionOracle.ts`, `classifyBoard`) now decides formation and `EvidenceBoard`
+(`handleDeductionAttempt`) forms every qualifying deduction; `DeductionButton` only rolls the d20 and
+reports the tier. The enacting tests live in `src/components/__tests__/EvidenceBoard.test.tsx`
+("oracle-driven formation" — a recipe-matching component forms on a **`failure`**-tier roll; a
+non-qualifying set forms **nothing** on a **`critical`**-tier roll). `DeductionButton.tsx` no longer
+gates on the tier at all.
+
 ## Links
 
 - Related ADRs: [ADR-0005](ADR-0005-key-deduction-recipes.md) (key-deduction recipes — defines the
   recipe subset-match this decision treats as "correct")
 - Planning docs: [docs/research/ui-ux-roadmap.md](../research/ui-ux-roadmap.md) (Phase 0);
   [docs/research/ui-ux-improvements.md](../research/ui-ux-improvements.md) (finding D3, Part V bridge)
-- Commits / PRs: <added when Phase 2 enacts>
+- Commits / PRs: enacted on branch `feat/phase2b-deduction-formation` (Phase 2b — deduction
+  formation model; PR # added on merge).

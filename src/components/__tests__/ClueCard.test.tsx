@@ -31,7 +31,6 @@ describe('ClueCard — data-status attribute', () => {
   const statuses: Clue['status'][] = [
     'new',
     'examined',
-    'connected',
     'deduced',
     'contested',
     'spent',
@@ -44,17 +43,23 @@ describe('ClueCard — data-status attribute', () => {
   });
 });
 
-describe('ClueCard — connected redundant cue (WCAG 1.4.1)', () => {
-  it('renders a link badge with an accessible label for the connected state', () => {
-    render(<ClueCard clue={makeClue({ status: 'connected' })} />);
-    const badge = screen.getByLabelText('Connected');
+describe('ClueCard — connected cue derived from isConnected (N1, WCAG 1.4.1)', () => {
+  it('renders the 🔗 badge + gold ring from isConnected, independent of status', () => {
+    render(<ClueCard clue={makeClue({ status: 'deduced' })} isConnected />);
+    const badge = screen.getByLabelText('Connected'); // shows though status is 'deduced'
     expect(badge).toBeInTheDocument();
     expect(badge.textContent).toBe('🔗');
+    expect(screen.getByRole('button').className).toMatch(/ring-yellow/);
   });
 
-  it('does not render the connected badge for examined clues', () => {
-    render(<ClueCard clue={makeClue({ status: 'examined' })} />);
+  it('does not render 🔗 when not connected', () => {
+    render(<ClueCard clue={makeClue({ status: 'examined' })} isConnected={false} />);
     expect(screen.queryByLabelText('Connected')).not.toBeInTheDocument();
+  });
+
+  it('appends ", connected" to the card aria-label when connected', () => {
+    render(<ClueCard clue={makeClue({ title: 'X', status: 'examined' })} isConnected />);
+    expect(screen.getByRole('button', { name: /status: examined, connected/i })).toBeInTheDocument();
   });
 });
 
@@ -94,21 +99,6 @@ describe('ClueCard — examined status', () => {
     render(<ClueCard clue={makeClue({ status: 'examined' })} />);
     const card = screen.getByRole('button');
     expect(card.className).not.toMatch(/animate-pulse/);
-  });
-});
-
-// ─── "connected" — gold border indicator ─────────────────────────────────────
-
-describe('ClueCard — connected status', () => {
-  it('applies yellow/gold ring class', () => {
-    render(<ClueCard clue={makeClue({ status: 'connected' })} />);
-    const card = screen.getByRole('button');
-    expect(card.className).toMatch(/ring-yellow/);
-  });
-
-  it('renders the 🔗 connected badge', () => {
-    render(<ClueCard clue={makeClue({ status: 'connected' })} />);
-    expect(screen.getByLabelText('Connected')).toBeInTheDocument();
   });
 });
 

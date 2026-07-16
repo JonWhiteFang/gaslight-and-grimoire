@@ -392,6 +392,25 @@ describe('validateBundle — clue sceneSource', () => {
   });
 });
 
+// ─── Generic-deduction namespace + clue-id charset (Phase 2b, Major 4) ────────
+
+describe('validateBundle — reserved generic-deduction namespace + clue-id charset', () => {
+  it('errors when a recipe id begins with the reserved deduction-generic- prefix', () => {
+    const bundle = makeBundle({
+      recipes: [{ id: 'deduction-generic-a+b', requiredClues: ['clue-a'], title: 't', description: 'd', isRedHerring: false }],
+      clues: [makeClue({ id: 'clue-a' })],
+    });
+    const errors = validateBundle(bundle).errors;
+    expect(errors.some((e) => /reserved.*deduction-generic/i.test(e))).toBe(true);
+  });
+
+  it('errors when a clue id contains a character outside [a-z0-9-]', () => {
+    const bundle = makeBundle({ clues: [makeClue({ id: 'clue+bad' })] });
+    const errors = validateBundle(bundle).errors;
+    expect(errors.some((e) => /clue.*id.*invalid|invalid.*clue id/i.test(e))).toBe(true);
+  });
+});
+
 // ─── Reachability + undiscoverable (CLI-only warnings) ────────────────────────
 
 describe('validateBundle — reachability warnings', () => {

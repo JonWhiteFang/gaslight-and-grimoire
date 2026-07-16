@@ -8,7 +8,9 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-15 (**Codex review → file-based (ADR-0013) + Phase 2a shipped — PR #82 merged (merge commit `63e4442`).** Two strands. (1) **Codex review procedure change:** replaced ADR-0010's MCP two-gate model (unreliable in-session Bedrock auth) with a **file-based** handoff at **three** checkpoints — spec, plan, completed implementation — via `codex/input`→`codex/output`; MCP `codex` tool retired for reviews (removed at user scope). **[ADR-0013](DECISIONS/ADR-0013-codex-file-based-review-handoff.md)** supersedes ADR-0010 (front-matter `superseded-by` + preserved banner per MADR immutability). (2) **Phase 2a — deduction feedback legibility** (roadmap items 6+2): `connected` 🔗 cue (WCAG 1.4.1) + board-owned outcome banner announced once via the Phase-1 `announce()` (fixes the button-unmount message loss) + directional partial-tier copy. **Legibility-only: formation unchanged, ADR-0012 NOT enacted.** The Phase 2 **spec took three Codex rounds** (each a real Blocker: tag-oracle unsound → recipe-only breaks the 4 vignettes → pre-existing board plumbing) resolving to a **2a-now / 2b-deferred split**; plan (5 findings) + impl (1 Major mobile-clip bug, live-fixed) each passed their own pass. Full review trail in `codex/`. Baseline **635/60 → 649/61** (+14). **Next:** Phase 2b (formation oracle, enacts ADR-0012, fixes the `contested`-revert latent bug — full analysis in the spec's Part B), or Phase 3/4 per the roadmap. — Prior update below.)_
+_Last updated: 2026-07-16 (**Phase 2b IMPLEMENTED — deduction formation model shipped on `feat/phase2b-deduction-formation`; PR [#83](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/83) open (merge commit, never squash).** Enacts **ADR-0012** (`Accepted → Enacted`): correctness gates deduction formation, the Reason d20 only flavours it. All 8 TDD tasks landed: pure `deductionOracle.ts` (`classifyBoard` — recipes matched against player topology not `connectsTo`; generic path against undirected `connectsTo`; forms EVERY matched recipe, Blocker 1); board-owned oracle-driven formation, `DeductionButton` rolls only (no sticky lock); `'connected'` derived from membership via `ClueCard isConnected` (N1); store-owned contested-revert (timer registry + per-clue generation tokens, `contestClues`/`markCluesDeduced`/`cancelContestedReverts`, baseline-prior carry-forward); canonical stable generic-deduction id (no `Date.now`/`Math.random`, N5); validator reserves `deduction-generic-` namespace + enforces clue-id charset; save **v4→v5** (`connected`→`deduced`/`examined` recovery + all-versions `contested`→`examined` hygiene). Internal whole-branch review (Ready to merge) + **file-based Codex impl pass** (3 findings — null-clue-value migration guard, slack only failed edges, count-bearing mixed banner — all folded). Live-verified in-browser. Baseline **649/61 → 684/64** (+35). **Next:** merge PR #83; then Phase 3 (dice legibility) or Phase 4 (a11y sweep) per the roadmap. — Prior update below.)_
+
+_Prior update: 2026-07-15 (**Codex review → file-based (ADR-0013) + Phase 2a shipped — PR #82 merged (merge commit `63e4442`).** Two strands. (1) **Codex review procedure change:** replaced ADR-0010's MCP two-gate model (unreliable in-session Bedrock auth) with a **file-based** handoff at **three** checkpoints — spec, plan, completed implementation — via `codex/input`→`codex/output`; MCP `codex` tool retired for reviews (removed at user scope). **[ADR-0013](DECISIONS/ADR-0013-codex-file-based-review-handoff.md)** supersedes ADR-0010 (front-matter `superseded-by` + preserved banner per MADR immutability). (2) **Phase 2a — deduction feedback legibility** (roadmap items 6+2): `connected` 🔗 cue (WCAG 1.4.1) + board-owned outcome banner announced once via the Phase-1 `announce()` (fixes the button-unmount message loss) + directional partial-tier copy. **Legibility-only: formation unchanged, ADR-0012 NOT enacted.** The Phase 2 **spec took three Codex rounds** (each a real Blocker: tag-oracle unsound → recipe-only breaks the 4 vignettes → pre-existing board plumbing) resolving to a **2a-now / 2b-deferred split**; plan (5 findings) + impl (1 Major mobile-clip bug, live-fixed) each passed their own pass. Full review trail in `codex/`. Baseline **635/60 → 649/61** (+14). **Next:** Phase 2b (formation oracle, enacts ADR-0012, fixes the `contested`-revert latent bug — full analysis in the spec's Part B), or Phase 3/4 per the roadmap. — Prior update below.)_
 
 _Prior update: 2026-07-14 (**UI/UX track opened + Phase 1 shipped — two docs-only PRs and one feature PR this run.** (1) PR #79 (merged): deep-research reference [`ui-ux-improvements.md`](research/ui-ux-improvements.md) (24 sources, adversarially verified) + a code-checked repo audit that corrected the research prompt's wrong premises (evidence board is click-select, not drag; dice/save/case-select are status/toast/route, not modals); track-C roadmap [`ui-ux-roadmap.md`](research/ui-ux-roadmap.md); and [ADR-0012](DECISIONS/ADR-0012-deduction-roll-semantics.md) (Phase-0 decision — deduction roll flavours, correctness gates; Accepted, enacts in Phase 2). (2) **PR #80 (open): Phase 1 — global live announcer.** New `src/announcer.ts` external store (polite/assertive channels, two-slot re-announce, ready+pre-mount queue, cached snapshot) + `<LiveAnnouncer>` (four always-mounted `sr-only` `aria-live` nodes, per-mount empty-commit gate), mounted at root in `main.tsx` outside `ErrorBoundary`. Pure substrate — no store-subscription, no existing `aria-live` region touched. Full gate pipeline: design Gate 1 (5 findings), plan Gate 1 (4 findings), per-task spec+quality reviews, code Gate 2 (round 1: remount bug + test gap fixed; round 2: "sound to merge"). Baseline **611/58 → 635/60** (+24). Codex handoff now a committed `codex/` dir (input/output); pattern documented in CLAUDE.md. **Next:** merge PR #79/#80 (merge commit, never squash); then Phase 2 (deduction feedback legibility) consumes `announce()` + enacts ADR-0012. On #80 merge: fix the roadmap Phase-1 row (says `AccessibilityProvider`; actual mount is `main.tsx`) and flip `ui-ux-improvements.md`'s "announcer ⭕ absent" rows to done.)_
 
@@ -155,9 +157,11 @@ build artifacts (`vite.config.js`/`.d.ts`) `tsconfig.node.json`'s `composite:tru
   drops its `<6.1.0` peer cap). Runtime: React 19, framer-motion 12, zustand 5, immer 11. Toolchain: Vite 8 (Rolldown),
   Vitest 4, jsdom 29, Tailwind 4 (CSS-first `@theme`), ESLint 10. See ADR-0008 + [[dependabot-major-group-migration]] for
   the clustering approach and the emnapi lockfile gotcha.
-- **Branch focus:** `docs/comet-club-spec` (at `c967878`) — **PR #76 open** (The Comet Club, content + docs only;
-  merge with a merge commit, never squash). On `main`: audit-2 code backlog (#53–#60) cleared; remaining items are
-  user-blocked (#20 media) or non-code. Prior: PR #51 (deps), PRs #48/#49 (#47 deploy).
+- **Branch focus:** `feat/phase2b-deduction-formation` (branched at `1e64758`) — **Phase 2b IMPLEMENTED, PR
+  [#83](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/83) open** (merge commit, never squash). All 8
+  TDD tasks landed + internal review + Codex impl pass folded; gate green (684/64, lint, validator 8/8, build).
+  **Next:** merge PR #83. `main` is clean: all audit backlogs cleared except #20 (media, user-blocked); Phase 2a
+  shipped (PR #82). Prior branches long merged: #76 (Comet Club), #79/#80 (UI/UX Phase 0/1).
 - **Verification:** 2026-07-09 — on merged `main`: `npm run test:run` → **611 passed (611)** across **58** files;
   `npm run lint` clean, validator clean (7 cases), `npm ci --ignore-scripts` + `npm run build` green (build now also
   type-checks `scripts/` + `vite.config.ts`; emits `dist/gaslight-and-grimoire/` + `dist/_headers`). **CI green on PR #68**
@@ -175,7 +179,12 @@ build artifacts (`vite.config.js`/`.d.ts`) `tsconfig.node.json`'s `composite:tru
   `npm run test:run` → **649 passed (649)** / **61** files, `npm run lint` clean, `node scripts/validateCase.mjs` →
   **8 cases** clean, `npm run build` green. CI on PR #82: all green except OWASP Dependency-Check, which failed on an
   external **NPM Audit API outage** (not a vulnerability, not a required check, zero dep changes in the PR) — merged per
-  user direction.
+  user direction. **2026-07-16 (Phase 2b spec + plan):** docs-only — no code/content touched, so the **649/61** baseline
+  held. **2026-07-16 (Phase 2b implementation, PR #83):** on `feat/phase2b-deduction-formation` at `4e2412d` —
+  `npm run test:run` → **684 passed (684)** / **64** files, `npm run lint` clean, `node scripts/validateCase.mjs`
+  → **8 cases** clean, `npm run build` green. Live-verified in-browser (The Whitechapel Cipher): correctness-gated
+  formation on a real roll, derived connected cue on a `deduced` clue, baseline-prior revert, repeat attempts,
+  zero console errors. Internal whole-branch review + Codex impl pass (3 findings) both folded.
 
 ---
 
@@ -215,19 +224,25 @@ Source of truth for each phase's scope: [status.md](status.md) (systems present 
 | R3′ | Audit-2 remediation — P3 CI type-check (#60) | `[x]` | **Done — PR #68 (`98d3ac9`).** New `tsconfig.scripts.json` (non-composite + `noEmit`, `lib ES2023`, `types:["node"]`) covering `scripts/**/*.ts` + `vite.config.ts`; `typecheck:scripts` npm script chained into `build`; `tsconfig.node.json` given explicit `target/lib` to fix the `TS2550` at root; `@types/node@^20` devDep. A type error in the validator source now fails the build (was exit 0). Emnapi lockfile trap on first push → clean regen. Baseline unchanged (611). |
 | U1 | UI/UX Phase 1 — global live announcer | `[x]` | **PR #80 merged**, 2026-07-14. `src/announcer.ts` + `<LiveAnnouncer>` at app root (`main.tsx`); `announce()` API. Substrate for Phases 2/3. 611/58 → 635/60. |
 | U2a | UI/UX Phase 2a — deduction feedback legibility | `[x]` | **PR #82 merged (`63e4442`)**, 2026-07-15. `connected` 🔗 cue (WCAG 1.4.1); board-owned outcome banner via `announce()` (fixes button-unmount message loss); directional partial-tier copy. Legibility-only — formation unchanged, **ADR-0012 NOT enacted**. Spec took 3 Codex rounds → 2a/2b split. 635/60 → 649/61. |
-| U2b | UI/UX Phase 2b — deduction formation model | `[ ]` | **Deferred from 2a.** Recipe/`connectsTo` two-graph correctness oracle over player topology; enacts ADR-0012; fixes the pre-existing `contested`-revert latent bug. Full analysis in the Phase 2 spec's Part B. Needs its own spec → file-based Codex reviews. |
+| U2b | UI/UX Phase 2b — deduction formation model | `[x]` | **IMPLEMENTED — PR [#83](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/83) open**, 2026-07-16. **Enacts ADR-0012** (`Accepted → Enacted`). Pure `deductionOracle.ts` classifies each player-connected component (`correct`/`false`/`partial`/`incorrect`); board forms every qualifying deduction (all matched recipes, Blocker 1); `DeductionButton` rolls only; `'connected'` derived from membership (N1); store-owned contested-revert with generation tokens; canonical stable generic-deduction id (N5); validator reserves the `deduction-generic-` namespace + clue-id charset; save v4→v5. Internal review + Codex impl pass (3 findings folded). 649/61 → **684/64**. [Spec](superpowers/specs/2026-07-15-phase2b-deduction-formation-design.md) · [plan](superpowers/plans/2026-07-16-phase2b-deduction-formation.md) · [Codex review](../codex/output/2026-07-16-phase2b-deduction-formation-impl-review.md). |
 
 ---
 
 ## Next actions (explicit order)
+
+**UI/UX track (active) — Phase 2b DONE, PR #83 open.** All 8 TDD tasks implemented on
+`feat/phase2b-deduction-formation`; internal whole-branch review (Ready to merge) + live verify + **file-based Codex
+impl pass** (3 findings, all folded) complete; gate green (684/64). **Next: merge PR
+[#83](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/83)** (merge commit, never squash). After 2b:
+Phase 3 (dice legibility) or Phase 4 (a11y sweep) per the roadmap.
 
 **Audit-2 code backlog: CLEAR.** All of #53–#60 merged (PRs #62–#68). The only open GitHub issue is #20 (media,
 user-blocked). No open code work. **#52 (agent-perspective interview) answered** 2026-07-09 — a first-person response to
 all 11 questions is posted as a [comment on the issue](https://github.com/JonWhiteFang/gaslight-and-grimoire/issues/52#issuecomment-4926364394)
 (the blog draft itself is the user's to write; the issue can be closed once they've mined the answer).
 
-**Content track (active):** **The Comet Club is BUILT** ([ADR-0011](DECISIONS/ADR-0011-comet-club-fourth-main-case.md)) —
-merge **PR #76** (merge commit, never squash). Remaining suggested order from
+**Content track (paused for UI/UX):** **The Comet Club is BUILT and MERGED** (PR #76,
+[ADR-0011](DECISIONS/ADR-0011-comet-club-fourth-main-case.md)). When content resumes, suggested order from
 [`content-ideas-2026-07-10.md`](content-ideas-2026-07-10.md): **The Orrery Room** (Grey Dawn vignette — fills the one
 missing faction vignette AND consumes the now-live `mythos-period-computed` flag) → The Drowned Archive → The
 Tidewaiter's Log. Small open decision from the build's reviews: three bookkeeping flags set but unread

@@ -20,6 +20,9 @@ export type ClueType =
 export type ClueStatus =
   | 'new'
   | 'examined'
+  // DEPRECATED / never written after Phase 2b — the connected cue is derived from
+  // `connections` membership at render, not stored on the clue (retained in the union
+  // so a pre-migration in-memory state can't fail isValidGameState).
   | 'connected'
   | 'deduced'
   | 'contested'
@@ -101,6 +104,22 @@ export interface KeyDeduction {
   title: string;
   description: string;
   isRedHerring: boolean;
+}
+
+export type DeductionCorrectness = 'correct' | 'false' | 'partial' | 'incorrect';
+
+/** One player-built connected component, classified by the deduction oracle. */
+export interface ClassifiedComponent {
+  /** Own-property, revealed clue ids in this component (sorted, deduped). */
+  clueIds: string[];
+  correctness: DeductionCorrectness;
+  /**
+   * EVERY recipe whose requiredClues ⊆ this component (ADR-0005 subset semantics).
+   * Ordered for PRESENTATION only (non-red-herring first → largest requiredClues →
+   * lowest id); the order never decides which recipes form — all of them do.
+   * Empty on the generic path.
+   */
+  recipes: KeyDeduction[];
 }
 
 // ─── NPC ─────────────────────────────────────────────────────────────────────

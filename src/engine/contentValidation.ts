@@ -124,10 +124,20 @@ export function validateBundle(
     if (clue.sceneSource && !baseOrSharedIds.has(clue.sceneSource) && !variantIds.has(clue.sceneSource)) {
       errors.push(`Clue "${clue.id}" -> sceneSource references unknown scene "${clue.sceneSource}"`);
     }
+    // Clue ids must match ^[a-z0-9-]+$ so the generic-deduction id signature
+    // (deduction-generic-<ids joined by '+'>) can never collide (Phase 2b, Major 4).
+    if (!/^[a-z0-9-]+$/.test(clue.id)) {
+      errors.push(`Clue id "${clue.id}" is invalid — must match ^[a-z0-9-]+$`);
+    }
   }
 
   // Key-deduction recipes: every required clue must exist.
   for (const recipe of bundle.recipes ?? []) {
+    // A recipe id must not intrude on the machine-owned generic-deduction namespace,
+    // or a generic connection could falsely satisfy its hasDeduction gate (Phase 2b, Major 4).
+    if (recipe.id.startsWith('deduction-generic-')) {
+      errors.push(`KeyDeduction "${recipe.id}" uses the reserved "deduction-generic-" id namespace`);
+    }
     for (const clueId of recipe.requiredClues) {
       if (!clueIds.has(clueId)) {
         errors.push(`KeyDeduction "${recipe.id}" -> requiredClues references unknown clue "${clueId}"`);

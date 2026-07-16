@@ -68,7 +68,7 @@ intersection of the six slice interfaces.
 |---|---|---|
 | `investigatorSlice` | `investigator` | `initInvestigator`, `updateFaculty`, `adjustComposure`, `adjustVitality`, `useAbility`, `resetAbility` |
 | `narrativeSlice` | `currentScene`, `currentCase`, `sceneHistory`, `visitedScenes`, `lastEffectMessages`, `lastCheckResult`, `encounterState`, `caseData` | `goToScene`, `setCheckResult`, `setEncounterState`, `loadAndStartCase`, `loadAndStartVignette`, `completeCase` |
-| `evidenceSlice` | `clues`, `deductions`, `connections` | `discoverClue`, `updateClueStatus`, `addDeduction`, `addConnection`, `clearConnections` |
+| `evidenceSlice` | `clues`, `deductions`, `connections`, `contestedTokens`, `contestedPrior`, `attemptSeq` | `discoverClue`, `updateClueStatus`, `addDeduction`, `addConnection`, `clearConnections`, `contestClues`, `markCluesDeduced`, `cancelContestedReverts` |
 | `npcSlice` | `npcs` | `adjustDisposition`, `adjustSuspicion`, `setNpcMemoryFlag`, `removeNpc` |
 | `worldSlice` | `flags`, `factionReputation` | `setFlag`, `adjustReputation`, `applyEffects` |
 | `metaSlice` | `settings` | `updateSettings`, `saveGame`, `autoSave`, `loadGame` |
@@ -110,7 +110,20 @@ intersection of the six slice interfaces.
 - **Evidence-board connections persist in `evidenceSlice`.** `connections` holds
   `{ fromId, toId }` id pairs (deduped, order-insensitive). DOM anchor points are
   recomputed on render; the store never holds pixel coordinates. Connections are
-  cleared on case/vignette load.
+  cleared on case/vignette load. The "connected" cue is **derived** from
+  `connections` membership at render (`ClueCard isConnected`), never written as a
+  clue status (Phase 2b, N1).
+- **Store-owned contested-revert ownership (Phase 2b).** A failed deduction attempt
+  marks its clues `'contested'` via `contestClues(ids)`, which claims a fresh
+  `gen = ++attemptSeq`, records each clue's baseline in `contestedPrior` (only if
+  not already set — carry-forward), stamps `contestedTokens[id] = gen`, and
+  schedules a 2 s revert. The revert restores `contestedPrior[id]` **iff**
+  `contestedTokens[id] === gen`, so a later attempt (fail or `markCluesDeduced`
+  success) that re-stamps the token makes the stale timer no-op — no cross-attempt
+  clobber. Timers live in a **module-level `revertTimers` registry** (non-serialised),
+  cancelled by `cancelContestedReverts()` on save-load and via `clearRevertTimers()`
+  on case load. `contestedTokens`/`contestedPrior`/`attemptSeq` are transient
+  (absent from `snapshotGameState`, never saved).
 
 ## Data flow (runtime)
 

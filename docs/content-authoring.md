@@ -195,13 +195,13 @@ costs composure and swaps in `worseAlternative` choices. Damage is dual-axis
 
 | Field | Type | Notes |
 |---|---|---|
-| `id` | string | Referenced by discoveries, choices, deductions |
+| `id` | string | Referenced by discoveries, choices, deductions. **Must match `^[a-z0-9-]+$`** (validator-enforced, Phase 2b — the generic-deduction id joins clue ids with `+`, so no id may contain `+`) |
 | `type` | `ClueType` | `physical`, `testimony`, `occult`, `deduction`, `redHerring` |
 | `title` | string | Display name |
 | `description` | string | Clue detail text |
 | `sceneSource` | string | Scene id where the clue originates |
 | `tags` | `string[]` | Free-form tags |
-| `status` | `ClueStatus` | `new`, `examined`, `connected`, `deduced`, `contested`, `spent` — author starting clues as `new` |
+| `status` | `ClueStatus` | `new`, `examined`, `deduced`, `contested`, `spent` — author starting clues as `new`. (`connected` is deprecated / never written after Phase 2b: the board-connection cue is derived from `connections` membership at render, not a status.) |
 | `isRevealed` | boolean | Author as `false`; set `true` at runtime on discovery |
 | `connectsTo` | `string[]?` | Clue ids this can be connected to on the evidence board |
 | `grantsFaculty` | `Faculty?` | Optional faculty association |
@@ -226,13 +226,20 @@ for both.
 ## Key deductions (`deductions.json`)
 
 A **key deduction** is an authored "recipe" that gives a specific conclusion a
-stable, gate-able identity. When the player connects a set of clues on the
-evidence board and passes the Reason check, the engine matches the connected set
-against the case's recipes (`matchDeduction`, **subset** semantics — extra
-connected clues are fine); on a match, the resulting `Deduction` is stored under
-the recipe's **authored `id`** instead of a random one, so a
-`hasDeduction` / `requiresDeduction` gate can reference it. Without a match, a
-generic random-id deduction is built as before.
+stable, gate-able identity. When the player connects clues on the evidence board
+and attempts a deduction, the pure **correctness oracle**
+(`deductionOracle.classifyBoard`) classifies each connected component and forms
+**every** recipe whose `requiredClues` are all in that component (**subset**
+semantics against the *player's* connection topology, not `connectsTo`); each
+match's `Deduction` is stored under the recipe's **authored `id`** so a
+`hasDeduction` / `requiresDeduction` gate can reference it. **Correctness — not
+the Reason roll — gates formation (ADR-0012):** a qualifying set forms even on a
+`failure` roll; a non-qualifying set forms nothing even on a `critical`. The roll
+only flavours the outcome banner's copy. A component that matches no recipe takes
+the **generic path** (the only path for vignettes, which ship no `deductions.json`):
+it forms one deduction under a **canonical stable id** `deduction-generic-<sorted
+clue ids joined by +>` (idempotent — re-forming the same set never inflates the
+Journal) when **all** its player-edges are authored `connectsTo` links.
 
 `deductions.json` (main cases; optional — vignettes omit it) has shape
 `{ "deductions": KeyDeduction[] }`:
@@ -249,9 +256,21 @@ Authoring rules:
 - Every `requiredClues` id must exist in the case's `clues.json`, and every
   `requiresDeduction`/`hasDeduction` target must be a defined recipe id — both are
   **validator-enforced** (a gate pointing at an undefined recipe is an error).
+- **A recipe `id` must not begin with `deduction-generic-`** — that prefix is the
+  machine-owned namespace for generic deductions; the validator errors on any
+  authored recipe id that intrudes on it (Phase 2b, Major 4).
 - Recipes should mix clue **types** and exclude `redHerring` clues; the
   conclusion must be genuinely supported by its clues (a real deduction, not an
   arbitrary set).
+- **Generic-connection correctness (no recipe):** a connected component is
+  `correct` only when **all** its player-edges are authored `connectsTo` links
+  (undirected); some-authored → `partial` (forms nothing, amber "won't quite
+  hold"); none → `incorrect` (forms nothing, red). Author `connectsTo` on the
+  clue pairs that genuinely relate, so a sound generic connection reads as correct.
+- **A `redHerring` clue inside an otherwise all-authored cluster** yields a
+  `false` outcome — the deduction still *forms* (under `isRedHerring: true`,
+  framed "Questionable connection: …") but is flagged uneasy in board + Journal.
+  This rewards spotting the real authored link while signalling the dead end.
 - Gate the **true/best resolution** behind a key deduction, but keep the case
   completable without it (leave other endings reachable) — never single-gate
   critical progress. Every clue a *gated* recipe requires must be obtainable

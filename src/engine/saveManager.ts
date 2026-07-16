@@ -11,7 +11,7 @@ import type { GameState, SaveFile } from '../types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-export const CURRENT_SAVE_VERSION = 4;
+export const CURRENT_SAVE_VERSION = 5;
 
 const KEY_PREFIX = 'gg_save_';
 const INDEX_KEY = 'gg_save_index';
@@ -71,6 +71,13 @@ export function isValidGameState(state: unknown): state is GameState {
   // The normalised record maps and history/settings must be present and correctly typed.
   for (const key of ['clues', 'deductions', 'npcs', 'flags', 'factionReputation'] as const) {
     if (!isPlainObject(state[key])) return false;
+  }
+  // Entity-record VALUES must themselves be objects: a `clues: { bad: null }` record
+  // is structurally invalid and would break rendering (and any status traversal).
+  for (const key of ['clues', 'deductions', 'npcs'] as const) {
+    for (const value of Object.values(state[key] as Record<string, unknown>)) {
+      if (!isPlainObject(value)) return false;
+    }
   }
   if (!Array.isArray(state.sceneHistory)) return false;
   if (!isPlainObject(state.settings)) return false;
@@ -136,7 +143,16 @@ export const SaveManager = {
     // hand-edited) would otherwise crash `migrate`'s `...state` spread (F-036).
     if (!isPlainObject(parsed) || !isPlainObject(parsed.state)) return null;
 
-    const migrated = SaveManager.migrate(parsed as unknown as SaveFile);
+    // Migration walks clue/deduction VALUES (Phase 2b status hygiene); a malformed
+    // entry (e.g. `clues: { bad: null }`) that slips past the envelope guard must
+    // surface as a clean null, not an escaping TypeError, so the load UI shows the
+    // established corrupt-save failure rather than a rejected action.
+    let migrated: SaveFile;
+    try {
+      migrated = SaveManager.migrate(parsed as unknown as SaveFile);
+    } catch {
+      return null;
+    }
     // Reject a structurally-invalid save rather than committing garbage to the
     // store (F-036). Migration backfills optional fields; this checks the
     // required ones survived.
@@ -174,10 +190,37 @@ export const SaveManager = {
    *          does not re-fire onEnter effects on scenes already passed (F-006).
    *   3 → 4: default `encounterState` to null — pre-v4 saves have no persisted
    *          encounter progress, so they resume as "not in an encounter" (F-105).
+   *   4 → 5: 'connected' is no longer a written clue status (derived from
+   *          connections). A v4 bug overwrote a re-wired clue to 'connected';
+   *          restore it — a clue still referenced by a persisted deduction →
+   *          deduced, otherwise → examined. Independently, `contested` is a 2s
+   *          transient with no owning timer after a reload — normalize it to
+   *          `examined` on EVERY load (all versions), so a save taken mid-attempt
+   *          can't strand a clue `contested` (Phase 2b).
    */
   migrate(saveFile: SaveFile): SaveFile {
+    // Version-independent load hygiene: 'contested' is a 2s transient with no timer
+    // after reload — normalize to 'examined' on EVERY load, including current version.
+    const normalizeContested = (sf: SaveFile): SaveFile => {
+      // Leave a malformed (non-plain-object) `clues` untouched so isValidGameState
+      // can still reject it — spreading an array into {} would mask the defect (F-036).
+      if (!isPlainObject(sf.state.clues)) return sf;
+      let touched = false;
+      const clues = { ...(sf.state.clues as Record<string, unknown>) };
+      for (const [id, clue] of Object.entries(clues)) {
+        // Skip a non-object clue value (null / scalar) — dereferencing .status
+        // would throw; isValidGameState is left to reject the malformed record.
+        if (!isPlainObject(clue)) continue;
+        if (clue.status === 'contested') {
+          clues[id] = { ...clue, status: 'examined' };
+          touched = true;
+        }
+      }
+      return touched ? { ...sf, state: { ...sf.state, clues } as GameState } : sf;
+    };
+
     if (saveFile.version === CURRENT_SAVE_VERSION) {
-      return saveFile;
+      return normalizeContested(saveFile);
     }
 
     let { state } = saveFile;
@@ -225,10 +268,37 @@ export const SaveManager = {
       version = 4;
     }
 
-    return {
+    // v4 → v5: recover 'connected'-overwritten clues. The v4 bug overwrote a
+    // re-wired 'deduced' clue to 'connected'; a persisted deduction can still
+    // reference it, so mapping blindly to 'examined' would desync the gate +
+    // Journal. Restore: referenced by any persisted deduction → 'deduced', else
+    // → 'examined'. (This recovery is v4-specific — do NOT run it on v5.)
+    if (version < 5) {
+      // Guard a malformed `clues` (spreading an array/scalar into {} would mask a
+      // structural defect isValidGameState must catch, F-036).
+      if (isPlainObject(state.clues)) {
+        const deducedClueIds = new Set<string>();
+        for (const d of Object.values(state.deductions ?? {})) {
+          if (!isPlainObject(d)) continue;
+          for (const id of (d.clueIds as string[] | undefined) ?? []) deducedClueIds.add(id);
+        }
+        const clues = { ...(state.clues as Record<string, unknown>) };
+        for (const [id, clue] of Object.entries(clues)) {
+          // Skip a non-object clue value (see normalizeContested).
+          if (!isPlainObject(clue)) continue;
+          if (clue.status === 'connected') {
+            clues[id] = { ...clue, status: deducedClueIds.has(id) ? 'deduced' : 'examined' };
+          }
+        }
+        state = { ...state, clues } as GameState;
+      }
+      version = 5;
+    }
+
+    return normalizeContested({
       version: CURRENT_SAVE_VERSION,
       timestamp: saveFile.timestamp,
       state,
-    };
+    });
   },
 };

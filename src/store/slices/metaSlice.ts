@@ -110,6 +110,12 @@ export const createMetaSlice: StateCreator<
         }
       }
 
+      // Cancel any pending contested-revert timer before committing loaded state,
+      // so an in-flight timer can't fire against a freshly loaded same-id clue.
+      // (Also clears contestedTokens/contestedPrior/attemptSeq — the loaded state
+      // has none of its own; contested statuses are normalized by SaveManager.)
+      get().cancelContestedReverts();
+
       set((state) => {
         state.investigator = gameState.investigator;
         state.currentScene = gameState.currentScene;
