@@ -101,6 +101,14 @@ function ChoiceCardComponent({
 
   // Pre-roll odds — only for a real check (faculty + a difficulty the engine rolls against).
   const isCheck = isFacultyCheck(choice);
+  // A partial roll reaches the advertised (good) destination when this choice routes
+  // its partial outcome to the SAME scene as its success or critical outcome. In that
+  // case the odds must count partial toward the pass band (dc-3), else the tag under-
+  // reports the real chance of the good outcome (Codex impl Major 1).
+  const partialIsSuccessEquivalent =
+    choice.outcomes?.partial != null &&
+    (choice.outcomes.partial === choice.outcomes.success ||
+      choice.outcomes.partial === choice.outcomes.critical);
   const odds =
     isCheck && choice.faculty
       ? computeCheckOdds({
@@ -110,7 +118,7 @@ function ChoiceCardComponent({
           hasAdvantage,
           hasDisadvantage: false,
           autoSucceeds,
-          partialCountsAsSuccess: false,
+          partialCountsAsSuccess: partialIsSuccessEquivalent,
         })
       : null;
 
