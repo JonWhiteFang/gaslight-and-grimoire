@@ -5,6 +5,8 @@ import { useCallback, useMemo } from 'react';
 import { useStore, useGameState, buildGameState } from '../../store';
 import { evaluateConditions, processChoice } from '../../engine/narrativeEngine';
 import { computeAdvantage } from '../../engine/advantage';
+import { checkAutoSucceeds } from '../../engine/flags';
+import { resolveDC } from '../../engine/diceEngine';
 import { ChoiceCard } from './ChoiceCard';
 import type { Choice, GameState } from '../../types';
 
@@ -80,6 +82,10 @@ export function ChoicePanel({ choices, onChoiceSelected }: ChoicePanelProps) {
           modifier: result.modifier ?? 0,
           total: result.total ?? result.roll,
           tier: result.tier,
+          dc:
+            choice.faculty && (choice.difficulty !== undefined || choice.dynamicDifficulty != null)
+              ? resolveDC(choice, currentState.investigator)
+              : undefined,
         });
       }
 
@@ -110,6 +116,7 @@ export function ChoicePanel({ choices, onChoiceSelected }: ChoicePanelProps) {
           revealedClueIds={revealedClueIds}
           deductionIds={deductionIds}
           hasAdvantage={computeAdvantage(choice, gameState)}
+          autoSucceeds={choice.faculty ? checkAutoSucceeds(choice.faculty, gameState.flags) : false}
           onSelect={handleSelect}
         />
       ))}
