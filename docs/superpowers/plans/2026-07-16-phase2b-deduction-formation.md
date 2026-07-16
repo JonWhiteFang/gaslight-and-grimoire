@@ -45,8 +45,9 @@ Run `npm run test:run` (not watch) for scripted checks. Never squash-merge this 
 | `src/engine/__tests__/deductionOracle.test.ts` (new) | Oracle unit suite (load-bearing). | 1 |
 | `src/engine/buildDeduction.ts` | Canonical generic id; drop `Date.now()`/`Math.random()`. | 2 |
 | `src/engine/contentValidation.ts` | Reserve `deduction-generic-` namespace; assert clue-id charset. | 3 |
-| `src/store/slices/evidenceSlice.ts` | `contestedTokens`/`attemptSeq` state; `contestClues`/`revertContested` actions. | 4 |
-| `src/store/slices/narrativeSlice.ts` | Clear the new state in `resetForNewCase`. | 4 |
+| `src/store/slices/evidenceSlice.ts` | Timer registry; `contestedTokens`/`contestedPrior`/`attemptSeq` state; `contestClues`/`markCluesDeduced`/`cancelContestedReverts`. | 4 |
+| `src/store/slices/narrativeSlice.ts` | Clear the new state + cancel reverts on case load. | 4 |
+| `src/store/slices/metaSlice.ts` | `loadGame` cancels pending reverts before committing loaded state. | 4 |
 | `src/engine/saveManager.ts` | v4 → v5 migration (`connected`→`deduced`/`examined`; `contested`→`examined`). | 5 |
 | `src/components/EvidenceBoard/ClueCard.tsx` | `isConnected` prop drives ring + 🔗; status no longer renders `connected`. | 6 |
 | `src/components/EvidenceBoard/DeductionButton.tsx` | Roll only; `onResult(tier)`; no formation/status writes. | 7 |
@@ -495,79 +496,114 @@ git commit -m "feat(validator): reserve deduction-generic- namespace + enforce c
 
 **Files:**
 - Modify: `src/store/slices/evidenceSlice.ts`
-- Modify: `src/store/slices/narrativeSlice.ts:53-59` (`resetForNewCase` clears the new state)
+- Modify: `src/store/slices/narrativeSlice.ts:53-59` (`resetForNewCase` cancels reverts + clears state)
+- Modify: `src/store/slices/metaSlice.ts:113-134` (`loadGame` cancels pending reverts before committing)
 - Test: `src/store/slices/__tests__/evidenceSlice.test.ts` (create if absent, else extend)
 
-The revert timer moves OUT of `DeductionButton` and INTO the store, with per-clue generation-token
-ownership so overlapping attempts and board-unmount can't corrupt or lose it.
+The revert lifecycle moves OUT of `DeductionButton` and INTO the store. Codex plan-review flagged that a
+naïve "bump the token somewhere" scheme has four holes: (Blocker 1) the success path never actually claims
+the token; (Blocker 2) timers are never tracked, so `resetForNewCase`/`loadGame` can't cancel them and a
+generation-counter reset lets a stale timer mistake a new attempt for its own; (Major) re-contesting an
+already-`contested` clue snapshots `contested` as its "prior", stranding it; and a repeat-attempt lockout.
+This task builds the **concrete** model that closes all of them:
+
+- A **module-level timer registry** `Map<gen, timeoutHandle>` (non-serialised — lives outside store state)
+  so any pending revert can be cancelled by generation.
+- **`contestedTokens[id] = gen`** for ownership + **`contestedPrior[id]`** stores the clue's *baseline
+  semantic status* (the status it should return to). Re-contesting a clue that is already `contested`
+  **carries forward** its existing `contestedPrior` rather than snapshotting `contested`.
+- **`markCluesDeduced(ids)`** — the atomic success action: in one `set` it invalidates each clue's token
+  (so any pending revert for it no-ops), clears its `contestedPrior`, and sets `status = 'deduced'`.
+- **`cancelContestedReverts()`** — clears every registry timer, empties `contestedTokens`/`contestedPrior`,
+  resets `attemptSeq`. Called by `resetForNewCase` and by `loadGame` *before* committing loaded state.
 
 - [ ] **Step 1: Write the failing tests (fake timers)**
 
 ```ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useStore } from '../../index'; // adjust to the store entry
+import { useStore } from '../../index'; // adjust to the store entry barrel
 
-function seed(status: Record<string, any>) {
-  useStore.setState({ clues: status, connections: [], deductions: {} } as any);
+function seed(clues: Record<string, any>) {
+  useStore.setState({ clues, connections: [], deductions: {}, contestedTokens: {}, contestedPrior: {}, attemptSeq: 0 } as any);
 }
 const clue = (id: string, s: string) => ({
   id, type: 'physical', title: id, description: '', sceneSource: 's',
   connectsTo: [], tags: [], status: s, isRevealed: true,
 });
 
-beforeEach(() => vi.useRealTimers());
+beforeEach(() => { vi.useRealTimers(); });
 
-describe('evidenceSlice — store-owned contested revert (Blocker 2)', () => {
+describe('evidenceSlice — store-owned contested revert (Blocker 2 / Major overlap)', () => {
   it('reverts contested clues to their PRIOR status after 2s', () => {
     vi.useFakeTimers();
     seed({ a: clue('a', 'examined'), b: clue('b', 'new') });
-    useStore.getState().contestClues(['a', 'b'], { a: 'examined', b: 'new' });
+    useStore.getState().contestClues(['a', 'b']); // prior captured from CURRENT status
     expect(useStore.getState().clues.a.status).toBe('contested');
     vi.advanceTimersByTime(2000);
     expect(useStore.getState().clues.a.status).toBe('examined');
     expect(useStore.getState().clues.b.status).toBe('new'); // prior, not hardcoded examined
   });
 
-  it('a later success on a shared clue wins — the stale revert does NOT clobber it', () => {
+  it('fail→success overlap: markCluesDeduced wins; the stale revert must NOT clobber it', () => {
     vi.useFakeTimers();
     seed({ c1: clue('c1', 'examined'), c2: clue('c2', 'examined'), c3: clue('c3', 'examined') });
     const st = useStore.getState();
-    st.contestClues(['c1', 'c2'], { c1: 'examined', c2: 'examined' }); // attempt A fails
-    st.updateClueStatus('c1', 'deduced'); // attempt B succeeds on c1 (bumps token via updateClueStatus? no)
-    // B explicitly takes ownership of c1 by a fresh attempt token:
-    st.claimClues(['c1', 'c3']); // see note below
-    st.updateClueStatus('c1', 'deduced');
-    vi.advanceTimersByTime(2000);
-    expect(useStore.getState().clues.c1.status).toBe('deduced'); // A's revert must not fire on c1
-    expect(useStore.getState().clues.c2.status).toBe('examined'); // A still owns c2
+    st.contestClues(['c1', 'c2']);        // attempt A fails → c1,c2 contested (gen 1)
+    st.markCluesDeduced(['c1', 'c3']);    // attempt B succeeds → c1 deduced, its token invalidated
+    vi.advanceTimersByTime(2000);         // A's timer fires
+    expect(useStore.getState().clues.c1.status).toBe('deduced');  // B won; A did not clobber
+    expect(useStore.getState().clues.c2.status).toBe('examined'); // A still owned c2 → reverted
   });
 
-  it('resetForNewCase clears contested tokens and pending state', () => {
-    seed({ a: clue('a', 'contested') });
-    useStore.getState().contestClues(['a'], { a: 'examined' });
-    // load a new case (via the store's load path) then assert tokens cleared
-    // (assert contestedTokens is empty and no clue stuck contested after load)
+  it('fail→fail overlap on a shared clue: the clue ultimately returns to its ORIGINAL status', () => {
+    vi.useFakeTimers();
+    seed({ c1: clue('c1', 'examined'), c2: clue('c2', 'examined'), c4: clue('c4', 'examined') });
+    const st = useStore.getState();
+    st.contestClues(['c1', 'c2']);        // A: gen1, c1 prior 'examined'
+    st.contestClues(['c1', 'c4']);        // B: gen2, RE-contests c1 → carries forward prior 'examined' (NOT 'contested')
+    vi.advanceTimersByTime(2000);         // both timers fire
+    expect(useStore.getState().clues.c1.status).toBe('examined'); // NOT stranded contested
+    expect(useStore.getState().clues.c2.status).toBe('examined');
+    expect(useStore.getState().clues.c4.status).toBe('examined');
+  });
+
+  it('cancelContestedReverts stops a pending timer and clears ownership', () => {
+    vi.useFakeTimers();
+    seed({ a: clue('a', 'examined') });
+    const st = useStore.getState();
+    st.contestClues(['a']);               // gen1 pending
+    st.cancelContestedReverts();          // e.g. a case load
+    expect(useStore.getState().contestedTokens).toEqual({});
+    st.contestClues(['a']);               // a NEW attempt reuses gen numbering from reset
+    vi.advanceTimersByTime(2000);
+    // the cancelled gen1 timer must not have fired against the new attempt:
+    expect(useStore.getState().clues.a.status).toBe('examined'); // only the new (owned) revert ran
   });
 });
 ```
 
-**Design note for the implementer:** the token-ownership contract is: an attempt gets a fresh `gen`
-(`++attemptSeq`); each contested clue records `contestedTokens[id] = gen`; the revert only restores a clue
-if `contestedTokens[id] === gen`. Any *newer* write to that clue (a success forming a deduction, or a
-later failed attempt) must first claim the clue by bumping its token so the stale revert's ownership check
-fails. Provide a small internal helper the success path calls to bump the token (the test calls it
-`claimClues`; name it as you see fit, e.g. fold the bump into the formation path in Task 7 rather than a
-public action — the test can assert the *behaviour* rather than the exact method name). Keep the public
-surface minimal: `contestClues(clueIds, priorStatuses)` is the one new action the board calls; the
-ownership bump on success can be internal to the formation flow.
+**Ownership contract (implementer, exact):** an attempt gets a fresh `gen = ++attemptSeq`. `contestClues`
+sets `contestedTokens[id] = gen` and captures `contestedPrior[id]` **only if not already set** (carry
+forward the baseline). The revert restores `clues[id].status = contestedPrior[id]` **iff**
+`contestedTokens[id] === gen`, then deletes both entries. `markCluesDeduced` and any later `contestClues`
+overwrite `contestedTokens[id]`, so a stale timer's `=== gen` check fails and it leaves the clue alone.
 
 - [ ] **Step 2: Run — verify fail**
 
-Run: `npm run test:run -- evidenceSlice` → Expected: FAIL (`contestClues` undefined).
+Run: `npm run test:run -- evidenceSlice` → Expected: FAIL (`contestClues`/`markCluesDeduced`/`cancelContestedReverts` undefined).
 
 - [ ] **Step 3: Implement the slice changes**
 
-Add to `EvidenceSlice` state + actions in `src/store/slices/evidenceSlice.ts`:
+At module scope in `src/store/slices/evidenceSlice.ts` (outside the slice factory — a non-serialised
+registry that must not enter store state or saves):
+
+```ts
+// Pending contested-revert timers, keyed by attempt generation. Module-scoped so
+// they can be cancelled on case-load/save-load without living in serialisable state.
+const revertTimers = new Map<number, ReturnType<typeof setTimeout>>();
+```
+
+Extend the interface + initial state:
 
 ```ts
 export interface EvidenceSlice {
@@ -576,6 +612,8 @@ export interface EvidenceSlice {
   connections: ClueConnection[];
   /** clue id → the attempt generation that last marked it contested (ownership). */
   contestedTokens: Record<string, number>;
+  /** clue id → the baseline semantic status to restore when its revert fires. */
+  contestedPrior: Record<string, ClueStatus>;
   /** Monotonic attempt counter; each attempt claims a fresh generation. */
   attemptSeq: number;
   discoverClue: (clueId: string) => void;
@@ -583,63 +621,129 @@ export interface EvidenceSlice {
   addDeduction: (deduction: Deduction) => void;
   addConnection: (fromId: string, toId: string) => void;
   clearConnections: () => void;
-  /** Mark clues contested with fresh ownership; schedule a 2s revert to prior status. */
-  contestClues: (clueIds: string[], priorStatuses: Record<string, ClueStatus>) => void;
+  /** Mark clues contested with fresh ownership; schedule a 2s revert to their baseline prior. */
+  contestClues: (clueIds: string[]) => void;
+  /** Atomic success: invalidate tokens + clear prior + set 'deduced' so a stale revert can't clobber. */
+  markCluesDeduced: (clueIds: string[]) => void;
+  /** Cancel every pending revert and clear ownership state (case-load / save-load). */
+  cancelContestedReverts: () => void;
 }
 ```
 
-Initial state: `contestedTokens: {}, attemptSeq: 0`.
+Initial state: `contestedTokens: {}, contestedPrior: {}, attemptSeq: 0`.
 
-`contestClues` implementation (the timer lives in the closure but restoration is ownership-gated, so it is
-safe across board unmount — the store outlives the component):
+Actions (`get` is available from the slice factory signature `(set, get) => ({...})` — add `get` if the
+factory currently only takes `set`):
 
 ```ts
-  contestClues: (clueIds, priorStatuses) =>
+  contestClues: (clueIds) =>
     set((state) => {
       const gen = ++state.attemptSeq;
       for (const id of clueIds) {
-        if (state.clues[id]) {
-          state.clues[id].status = 'contested';
-          state.contestedTokens[id] = gen;
+        if (!state.clues[id]) continue;
+        // Carry forward an existing baseline: re-contesting a 'contested' clue must
+        // NOT snapshot 'contested' as its prior (Major: fail→fail strand).
+        if (state.contestedPrior[id] === undefined) {
+          state.contestedPrior[id] = state.clues[id].status;
         }
+        state.clues[id].status = 'contested';
+        state.contestedTokens[id] = gen;
       }
-      // Schedule the ownership-gated revert. Reads/writes go through get()/set()
-      // so it operates on live state, not the captured draft.
-      setTimeout(() => {
-        set((s) => {
-          for (const id of clueIds) {
-            if (s.contestedTokens[id] === gen && s.clues[id]) {
-              s.clues[id].status = priorStatuses[id] ?? 'examined';
-              delete s.contestedTokens[id];
-            }
-          }
-        });
-      }, 2000);
     }),
 ```
 
-Make the success path (Task 7) bump the token before setting `deduced`: when forming a deduction, for each
-clue set `state.contestedTokens[id] = ++state.attemptSeq` (claim) then `status = 'deduced'`. Simplest: add
-the claim inside the existing `updateClueStatus` when the new status is `'deduced'` — OR do it explicitly
-in the board's formation loop. Prefer explicit in Task 7 to keep `updateClueStatus` generic. Expose a tiny
-internal claim if needed; the test asserts behaviour, not the method name.
+Then schedule the timer *outside* the Immer producer (a `set` producer must be pure — no `setTimeout`
+inside it). Wrap `contestClues` so it registers the timer after the state update:
 
-In `narrativeSlice.ts` `resetForNewCase`, alongside the existing clears (line 53-59) add:
+```ts
+  // In the factory, define contestClues to update state AND register a timer:
+  contestClues: (clueIds) => {
+    let gen = 0;
+    set((state) => {
+      gen = ++state.attemptSeq;
+      for (const id of clueIds) {
+        if (!state.clues[id]) continue;
+        if (state.contestedPrior[id] === undefined) state.contestedPrior[id] = state.clues[id].status;
+        state.clues[id].status = 'contested';
+        state.contestedTokens[id] = gen;
+      }
+    });
+    const handle = setTimeout(() => {
+      revertTimers.delete(gen);
+      set((s) => {
+        for (const id of clueIds) {
+          if (s.contestedTokens[id] === gen && s.clues[id]) {
+            s.clues[id].status = s.contestedPrior[id] ?? 'examined';
+            delete s.contestedTokens[id];
+            delete s.contestedPrior[id];
+          }
+        }
+      });
+    }, 2000);
+    revertTimers.set(gen, handle);
+  },
+
+  markCluesDeduced: (clueIds) =>
+    set((state) => {
+      for (const id of clueIds) {
+        if (!state.clues[id]) continue;
+        // Invalidate any pending revert ownership so a stale timer no-ops on this clue.
+        delete state.contestedTokens[id];
+        delete state.contestedPrior[id];
+        state.clues[id].status = 'deduced';
+      }
+    }),
+
+  cancelContestedReverts: () => {
+    for (const handle of revertTimers.values()) clearTimeout(handle);
+    revertTimers.clear();
+    set((state) => {
+      state.contestedTokens = {};
+      state.contestedPrior = {};
+      state.attemptSeq = 0;
+    });
+  },
+```
+
+> **Note (test seeding):** the `contestClues` closure captures `gen` from the `set` producer via the outer
+> `let gen`. Immer runs the producer synchronously, so `gen` is assigned before `setTimeout` is registered.
+
+In `narrativeSlice.ts` `resetForNewCase`, alongside the existing clears (line 53-59) — cancel reverts and
+clear the new state. Since `resetForNewCase` is a plain function mutating the draft (not inside a store
+action with registry access), call the registry-clearing via the store: the cleanest split is to have
+`resetForNewCase` clear the serialisable fields and let its **callers** already inside a `set` also invoke
+the timer cancellation. Concretely, add to `resetForNewCase`:
 
 ```ts
   state.contestedTokens = {};
+  state.contestedPrior = {};
   state.attemptSeq = 0;
+```
+
+and in the same module, at the top of the two load actions that call `resetForNewCase`
+(`loadAndStartCase`/vignette load, ~line 212 & 235), cancel timers first:
+`get().cancelContestedReverts?.();` **before** the `set(...)` that calls `resetForNewCase` — or simpler,
+export a tiny `clearRevertTimers()` from `evidenceSlice.ts` (that just does the `revertTimers` clear) and
+call it there. Choose whichever keeps the registry encapsulated; the requirement is: **no timer survives a
+case load.**
+
+In `metaSlice.ts` `loadGame` (~line 113-134), **before** committing the loaded `state.clues`, cancel any
+pending reverts so an in-flight timer can't fire against a freshly loaded same-id clue:
+
+```ts
+  get().cancelContestedReverts();
+  // ...then the existing state assignment from the loaded gameState...
 ```
 
 - [ ] **Step 4: Run — verify pass**
 
-Run: `npm run test:run -- evidenceSlice` → Expected: PASS.
+Run: `npm run test:run -- evidenceSlice` → Expected: PASS (incl. fail→success, fail→fail, cancel tests).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/store/slices/evidenceSlice.ts src/store/slices/narrativeSlice.ts src/store/slices/__tests__/evidenceSlice.test.ts
-git commit -m "feat(store): store-owned contested revert with per-clue generation tokens (fixes N2 + Blocker 2)"
+git add src/store/slices/evidenceSlice.ts src/store/slices/narrativeSlice.ts src/store/slices/metaSlice.ts src/store/slices/__tests__/evidenceSlice.test.ts
+git commit -m "feat(store): store-owned contested revert — timer registry, baseline-prior carry-forward, markCluesDeduced, cancel on load (fixes N2 + Blocker 2 + overlap)"
 ```
 
 ---
@@ -673,9 +777,23 @@ describe('SaveManager.migrate — v4 → v5 (clue status normalization)', () => 
     expect(SaveManager.migrate(sf as any).state.clues.c2.status).toBe('examined');
   });
 
-  it('maps a persisted contested clue to examined (no stranded transient)', () => {
+  it('maps a persisted contested clue to examined on a v4 save', () => {
     const sf = base({ c3: { id: 'c3', status: 'contested' } });
     expect(SaveManager.migrate(sf as any).state.clues.c3.status).toBe('examined');
+  });
+
+  it('ALSO normalizes contested→examined on a CURRENT-version (v5) save (Codex Major 4)', () => {
+    // migrate() returns early when version === CURRENT, so contested hygiene must run
+    // on every load regardless of version — not only inside the v4→v5 step.
+    const sf = { version: 5, timestamp: 't', state: { clues: { c3: { id: 'c3', status: 'contested' } }, deductions: {}, connections: [] } as any };
+    expect(SaveManager.migrate(sf as any).state.clues.c3.status).toBe('examined');
+  });
+
+  it('is idempotent — migrating an already-migrated file changes nothing further', () => {
+    const once = SaveManager.migrate(base({ c1: { id: 'c1', status: 'connected' } }, { d: { id: 'd', clueIds: ['c1'], description: '', isRedHerring: false } }) as any);
+    const twice = SaveManager.migrate(once as any);
+    expect(twice.state.clues.c1.status).toBe('deduced');
+    expect(twice.version).toBe(5);
   });
 
   it('stamps the migrated file at the current version', () => {
@@ -688,13 +806,16 @@ Run: `npm run test:run -- saveManager` → Expected: FAIL (version still 4; no n
 
 - [ ] **Step 2: Implement**
 
-Bump `CURRENT_SAVE_VERSION` to `5`. Add after the `v3 → 4` block in `migrate()`:
+Bump `CURRENT_SAVE_VERSION` to `5`. **Two changes**, because `migrate()` early-returns when
+`version === CURRENT` — so version-independent hygiene must run outside that gate (Codex Major 4).
+
+**(a) The v4-artifact recovery** stays a versioned step. Add after the `v3 → 4` block in `migrate()`:
 
 ```ts
     // v4 → v5: 'connected' is no longer a written clue status (derived from
-    // connections). Restore it: a clue referenced by a persisted deduction was
-    // 'deduced' before the v4 bug overwrote it → deduced; otherwise → examined.
-    // Also normalize the transient 'contested' (no owning timer survives a reload).
+    // connections). The v4 bug overwrote a re-wired 'deduced' clue to 'connected';
+    // restore it — a clue still referenced by a persisted deduction → deduced,
+    // otherwise → examined. (This recovery is v4-specific — do NOT run it on v5.)
     if (version < 5) {
       const deducedClueIds = new Set<string>();
       for (const d of Object.values(state.deductions ?? {})) {
@@ -705,8 +826,6 @@ Bump `CURRENT_SAVE_VERSION` to `5`. Add after the `v3 → 4` block in `migrate()
         const c = clue as { status?: string };
         if (c.status === 'connected') {
           clues[id] = { ...c, status: deducedClueIds.has(id) ? 'deduced' : 'examined' } as never;
-        } else if (c.status === 'contested') {
-          clues[id] = { ...c, status: 'examined' } as never;
         }
       }
       state = { ...state, clues };
@@ -714,17 +833,47 @@ Bump `CURRENT_SAVE_VERSION` to `5`. Add after the `v3 → 4` block in `migrate()
     }
 ```
 
-(Match the exact `migrate` style already in the file — it reassigns `state`/`version` step by step.)
+**(b) Transient `contested` hygiene runs on EVERY load, regardless of version.** `contested` has no owning
+timer after a reload, so a v5 save taken mid-attempt would strand it. Restructure `migrate()` so the early
+`if (saveFile.version === CURRENT_SAVE_VERSION) return saveFile;` no longer skips this — apply the
+normalization to the final `state` right before the `return`, unconditionally:
+
+```ts
+  migrate(saveFile: SaveFile): SaveFile {
+    // Version-independent load hygiene: 'contested' is a 2s transient with no timer
+    // after reload — normalize to 'examined' on EVERY load, including current version.
+    const normalizeContested = (sf: SaveFile): SaveFile => {
+      let touched = false;
+      const clues = { ...(sf.state.clues ?? {}) };
+      for (const [id, clue] of Object.entries(clues)) {
+        if ((clue as { status?: string }).status === 'contested') {
+          clues[id] = { ...(clue as object), status: 'examined' } as never;
+          touched = true;
+        }
+      }
+      return touched ? { ...sf, state: { ...sf.state, clues } } : sf;
+    };
+
+    if (saveFile.version === CURRENT_SAVE_VERSION) {
+      return normalizeContested(saveFile);
+    }
+    // ...existing step chain (v0→1 … v4→5, reassigning state/version) ...
+    return normalizeContested({ version: CURRENT_SAVE_VERSION, timestamp: saveFile.timestamp, state });
+  }
+```
+
+(Adapt to the file's exact final-return shape; the invariant is: `contested→examined` applies to the
+returned state on every path, and the `connected` recovery stays inside `if (version < 5)`.)
 
 - [ ] **Step 3: Run — verify pass**
 
-Run: `npm run test:run -- saveManager` → Expected: PASS.
+Run: `npm run test:run -- saveManager` → Expected: PASS (incl. the v5-contested and idempotence cases).
 
 - [ ] **Step 4: Commit**
 
 ```bash
 git add src/engine/saveManager.ts src/engine/__tests__/saveManager.test.ts
-git commit -m "feat(save): v4->v5 migration — connected->deduced/examined, contested->examined (Major 3)"
+git commit -m "feat(save): v4->v5 connected recovery + all-versions contested->examined hygiene (Major 3+4)"
 ```
 
 ---
@@ -858,20 +1007,34 @@ describe('EvidenceBoard — oracle-driven formation (Phase 2b, ADR-0012)', () =>
   it('empty classified result (all edges stale) → red banner, forms nothing, clears (Minor 5)', () => {
     // connections reference missing clue ids; attempt; assert incorrect banner + announce once + deductions empty
   });
+
+  it('REPEAT ATTEMPT (Major 5): after forming one deduction, a new pair can be attempted without reopening', () => {
+    // 1st attempt: connect recipe pair a-b (success) → deduction forms, connections clear.
+    // 2nd: connect a DIFFERENT pair c-d in the same mounted board → the button is enabled again
+    //      (name /Attempt Deduction/i, not stuck 'Deduction Locked'); clicking it runs the oracle again.
+    // assert the button is not disabled and a second attempt is processed.
+  });
 });
 ```
 
 Run: `npm run test:run -- DeductionButton EvidenceBoard` → Expected: FAIL.
 
-- [ ] **Step 2: Implement `DeductionButton` (roll only)**
+- [ ] **Step 2: Implement `DeductionButton` (roll only, no sticky lock — Major 5)**
 
 Strip formation from `DeductionButton.tsx`:
 - Remove imports of `buildDeduction`/`buildDeductionFromRecipe`/`matchDeduction`, `useStore` clue/recipe
   selectors, `updateClueStatus`, `addDeduction`.
 - `onResult` signature → `(tier: OutcomeTier) => void`.
-- `handleAttempt`: roll `performCheck('reason', investigator, DEDUCTION_DC, false, false)`; set button
-  phase from tier for its own label (keep `🔒 Deduction Locked` on `success`/`critical`, `🔴 Attempt
-  Failed` otherwise — purely cosmetic button text); call `onResult(result.tier)`. No store writes.
+- `handleAttempt`: roll `performCheck('reason', investigator, DEDUCTION_DC, false, false)`; call
+  `onResult(result.tier)`. No store writes.
+- **Fix the repeat-attempt lockout (Codex Major 5).** Today the button keeps a sticky
+  `phase: 'success'|'failure'` that disables it after one attempt; with the revert timer removed there is no
+  longer anything to reset it, so a second connection in the same board session finds the button stuck
+  `🔒 Deduction Locked`. Fix by **not persisting a terminal phase**: reduce local state to a synchronous
+  `rolling` guard only (prevents a double-click mid-roll), and let the **board-owned banner** carry the
+  outcome. The button label is just `🧠 Attempt Deduction` / `Rolling…`; it re-enables as soon as the roll
+  returns. Additionally, **reset any transient phase when `connectedClueIds` changes** (a `useEffect` on the
+  ids signature) so a new connection set always presents a fresh button.
 - Keep the `< 2` → `null` guard and `NO_RECIPES` removal (recipes no longer read here).
 
 - [ ] **Step 3: Implement `EvidenceBoard.handleDeductionAttempt(tier)`**
@@ -896,16 +1059,20 @@ function handleDeductionAttempt(tier: OutcomeTier) {
   for (const comp of components) {
     if (comp.correctness === 'correct' || comp.correctness === 'false') {
       if (comp.recipes.length > 0) {
+        // Blocker 1: form EVERY matched recipe, not just one.
         for (const r of comp.recipes) { addDeduction(buildDeductionFromRecipe(r, comp.clueIds)); formedCount++; }
       } else {
         addDeduction(buildDeduction(comp.clueIds, clues)); formedCount++;
       }
-      comp.clueIds.forEach((id) => updateClueStatus(id, 'deduced')); // claim + deduced (Task 4 note)
+      // Atomic success: invalidates any pending contested token for these clues AND
+      // sets 'deduced' in one set — so a stale revert from an earlier failed attempt
+      // can't clobber it (Task 4 markCluesDeduced; fixes Codex Blocker 1).
+      markCluesDeduced(comp.clueIds);
     } else {
-      const prior = Object.fromEntries(comp.clueIds.map((id) => [id, clues[id].status]));
-      contestClues(comp.clueIds, prior);
+      // contestClues captures each clue's baseline prior itself (carry-forward safe).
+      contestClues(comp.clueIds);
     }
-    best = rank(comp.correctness, best, tier);
+    best = rank(comp.correctness, best); // best correctness across components
   }
   showBanner(best, tier, formedCount);
   // clear connections for formed components (or all, matching today's clear-on-attempt behaviour);
@@ -913,13 +1080,16 @@ function handleDeductionAttempt(tier: OutcomeTier) {
 }
 ```
 
+- Add `markCluesDeduced` + `contestClues` to the board's store selectors (alongside `updateClueStatus`,
+  `clearConnections`).
 - Compute `connectedIds` and pass `isConnected={connectedIds.includes(clue.id)}` to each `ClueCard`.
 - **Stop** calling `updateClueStatus(_, 'connected')` in `handleInitiateConnection` (delete lines 194-195).
-- The banner uses the correctness→message/tone table from the spec §Banner; `announce()` once with the
-  chosen message. Multi-recipe/multi-component: best-outcome-led + `formedCount` in the copy.
-- The `updateClueStatus(id, 'deduced')` call must also **claim** the clue's contested token (per Task 4
-  note) so a pending stale revert from an earlier failed attempt can't clobber it — do this in the store
-  action or inline here.
+- The banner uses the correctness→message/tone table from the spec §Banner; `announce()` **once** with the
+  chosen message (the 2a single-announce invariant — one `announce()` per attempt even for a
+  multi-component/multi-recipe result; best-outcome-led + `formedCount` in the copy).
+- `rank(correctness, best)` picks the better of two correctness values (order:
+  `correct > false > partial > incorrect`); `tier` only sharpens the *copy* of a `correct` best (critical →
+  "sharp, decisive insight"), never the outcome — enacting ADR-0012.
 
 - [ ] **Step 4: Run — verify pass (incl. the ADR-0012 Confirmation)**
 
@@ -996,20 +1166,43 @@ git commit -m "docs: enact ADR-0012 (Accepted->Enacted) + Phase 2b engine/author
 
 ---
 
+## Codex plan-review round 1 ([review](../../../codex/output/2026-07-16-phase2b-deduction-formation-plan-review.md)) — 5 findings, all folded in
+
+Codex verified the oracle, validator, and generic-id design as sound, then found 5 defects in the
+lifecycle plumbing — all now fixed in this plan:
+
+1. **Blocker — success path never concretely claimed the token** (the token-bump was prose, not code, so
+   the fail→success test relied on a nonexistent `claimClues`). **Fixed:** Task 4 now defines a real atomic
+   `markCluesDeduced(ids)` action (invalidates tokens + sets `deduced` in one `set`); Task 7 calls it. The
+   test drives fail→success with no manual helper.
+2. **Blocker — pending timers were never tracked or cancelled on reset/load.** **Fixed:** a module-level
+   `revertTimers` registry keyed by generation + a `cancelContestedReverts()` helper called by
+   `resetForNewCase` **and** `metaSlice.loadGame` (before committing loaded state). No timer survives a
+   case/save load. (`metaSlice.ts` added to Task 4's file list.)
+3. **Major — fail→fail overlap stranded a clue `contested`** (re-contesting snapshotted `contested` as its
+   own "prior"). **Fixed:** `contestedPrior[id]` captures the baseline *only if not already set*
+   (carry-forward); added the A/B fail→fail test asserting the clue returns to its original status.
+4. **Major — a current-version (v5) save could reload stuck `contested`** (migrate early-returns on
+   `version === CURRENT`, skipping the normalization). **Fixed:** Task 5 splits the migration —
+   `connected` recovery stays in the `v4→v5` step; `contested→examined` hygiene runs on **every** load path
+   (incl. current version), with a v5-contested test + an idempotence test.
+5. **Major — button stayed `Deduction Locked` after a success**, blocking a second attempt without
+   reopening the board. **Fixed:** Task 7 reduces the button to a synchronous `rolling` guard (no sticky
+   terminal phase) + resets on `connectedClueIds` change; added a repeat-attempt integration test.
+
 ## Self-Review (author)
 
 - **Spec coverage:** §1 oracle → Task 1; §2 status/revert/migration → Tasks 4-6 (+ save in 5); §3 formation
-  ownership + generic id + banner → Tasks 2, 7; §4 enactment/tests/docs → Task 8. All five Codex findings
-  map to a task: Blocker 1 → Task 1/7 (recipes list), Blocker 2 → Task 4, Major 3 → Task 5, Major 4 →
-  Task 3, Minor 5 → Task 7 empty-guard. ✔
+  ownership + generic id + banner → Tasks 2, 7; §4 enactment/tests/docs → Task 8. All five *spec* Codex
+  findings map to a task (Blocker 1 → Task 1/7 recipes list, Blocker 2 → Task 4, Major 3 → Task 5, Major 4 →
+  Task 3, Minor 5 → Task 7 empty-guard); all five *plan* Codex findings folded in above. ✔
 - **Type consistency:** `classifyBoard(connections, clues, recipes): ClassifiedComponent[]` used identically
   in Task 1 (def) and Task 7 (call). `ClassifiedComponent.recipes` is a list everywhere. `onResult(tier)`
-  simplified consistently in Task 7's button + board. `contestClues(clueIds, priorStatuses)` matches Task 4
-  def and Task 7 call. ✔
-- **Placeholder scan:** the Task 4 fail→success ownership test names an internal `claimClues` helper but the
-  plan explicitly says the implementer may fold the token-bump into the formation path and assert behaviour
-  rather than that method name — flagged, not a hidden placeholder. Task 7 test bodies are described as
-  comments (fixtures are mechanical) — acceptable since the assertions are spelled out; an implementer
-  following TDD writes the concrete fixture. ✔
+  simplified consistently in Task 7's button + board. The Task-4 store surface is now concrete and used
+  verbatim in Task 7: `contestClues(clueIds)` (captures prior itself), `markCluesDeduced(clueIds)`,
+  `cancelContestedReverts()`. No lingering `claimClues`/`priorStatuses`-arg references. ✔
+- **Placeholder scan:** no prose-only contracts remain — the token claim is a real action with a test that
+  doesn't invoke a nonexistent helper. Task 7 test bodies are described as comments with the assertions
+  spelled out (fixtures are mechanical); an implementer following TDD writes the concrete fixture. ✔
 - **Ordering:** oracle (1) → id (2) → validator (3) → store (4) → save (5) → card (6) → integration (7) →
   docs (8). Integration depends on 1/2/4; correct order. ✔
