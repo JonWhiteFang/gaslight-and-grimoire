@@ -11,7 +11,7 @@ import type { GameState, SaveFile } from '../types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-export const CURRENT_SAVE_VERSION = 4;
+export const CURRENT_SAVE_VERSION = 5;
 
 const KEY_PREFIX = 'gg_save_';
 const INDEX_KEY = 'gg_save_index';
@@ -174,10 +174,31 @@ export const SaveManager = {
    *          does not re-fire onEnter effects on scenes already passed (F-006).
    *   3 → 4: default `encounterState` to null — pre-v4 saves have no persisted
    *          encounter progress, so they resume as "not in an encounter" (F-105).
+   *   4 → 5: 'connected' is no longer a written clue status (derived from
+   *          connections). A v4 bug overwrote a re-wired clue to 'connected';
+   *          restore it — a clue still referenced by a persisted deduction →
+   *          deduced, otherwise → examined. Independently, `contested` is a 2s
+   *          transient with no owning timer after a reload — normalize it to
+   *          `examined` on EVERY load (all versions), so a save taken mid-attempt
+   *          can't strand a clue `contested` (Phase 2b).
    */
   migrate(saveFile: SaveFile): SaveFile {
+    // Version-independent load hygiene: 'contested' is a 2s transient with no timer
+    // after reload — normalize to 'examined' on EVERY load, including current version.
+    const normalizeContested = (sf: SaveFile): SaveFile => {
+      let touched = false;
+      const clues = { ...((sf.state.clues ?? {}) as Record<string, unknown>) };
+      for (const [id, clue] of Object.entries(clues)) {
+        if ((clue as { status?: string }).status === 'contested') {
+          clues[id] = { ...(clue as object), status: 'examined' };
+          touched = true;
+        }
+      }
+      return touched ? { ...sf, state: { ...sf.state, clues } as GameState } : sf;
+    };
+
     if (saveFile.version === CURRENT_SAVE_VERSION) {
-      return saveFile;
+      return normalizeContested(saveFile);
     }
 
     let { state } = saveFile;
@@ -225,10 +246,31 @@ export const SaveManager = {
       version = 4;
     }
 
-    return {
+    // v4 → v5: recover 'connected'-overwritten clues. The v4 bug overwrote a
+    // re-wired 'deduced' clue to 'connected'; a persisted deduction can still
+    // reference it, so mapping blindly to 'examined' would desync the gate +
+    // Journal. Restore: referenced by any persisted deduction → 'deduced', else
+    // → 'examined'. (This recovery is v4-specific — do NOT run it on v5.)
+    if (version < 5) {
+      const deducedClueIds = new Set<string>();
+      for (const d of Object.values(state.deductions ?? {})) {
+        for (const id of (d as { clueIds?: string[] }).clueIds ?? []) deducedClueIds.add(id);
+      }
+      const clues = { ...((state.clues ?? {}) as Record<string, unknown>) };
+      for (const [id, clue] of Object.entries(clues)) {
+        const c = clue as { status?: string };
+        if (c.status === 'connected') {
+          clues[id] = { ...c, status: deducedClueIds.has(id) ? 'deduced' : 'examined' };
+        }
+      }
+      state = { ...state, clues } as GameState;
+      version = 5;
+    }
+
+    return normalizeContested({
       version: CURRENT_SAVE_VERSION,
       timestamp: saveFile.timestamp,
       state,
-    };
+    });
   },
 };
