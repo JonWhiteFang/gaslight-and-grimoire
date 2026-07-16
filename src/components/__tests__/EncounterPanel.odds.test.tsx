@@ -6,7 +6,7 @@
  * its pre-roll odds tag. Rounds are non-supernatural to avoid the reaction roll.
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { EncounterPanel } from '../EncounterPanel/EncounterPanel';
 import { useStore } from '../../store';
 import type { EncounterRound } from '../../types';
@@ -75,5 +75,33 @@ describe('EncounterPanel — round-choice odds', () => {
     useStore.setState({ flags: { 'ability-auto-succeed-reason': true } });
     render(<EncounterPanel sceneId="enc2" rounds={rounds} isSupernatural={false} onComplete={() => {}} />);
     expect(screen.getByText(/Assured/i)).toBeInTheDocument();
+  });
+
+  it('writes the DC into lastCheckResult when a round choice is selected', () => {
+    useStore.setState({ flags: {}, lastCheckResult: null });
+    render(<EncounterPanel sceneId="enc3" rounds={rounds} isSupernatural={false} onComplete={() => {}} />);
+    // Selecting the round choice resolves the check and may complete the
+    // encounter (single round → onComplete); assert the store dc write here.
+    fireEvent.click(screen.getByRole('button', { name: /Reason it out/ }));
+    expect(useStore.getState().lastCheckResult?.dc).toBe(14); // resolveDC(e1) === 14
+  });
+
+  it('reacts to the auto-succeed flag flipping on AFTER mount', () => {
+    // Mount FIRST with no flags: the pre-roll odds must show the Prospects band
+    // (DC 14), NOT "Assured". A non-reactive snapshot would freeze this state.
+    useStore.setState({ flags: {} });
+    render(<EncounterPanel sceneId="enc4" rounds={rounds} isSupernatural={false} onComplete={() => {}} />);
+    expect(screen.getByText(/DC 14/)).toBeInTheDocument();
+    expect(screen.queryByText(/Assured/i)).not.toBeInTheDocument();
+
+    // Flip the flag while the panel stays mounted. Because EncounterPanel reads
+    // flags via the reactive `useStore((s) => s.flags)` selector (not the
+    // non-reactive buildGameState snapshot), the ChoiceCard must re-render and
+    // now read "Assured". This test would FAIL against a snapshot flags source.
+    act(() => {
+      useStore.setState({ flags: { 'ability-auto-succeed-reason': true } });
+    });
+    expect(screen.getByText(/Assured/i)).toBeInTheDocument();
+    expect(screen.queryByText(/DC 14/)).not.toBeInTheDocument();
   });
 });
