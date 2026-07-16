@@ -6,6 +6,7 @@ vi.mock('../../engine/diceEngine', () => ({
   performCheck: vi.fn(() => ({ roll: 10, modifier: 0, total: 10, dc: 14, tier: 'success' })),
   calculateModifier: () => 0,
   getTrainedBonus: () => 0,
+  isFacultyCheck: (c: any) => c.faculty != null && (c.difficulty !== undefined || c.dynamicDifficulty != null),
 }));
 
 import { DeductionButton } from '../EvidenceBoard/DeductionButton';

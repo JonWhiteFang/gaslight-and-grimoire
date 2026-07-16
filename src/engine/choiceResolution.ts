@@ -10,7 +10,7 @@ import type {
   GameState,
 } from '../types';
 import type { EngineActions } from './engineActions';
-import { performCheck, resolveDC } from './diceEngine';
+import { performCheck, resolveDC, isFacultyCheck } from './diceEngine';
 import { abilityAutoSucceedFlag, checkAutoSucceeds } from './flags';
 import { computeAdvantage } from './advantage';
 
@@ -45,7 +45,7 @@ export function resolveCheckOutcome(
   state: GameState,
   label = 'Choice',
 ): CheckOutcome {
-  if (choice.faculty && (choice.difficulty !== undefined || choice.dynamicDifficulty)) {
+  if (isFacultyCheck(choice)) {
     const abilityFlag = abilityAutoSucceedFlag(choice.faculty);
     if (abilityFlag && checkAutoSucceeds(choice.faculty, state.flags)) {
       return {

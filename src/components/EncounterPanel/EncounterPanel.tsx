@@ -11,7 +11,7 @@ import {
 } from '../../engine/narrativeEngine';
 import { computeAdvantage } from '../../engine/advantage';
 import { checkAutoSucceeds } from '../../engine/flags';
-import { resolveDC } from '../../engine/diceEngine';
+import { resolveDC, isFacultyCheck } from '../../engine/diceEngine';
 import { ChoiceCard } from '../ChoicePanel/ChoiceCard';
 import type { Choice, EncounterRound, EncounterState } from '../../types';
 
@@ -94,10 +94,9 @@ export function EncounterPanel({ sceneId, rounds, isSupernatural, onComplete }: 
           modifier: result.modifier ?? 0,
           total: result.total ?? result.roll,
           tier: result.tier,
-          dc:
-            choice.faculty && (choice.difficulty !== undefined || choice.dynamicDifficulty != null)
-              ? resolveDC(choice, gameState.investigator)
-              : undefined,
+          dc: isFacultyCheck(choice)
+            ? resolveDC(choice, gameState.investigator)
+            : undefined,
         });
       }
 

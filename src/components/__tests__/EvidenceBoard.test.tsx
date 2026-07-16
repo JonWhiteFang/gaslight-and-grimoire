@@ -14,6 +14,7 @@ vi.mock('../../engine/diceEngine', () => ({
   performCheck: vi.fn(() => ({ roll: 10, modifier: 0, total: 10, tier: 'success' })),
   calculateModifier: () => 0,
   getTrainedBonus: () => 0,
+  isFacultyCheck: (c: any) => c.faculty != null && (c.difficulty !== undefined || c.dynamicDifficulty != null),
 }));
 
 vi.mock('../../announcer', () => ({

@@ -72,6 +72,21 @@ export function resolveCheck(roll: number, modifier: number, dc: number): Outcom
   return 'failure';
 }
 
+// ─── Faculty-Check Predicate ──────────────────────────────────────────────────
+
+/**
+ * True when a Choice is a faculty check the engine will roll for: it names a
+ * faculty AND supplies a difficulty (static or dynamic). The single source of
+ * truth gating BOTH the roll (resolveCheckOutcome) and the pre-roll odds UI
+ * (ChoiceCard/panels) — keep every call site on this predicate so they can't drift.
+ *
+ * Typed as a guard so call sites narrow `choice.faculty` to non-null inside the
+ * branch (performCheck/resolveDC/computeCheckOdds all need it).
+ */
+export function isFacultyCheck(choice: Choice): choice is Choice & { faculty: Faculty } {
+  return choice.faculty != null && (choice.difficulty !== undefined || choice.dynamicDifficulty != null);
+}
+
 // ─── Dynamic Difficulty ───────────────────────────────────────────────────────
 
 /**

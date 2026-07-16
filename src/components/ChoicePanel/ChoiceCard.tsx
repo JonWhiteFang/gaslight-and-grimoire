@@ -3,7 +3,7 @@
  * proficiency colour + text label, Advantage indicator, and key icon.
  */
 import React from 'react';
-import { calculateModifier, getTrainedBonus, resolveDC } from '../../engine/diceEngine';
+import { calculateModifier, getTrainedBonus, resolveDC, isFacultyCheck } from '../../engine/diceEngine';
 import { computeCheckOdds, describeCheckOdds } from '../../engine/checkOdds';
 import { CheckOddsTag } from '../shared';
 import type { Choice, Faculty, Investigator } from '../../types';
@@ -100,8 +100,7 @@ function ChoiceCardComponent({
   }
 
   // Pre-roll odds — only for a real check (faculty + a difficulty the engine rolls against).
-  const isCheck =
-    choice.faculty != null && (choice.difficulty !== undefined || choice.dynamicDifficulty != null);
+  const isCheck = isFacultyCheck(choice);
   const odds =
     isCheck && choice.faculty
       ? computeCheckOdds({
