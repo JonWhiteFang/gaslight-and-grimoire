@@ -126,10 +126,39 @@ to:
 
 (`abilityFlag` is retained because it is returned as `consumedAbilityFlag`; the guard now routes through the shared predicate.)
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [ ] **Step 5: Add a resolver behaviour-preservation assertion + run tests**
 
-Run: `npx vitest run src/engine/__tests__/checkAutoSucceeds.test.ts src/engine/__tests__/choiceResolution*.test.ts`
-Expected: PASS — new predicate tests green AND existing resolver tests still green (behaviour preserved).
+There is **no** `choiceResolution*.test.ts` (an unmatched glob aborts under zsh). Add a direct resolver case to the
+new test file so the refactor is guarded, then run an exact path. Append to `checkAutoSucceeds.test.ts`:
+
+```ts
+import { resolveCheckOutcome } from '../choiceResolution';
+import type { Choice, GameState } from '../../types';
+
+describe('resolveCheckOutcome — auto-succeed still short-circuits after the refactor', () => {
+  it('returns a guaranteed critical and consumes the ability flag', () => {
+    const choice = {
+      id: 'x', text: 't', faculty: 'reason', difficulty: 14,
+      outcomes: { critical: 'crit', success: 's', partial: 'p', failure: 'f', fumble: 'f' },
+    } as Choice;
+    const state = { flags: { 'ability-auto-succeed-reason': true }, investigator: {
+      name: 'T', archetype: 'deductionist',
+      faculties: { reason: 10, perception: 10, nerve: 10, vigor: 10, influence: 10, lore: 10 },
+      composure: 10, vitality: 10, abilityUsed: false,
+    } } as unknown as GameState;
+    const out = resolveCheckOutcome(choice, state);
+    expect(out.result.tier).toBe('critical');
+    expect(out.result.nextSceneId).toBe('crit');
+    expect(out.consumedAbilityFlag).toBe('ability-auto-succeed-reason');
+  });
+});
+```
+
+> **Implementer note:** confirm `GameState`'s required fields (`clues`, `deductions`, etc.) and add the minimum the
+> cast needs — check an existing engine test that builds a `GameState` (e.g. `integration.test.ts`) for the shape.
+
+Run: `npx vitest run src/engine/__tests__/checkAutoSucceeds.test.ts src/engine/__tests__/integration.test.ts`
+Expected: PASS — new predicate + resolver tests green AND the existing integration suite still green.
 
 - [ ] **Step 6: Commit**
 
@@ -158,63 +187,78 @@ import fc from 'fast-check';
 import { computeCheckOdds, describeCheckOdds } from '../checkOdds';
 import type { Investigator } from '../../types';
 
-// Minimal investigator: reason 14 → modifier +2 (floor((14-10)/2)); archetype
-// 'detective' has reason primary → +1 trained → total +3 unless overridden below.
-function inv(reasonScore = 10, archetype: Investigator['archetype'] = 'detective'): Investigator {
+// Valid Investigator fixture. Archetype 'deductionist' has primaryFaculty 'reason'
+// (src/data/archetypes.ts), so a reason check gets +1 trained bonus. Required
+// fields per src/types/index.ts: name, archetype, faculties, composure, vitality,
+// abilityUsed. lastCriticalFaculty is OPTIONAL (omit it — do not pass null).
+function inv(reasonScore = 10, archetype: Investigator['archetype'] = 'deductionist'): Investigator {
   return {
     name: 'Test', archetype,
     faculties: { reason: reasonScore, perception: 10, nerve: 10, vigor: 10, influence: 10, lore: 10 },
-    composure: 10, vitality: 10, maxComposure: 10, maxVitality: 10,
-    lastCriticalFaculty: null,
-  } as Investigator;
+    composure: 10, vitality: 10, abilityUsed: false,
+  };
 }
 
 const base = {
-  investigator: inv(10, 'detective'), // reason 10 → mod 0, but detective primary reason → +1 = +1
+  investigator: inv(10, 'deductionist'), // reason 10 → mod 0, +1 trained (reason primary) = +1
   hasAdvantage: false, hasDisadvantage: false, autoSucceeds: false, partialCountsAsSuccess: false,
 };
 
-describe('computeCheckOdds — band thresholds (strict success)', () => {
-  // With modifier m, needed = dc - m; p = clamp((21-needed)/20, .05, .95).
-  // Favourable ≥ .65, Uncertain [.35,.65), Forbidding < .35.
-  it('Favourable when success chance ≥ 65%', () => {
-    // mod +1 (detective/reason 10), dc 8 → needed 7 → p = (21-7)/20 = .70 → Favourable
-    const o = computeCheckOdds({ ...base, faculty: 'reason', dc: 8 });
+describe('computeCheckOdds — band thresholds at the EXACT .65 / .35 boundaries', () => {
+  // needed = dc - modifier; p = clamp((21-needed)/20, .05, .95).
+  // Favourable ≥ .65, Uncertain [.35,.65), Forbidding < .35 — pin the boundaries.
+  // mod +1 (deductionist/reason).
+  it('p == .65 exactly → Favourable (inclusive lower bound)', () => {
+    // p .65 needs (21-needed)/20 = .65 → needed = 8 → dc = needed + mod = 9
+    const o = computeCheckOdds({ ...base, faculty: 'reason', dc: 9 });
     expect(o.band).toBe('favourable');
   });
-  it('Uncertain in the 35–64% range', () => {
-    // mod +1, dc 13 → needed 12 → p = (21-12)/20 = .45 → Uncertain
-    const o = computeCheckOdds({ ...base, faculty: 'reason', dc: 13 });
+  it('just below .65 → Uncertain', () => {
+    // needed 9 → p .60 → dc = 10
+    const o = computeCheckOdds({ ...base, faculty: 'reason', dc: 10 });
     expect(o.band).toBe('uncertain');
   });
-  it('Forbidding when success chance < 35%', () => {
-    // mod +1, dc 17 → needed 16 → p = (21-16)/20 = .25 → Forbidding
-    const o = computeCheckOdds({ ...base, faculty: 'reason', dc: 17 });
+  it('p == .35 exactly → Uncertain (inclusive lower bound)', () => {
+    // p .35 → needed = 14 → dc = 15
+    const o = computeCheckOdds({ ...base, faculty: 'reason', dc: 15 });
+    expect(o.band).toBe('uncertain');
+  });
+  it('just below .35 → Forbidding', () => {
+    // needed 15 → p .30 → dc = 16
+    const o = computeCheckOdds({ ...base, faculty: 'reason', dc: 16 });
     expect(o.band).toBe('forbidding');
   });
 });
 
-describe('computeCheckOdds — clamps', () => {
-  it('never certain even when modifier dwarfs DC', () => {
-    const o = computeCheckOdds({ ...base, faculty: 'reason', dc: -5 });
-    expect(o.band).toBe('favourable'); // clamped to .95, still a band not "certain"
+describe('computeCheckOdds — clamp is load-bearing (fails if clamp deleted)', () => {
+  // Each pairs an extreme DC (raw p outside [0,1]) with adv/disadv so the fold-in
+  // squares the WRONG number if the clamp is removed. Guard = the band flips.
+  it('extreme-high DC + disadvantage → Forbidding (guards the p<0 floor)', () => {
+    // dc 40, mod +1 → needed 39 → raw p = (21-39)/20 = -0.9.
+    //   clamped:   p=.05 → disadv .05^2 = .0025 → Forbidding ✓
+    //   UNCLAMPED: (-0.9)^2 = .81 → Favourable ✗  ← flips if clamp deleted
+    const o = computeCheckOdds({ ...base, faculty: 'reason', dc: 40, hasDisadvantage: true });
+    expect(o.band).toBe('forbidding');
   });
-  it('never impossible even when DC dwarfs modifier', () => {
-    const o = computeCheckOdds({ ...base, faculty: 'reason', dc: 40 });
-    expect(o.band).toBe('forbidding'); // clamped to .05
+  it('extreme-low DC + advantage → Favourable (guards the p>1 ceiling)', () => {
+    // dc -20, mod +1 → needed -21 → raw p = (21+21)/20 = 2.1.
+    //   clamped:   p=.95 → adv 1-(1-.95)^2 = .9975 → Favourable ✓
+    //   UNCLAMPED: 1-(1-2.1)^2 = 1-1.21 = -0.21 → Forbidding ✗  ← flips if clamp deleted
+    const o = computeCheckOdds({ ...base, faculty: 'reason', dc: -20, hasAdvantage: true });
+    expect(o.band).toBe('favourable');
   });
 });
 
 describe('computeCheckOdds — advantage / disadvantage', () => {
-  it('advantage lifts a Forbidding bare check', () => {
+  it('advantage lifts a Forbidding bare check to Uncertain', () => {
+    // dc 17, mod +1 → needed 16 → p = .25 (forbidding). adv pEff = 1-(1-.25)^2 = .4375 → uncertain.
     const bare = computeCheckOdds({ ...base, faculty: 'reason', dc: 17 });
     const adv = computeCheckOdds({ ...base, faculty: 'reason', dc: 17, hasAdvantage: true });
     expect(bare.band).toBe('forbidding');
-    // p=.25 → pEff = 1-(1-.25)^2 = .4375 → Uncertain
     expect(adv.band).toBe('uncertain');
   });
-  it('disadvantage lowers a bare check', () => {
-    // dc 13 → p .45 (uncertain); disadv pEff = .45^2 = .2025 → forbidding
+  it('disadvantage lowers a bare Uncertain check to Forbidding', () => {
+    // dc 13 → needed 12 → p .45 (uncertain); disadv pEff = .45^2 = .2025 → forbidding.
     const dis = computeCheckOdds({ ...base, faculty: 'reason', dc: 13, hasDisadvantage: true });
     expect(dis.band).toBe('forbidding');
   });
@@ -227,13 +271,11 @@ describe('computeCheckOdds — advantage / disadvantage', () => {
 
 describe('computeCheckOdds — partialCountsAsSuccess', () => {
   it('including partial can raise the band on a clue prompt', () => {
-    // reason 10 detective mod +1. Use a faculty with mod 0 to hit the spec example:
-    const i = inv(10, 'detective');
-    // perception mod 0 (score 10, not primary). dc 10:
-    //   strict: needed 10 → p .55 → uncertain
+    // perception mod 0 (score 10, NOT the deductionist primary). dc 10:
+    //   strict:  needed 10 → p .55 → uncertain
     //   partial: needed dc-3 = 7 → p .70 → favourable
-    const strict = computeCheckOdds({ ...base, investigator: i, faculty: 'perception', dc: 10 });
-    const lenient = computeCheckOdds({ ...base, investigator: i, faculty: 'perception', dc: 10, partialCountsAsSuccess: true });
+    const strict = computeCheckOdds({ ...base, faculty: 'perception', dc: 10 });
+    const lenient = computeCheckOdds({ ...base, faculty: 'perception', dc: 10, partialCountsAsSuccess: true });
     expect(strict.band).toBe('uncertain');
     expect(lenient.band).toBe('favourable');
   });
@@ -253,7 +295,7 @@ describe('describeCheckOdds', () => {
     expect(describeCheckOdds(o)).toBe('Reason check, modifier +1, difficulty 13, prospects uncertain');
   });
   it('appends advantage', () => {
-    const o = computeCheckOdds({ ...base, faculty: 'reason', dc: 8, hasAdvantage: true });
+    const o = computeCheckOdds({ ...base, faculty: 'reason', dc: 9, hasAdvantage: true });
     expect(describeCheckOdds(o)).toContain('advantage');
   });
   it('phrases an assured check without probability language', () => {
@@ -263,14 +305,14 @@ describe('describeCheckOdds', () => {
 });
 
 describe('computeCheckOdds — monotonic in modifier (property)', () => {
-  const order = { forbidding: 0, uncertain: 1, favourable: 2 };
+  const order = { forbidding: 0, uncertain: 1, favourable: 2 } as const;
   it('higher modifier never yields a worse band at fixed DC', () => {
     fc.assert(fc.property(
       fc.integer({ min: 4, max: 20 }), fc.integer({ min: 4, max: 20 }), fc.integer({ min: 1, max: 25 }),
       (loScore, hiScore, dc) => {
         const lo = Math.min(loScore, hiScore), hi = Math.max(loScore, hiScore);
-        const oLo = computeCheckOdds({ ...base, investigator: inv(lo, 'detective'), faculty: 'reason', dc });
-        const oHi = computeCheckOdds({ ...base, investigator: inv(hi, 'detective'), faculty: 'reason', dc });
+        const oLo = computeCheckOdds({ ...base, investigator: inv(lo), faculty: 'reason', dc });
+        const oHi = computeCheckOdds({ ...base, investigator: inv(hi), faculty: 'reason', dc });
         expect(order[oHi.band]).toBeGreaterThanOrEqual(order[oLo.band]);
       },
     ));
@@ -278,7 +320,10 @@ describe('computeCheckOdds — monotonic in modifier (property)', () => {
 });
 ```
 
-> **Note for implementer:** confirm the exact `Investigator` shape and a valid `archetype` value + its primary faculty from `src/types/index.ts` and `src/data/archetypes.ts` before running — adjust the `inv()` helper's fields/archetype if the type differs. The `detective`/`reason`-primary assumption drives the `+1` in expectations; if the archetype key or its primary faculty differs, use one whose primary is `reason`, or set expectations from `calculateModifier` + `getTrainedBonus` directly.
+> **Implementer note (verified against repo):** `Investigator` requires `name, archetype, faculties,
+> composure, vitality, abilityUsed`; `lastCriticalFaculty` is **optional** (omit — never pass `null`).
+> There are **no** `maxComposure`/`maxVitality` fields. Valid archetype ids are `deductionist` (reason
+> primary), and the others in `src/data/archetypes.ts` — use `deductionist` for reason-check expectations.
 
 - [ ] **Step 2: Run tests to verify they fail**
 
@@ -475,16 +520,63 @@ Inside the roll-breakdown `<div className="flex items-center gap-2 ...">`, after
           )}
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [ ] **Step 5: Wire the DC into the overlay's render call (Codex plan-review Major 2)**
 
-Run: `npx vitest run src/components/__tests__/DiceRollOverlay.dc.test.tsx`
-Expected: PASS both cases.
+The prop is useless until `NarrativePanel` passes it. In `src/components/NarrativePanel/NarrativePanel.tsx`, the
+`<DiceRollOverlay>` element (around line 125) currently passes `roll`/`modifier`/`total`/`visible`/`reducedMotion`
+but **not** `dc`. Add it:
 
-- [ ] **Step 6: Commit**
+```tsx
+      <DiceRollOverlay
+        roll={lastCheckResult?.roll}
+        modifier={lastCheckResult?.modifier}
+        total={lastCheckResult?.total}
+        dc={lastCheckResult?.dc}
+        visible={diceVisible}
+        reducedMotion={reducedMotion}
+      />
+```
+
+- [ ] **Step 6: Add a NarrativePanel integration test proving the DC reaches the overlay**
+
+Append to a new `src/components/__tests__/NarrativePanel.dc.test.tsx` (seed a `lastCheckResult` with `dc` via the
+store, mirroring the existing NarrativePanel store-seeding helper — check `src/components/__tests__` for it):
+
+```tsx
+import { describe, it, expect, beforeEach } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { NarrativePanel } from '../NarrativePanel/NarrativePanel';
+import { useStore } from '../../store';
+
+describe('NarrativePanel — DC reaches the dice overlay', () => {
+  beforeEach(() => {
+    // Reuse the repo's store-reset/seed helper if one exists; otherwise set the
+    // minimum: a current scene + investigator so the panel renders, then the result.
+    useStore.setState({ lastCheckResult: { roll: 17, modifier: 2, total: 19, tier: 'success', dc: 14 } });
+  });
+
+  it('renders "vs DC 14" from lastCheckResult.dc', () => {
+    render(<NarrativePanel />);
+    expect(screen.getByText(/DC 14/)).toBeInTheDocument();
+  });
+});
+```
+
+> **Implementer note:** confirm what minimum store state `NarrativePanel` needs to render (it reads
+> `currentScene`, `investigator`, `clues`, `settings`, `lastCheckResult`). Reuse the established seeding
+> pattern from the existing NarrativePanel tests rather than hand-rolling. If a full render is heavy, an
+> acceptable alternative is asserting the overlay receives `dc` — but the DOM assertion above is preferred.
+
+- [ ] **Step 7: Run tests to verify they pass**
+
+Run: `npx vitest run src/components/__tests__/DiceRollOverlay.dc.test.tsx src/components/__tests__/NarrativePanel.dc.test.tsx`
+Expected: PASS. The NarrativePanel test is the one that would stay RED if Step 5's render-call wiring were skipped.
+
+- [ ] **Step 8: Commit**
 
 ```bash
-git add src/store/slices/narrativeSlice.ts src/components/NarrativePanel/DiceRollOverlay.tsx src/components/__tests__/DiceRollOverlay.dc.test.tsx
-git commit -m "feat: CheckResult.dc + DiceRollOverlay 'vs DC' display (Phase 3 T3)"
+git add src/store/slices/narrativeSlice.ts src/components/NarrativePanel/DiceRollOverlay.tsx src/components/NarrativePanel/NarrativePanel.tsx src/components/__tests__/DiceRollOverlay.dc.test.tsx src/components/__tests__/NarrativePanel.dc.test.tsx
+git commit -m "feat: CheckResult.dc + DiceRollOverlay 'vs DC' display, wired through NarrativePanel (Phase 3 T3)"
 ```
 
 ---
@@ -531,9 +623,14 @@ describe('CheckOddsTag', () => {
     expect(screen.queryByText(/DC/)).not.toBeInTheDocument();
   });
 
-  it('renders the advantage glyph when advantaged', () => {
+  it('renders the literal "Prospects:" label', () => {
+    render(<CheckOddsTag odds={odds} />);
+    expect(screen.getByText(/Prospects:\s*Uncertain/i)).toBeInTheDocument();
+  });
+
+  it('does NOT render its own advantage glyph (ChoiceCard/prompt owns it — no duplicate)', () => {
     render(<CheckOddsTag odds={{ ...odds, hasAdvantage: true }} />);
-    expect(screen.getByText('◈')).toBeInTheDocument();
+    expect(screen.queryByText('◈')).not.toBeInTheDocument();
   });
 });
 ```
@@ -592,12 +689,16 @@ export function CheckOddsTag({ odds }: CheckOddsTagProps) {
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-xs font-medium ${BAND_STYLE[odds.band]}`}
     >
       <span>vs DC {odds.dc}</span>
-      <span className="opacity-75">· {BAND_LABEL[odds.band]}</span>
-      {odds.hasAdvantage && !odds.hasDisadvantage && <span className="text-green-400">◈</span>}
+      <span className="opacity-75">· Prospects: {BAND_LABEL[odds.band]}</span>
     </span>
   );
 }
 ```
+
+> **Note:** the tag deliberately does **not** render the ◈ advantage glyph — `ChoiceCard` already renders its own
+> advantage indicator (`ChoiceCard.tsx:126-135`), and `SceneCluePrompts` clue checks never have advantage. Rendering
+> it here too would double the glyph (Codex plan-review Minor). The advantage is still conveyed to AT via the
+> button's appended `aria-label` phrase.
 
 Create `src/components/shared/index.ts`:
 
@@ -640,10 +741,10 @@ import type { Choice, Investigator } from '../../types';
 
 function inv(): Investigator {
   return {
-    name: 'T', archetype: 'detective',
+    name: 'T', archetype: 'deductionist',
     faculties: { reason: 14, perception: 10, nerve: 10, vigor: 10, influence: 10, lore: 10 },
-    composure: 10, vitality: 10, maxComposure: 10, maxVitality: 10, lastCriticalFaculty: null,
-  } as Investigator;
+    composure: 10, vitality: 10, abilityUsed: false,
+  };
 }
 
 const checkChoice: Choice = {
@@ -680,6 +781,11 @@ describe('ChoiceCard — pre-roll odds', () => {
     render(<ChoiceCard choice={checkChoice} {...common} autoSucceeds />);
     expect(screen.getByText(/Assured/i)).toBeInTheDocument();
     expect(screen.getByRole('button')).toHaveAccessibleName(/assured success/i);
+  });
+
+  it('shows exactly one advantage glyph when advantaged (tag must not duplicate it)', () => {
+    render(<ChoiceCard choice={checkChoice} {...common} hasAdvantage />);
+    expect(screen.getAllByText('◈')).toHaveLength(1);
   });
 });
 ```
@@ -795,10 +901,23 @@ describe('ChoicePanel — autoSucceeds plumbing', () => {
     render(<ChoicePanel choices={[reasonCheck]} />);
     expect(screen.getByText(/DC 14/)).toBeInTheDocument();
   });
+
+  it('writes the DC into lastCheckResult when a check choice is selected (guards the dc wiring)', async () => {
+    const { userEvent } = await import('@testing-library/user-event');
+    useStore.setState({ flags: {}, lastCheckResult: null });
+    render(<ChoicePanel choices={[reasonCheck]} />);
+    await userEvent.default.click(screen.getByRole('button', { name: /Deduce/ }));
+    // Only assert the DC field — roll/tier are RNG. resolveDC(reasonCheck) === 14.
+    expect(useStore.getState().lastCheckResult?.dc).toBe(14);
+  });
 });
 ```
 
-> **Note for implementer:** confirm how the store exposes `flags` and whether an investigator must be seeded for `ChoicePanel` to render (it reads `useStore(s => s.investigator)`). If a default investigator isn't present in a fresh store, seed one via `useStore.setState({ investigator: ... })` in a `beforeEach`, mirroring existing ChoicePanel tests. Check `src/components/__tests__` for the established store-seeding helper and reuse it.
+> **Note for implementer:** confirm the store exposes `flags` and whether an investigator must be seeded for
+> `ChoicePanel` to render (it reads `useStore(s => s.investigator)`). Seed a valid investigator + reset `flags`/
+> `lastCheckResult` in `beforeEach`, mirroring existing ChoicePanel tests. Check `src/components/__tests__` for the
+> established store-seeding/reset helper and reuse it. For the click test, use the repo's existing `user-event`
+> import idiom (adjust the import above if the repo imports it differently).
 
 - [ ] **Step 2: Run test to verify it fails**
 
@@ -856,11 +975,23 @@ import { checkAutoSucceeds } from '../../engine/flags';
 import { resolveDC } from '../../engine/diceEngine';
 ```
 
-2. Pass `autoSucceeds` to each round-choice `ChoiceCard` (line 140-148 map):
+2. **Make flags reactive (Codex plan-review Minor).** The render body builds `gameState` via
+`buildGameState(useStore.getState())` (line ~111), which is a non-reactive snapshot — a flag-only store update
+(e.g. an ability activating mid-encounter) would NOT re-render the panel, so the memoized `ChoiceCard` would keep a
+stale `autoSucceeds`. Subscribe to `flags` reactively. Add near the other `useStore` selectors (top of component):
 
 ```tsx
-            autoSucceeds={choice.faculty ? checkAutoSucceeds(choice.faculty, gameState.flags) : false}
+  const flags = useStore((s) => s.flags);
 ```
+
+Then pass `autoSucceeds` from that reactive `flags` to each round-choice `ChoiceCard` (line 140-148 map):
+
+```tsx
+            autoSucceeds={choice.faculty ? checkAutoSucceeds(choice.faculty, flags) : false}
+```
+
+(Leave the `gameState = buildGameState(...)` for `getEncounterChoices`/`computeAdvantage` as-is; only the
+`autoSucceeds` source must be the reactive `flags` selector.)
 
 3. In `handleChoiceSelect`, add `dc` to the `setCheckResult` call (lines 86-93):
 
@@ -880,15 +1011,60 @@ import { resolveDC } from '../../engine/diceEngine';
 
 (`gameState` is already built at the top of `handleChoiceSelect` — reuse it.)
 
+- [ ] **Step 4b: Add an encounter round-choice test (Codex plan-review Major 5)**
+
+`ChoicePanel`-only tests leave the `EncounterPanel` edits unexercised. Add `src/components/__tests__/EncounterPanel.odds.test.tsx` proving a round choice shows the tag and reflects a reactive flag update. Encounters use the real store + `startEncounter`; model it on the existing EncounterPanel tests (find them in `src/components/__tests__`):
+
+```tsx
+import { describe, it, expect, beforeEach } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { EncounterPanel } from '../EncounterPanel/EncounterPanel';
+import { useStore } from '../../store';
+import type { EncounterRound } from '../../types';
+
+const rounds: EncounterRound[] = [
+  {
+    roundNumber: 1,
+    // A round choice that is a real reason check.
+    choices: [{ id: 'e1', text: 'Reason it out', faculty: 'reason', difficulty: 14,
+      outcomes: { critical: 'w', success: 'w', partial: 'w', failure: 'l', fumble: 'l' } }],
+  } as unknown as EncounterRound,
+];
+
+describe('EncounterPanel — round-choice odds', () => {
+  beforeEach(() => {
+    // Seed a valid investigator; mirror the existing EncounterPanel test setup.
+    useStore.setState({ flags: {}, encounterState: null });
+  });
+
+  it('shows the Prospects tag on a round choice (transitive via ChoiceCard)', () => {
+    render(<EncounterPanel sceneId="enc1" rounds={rounds} isSupernatural={false} onComplete={() => {}} />);
+    expect(screen.getByText(/DC 14/)).toBeInTheDocument();
+  });
+
+  it('shows Assured when the auto-succeed flag is active for that faculty', () => {
+    useStore.setState({ flags: { 'ability-auto-succeed-reason': true } });
+    render(<EncounterPanel sceneId="enc2" rounds={rounds} isSupernatural={false} onComplete={() => {}} />);
+    expect(screen.getByText(/Assured/i)).toBeInTheDocument();
+  });
+});
+```
+
+> **Implementer note:** confirm the `EncounterRound`/encounter fixture shape and the store seeding an encounter
+> needs (investigator, and whatever `startEncounter` reads) against `src/engine/encounters.ts` + the existing
+> EncounterPanel tests. If a supernatural reaction roll interferes, keep `isSupernatural={false}`. The two
+> assertions above are the ones that stay RED if the `EncounterPanel` `autoSucceeds`/flags edits are skipped.
+
 - [ ] **Step 5: Run tests to verify they pass**
 
-Run: `npx vitest run src/components/__tests__/ChoicePanel.odds.test.tsx`
-Expected: PASS both. Then existing panel tests: `npx vitest run src/components/__tests__ -t ChoicePanel` and `-t Encounter` — no regressions.
+Run: `npx vitest run src/components/__tests__/ChoicePanel.odds.test.tsx src/components/__tests__/EncounterPanel.odds.test.tsx`
+Expected: PASS all (incl. the click-level DC test and the encounter Assured test). Then existing panel tests:
+`npx vitest run src/components/__tests__ -t ChoicePanel` and `-t Encounter` — no regressions.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/components/ChoicePanel/ChoicePanel.tsx src/components/EncounterPanel/EncounterPanel.tsx src/components/__tests__/ChoicePanel.odds.test.tsx
+git add src/components/ChoicePanel/ChoicePanel.tsx src/components/EncounterPanel/EncounterPanel.tsx src/components/__tests__/ChoicePanel.odds.test.tsx src/components/__tests__/EncounterPanel.odds.test.tsx
 git commit -m "feat(ui): plumb autoSucceeds + DC through ChoicePanel/EncounterPanel (Phase 3 T6)"
 ```
 
@@ -913,30 +1089,54 @@ import type { Clue, ClueDiscovery, GameState, Investigator } from '../../types';
 
 function inv(): Investigator {
   return {
-    name: 'T', archetype: 'detective',
+    name: 'T', archetype: 'deductionist',
     faculties: { reason: 10, perception: 10, nerve: 10, vigor: 10, influence: 10, lore: 10 },
-    composure: 10, vitality: 10, maxComposure: 10, maxVitality: 10, lastCriticalFaculty: null,
-  } as Investigator;
+    composure: 10, vitality: 10, abilityUsed: false,
+  };
 }
 
 const clue: Clue = { id: 'k1', title: 'Torn ledger', type: 'physical', isRevealed: false, status: 'unknown' } as Clue;
 const disc: ClueDiscovery = { clueId: 'k1', method: 'check', requiresFaculty: { faculty: 'perception', minimum: 10 } } as ClueDiscovery;
+const explore: ClueDiscovery = { clueId: 'k2', method: 'exploration' } as ClueDiscovery;
+const exploreClue: Clue = { id: 'k2', title: 'Open drawer', type: 'physical', isRevealed: false, status: 'unknown' } as Clue;
 const gs = { clues: {}, flags: {}, deductions: {}, investigator: inv() } as unknown as GameState;
 
 describe('SceneCluePrompts — pre-roll odds', () => {
-  it('surfaces the DC visibly on a check prompt', () => {
+  it('surfaces the DC visibly and the band on a check prompt', () => {
     render(
       <SceneCluePrompts sceneId="s1" cluesAvailable={[disc]} clues={{ k1: clue }} gameState={gs}
         investigator={inv()} onClueDiscovered={() => {}} onCheckResult={() => {}} discoverClue={() => {}} />,
     );
     expect(screen.getByText(/DC 10/)).toBeInTheDocument();
     // partialCountsAsSuccess=true: perception mod 0, dc 10 → clue-discovery 70% → Favourable
-    expect(screen.getByText(/Favourable/i)).toBeInTheDocument();
+    expect(screen.getByText(/Prospects:\s*Favourable/i)).toBeInTheDocument();
+  });
+
+  it('folds the odds phrase into the check button accessible name (Codex plan-review Minor)', () => {
+    render(
+      <SceneCluePrompts sceneId="s1" cluesAvailable={[disc]} clues={{ k1: clue }} gameState={gs}
+        investigator={inv()} onClueDiscovered={() => {}} onCheckResult={() => {}} discoverClue={() => {}} />,
+    );
+    const btn = screen.getByRole('button');
+    expect(btn).toHaveAccessibleName(/Perception check/i);
+    expect(btn).toHaveAccessibleName(/difficulty 10/i);
+    expect(btn).toHaveAccessibleName(/prospects favourable/i);
+  });
+
+  it('leaves an exploration (non-check) prompt unchanged — no DC / Prospects', () => {
+    render(
+      <SceneCluePrompts sceneId="s1" cluesAvailable={[explore]} clues={{ k2: exploreClue }} gameState={gs}
+        investigator={inv()} onClueDiscovered={() => {}} onCheckResult={() => {}} discoverClue={() => {}} />,
+    );
+    expect(screen.queryByText(/DC/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Prospects/i)).not.toBeInTheDocument();
   });
 });
 ```
 
-> **Note for implementer:** confirm the `Clue`/`ClueDiscovery`/`GameState` field names against `src/types/index.ts` and adjust the fixtures. The band expectation depends on `partialCountsAsSuccess: true`; if perception isn't mod 0 for this fixture, recompute the expected band.
+> **Note for implementer:** confirm `Clue`/`ClueDiscovery`/`GameState` field names against `src/types/index.ts` and
+> adjust fixtures (esp. `ClueDiscovery` for `exploration` — it may not need `requiresFaculty`). The band expectation
+> depends on `partialCountsAsSuccess: true` and perception being mod 0; recompute if the fixture differs.
 
 - [ ] **Step 2: Run test to verify it fails**
 
@@ -951,7 +1151,6 @@ In `src/components/NarrativePanel/SceneCluePrompts.tsx`:
 
 ```tsx
 import { computeCheckOdds, describeCheckOdds } from '../../engine/checkOdds';
-import { checkAutoSucceeds } from '../../engine/flags';
 import { CheckOddsTag } from '../shared';
 ```
 
@@ -964,7 +1163,10 @@ import { CheckOddsTag } from '../shared';
             dc: minimum,
             hasAdvantage: false,
             hasDisadvantage: false,
-            autoSucceeds: checkAutoSucceeds(faculty, gameState.flags),
+            // autoSucceeds is HARD false here (spec §4.2, Codex plan-review Major 1):
+            // handleCheck calls performCheck directly and does NOT honor/consume the
+            // auto-succeed ability, so an "Assured" tag would lie. Do NOT read the flag.
+            autoSucceeds: false,
             partialCountsAsSuccess: true,
           });
 ```
@@ -1083,4 +1285,5 @@ git commit -m "docs: Phase 3 dice-legibility — engine-reference/architecture/s
 - Spec §2.1 helper → T2. §2.2 predicate → T1. §2.3 tag + accessible-name → T4/T5/T7. §2.4 store `dc` → T3.
 - §3 band math incl. `partialCountsAsSuccess` → T2. §4.1 ChoiceCard + guard → T5. §4.2 clue prompts → T7. §4.3 encounter scope (transitive; reaction out) → T5 (transitive) + T6 (dc). §4.4 a11y → T5/T7 accessible-name tests. §5 overlay `dc` → T3.
 - §6 testing: engine T2, flags T1, components T4–T7. §7 edge cases covered across T2 (clamp/partial/autoSucceeds), T5 (faculty-only guard), T6 (autoSucceeds plumbing).
-- All findings mapped: Major1→T1/T2/T5/T6; Major2→T2/T7; Major3→T4/T5/T7; Major4→T5/T6 (+ spec scope); Minor5→T5.
+- All **spec-review** findings mapped: Major1→T1/T2/T5/T6; Major2→T2/T7; Major3→T4/T5/T7; Major4→T5/T6 (+ spec scope); Minor5→T5.
+- All **plan-review** findings folded: Major (clue-prompt Assured lie)→T7 `autoSucceeds:false` + spec §4.2; Major (DC never reached overlay)→T3 Step 5 render-call wiring + NarrativePanel integration test; Major (`detective` archetype/invalid fixtures)→T2/T5/T7 use `deductionist` + valid `Investigator` (no `maxComposure`/`maxVitality`, `abilityUsed:false`, no `null` `lastCriticalFaculty`); Major (weak clamp/boundary tests)→T2 exact .65/.35 boundaries + clamp-flip guards; Major (Task 6 vacuous GREEN)→T6 click-level `lastCheckResult.dc` test + EncounterPanel.odds test; Minor (non-reactive encounter flags)→T6 Step 4 `useStore(s=>s.flags)` selector; Minor (Task 1 glob abort)→T1 direct resolver test + exact paths; Minor (dropped "Prospects:" + duplicate glyph)→T4 literal label + no tag glyph + T5 one-glyph assertion; Minor (missing clue-prompt accessible name)→T7 button accessible-name + exploration-unchanged assertions.

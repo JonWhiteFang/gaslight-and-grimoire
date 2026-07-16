@@ -214,10 +214,16 @@ Perception +1 · vs DC 12 · Prospects: Favourable
 ```
 
 DC from `d.requiresFaculty.minimum`. `hasAdvantage`/`hasDisadvantage` = `false` (clue-check prompts don't route
-through `computeAdvantage` — matches the actual roll at `SceneCluePrompts:81`), `autoSucceeds` =
-`checkAutoSucceeds(faculty, gameState.flags)`, and **`partialCountsAsSuccess: true`** (partial discovers the clue —
-§3.1, finding 2). The odds phrase is appended to the check button's `aria-label`; the visible tag is decorative.
-Exploration (non-check) prompts are unchanged.
+through `computeAdvantage` — matches the actual roll at `SceneCluePrompts:81`), and
+**`partialCountsAsSuccess: true`** (partial discovers the clue — §3.1, finding 2). The odds phrase is appended to the
+check button's `aria-label`; the visible tag is decorative. Exploration (non-check) prompts are unchanged.
+
+**`autoSucceeds` is `false` on this surface (Codex plan-review Major 1).** Unlike `resolveCheckOutcome`, the clue-
+check path (`SceneCluePrompts.handleCheck`) calls `performCheck` directly and does **not** honor or consume the
+auto-succeed ability flag. Showing an "Assured" tag here would therefore lie — the check would still roll and could
+fail. Because the shipped clue prompts use Reason/Vigor/Influence (exactly the three auto-succeed faculties), this
+mismatch is reachable, so we hard-code `autoSucceeds: false` for clue prompts rather than reading the flag. (Making
+clue checks honor+consume the ability is a larger, separate change, explicitly out of scope for Phase 3.)
 
 ### 4.3 `EncounterPanel` (`src/components/EncounterPanel/`) — scope correction (Codex finding 4)
 
