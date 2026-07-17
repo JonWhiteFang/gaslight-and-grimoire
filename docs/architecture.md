@@ -127,7 +127,10 @@ intersection of the six slice interfaces.
   recomputed on render; the store never holds pixel coordinates. Connections are
   cleared on case/vignette load. The "connected" cue is **derived** from
   `connections` membership at render (`ClueCard isConnected`), never written as a
-  clue status (Phase 2b, N1).
+  clue status (Phase 2b, N1). During formation, `EvidenceBoard` also applies a
+  recipe's `onForm` effects (via `worldSlice.applyEffects`) **once per newly
+  formed recipe** — the `deductions` record is the once-guard, so re-forming an
+  already-recorded recipe never re-fires them.
 - **Store-owned contested-revert ownership (Phase 2b).** A failed deduction attempt
   marks its clues `'contested'` via `contestClues(ids)`, which claims a fresh
   `gen = ++attemptSeq`, records each clue's baseline in `contestedPrior` (only if
