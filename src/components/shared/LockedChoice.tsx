@@ -26,7 +26,9 @@ export function LockedChoice({ text, gateReason }: LockedChoiceProps) {
           <span className="text-stone-400 font-serif leading-snug line-through decoration-stone-600">
             {text}
           </span>
-          <p className="mt-1 text-sm text-stone-400 font-serif">{gateReason}</p>
+          {gateReason && (
+            <p className="mt-1 text-sm text-stone-400 font-serif">{gateReason}</p>
+          )}
         </div>
       </div>
     </li>

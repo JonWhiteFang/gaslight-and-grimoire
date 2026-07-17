@@ -40,9 +40,9 @@ export function ChoicePanel({ choices, onChoiceSelected }: ChoicePanelProps) {
   const shownChoices: Choice[] = [];
   const lockedChoices: Choice[] = [];
   for (const c of choices) {
-    const state = resolveChoiceVisibility(c, gameState);
-    if (state === 'shown') shownChoices.push(c);
-    else if (state === 'disabled') lockedChoices.push(c);
+    const visibility = resolveChoiceVisibility(c, gameState);
+    if (visibility === 'shown') shownChoices.push(c);
+    else if (visibility === 'disabled') lockedChoices.push(c);
     // 'hidden' -> dropped
   }
 
@@ -100,8 +100,9 @@ export function ChoicePanel({ choices, onChoiceSelected }: ChoicePanelProps) {
           ))}
         </nav>
       )}
+      {/* role="list" is explicit: list-none strips list semantics in Safari/VoiceOver */}
       {lockedChoices.length > 0 && (
-        <ul aria-label="Locked choices" className="flex flex-col gap-2 list-none">
+        <ul role="list" aria-label="Locked choices" className="flex flex-col gap-2 list-none">
           {lockedChoices.map((choice) => (
             <LockedChoice key={choice.id} text={choice.text} gateReason={choice.gateReason ?? ''} />
           ))}
