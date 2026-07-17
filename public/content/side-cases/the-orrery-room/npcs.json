@@ -1,0 +1,7 @@
+{
+  "npcs": [
+    { "id": "npc-vervain", "name": "Sister Vervain", "faction": "Hermetic Order of the Grey Dawn", "disposition": 0, "suspicion": 0, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "npc-coyle", "name": "Magister Coyle", "faction": "Hermetic Order of the Grey Dawn", "disposition": 1, "suspicion": 0, "memoryFlags": {}, "isAlive": true, "isAccessible": true },
+    { "id": "npc-finch", "name": "Mr. Abelard Finch", "faction": "Rationalists Circle", "disposition": 0, "suspicion": 0, "memoryFlags": {}, "isAlive": true, "isAccessible": true }
+  ]
+}

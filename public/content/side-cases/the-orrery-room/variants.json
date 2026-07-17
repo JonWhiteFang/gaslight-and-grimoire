@@ -1,0 +1,74 @@
+{
+  "variants": [
+    {
+      "id": "or-act2-night-vigil-veil",
+      "variantOf": "or-act2-night-vigil",
+      "variantCondition": { "type": "hasFlag", "target": "ability-veil-sight-active" },
+      "act": 2,
+      "narrative": "The house is asleep, or performing sleep, and the orrery room at midnight belongs to the orrery. You bring a lamp and do not light it. The skylight gives you the city's dull copper glow and a handful of actual stars, and beneath them the instrument turns in the dark, patient, unattended, keeping its sky for nobody.\n\nThe sound is different at night. You noticed the daytime sound without attending to it — a fine layered ticking, the cathedral-thought murmur of a great train of wheels all consenting to move together. With the gas down and the house quiet, the layers come apart. There is the tick, and beneath the tick a slower breathing of the mainspring, and beneath that — you are several minutes admitting this — a rhythm that does not divide evenly into the others. Not a fault. Nothing so honest as a fault. A stress in the music, as though somewhere in the train a wheel were keeping a different measure and the rest were accommodating it, courteously, the way this house accommodates things.\n\nAnd there is what the Sight shows you, which you spend those same several minutes declining to look at directly. Twelve of the bodies move the way moving things move: they go around, and their going describes a circle, and the circle stays where circles stay. The thirteenth does not read that way. Watched sidelong, in the grammar the Sight imposes, its motion is not an orbit at all — it is a distance, closing. Each circuit of the long ellipse reads like a stride rather than a lap, the same track covered and yet less of something remaining, as though the little dark sphere were not travelling around the gilt sun but toward some appointment the gearing merely rehearses. Arrival, the Sight insists, in the wordless way it insists on things. Not orbit. Arrival. You stop watching sidelong.\n\nThe sensible procedure is to sit until dawn and watch: note the motions, time the arcs, let the machine make its case for the appraisal in the only language it has. It is a long time until dawn, and the dark between you and the skylight is full of small brass movements, and the chair the Order has left you faces the instrument in a way that suggests other people have sat this watch before you and needed to.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "or-choice-vigil-watch",
+          "text": "Hold the watch until morning, whatever the dark does with it.",
+          "faculty": "nerve",
+          "difficulty": 12,
+          "outcomes": {
+            "critical": "or-act2-vigil-held",
+            "success": "or-act2-vigil-held",
+            "partial": "or-act2-vigil-broken",
+            "failure": "or-act2-vigil-broken",
+            "fumble": "or-act2-vigil-broken"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "or-act2-ending-destroyed-named",
+      "variantOf": "or-act2-ending-destroyed",
+      "variantCondition": { "type": "hasDeduction", "target": "mythos-pattern-named" },
+      "act": 2,
+      "narrative": "The Order abides. That is the terrible efficiency of the place: the verdict is entered in the minute-book, the seniors file out, and by evening the thing is arranged, because Vervain has had the arrangements ready for weeks. A furnace room below a foundry the Order quietly owns. Running water within reach. Witnesses limited to those whose names are already in ledgers that do not leave the house.\n\nShe does it herself. She would not have permitted otherwise. The orrery comes down the stairs in pieces on canvas slings, handled by porters who are not told what it is and do not ask, and Vervain stands at the furnace mouth and feeds it in arm by arm, wheel by wheel, in an order she appears to have decided long ago — the thirteenth arm neither first nor last, given no ceremony, one more piece of brass among brass. She works without hurry and without a single wasted motion, and her face is the face of a woman writing a minute.\n\nWhen the little dark sphere goes into the white heat, it makes a sound. A small sound, quickly over — the sound, perhaps, of trapped air escaping a hollow casting, which is what anyone sensible will have called it by morning. Nobody in the furnace room says anything. Vervain watches the crucible a while, and then she says, to the fire, in the tone of a woman closing a ledger, 'There.' The slag is poured, cooled, broken, and carried out before dawn in seven unmarked bags to seven reaches of the river. Coyle does not attend. Coyle does not speak to you again before you leave, and the look he gives you across the breakfast room has scholarship in it, and arithmetic, and no forgiveness of any kind. The Order pays your fee to the shilling, with a courtesy that has cooled ten degrees. On the street outside, the morning is ordinary. You find you keep listening for a ticking under it anyway, for longer than you would care to put in writing.\n\nAnd you carry out of that house the one thing the furnace could not be given: the figure. Three hands kept it — a dead astronomer's, a dead collector's, and a train of gears now slag in seven reaches of the river — and you checked it, and it held, and it holds still. The brass is gone; the number was never in the brass. You walk away through the ordinary morning knowing to the day how long the appointment book runs, and you tell no one, and you never will.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        { "type": "disposition", "target": "npc-coyle", "delta": -3 },
+        { "type": "reputation", "target": "Hermetic Order of the Grey Dawn", "delta": 2 },
+        { "type": "flag", "target": "or-case-complete", "value": true },
+        { "type": "flag", "target": "or-orrery-destroyed", "value": true }
+      ]
+    },
+    {
+      "id": "or-act2-ending-enshrined-named",
+      "variantOf": "or-act2-ending-enshrined",
+      "variantCondition": { "type": "hasDeduction", "target": "mythos-pattern-named" },
+      "act": 2,
+      "narrative": "The Order abides. The verdict is entered in the minute-book, and Coyle is on his feet before the ink is dry, gracious in victory the way only a man who never doubted it can be. Within the week the arrangements are made — and they are beautiful arrangements, you are given to see them, because Coyle wants you to see them. A chamber in the inner rooms, prepared to receive the instrument as a reliquary receives a saint: a case of leaded glass ground to optical fineness, wards worked into the frame by three separate hands so that no single hand knows the whole, a book of observance placed on a stand at the door with rules for winding, rules for watching, rules for who may be alone with it and for how long. The dead collector's diary is bound in morocco and shelved beside it. 'Provenance,' Coyle says, with real tenderness. 'He would have liked that. We keep what we fear — and we honour who it costs.'\n\nVervain does not attend the installation. Her faction registers its dissent in a minute that is read once and filed, and she stands in the corridor outside the inner rooms as the case is sealed, not entering, in the manner of a woman declining to attend a wedding she has failed to prevent. As you pass her she looks at you once. She says nothing at all, which from Vervain is a long speech, and you find you can reconstruct every sentence of it.\n\nThe Order pays your fee with warmth, and Coyle adds a standing invitation to consult the piece — 'scholars of your quality are exactly what it wants.' You leave by the quiet street behind the Museum with the house rising behind you, lamps low, factions settling into their new positions around the thing at the centre. The last thing you hear, before the door of the chapterhouse closes on its wax-polished hush, is the instrument. Somewhere above, in its glass and its wards and its honours, it is still running.\n\nStill running, and you alone on that street know what it is running toward. Three hands kept the figure — a dead astronomer's, a dead collector's, and the gearing now honoured under glass — and you checked it, and it held. The Order has enshrined a schedule and called it a treasure; the book of observance at the chamber door has rules for everything except the one date that matters. You could have told them. You watched Coyle seal the case, and the words were in your mouth, and you swallowed them, and you walk away knowing to the day how long the wards have to hold — and you tell no one, and you never will.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        { "type": "disposition", "target": "npc-vervain", "delta": -3 },
+        { "type": "reputation", "target": "Hermetic Order of the Grey Dawn", "delta": 2 },
+        { "type": "flag", "target": "or-case-complete", "value": true },
+        { "type": "flag", "target": "or-orrery-enshrined", "value": true }
+      ]
+    },
+    {
+      "id": "or-act2-ending-sealed-named",
+      "variantOf": "or-act2-ending-sealed",
+      "variantCondition": { "type": "hasDeduction", "target": "mythos-pattern-named" },
+      "act": 2,
+      "narrative": "You give them a third verdict, and you build it in front of them, out of their own materials, which is the only way it could ever stand. The instrument is genuine — that finding is not negotiable, and you do not negotiate it. But an appraisal, you remind the table, values a thing; it does not sentence it. And so you propose terms instead: the orrery sealed — not enshrined, not studied, not wound — in a chamber to which both factions hold keys, and neither holds both. Vervain's people to work the wards; Coyle's people to keep the record; the seals to be broken only by joint instruction of both factions, in writing, in the minute-book, over both signatures. Destruction forecloses knowledge, you tell Vervain, and the Order may one day need to know. Enshrinement is attendance, you tell Coyle, and the collector's diary shows what attendance becomes. Custody, jointly held, satisfies neither of you — which is the only proof available that it serves the Order rather than a faction.\n\nThe argument takes the afternoon. It succeeds the way such arguments succeed: not in a moment, but in the slow accumulation of neither side finding the flaw it is looking for. Vervain tests the terms like a woman testing a rope over a drop, and finds they hold her ledger's real requirement — that no one, ever again, sits alone with the thing at night. Coyle tests them like a man reading a contract for the clause that isn't there, and finds his charter honoured: nothing destroyed, nothing lost, the Order still standing between the city and what leans on it. Neither of them thanks you. Both of them sign.\n\nThe sealing takes place on the last morning, without ceremony, because ceremony was one of the things Vervain struck out. The chamber door is closed, the wards are worked, the two keys go their separate ways down separate corridors, and the minute-book records the whole affair in eleven lines. The Order pays your fee, and — rarer coin — both factions see you to the door. It is compromise as craft: nobody's victory, carefully built, and you walk out into the ordinary morning knowing the instrument stands unwound in the dark behind two locks, and that the dark quarter of one long ellipse is patient, and that patience was, on the whole, the very best that could be purchased.\n\nPurchased, you alone know, for a term you could name to the day. Three hands kept the figure — a dead astronomer's, a dead collector's, and the gearing now standing unwound behind two locks — and you checked it, and it held. The seals do not stop it; the seals were never the point; what is coming keeps its own calendar and consults no minute-book. But the chamber is dark, and no one sits with the thing at night, and no one will spend five improving months correcting it toward its appointment. That is what you bought them. You button your coat against the ordinary morning, carrying the number they did not ask for and you did not offer, and you tell no one, and you never will.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        { "type": "disposition", "target": "npc-vervain", "delta": 1 },
+        { "type": "disposition", "target": "npc-coyle", "delta": 1 },
+        { "type": "reputation", "target": "Hermetic Order of the Grey Dawn", "delta": 1 },
+        { "type": "flag", "target": "or-case-complete", "value": true },
+        { "type": "flag", "target": "or-orrery-sealed", "value": true }
+      ]
+    }
+  ]
+}

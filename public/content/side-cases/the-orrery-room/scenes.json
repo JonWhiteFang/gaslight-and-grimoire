@@ -1,0 +1,599 @@
+{
+  "scenes": [
+    {
+      "id": "or-act1-summons",
+      "act": 1,
+      "narrative": "The Hermetic Order of the Grey Dawn does not summon. It invites, on paper heavy enough to stand unassisted, in a hand that has clearly copied out the same courtesies for forty years. The invitation names an hour, a door in a quiet street behind the Museum, and a matter described only as 'an appraisal of some delicacy' — and it is the courtesy of the thing that keeps you reading it twice. The Order asks for nothing. The Order arranges. When the Grey Dawn takes the trouble to request, something inside the Order has gone wrong enough that arranging is no longer safe.\n\nThe door is opened before you knock. The chapterhouse beyond is all wax-polished quiet and lamps turned deliberately low, and the man who takes your coat wears the studied blankness of a servant who has spent his career not hearing things. You are shown through two anterooms — each with someone in it, each someone watching you with an attention their newspapers do not explain — and into a study where the Order's trouble is finally given a shape.\n\nA member is dead. Nothing irregular in that, you are told, in a tone that has already decided the question. But the dead man collected instruments, and among the effects seized from his estate is a piece the Order cannot agree on — and the disagreement, it is implied with exquisite indirection, has factions, and the factions have histories, and the histories have very nearly had funerals. The Order requires an outside eye. Someone with a reputation for looking at difficult things and reporting exactly what is there. Someone whose conclusions neither faction can call bought.\n\nYou are offered tea, terms, and the use of the house. Nobody says the word 'war'. That is how you know.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "or-choice-summons-accept",
+          "text": "Accept the commission and ask to see the instrument.",
+          "outcomes": {
+            "critical": "or-act1-commission",
+            "success": "or-act1-commission",
+            "partial": "or-act1-commission",
+            "failure": "or-act1-commission",
+            "fumble": "or-act1-commission"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "or-act1-commission",
+      "act": 1,
+      "narrative": "They receive you together, which is plainly a torment to them both. Sister Vervain stands by the cold hearth as though warmth were a habit she has renounced; Magister Coyle occupies an armchair the way other men occupy an argument, comfortably and entirely. Between them, on a baize-covered table, lies a dossier neither of them touches. The room has the particular stillness of a truce measured in minutes.\n\n'The instrument is wrong,' Vervain says, before any introduction is finished. 'It should be broken up, melted, and the slag scattered in running water. You will examine it, you will confirm what it is, and the Order will act.' She does not raise her voice. She has the manner of a woman who said her last unnecessary word some years ago and has not missed it.\n\n'The instrument,' Coyle says, with the warmth of a man correcting a beloved but hasty student, 'is the finest thing this Order has acquired in a century, and our late brother understood that better than any of us. \"We keep what we fear,\" he used to say — one of his better sayings. It belongs in the inner rooms, under glass and under wards, where scholarship can reach it and foolishness cannot.' He smiles at Vervain as he says 'foolishness'. She does not appear to notice, which is somehow worse than if she had.\n\nThe terms are simple, and both of them, for one sentence each, agree on them: you will examine the orrery, the dead man's rooms, and whatever else you require. You will deliver an appraisal. The Order will abide by it. Neither of them says what happens if the Order does not.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "or-choice-commission-orrery",
+          "text": "Begin with the instrument itself.",
+          "outcomes": {
+            "critical": "or-act1-orrery-room",
+            "success": "or-act1-orrery-room",
+            "partial": "or-act1-orrery-room",
+            "failure": "or-act1-orrery-room",
+            "fumble": "or-act1-orrery-room"
+          }
+        },
+        {
+          "id": "or-choice-commission-rooms",
+          "text": "Begin with the dead man's rooms.",
+          "outcomes": {
+            "critical": "or-act1-collectors-rooms",
+            "success": "or-act1-collectors-rooms",
+            "partial": "or-act1-collectors-rooms",
+            "failure": "or-act1-collectors-rooms",
+            "fumble": "or-act1-collectors-rooms"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "or-act1-orrery-room",
+      "act": 1,
+      "narrative": "They have given it a room to itself, at the top of the house, and the room has begun to arrange itself around the instrument the way furniture arranges itself around a fireplace. The orrery stands on a mahogany plinth under the skylight: brass and silvered bronze, perhaps four feet across, its bodies carried on arms of graduated length around a gilt sun. The workmanship is not of this century. It may not be of the last. Wound and released, the whole sky turns with a sound like a cathedral thinking.\n\nTwelve bodies ride the arms — the six planets any almanac would own to, their moons, the expected apparatus of a respectable heavens. And then the thirteenth: a small sphere of some dark alloy, set on the longest arm of all, out past everything, on an orbit the gearing tilts and stretches into a long ellipse that belongs to no chart you have ever been shown. It is not hidden. It is not emphasized. It is simply there, riding its track with the same patient authority as all the rest, and the instrument offers no opinion about it whatsoever.\n\nThe appraisal is why you are here, and the appraisal begins with the question every forgery answers eventually: is the thing what it claims to be? The gear train is accessible through a hinged panel in the plinth, the dead man's rooms are two floors below, the horologist the Order consulted keeps a workshop in Clerkenwell, and somewhere in the city is whoever sold a dead collector a sky with one body too many.",
+      "cluesAvailable": [
+        { "clueId": "or-clue-gear-train", "method": "exploration" }
+      ],
+      "choices": [
+        {
+          "id": "or-choice-hub-rooms",
+          "text": "Go down to the collector's rooms.",
+          "outcomes": {
+            "critical": "or-act1-collectors-rooms",
+            "success": "or-act1-collectors-rooms",
+            "partial": "or-act1-collectors-rooms",
+            "failure": "or-act1-collectors-rooms",
+            "fumble": "or-act1-collectors-rooms"
+          }
+        },
+        {
+          "id": "or-choice-hub-finch",
+          "text": "Call on the horologist the Order consulted.",
+          "outcomes": {
+            "critical": "or-act1-finch-workshop",
+            "success": "or-act1-finch-workshop",
+            "partial": "or-act1-finch-workshop",
+            "failure": "or-act1-finch-workshop",
+            "fumble": "or-act1-finch-workshop"
+          }
+        },
+        {
+          "id": "or-choice-hub-gallery",
+          "text": "Trace the seller through the Whispering Gallery.",
+          "outcomes": {
+            "critical": "or-act1-whispering-gallery",
+            "success": "or-act1-whispering-gallery",
+            "partial": "or-act1-whispering-gallery",
+            "failure": "or-act1-whispering-gallery",
+            "fumble": "or-act1-whispering-gallery"
+          }
+        },
+        {
+          "id": "or-choice-hub-period-match",
+          "text": "Set the extra body's gearing against a figure you have seen before.",
+          "faculty": "reason",
+          "difficulty": 12,
+          "requiresFlag": "mythos-period-computed",
+          "visibility": "disabled",
+          "gateReason": "The gearing implies a period. You have nothing to set it against.",
+          "outcomes": {
+            "critical": "or-act1-period-match",
+            "success": "or-act1-period-match",
+            "partial": "or-act1-period-match",
+            "failure": "or-act1-orrery-room",
+            "fumble": "or-act1-orrery-room"
+          }
+        },
+        {
+          "id": "or-choice-hub-onward",
+          "text": "The examination is as complete as daylight will make it. Report to the Order.",
+          "outcomes": {
+            "critical": "or-act1-close",
+            "success": "or-act1-close",
+            "partial": "or-act1-close",
+            "failure": "or-act1-close",
+            "fumble": "or-act1-close"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "or-act1-period-match",
+      "act": 1,
+      "narrative": "It is an evening's work with pencil and paper, done at the plinth by lamplight: tooth-counts read through a jeweller's glass, ratios multiplied along the train, the thirteenth arm's motion reduced to a single figure — a period, in years and days, exact to the limit of the brass. You carry the figure in your head down the quiet stairs and up again, and set it beside the one you brought into this house with you, the one computed in another room, in another case, by a hand that is now dust.\n\nThey agree. Not approximately. Not suggestively. To the decimal, allowing only for the width of a gear tooth, the two figures are the same figure.\n\nYou sit for a while in the lamplight with the pencil still in your hand. The orrery ticks through its arcs above you, twelve bodies keeping their appointed rounds and one keeping something else's. The house below is silent, the skylight above is black, and the agreement of two numbers sits in the room with you like a third presence, saying nothing, requiring nothing, simply being the case.\n\nAfter a time you put the pencil away. The workings you burn in the grate, stirring the ash after. Some sums should not be left where a tidy-minded Order might file them.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "or-choice-period-back",
+          "text": "Return to the examination.",
+          "outcomes": {
+            "critical": "or-act1-orrery-room",
+            "success": "or-act1-orrery-room",
+            "partial": "or-act1-orrery-room",
+            "failure": "or-act1-orrery-room",
+            "fumble": "or-act1-orrery-room"
+          }
+        }
+      ],
+      "onEnter": [
+        { "type": "discoverClue", "target": "or-clue-orrery-period", "description": "The figures agree. You write nothing down." }
+      ]
+    },
+    {
+      "id": "or-act1-collectors-rooms",
+      "act": 1,
+      "narrative": "The Order sealed the rooms the day the body left them, and the seals have kept everything, including the dust. It lies evenly over the bookshelves and the cabinets of lesser instruments, over the cold grate and the decanter with its inch of sherry gone to syrup — and thins to nothing along one path, worn like a sheep-track through grass, from the bed to the desk to the door that leads, three flights up, to the orrery. For his last months the dead man's world was that path. Everything off it has the undisturbed look of a museum after closing.\n\nThe desk keeps his last industry. A quarto notebook lies open at the final entry, pen laid across it in the manner of a man intending to return in a moment; the pages before it march back through five months of nightly figures, corrections, small exact adjustments. The bed keeps his last arrangements: the nightstand orderly, the bottle and the dosage book side by side, the drawer beneath full of receipts filed by a man who filed everything. He was ill. The room admits it in a hundred small ways — the cane by the bed, the invalid's diet in the tradesmen's bills, the chair placed halfway up the path where a man might rest.\n\nWhat the room does not hold is any sign of fear. No wards scratched behind the door, no salt at the sills, none of the apparatus of a collector who believed his collection had turned on him. He walked his path, kept his figures, measured his drops, and went on doing all three until one of them finished him. Which one is the question the desk and the nightstand are quietly disputing.",
+      "cluesAvailable": [
+        { "clueId": "or-clue-adjustment-diary", "method": "exploration" },
+        { "clueId": "or-clue-laudanum-arithmetic", "method": "check", "requiresFaculty": { "faculty": "perception", "minimum": 8 } }
+      ],
+      "choices": [
+        {
+          "id": "or-choice-rooms-back",
+          "text": "Go back up to the orrery.",
+          "outcomes": {
+            "critical": "or-act1-orrery-room",
+            "success": "or-act1-orrery-room",
+            "partial": "or-act1-orrery-room",
+            "failure": "or-act1-orrery-room",
+            "fumble": "or-act1-orrery-room"
+          }
+        },
+        {
+          "id": "or-choice-rooms-finch",
+          "text": "Take what the rooms have said to the horologist.",
+          "outcomes": {
+            "critical": "or-act1-finch-workshop",
+            "success": "or-act1-finch-workshop",
+            "partial": "or-act1-finch-workshop",
+            "failure": "or-act1-finch-workshop",
+            "fumble": "or-act1-finch-workshop"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "or-act1-finch-workshop",
+      "act": 1,
+      "narrative": "Mr. Abelard Finch keeps a workshop in Clerkenwell of the kind that has outlived three landlords and will outlive three more: benches black with a century of oil, escapements in various states of undress under glass domes, and a wall of regulator clocks all agreeing with one another to the second, like a jury that has already reached its verdict. Finch himself is a small precise man with red-rimmed eyes, and he is winding a chronometer that does not need winding when you come in, and he keeps winding it while you introduce yourself, and stops only when the mainspring objects.\n\nHe knows why you have come. The Order engaged him a fortnight ago to examine 'a planetary machine' — his phrase, delivered with the flat care of a man handling something at arm's length — and his report is written, and folded, and sitting in the drawer of his bench, and has been sitting there for four days while he finds reasons not to send it. He tells you about the drawer. He does not open it.\n\nInstead he talks — fluently, gratefully, at length — about escapements. About the dead-beat versus the gravity type, about a remontoire he once built for an observatory in Scotland, about the specific insolence of a striking train he repaired in 1871. It is expert, it is genuine, and it is a wall: every small mechanism in the room is pressed into service so that the large one at the top of the Order's house need not be mentioned. When at last you say the word 'orrery' he looks, for one unguarded moment, like a man who has been shown his own grave, neatly kept.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "or-choice-finch-press",
+          "text": "Press him on what his report actually says.",
+          "faculty": "influence",
+          "difficulty": 13,
+          "outcomes": {
+            "critical": "or-act1-finch-admission",
+            "success": "or-act1-finch-admission",
+            "partial": "or-act1-finch-doorstep",
+            "failure": "or-act1-finch-doorstep",
+            "fumble": "or-act1-finch-doorstep"
+          }
+        },
+        {
+          "id": "or-choice-finch-leave",
+          "text": "Leave him to his escapements and return to the instrument.",
+          "outcomes": {
+            "critical": "or-act1-orrery-room",
+            "success": "or-act1-orrery-room",
+            "partial": "or-act1-orrery-room",
+            "failure": "or-act1-orrery-room",
+            "fumble": "or-act1-orrery-room"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "or-act1-finch-admission",
+      "act": 1,
+      "narrative": "He crosses the workshop and shuts the door. Then he draws the bolt, which is not the same gesture at all, and stands with his back to you for a moment, facing his wall of agreeing clocks.\n\n'The gearing is sound,' he says, to the clocks. 'It is original throughout. There is no graft, no later addition, no repair even — do you understand what I am telling you? A machine of that age with no repairs. And the cutting.' He turns around. His hands, which have been precise all afternoon, describe a small helpless circle. 'I measured the thirteenth train four times, on the Order's premises, with my own instruments. It is correct to a tolerance I could not hold in this workshop with this equipment and a year of my life to spend. Not once, for one wheel. Throughout. Whoever cut those teeth was not working to the standards of his century, or of mine, or —' He stops himself with the neatness of long practice.\n\n'My report says the instrument is genuine and of exceptional quality,' he says, in his flat professional voice, as though reading it off the folded page in the drawer. 'That is all it says. If you repeat the rest of this to the Order, or to anyone, I will deny it, and I will be believed, because I am a dull man with a good reputation and you are a person who consorts with the Grey Dawn.' He unbolts the door. His hands are quite steady again. 'It keeps better time than my regulators,' he says, as you leave, in the tone of a man confessing the thing he actually cannot bear.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "or-choice-admission-back",
+          "text": "Carry the admission back to the orrery room.",
+          "outcomes": {
+            "critical": "or-act1-orrery-room",
+            "success": "or-act1-orrery-room",
+            "partial": "or-act1-orrery-room",
+            "failure": "or-act1-orrery-room",
+            "fumble": "or-act1-orrery-room"
+          }
+        }
+      ],
+      "onEnter": [
+        { "type": "discoverClue", "target": "or-clue-finch-admission" },
+        { "type": "disposition", "target": "npc-finch", "delta": 1 }
+      ]
+    },
+    {
+      "id": "or-act1-finch-doorstep",
+      "act": 1,
+      "narrative": "Finch hears the question out with perfect courtesy, and then he stands, and fetches your coat, and holds it for you, and you find yourself on the pavement of Clerkenwell Green with the door clicking shut at your back before you have entirely followed the sequence of events. It is masterfully done. There is no rudeness anywhere in it that could be reported or resented; there is only, suddenly, a closed door with a horologist on the other side of it.\n\nYou stand a moment in the grey afternoon, considering the door. Through the window you can see him already back at his bench, head bent, restored to the company of mechanisms small enough to be safe. He does not look up. He is very careful not to look up, and the care is visible from the street.\n\nA man with nothing to say does not bolt himself behind courtesy. A man whose report contained only the word 'forgery' would have said it on the doorstep and been glad of the company. Whatever is folded in that bench drawer, Finch is guarding it the way men guard things they wish they did not know — and that, delivered at coat's length with impeccable manners, is an answer of a kind. It wants only the words, and the words can be tried for again.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "or-choice-doorstep-back",
+          "text": "Return to the orrery and the rest of the appraisal.",
+          "outcomes": {
+            "critical": "or-act1-orrery-room",
+            "success": "or-act1-orrery-room",
+            "partial": "or-act1-orrery-room",
+            "failure": "or-act1-orrery-room",
+            "fumble": "or-act1-orrery-room"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "or-act1-whispering-gallery",
+      "act": 1,
+      "narrative": "The Whispering Gallery is not in any directory, and its address is a matter of introductions. It occupies the long upper floor of a bookbinder's off Cecil Court: one room, forty feet of it, lined with map presses and cabinets of curiosities priced by the question rather than the object. Here the city's trade in old and doubtful things conducts itself at a murmur — celestial charts with too many annotations, instruments of no stated purpose, provenances sold separately from the goods they describe. Everything is for sale. Nothing is guaranteed. Asking for a guarantee marks you as a tourist.\n\nThe way to the Gallery's confidence, you know from experience, is to ask wrong questions correctly. You do not ask who sold a dead Grey Dawn collector an orrery — that question would empty the room. You ask, idly, over a tray of Jesuit star-maps, whether anyone still handles the big Continental planetary machines; you let it be known, untruthfully, that a client of yours has money and more ambition than sense; you mishandle a name or two on purpose and allow yourself to be corrected. The Gallery cannot resist correcting. It is how it displays its plumage.\n\nBy the second pot of the proprietor's bitter coffee you have what you came for: the machine that went to the Grey Dawn gentleman came through a dealer called Prosper — a man who works out of a room above a picture-framer's in Museum Street, who handled the sale two years ago, and who has, the Gallery notes with faint professional distaste, been selling off his own stock since. Not expanding. Selling. The Gallery's opinion is that Prosper is a competent man who has lost his nerve, and the Gallery's opinion of lost nerve is that it is contagious and one does not visit it.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "or-choice-gallery-seller",
+          "text": "Call on Prosper in Museum Street.",
+          "outcomes": {
+            "critical": "or-act1-seller",
+            "success": "or-act1-seller",
+            "partial": "or-act1-seller",
+            "failure": "or-act1-seller",
+            "fumble": "or-act1-seller"
+          }
+        },
+        {
+          "id": "or-choice-gallery-back",
+          "text": "Return to the orrery room.",
+          "outcomes": {
+            "critical": "or-act1-orrery-room",
+            "success": "or-act1-orrery-room",
+            "partial": "or-act1-orrery-room",
+            "failure": "or-act1-orrery-room",
+            "fumble": "or-act1-orrery-room"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "or-act1-seller",
+      "act": 1,
+      "narrative": "Prosper receives you because you give him no graceful way not to: you arrive with the Gallery's name in your mouth and the Order's commission in your card-case, and dealers who have lost their nerve cannot afford to offend either. His room above the framer's is half-empty — pale rectangles on the walls where stock has gone, a tea-chest of sale catalogues by the door — and Prosper himself is a soft-spoken man of sixty who watches your hands when you reach into your coat, which tells you something before anyone has spoken at all.\n\nYou put it to him politely, which is the crueller way: the provenance that travelled with the orrery. The Continental workshop, the chain of bills of sale, the notary's seal. You lay out what an afternoon with the documents has already told you — ink too young for its dates, watermarks that belong to the wrong decades, a notary witnessing sales from beyond his own grave — and you watch him decide, line by line, not to insult you by defending it. 'The papers were made,' he says at last. 'I had them made. I'll not pretend otherwise to a person who has plainly read them.' The fraud confessed, he seems steadier, like a man glad to be charged with the smaller crime.\n\nIt is when you ask about the article itself that the steadiness goes. The orrery came to him, he says, from an estate sale in the fens he will not further particularize; it had no history he could discover, and a machine of that quality with no history is unsellable to careful buyers — hence the papers, which gave it a past that respectable money could countenance. 'You are asking why I forged a pedigree for a genuine article,' he says. 'Because the genuine article needed one. Because I had it in this room for a winter, and I would take it off its stand each night, and each morning —' He folds his hands. 'I priced it to sell quickly, and it sold quickly, and I have been selling my way toward the coast ever since. The papers are false. Nothing else about it is. I am sorrier about that than about the papers.'",
+      "cluesAvailable": [
+        { "clueId": "or-clue-forged-provenance", "method": "exploration" }
+      ],
+      "choices": [
+        {
+          "id": "or-choice-seller-back",
+          "text": "Leave Prosper to his packing and return to the instrument.",
+          "outcomes": {
+            "critical": "or-act1-orrery-room",
+            "success": "or-act1-orrery-room",
+            "partial": "or-act1-orrery-room",
+            "failure": "or-act1-orrery-room",
+            "fumble": "or-act1-orrery-room"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "or-act1-close",
+      "act": 1,
+      "narrative": "You give the Order a day's summary that is accurate and incomplete, which is the only kind of summary this house deserves yet, and the Order receives it with the grave approval of people hearing their own importance confirmed. The appraisal proper is expected tomorrow. Vervain asks one question — 'Is it what I say it is?' — and accepts 'It is not a forgery, and that is not the same answer' with a look that says she has already filed the distinction under evasions. Coyle asks nothing and offers you a very good brandy, which is its own kind of question.\n\nWhat you carry up the stairs that night is a case that has come quietly apart into two cases. There is the instrument question: whether the orrery is what it appears to be, and what, if it is genuine, that thirteenth arm is doing on a machine older than the charts that omit it. And there is the death question: a failing heart, a careful bottle, five months of nightly figures in an improving hand — a man's last season, which touched the orrery every single night and may for all that have nothing to do with brass at all. The two questions lean against one another. They are not the same question. Whoever answers them as one will answer both wrongly.\n\nThe Order offers you hospitality for the night — a guest room two doors from the orrery's, which nobody remarks on — and the house settles around you with its lamps turned low and its factions lying awake in their separate wings. Above you, faintly, when the pipes stop knocking and the street goes quiet, you can hear the instrument running. Someone has wound it. Nobody mentions having wound it.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "or-choice-close-vigil",
+          "text": "Go up after midnight and sit with the machine.",
+          "outcomes": {
+            "critical": "or-act2-night-vigil",
+            "success": "or-act2-night-vigil",
+            "partial": "or-act2-night-vigil",
+            "failure": "or-act2-night-vigil",
+            "fumble": "or-act2-night-vigil"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "or-act2-night-vigil",
+      "act": 2,
+      "narrative": "The house is asleep, or performing sleep, and the orrery room at midnight belongs to the orrery. You bring a lamp and do not light it. The skylight gives you the city's dull copper glow and a handful of actual stars, and beneath them the instrument turns in the dark, patient, unattended, keeping its sky for nobody.\n\nThe sound is different at night. You noticed the daytime sound without attending to it — a fine layered ticking, the cathedral-thought murmur of a great train of wheels all consenting to move together. With the gas down and the house quiet, the layers come apart. There is the tick, and beneath the tick a slower breathing of the mainspring, and beneath that — you are several minutes admitting this — a rhythm that does not divide evenly into the others. Not a fault. Nothing so honest as a fault. A stress in the music, as though somewhere in the train a wheel were keeping a different measure and the rest were accommodating it, courteously, the way this house accommodates things.\n\nThe sensible procedure is to sit until dawn and watch: note the motions, time the arcs, let the machine make its case for the appraisal in the only language it has. It is a long time until dawn, and the dark between you and the skylight is full of small brass movements, and the chair the Order has left you faces the instrument in a way that suggests other people have sat this watch before you and needed to.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "or-choice-vigil-watch",
+          "text": "Hold the watch until morning, whatever the dark does with it.",
+          "faculty": "nerve",
+          "difficulty": 12,
+          "outcomes": {
+            "critical": "or-act2-vigil-held",
+            "success": "or-act2-vigil-held",
+            "partial": "or-act2-vigil-broken",
+            "failure": "or-act2-vigil-broken",
+            "fumble": "or-act2-vigil-broken"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "or-act2-vigil-held",
+      "act": 2,
+      "narrative": "You hold. The first hour is discipline, the second is habit, and somewhere in the third the room accepts you as furniture and shows you what it does at night.\n\nTwelve bodies orbit. You time them against your watch until the exercise proves what daytime already suggested: the gearing is honest, the periods regular, the whole visible sky moving with the decency of good clockwork. It is the thirteenth you keep returning to, because the thirteenth does something else. Three times before dawn — you count, because counting is the handrail you have — it pauses. Not a stutter, not a tooth slipping; a pause, seconds long, always at the same dark quarter of its long ellipse, the little alloy sphere hanging on its arm as though attending to something while the rest of the sky goes courteously on without it. Then it resumes. And here is the thing you sit with until the skylight greys: it arrives at each station of its orbit exactly on time. You prove it twice with the watch. The pauses cost it nothing. Whatever schedule the thirteenth body keeps, it is not being kept by the gears — the gears are being permitted to agree with it.\n\nDawn comes up over the glass, the room resumes its daytime manners, and the instrument ticks on, layered and smooth, a fine old machine keeping a fine old sky. You stand, stiff from the chair, and note in your professional hand that the orrery ran all night without fault or deviation. The note is true. That is the worst thing about it.",
+      "cluesAvailable": [
+        { "clueId": "or-clue-night-observation", "method": "automatic" }
+      ],
+      "choices": [
+        {
+          "id": "or-choice-vigil-morning",
+          "text": "Go down and take up the morning's real business: how the collector died.",
+          "outcomes": {
+            "critical": "or-act2-dosage",
+            "success": "or-act2-dosage",
+            "partial": "or-act2-dosage",
+            "failure": "or-act2-dosage",
+            "fumble": "or-act2-dosage"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "or-act2-vigil-broken",
+      "act": 2,
+      "narrative": "You do not hold. There is no moment you can point to afterward — no sound that was not brass, no shadow that was not the skylight's — only the slow accumulation of the dark, and the ticking coming apart into its layers, and the growing conviction, unreasonable and unanswerable, that the room was arranged around the chair, and the chair around you, and that something in the long ellipse's dark quarter was being patient about it.\n\nYou leave before you decide to. That is the fact of it, and you are too honest with yourself to dress it otherwise: you are on the stairs with the unlit lamp in your hand and the door shut behind you, and you do not remember choosing any of those things in that order. The house is silent. Your own breathing is not. On the landing below you stand a while in the dark, listening to the instrument through the floor — faint, regular, entirely innocent — and despising the flat animal relief of having a ceiling between you and it.\n\nDawn is two hours off. The guest room does not hold you. You could go back up — the door is not locked, the chair has not moved, and the watch could still be kept for what remains of the night, if you can make your feet agree to it. Or you can let the morning come, and go down to the part of this case that can be solved with arithmetic, and carry the knowledge that the room asked you a question and you left before answering.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "or-choice-vigil-return",
+          "text": "Go back up. Finish the watch.",
+          "faculty": "nerve",
+          "difficulty": 12,
+          "outcomes": {
+            "critical": "or-act2-vigil-held",
+            "success": "or-act2-vigil-held",
+            "partial": "or-act2-dosage",
+            "failure": "or-act2-dosage",
+            "fumble": "or-act2-dosage"
+          }
+        },
+        {
+          "id": "or-choice-vigil-leave",
+          "text": "Let it be. Wait for morning and the death question.",
+          "outcomes": {
+            "critical": "or-act2-dosage",
+            "success": "or-act2-dosage",
+            "partial": "or-act2-dosage",
+            "failure": "or-act2-dosage",
+            "fumble": "or-act2-dosage"
+          }
+        }
+      ],
+      "onEnter": [
+        { "type": "composure", "delta": -1 }
+      ]
+    },
+    {
+      "id": "or-act2-dosage",
+      "act": 2,
+      "narrative": "Morning restores the house to its lamps and its courtesies, and you take the death question down to the sealed rooms and solve it, because it can be solved, and someone in this affair deserves an answer that closes.\n\nIt goes like this. The collector's heart had been failing for years — his own physician's letters say so, filed in the receipts drawer with everything else. Against the pain of it, or the sleeplessness, he took laudanum, and being the man the diary shows him to be, he took it exactly: the dosage book records every draught, in drops, nightly, for three years. Set the dosage book against the pharmacist's dated receipts and the bottle's remainder, and the arithmetic closes without a gap. The dose rises — slowly, steadily, by careful increments, over his final five months — to quantities no failing heart sustains. Whether he raised it to sleep, or to work the longer hours the diary shows, or because some part of him had settled the matter and chose the gentle door, the figures cannot say. What they say, exactly and sufficiently, is this: heart failure, hastened by the bottle, by his own measured hand. No other hand touched it. The dates admit no visitor, the sums admit no tampering, and the Order's darker suspicions about its factions admit, in this one particular, of nothing at all.\n\nIt is ordinary, and it is sad, and it is true, and you write it into the appraisal in plain language because the dead man kept honest books and has earned an honest finding. A collector with a failing heart worked at the thing he loved through his last season and measured himself out of the world doing it. That is the death. The instrument is another matter — and the factions are waiting for you on the subject of the instrument, in their separate rooms, each having sent word that they would value a moment of your morning.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "or-choice-dosage-vervain",
+          "text": "Hear Sister Vervain first.",
+          "outcomes": {
+            "critical": "or-act2-vervain-pressure",
+            "success": "or-act2-vervain-pressure",
+            "partial": "or-act2-vervain-pressure",
+            "failure": "or-act2-vervain-pressure",
+            "fumble": "or-act2-vervain-pressure"
+          }
+        },
+        {
+          "id": "or-choice-dosage-coyle",
+          "text": "Hear Magister Coyle first.",
+          "outcomes": {
+            "critical": "or-act2-coyle-pressure",
+            "success": "or-act2-coyle-pressure",
+            "partial": "or-act2-coyle-pressure",
+            "failure": "or-act2-coyle-pressure",
+            "fumble": "or-act2-coyle-pressure"
+          }
+        },
+        {
+          "id": "or-choice-dosage-verdict",
+          "text": "Hear neither. Deliver the appraisal.",
+          "outcomes": {
+            "critical": "or-act2-verdict-hub",
+            "success": "or-act2-verdict-hub",
+            "partial": "or-act2-verdict-hub",
+            "failure": "or-act2-verdict-hub",
+            "fumble": "or-act2-verdict-hub"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "or-act2-vervain-pressure",
+      "act": 2,
+      "narrative": "Vervain receives you in a bare room with two chairs and uses neither. 'You will have found that it is genuine,' she says. 'I knew it was genuine the day it entered this house. Forgeries are vulgar. That thing is not vulgar.' She stands at the window with her back to the light, and what she says next she says in the same flat administrative tone she uses for everything, which is how you know what it costs. 'I have been of this Order thirty-one years. I have watched it acquire things it was proud of. I sat with Brother Amaury in his last year, when he could no longer be left alone with the mirror he catalogued, and I wrote the minute that called his death a fever. I washed Sister Ellery's hands for her when she could not stop washing them. The Order keeps what it fears. I have kept the ledger of what the keeping costs.'\n\nShe turns. 'The collector died by his own bottle — you will have found that too, you have the look of someone who has done the sums. And I believe it, and it changes nothing. He spent his last five months in service to a machine that was teaching him precision on his deathbed. No one made him. That is what these things do: they do not make you. They wait, and they are interesting, and we are the Order we are.' For a moment something moves behind the administration — not fear as you commonly meet it, but fear's senior form, the kind that has filled out its paperwork. 'Break it,' she says. 'Melt the brass, scatter the slag in running water, and let Coyle put my name in whatever minute he likes. You are the appraisal. The Order will abide it. I ask you to make it one I do not have to survive.'\n\nShe does not offer you anything. It does not occur to her. She is the only person in this house who has asked you for something instead.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "or-choice-vervain-coyle",
+          "text": "Hear Coyle's side before deciding.",
+          "outcomes": {
+            "critical": "or-act2-coyle-pressure",
+            "success": "or-act2-coyle-pressure",
+            "partial": "or-act2-coyle-pressure",
+            "failure": "or-act2-coyle-pressure",
+            "fumble": "or-act2-coyle-pressure"
+          }
+        },
+        {
+          "id": "or-choice-vervain-verdict",
+          "text": "You have heard enough. Deliver the appraisal.",
+          "outcomes": {
+            "critical": "or-act2-verdict-hub",
+            "success": "or-act2-verdict-hub",
+            "partial": "or-act2-verdict-hub",
+            "failure": "or-act2-verdict-hub",
+            "fumble": "or-act2-verdict-hub"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "or-act2-coyle-pressure",
+      "act": 2,
+      "narrative": "Coyle's study is everything Vervain's bare room is not: books to the ceiling, instruments under glass, a fire built by somebody who understands fires, and two glasses already poured, because Coyle has never in his life been surprised by a visitor. 'Sit,' he says, warmly, and you are three sentences into his hospitality before you notice you have obeyed. 'She will have shown you her scars. They are real scars; I don't mock them. Sister Vervain is the finest woman this Order has, and if she had her way we would be a society for the destruction of everything we were founded to understand.'\n\nHe talks, and it is very good talk. About the Order's charter — 'to stand between the city and what leans on it, which one cannot do from ignorance.' About the inner rooms, and what is already in them, and how long it has been kept without incident, sixty years, ninety, some of it older than the house. He quotes the dead collector twice, with real affection — 'We keep what we fear, he used to say; he had it from old Magister Herne, who had it from the founding — it is the whole Order in five words, and Vervain would tell you the same five words as an accusation.' He refills your glass without asking. 'The orrery is the finest instrument of its kind in Europe, and it is telling us something about the sky that no other instrument can, and I do not pretend to know yet what. That is precisely why it must be kept. Under glass. Under wards. Under scholarship. Destruction is not safety — destruction is only ignorance made permanent, and whatever that machine is keeping time with will not stop because we broke the clock.'\n\nIt is the most sensible speech anyone has made in this house, and he makes it with the fire warm and the brandy good, and it is only afterward, on the stairs, that you tally what was in it: the inner rooms, the acquisition, the collection — and not one word about the man who wound the thing nightly for five months and measured himself out of the world at its side. Coyle grieves his friend, you believe that. But somewhere in the grief the friend has already become provenance.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "or-choice-coyle-vervain",
+          "text": "Hear Vervain's side before deciding.",
+          "outcomes": {
+            "critical": "or-act2-vervain-pressure",
+            "success": "or-act2-vervain-pressure",
+            "partial": "or-act2-vervain-pressure",
+            "failure": "or-act2-vervain-pressure",
+            "fumble": "or-act2-vervain-pressure"
+          }
+        },
+        {
+          "id": "or-choice-coyle-verdict",
+          "text": "You have heard enough. Deliver the appraisal.",
+          "outcomes": {
+            "critical": "or-act2-verdict-hub",
+            "success": "or-act2-verdict-hub",
+            "partial": "or-act2-verdict-hub",
+            "failure": "or-act2-verdict-hub",
+            "fumble": "or-act2-verdict-hub"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "or-act2-verdict-hub",
+      "act": 2,
+      "narrative": "They assemble to hear you in the long room on the first floor — not just Vervain and Coyle but a dozen of the Order's seniors, ranged down both sides of a table older than any of them, with one empty chair at the foot that nobody has taken and nobody has removed. The appraisal sits before you in your own fair copy. You deliver the findings in the order the case gave them to you.\n\nThe death first, because the dead go first: heart failure, hastened by laudanum, by the collector's own measured hand, over his final five months. No other agency. The sums close. You watch a dozen private theories about rival factions and quiet murders die around the table, and you watch how differently the two factions grieve their acquittal — Vervain as one item struck from a long ledger, Coyle with his eyes closed for exactly one breath.\n\nThe provenance second: forged, confessedly, by the seller — recent ink, impossible watermarks, a dead notary — a fraud wrapped around the article to give it a past that respectable money could countenance. And then the article, which is the reason for the table and the silence: genuine. Original throughout. Older than its earliest false paper by a margin you decline to guess at, correct in its gearing to tolerances the finest horologist consulted could not reproduce, and carrying on its longest arm a thirteenth body that belongs to no chart, no almanac, and no sky that any person in this room has been taught. The instrument is exactly what it appears to be. That is the appraisal. What remains is the verdict, and the Order, having sworn to abide your finding, waits to hear which of its futures you have appraised it into.",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "or-choice-verdict-vervain",
+          "text": "Find for destruction. Let Vervain end it.",
+          "outcomes": {
+            "critical": "or-act2-ending-destroyed",
+            "success": "or-act2-ending-destroyed",
+            "partial": "or-act2-ending-destroyed",
+            "failure": "or-act2-ending-destroyed",
+            "fumble": "or-act2-ending-destroyed"
+          }
+        },
+        {
+          "id": "or-choice-verdict-coyle",
+          "text": "Find for preservation. Let Coyle enshrine it.",
+          "outcomes": {
+            "critical": "or-act2-ending-enshrined",
+            "success": "or-act2-ending-enshrined",
+            "partial": "or-act2-ending-enshrined",
+            "failure": "or-act2-ending-enshrined",
+            "fumble": "or-act2-ending-enshrined"
+          }
+        },
+        {
+          "id": "or-choice-verdict-broker",
+          "text": "Propose that the Order seal the orrery under joint custody — neither destroyed nor enshrined.",
+          "faculty": "influence",
+          "difficulty": 13,
+          "requiresDeduction": "or-genuine-instrument",
+          "outcomes": {
+            "critical": "or-act2-ending-sealed",
+            "success": "or-act2-ending-sealed",
+            "partial": "or-act2-verdict-hub",
+            "failure": "or-act2-verdict-hub",
+            "fumble": "or-act2-verdict-hub"
+          }
+        }
+      ],
+      "onEnter": []
+    },
+    {
+      "id": "or-act2-ending-destroyed",
+      "act": 2,
+      "narrative": "The Order abides. That is the terrible efficiency of the place: the verdict is entered in the minute-book, the seniors file out, and by evening the thing is arranged, because Vervain has had the arrangements ready for weeks. A furnace room below a foundry the Order quietly owns. Running water within reach. Witnesses limited to those whose names are already in ledgers that do not leave the house.\n\nShe does it herself. She would not have permitted otherwise. The orrery comes down the stairs in pieces on canvas slings, handled by porters who are not told what it is and do not ask, and Vervain stands at the furnace mouth and feeds it in arm by arm, wheel by wheel, in an order she appears to have decided long ago — the thirteenth arm neither first nor last, given no ceremony, one more piece of brass among brass. She works without hurry and without a single wasted motion, and her face is the face of a woman writing a minute.\n\nWhen the little dark sphere goes into the white heat, it makes a sound. A small sound, quickly over — the sound, perhaps, of trapped air escaping a hollow casting, which is what anyone sensible will have called it by morning. Nobody in the furnace room says anything. Vervain watches the crucible a while, and then she says, to the fire, in the tone of a woman closing a ledger, 'There.' The slag is poured, cooled, broken, and carried out before dawn in seven unmarked bags to seven reaches of the river. Coyle does not attend. Coyle does not speak to you again before you leave, and the look he gives you across the breakfast room has scholarship in it, and arithmetic, and no forgiveness of any kind. The Order pays your fee to the shilling, with a courtesy that has cooled ten degrees. On the street outside, the morning is ordinary. You find you keep listening for a ticking under it anyway, for longer than you would care to put in writing.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        { "type": "disposition", "target": "npc-coyle", "delta": -3 },
+        { "type": "reputation", "target": "Hermetic Order of the Grey Dawn", "delta": 2 },
+        { "type": "flag", "target": "or-case-complete", "value": true },
+        { "type": "flag", "target": "or-orrery-destroyed", "value": true }
+      ]
+    },
+    {
+      "id": "or-act2-ending-enshrined",
+      "act": 2,
+      "narrative": "The Order abides. The verdict is entered in the minute-book, and Coyle is on his feet before the ink is dry, gracious in victory the way only a man who never doubted it can be. Within the week the arrangements are made — and they are beautiful arrangements, you are given to see them, because Coyle wants you to see them. A chamber in the inner rooms, prepared to receive the instrument as a reliquary receives a saint: a case of leaded glass ground to optical fineness, wards worked into the frame by three separate hands so that no single hand knows the whole, a book of observance placed on a stand at the door with rules for winding, rules for watching, rules for who may be alone with it and for how long. The dead collector's diary is bound in morocco and shelved beside it. 'Provenance,' Coyle says, with real tenderness. 'He would have liked that. We keep what we fear — and we honour who it costs.'\n\nVervain does not attend the installation. Her faction registers its dissent in a minute that is read once and filed, and she stands in the corridor outside the inner rooms as the case is sealed, not entering, in the manner of a woman declining to attend a wedding she has failed to prevent. As you pass her she looks at you once. She says nothing at all, which from Vervain is a long speech, and you find you can reconstruct every sentence of it.\n\nThe Order pays your fee with warmth, and Coyle adds a standing invitation to consult the piece — 'scholars of your quality are exactly what it wants.' You leave by the quiet street behind the Museum with the house rising behind you, lamps low, factions settling into their new positions around the thing at the centre. The last thing you hear, before the door of the chapterhouse closes on its wax-polished hush, is the instrument. Somewhere above, in its glass and its wards and its honours, it is still running.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        { "type": "disposition", "target": "npc-vervain", "delta": -3 },
+        { "type": "reputation", "target": "Hermetic Order of the Grey Dawn", "delta": 2 },
+        { "type": "flag", "target": "or-case-complete", "value": true },
+        { "type": "flag", "target": "or-orrery-enshrined", "value": true }
+      ]
+    },
+    {
+      "id": "or-act2-ending-sealed",
+      "act": 2,
+      "narrative": "You give them a third verdict, and you build it in front of them, out of their own materials, which is the only way it could ever stand. The instrument is genuine — that finding is not negotiable, and you do not negotiate it. But an appraisal, you remind the table, values a thing; it does not sentence it. And so you propose terms instead: the orrery sealed — not enshrined, not studied, not wound — in a chamber to which both factions hold keys, and neither holds both. Vervain's people to work the wards; Coyle's people to keep the record; the seals to be broken only by joint instruction of both factions, in writing, in the minute-book, over both signatures. Destruction forecloses knowledge, you tell Vervain, and the Order may one day need to know. Enshrinement is attendance, you tell Coyle, and the collector's diary shows what attendance becomes. Custody, jointly held, satisfies neither of you — which is the only proof available that it serves the Order rather than a faction.\n\nThe argument takes the afternoon. It succeeds the way such arguments succeed: not in a moment, but in the slow accumulation of neither side finding the flaw it is looking for. Vervain tests the terms like a woman testing a rope over a drop, and finds they hold her ledger's real requirement — that no one, ever again, sits alone with the thing at night. Coyle tests them like a man reading a contract for the clause that isn't there, and finds his charter honoured: nothing destroyed, nothing lost, the Order still standing between the city and what leans on it. Neither of them thanks you. Both of them sign.\n\nThe sealing takes place on the last morning, without ceremony, because ceremony was one of the things Vervain struck out. The chamber door is closed, the wards are worked, the two keys go their separate ways down separate corridors, and the minute-book records the whole affair in eleven lines. The Order pays your fee, and — rarer coin — both factions see you to the door. It is compromise as craft: nobody's victory, carefully built, and you walk out into the ordinary morning knowing the instrument stands unwound in the dark behind two locks, and that the dark quarter of one long ellipse is patient, and that patience was, on the whole, the very best that could be purchased.",
+      "cluesAvailable": [],
+      "choices": [],
+      "onEnter": [
+        { "type": "disposition", "target": "npc-vervain", "delta": 1 },
+        { "type": "disposition", "target": "npc-coyle", "delta": 1 },
+        { "type": "reputation", "target": "Hermetic Order of the Grey Dawn", "delta": 1 },
+        { "type": "flag", "target": "or-case-complete", "value": true },
+        { "type": "flag", "target": "or-orrery-sealed", "value": true }
+      ]
+    }
+  ]
+}

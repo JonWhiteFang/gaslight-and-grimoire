@@ -1,0 +1,11 @@
+{
+  "id": "the-orrery-room",
+  "title": "The Orrery Room",
+  "synopsis": "The Hermetic Order of the Grey Dawn asks you — politely, which is itself alarming — to appraise an orrery seized from a dead member's estate before the Order's factions go to war over it. It is beautiful, old, and wrong: it models a sky with one body too many.",
+  "firstScene": "or-act1-summons",
+  "triggerCondition": {
+    "type": "factionReputation",
+    "target": "Hermetic Order of the Grey Dawn",
+    "value": 2
+  }
+}
