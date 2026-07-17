@@ -128,9 +128,11 @@ describe('choiceGateConditions', () => {
     ]);
   });
 
-  it('treats an empty-string requires* as ungated (backward-compat, Codex Major 3)', () => {
+  it('treats an empty-string or null requires* as ungated (backward-compat, Codex spec Major 3 + plan Major)', () => {
     expect(choiceGateConditions(choice({ requiresFlag: '' }))).toEqual([]);
     expect(choiceGateConditions(choice({ requiresClue: '' }))).toEqual([]);
+    // Content is cast, not structurally parsed — a null can reach here from JSON.
+    expect(choiceGateConditions(choice({ requiresFlag: null as unknown as string }))).toEqual([]);
   });
 });
 
@@ -266,8 +268,11 @@ Create `src/engine/__tests__/contentValidation.choiceGating.test.ts`:
 
 ```ts
 import { describe, it, expect } from 'vitest';
-import { validateBundle } from '../contentValidation';
-import type { ContentBundle, Choice, SceneNode } from '../../types';
+import { validateBundle, type ContentBundle } from '../contentValidation';
+import type { Choice, SceneNode } from '../../types';
+// NOTE: ContentBundle is exported by contentValidation.ts:31, NOT ../../types
+// (Codex plan Blocker). Importing it from types would be TS2305 at build time —
+// vitest transpiles without type-checking, so it would false-green until T9.
 
 // Build a minimal bundle with one scene holding the given choice.
 function bundleWithChoice(choice: Choice): ContentBundle {
@@ -310,6 +315,14 @@ describe('choice-gating validation', () => {
     expect(errs.some((e) => /disabled but has no gateReason/.test(e))).toBe(true);
   });
 
+  it('treats a non-string gateReason as absent (Codex plan Major — non-string coverage)', () => {
+    // Content is cast, not structurally parsed, so a bad JSON value can reach here.
+    const numeric = errorsOf(baseChoice({ requiresClue: 'clue-1', visibility: 'disabled', gateReason: 42 as unknown as string }));
+    expect(numeric.some((e) => /disabled but has no gateReason/.test(e))).toBe(true);
+    const nul = errorsOf(baseChoice({ requiresClue: 'clue-1', visibility: 'disabled', gateReason: null as unknown as string }));
+    expect(nul.some((e) => /disabled but has no gateReason/.test(e))).toBe(true);
+  });
+
   it('error: disabled/shown on an ungated choice', () => {
     expect(errorsOf(baseChoice({ visibility: 'disabled', gateReason: 'r' })).some((e) => /no requires\* gate/.test(e))).toBe(true);
     expect(errorsOf(baseChoice({ visibility: 'shown' })).some((e) => /no requires\* gate/.test(e))).toBe(true);
@@ -329,9 +342,11 @@ describe('choice-gating validation', () => {
     expect(errs.some((e) => /escape-path choice .* may not set/.test(e))).toBe(true);
   });
 
-  it('warning (not error): shown on a gated choice', () => {
+  it('warning (not error): shown on a gated choice — and NO errors at all (Codex plan Major)', () => {
     const c = baseChoice({ requiresClue: 'clue-1', visibility: 'shown' });
-    expect(errorsOf(c).some((e) => /shown despite a gate/.test(e))).toBe(false);
+    // Assert the whole choice produces zero errors — not merely that no error
+    // contains the warning phrase (a differently-worded hard error must fail this).
+    expect(errorsOf(c)).toEqual([]);
     expect(warningsOf(c).some((w) => /shown despite a gate/.test(w))).toBe(true);
   });
 
@@ -438,12 +453,37 @@ to:
 Run: `npm run test:run -- contentValidation.choiceGating 2>&1 | tail -20`
 Expected: PASS.
 
-- [ ] **Step 7: Run the full validator on shipped content (regression)**
+- [ ] **Step 7: Prove the soft-gate warning maps to CLI success + run the full validator (regression)**
 
+The CLI (`scripts/validateCase.ts` `main`) calls `process.exit(1)` **iff** `totalErrors > 0` and prints
+warnings without failing — so a `visibility: 'shown'` soft-gate must produce `errors: []` (CLI exit 0).
+The shipped content contains no `visibility: 'shown'`, so shipped-content validation alone can't prove
+this (Codex plan Major). Prove the contract at the `validateBundle` level (its exact CLI decision input)
+by adding a bundle-level assertion to `contentValidation.choiceGating.test.ts`:
+
+```ts
+it('a shown soft-gate yields a warning with ZERO errors (CLI would exit 0)', () => {
+  const result = validateBundle(bundleWithChoice(baseChoice({ requiresClue: 'clue-1', visibility: 'shown' })));
+  expect(result.errors).toEqual([]);
+  expect(result.warnings.some((w) => /shown despite a gate/.test(w))).toBe(true);
+});
+```
+
+(Rationale for not building a throwaway fixture case: the CLI's exit code is a stable one-line invariant
+`exit 1 iff totalErrors>0`, exercised by every green CI run; the assertion above proves the only
+Phase-5-specific part — that a soft-gate is a warning, not an error.)
+
+Then the shipped-content regression:
 Run: `node scripts/validateCase.mjs 2>&1 | tail -10`
-Expected: 8 cases, zero errors (the shipped cases set no `visibility`, so no new errors). Warnings from shipped content should be zero (no shipped choice uses `visibility: 'shown'`).
+Expected: 8 cases, zero errors (the shipped cases set no `visibility`, so no new errors); zero new
+warnings (no shipped choice uses `visibility: 'shown'`).
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 8: Type-check now (don't defer to T9 — catches the TS2305 class of bug early; Codex plan Blocker)**
+
+Run: `npm run build 2>&1 | tail -20`
+Expected: no TS errors. (Confirms the test's `ContentBundle` import resolves and the new `Ctx.warnings` usage type-checks.)
+
+- [ ] **Step 9: Commit**
 
 ```bash
 git add src/engine/contentValidation.ts src/engine/__tests__/contentValidation.choiceGating.test.ts
@@ -516,20 +556,26 @@ export interface LockedChoiceProps {
 
 export function LockedChoice({ text, gateReason }: LockedChoiceProps) {
   return (
-    <li className="w-full px-4 py-3 rounded-lg border border-stone-700/40 bg-gaslight-ink/30 opacity-60">
+    <li className="w-full px-4 py-3 rounded-lg border border-stone-700/60 bg-gaslight-ink/50">
       <div className="flex items-start gap-2">
         <span aria-hidden="true" className="text-stone-400 text-sm mt-0.5">🔒</span>
         <div className="flex-1">
-          <span className="text-stone-400 font-serif leading-snug line-through decoration-stone-600/50">
+          <span className="text-stone-400 font-serif leading-snug line-through decoration-stone-600">
             {text}
           </span>
-          <p className="mt-1 text-xs text-stone-500 italic font-serif not-italic">{gateReason}</p>
+          <p className="mt-1 text-sm text-stone-400 font-serif">{gateReason}</p>
         </div>
       </div>
     </li>
   );
 }
 ```
+
+**Contrast (Codex plan Major):** do NOT apply `opacity-*` to the `<li>` subtree — compositing at 60%
+drops `stone-400`/`stone-500` on the `#1a1a2e` ink to ~3.23:1 / ~2.10:1, below the 4.5:1 AA body
+threshold the Phase-4 sweep established (spec §6). The disabled state is conveyed by the 🔒 icon,
+line-through, and a muted border/background instead. Both text runs use `text-stone-400` (established
+ink ratio 6.60:1) at `text-sm` (not `text-xs`) so both pass AA. T9 live-verify recomputes both ratios.
 
 - [ ] **Step 4: Export from the shared barrel**
 
@@ -567,7 +613,7 @@ Add to `src/components/__tests__/ChoicePanel.test.tsx` (import `render`, `screen
 
 ```tsx
 describe('Phase 5 — disabled choices', () => {
-  it('renders a disabled choice greyed & non-interactive with its reason, in a list', () => {
+  it('renders a disabled choice greyed, non-interactive, non-focusable, with its reason in a list', () => {
     // A gated choice with visibility 'disabled' whose gate is unmet.
     const choices = [
       { id: 'open', text: 'Open ledger', outcomes: { success: 's2' } },
@@ -581,9 +627,36 @@ describe('Phase 5 — disabled choices', () => {
     // Interactive choice is a button; disabled one is not.
     expect(screen.getByRole('button', { name: /Open ledger/ })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Force the safe/ })).toBeNull();
-    // Reason visible; rendered in a listitem.
+    // Reason + text visible; rendered as a listitem inside a list.
     expect(screen.getByText('You would need the key first.')).toBeInTheDocument();
     expect(screen.getByText('Force the safe')).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: /Locked choices/ })).toBeInTheDocument();
+    expect(screen.getAllByRole('listitem').length).toBe(1);
+    // Non-focusable: the locked item exposes no interactive/focusable element.
+    const locked = screen.getByRole('listitem');
+    expect(locked.querySelector('button, a, [tabindex]')).toBeNull();
+  });
+
+  it('places the interactive nav BEFORE the locked list in DOM order (Codex plan Major)', () => {
+    const choices = [
+      { id: 'open', text: 'Open ledger', outcomes: { success: 's2' } },
+      { id: 'force', text: 'Force the safe', requiresClue: 'missing-clue',
+        visibility: 'disabled', gateReason: 'Locked.', outcomes: { success: 's3' } },
+    ] as unknown as import('../../types').Choice[];
+    const { container } = render(<ChoicePanel choices={choices} />);
+    const nav = screen.getByRole('navigation', { name: /Available choices/ });
+    const list = screen.getByRole('list', { name: /Locked choices/ });
+    // compareDocumentPosition: FOLLOWING (4) means `list` comes after `nav`.
+    expect(nav.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('renders a shown-soft-gate choice as interactive despite an unmet gate', () => {
+    const choices = [
+      { id: 'soft', text: 'Soft gate', requiresClue: 'missing-clue', visibility: 'shown',
+        outcomes: { success: 's2' } },
+    ] as unknown as import('../../types').Choice[];
+    render(<ChoicePanel choices={choices} />);
+    expect(screen.getByRole('button', { name: /Soft gate/ })).toBeInTheDocument();
   });
 
   it('still hides a gated choice with default (absent) visibility', () => {
@@ -597,7 +670,12 @@ describe('Phase 5 — disabled choices', () => {
 });
 ```
 
-(If the existing test file seeds a store with a loaded case, reuse that harness; the two choices above need no clue in the store so `missing-clue` stays unmet.)
+**Test harness (Codex plan Major — do not hand-wave this):** the existing `ChoicePanel.test.tsx` renders
+`<ChoicePanel choices={...} />` against the real store. Codex confirmed the current harness has **no**
+`missing-clue` in the store, so the `requiresClue: 'missing-clue'` gates above are genuinely unmet
+(non-vacuous RED). Reuse the file's existing render/store setup verbatim — if the file wraps render in a
+helper or seeds a case, use that same helper; do not invent a new one. The `role="navigation"` query
+matches the `<nav aria-label="Available choices">`; `role="list"`/`"listitem"` match the locked `<ul>`.
 
 - [ ] **Step 2: Run to verify failure**
 
@@ -712,7 +790,7 @@ Expected: PASS (both new tests + existing ChoicePanel tests still green).
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/components/ChoicePanel/
+git add src/components/ChoicePanel/ src/components/__tests__/ChoicePanel.test.tsx
 git commit -m "feat(ui): ChoicePanel renders disabled choices via resolver + locked <ul> (Phase 5)"
 ```
 
@@ -729,17 +807,18 @@ git commit -m "feat(ui): ChoicePanel renders disabled choices via resolver + loc
 
 Add to `src/engine/__tests__/encounterSystem.test.ts` (reuse its existing state/round builders). Add:
 
-```ts
-import { getEncounterChoices } from '../encounters';
-// (reuse the file's existing GameState/EncounterRound builders)
+`getEncounterChoices` is **already imported** in this file (line 51, from the `../narrativeEngine`
+barrel) and the state builder is `makeGameState` (line 75) — do NOT add a duplicate import or invent
+`makeEmptyState` (Codex plan Minor). Add this describe block, reusing those:
 
+```ts
 describe('getEncounterChoices — Phase 5 visibility', () => {
   it('includes a non-escape disabled choice (gate unmet, visibility disabled)', () => {
     const round = { roundNumber: 1, isSupernatural: false, choices: [
       { id: 'a', text: 'fight', outcomes: { success: 's' } },
       { id: 'b', text: 'ritual', requiresClue: 'missing', visibility: 'disabled', gateReason: 'r', outcomes: { success: 's' } },
     ]} as never;
-    const state = /* state with no clues */ makeEmptyState();
+    const state = makeGameState(); // empty clues -> 'missing' is unmet
     const ids = getEncounterChoices(round, state).map((c) => c.id);
     expect(ids).toContain('a');
     expect(ids).toContain('b'); // disabled, but returned so the panel can grey it
@@ -749,13 +828,11 @@ describe('getEncounterChoices — Phase 5 visibility', () => {
     const round = { roundNumber: 1, isSupernatural: false, choices: [
       { id: 'esc', text: 'flee', isEscapePath: true, requiresFlag: 'has-exit', outcomes: { success: 's' } },
     ]} as never;
-    const state = makeEmptyState(); // has-exit not set
+    const state = makeGameState(); // has-exit flag not set
     expect(getEncounterChoices(round, state).map((c) => c.id)).not.toContain('esc');
   });
 });
 ```
-
-(Adapt `makeEmptyState` to the test file's existing helper.)
 
 - [ ] **Step 2: Run to verify failure**
 
@@ -793,13 +870,54 @@ export function getEncounterChoices(
 }
 ```
 
-Add the imports at the top of `encounters.ts` if not already present:
+Add the import at the top of `encounters.ts`:
 
 ```ts
 import { choiceGateConditions, resolveChoiceVisibility } from './choiceVisibility';
 ```
 
-(`evaluateConditions` is already imported in this file; confirm with `grep -n "evaluateConditions" src/engine/encounters.ts`.)
+(`evaluateConditions` is already imported here at line 17.) This rewrite removes the last use of the
+`Condition` type in `encounters.ts` (the old inline `const conditions: Condition[] = []`). Check whether
+`Condition` is still referenced elsewhere in the file (`grep -n "Condition" src/engine/encounters.ts`);
+if not, **remove it from the type import** at line ~10 to avoid an unused-import lint error (Codex plan
+Minor).
+
+- [ ] **Step 3b: Write a failing EncounterPanel render test (Codex plan Major — the panel render must have its own RED)**
+
+Add to `src/components/__tests__/EncounterPanel.test.tsx`. That file **mocks** `../../engine/narrativeEngine`
+(so `getEncounterChoices` is a `vi.fn()` you control) but does **not** mock `../../engine/choiceVisibility`,
+so the panel's real `resolveChoiceVisibility` runs — its gate must be genuinely unmet against the seeded
+store (which has empty `clues`/`flags`, so `requiresClue: 'missing'` is unmet). Add:
+
+```tsx
+it('renders a disabled encounter choice greyed & non-interactive with its reason (Phase 5)', () => {
+  initStore();
+  mockGetEncounterChoices.mockReturnValue([
+    { id: 'fight', text: 'Fight', faculty: 'vigor', difficulty: 10,
+      outcomes: { critical: 's1', success: 's1', partial: 's1', failure: 's1', fumble: 's1' } },
+    { id: 'ritual', text: 'Perform the ritual', requiresClue: 'missing',
+      visibility: 'disabled', gateReason: 'You do not yet grasp the sigil.',
+      outcomes: { success: 's1' } },
+  ]);
+  // (start the encounter the way the file's other tests do, so encounterState is set.)
+  render(<EncounterPanel /* same props the file's tests pass */ />);
+
+  expect(screen.getByRole('button', { name: /Fight/ })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /Perform the ritual/ })).toBeNull();
+  expect(screen.getByText('You do not yet grasp the sigil.')).toBeInTheDocument();
+  expect(screen.getByRole('list', { name: /Locked choices/ })).toBeInTheDocument();
+  // The interactive encounter nav is preserved.
+  expect(screen.getByRole('navigation', { name: /Encounter choices/ })).toBeInTheDocument();
+});
+```
+
+(Match the file's existing pattern for setting `encounterState` — e.g. it dispatches `startEncounter`
+via the store or seeds `encounterState` directly. Reuse whatever the sibling tests do; do not invent a
+new setup.)
+
+Run: `npm run test:run -- EncounterPanel 2>&1 | tail -15`
+Expected: FAIL — the disabled `ritual` currently renders as an interactive `ChoiceCard` button (or its
+reason/`list` is absent).
 
 - [ ] **Step 4: Render the locked group in EncounterPanel**
 
@@ -810,12 +928,19 @@ import { resolveChoiceVisibility } from '../../engine/choiceVisibility';
 import { LockedChoice } from '../shared';
 ```
 
-Replace the choices block (the single `<nav aria-label="Encounter choices">` mapping `availableChoices`, ~line 146-159). First partition:
+Replace the choices block (the single `<nav aria-label="Encounter choices">` mapping `availableChoices`, ~line 146-159). First partition in a single loop (resolve each choice once, mirroring T5; Codex plan Minor):
 
 ```ts
-  const shownChoices = availableChoices.filter((c) => resolveChoiceVisibility(c, gameState) === 'shown');
-  const lockedChoices = availableChoices.filter((c) => resolveChoiceVisibility(c, gameState) === 'disabled');
+  const shownChoices: Choice[] = [];
+  const lockedChoices: Choice[] = [];
+  for (const c of availableChoices) {
+    const state = resolveChoiceVisibility(c, gameState);
+    if (state === 'shown') shownChoices.push(c);
+    else if (state === 'disabled') lockedChoices.push(c);
+  }
 ```
+
+(Add `import type { Choice } from '../../types';` if the file doesn't already import it.)
 
 Then render:
 
@@ -858,7 +983,8 @@ Expected: all green (baseline + the new tests).
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/engine/encounters.ts src/components/EncounterPanel/ src/engine/__tests__/
+git add src/engine/encounters.ts src/components/EncounterPanel/ \
+  src/engine/__tests__/encounterSystem.test.ts src/components/__tests__/EncounterPanel.test.tsx
 git commit -m "feat(engine/ui): encounter choices via shared resolver; escape paths stay hard-gated (Phase 5)"
 ```
 
@@ -890,15 +1016,59 @@ Keep the existing `requires*` gate. The reason must be Victorian-measured, never
 Run: `node scripts/validateCase.mjs 2>&1 | tail -10`
 Expected: 8 cases, zero errors (the converted choice has a real gateReason + a gate).
 
-- [ ] **Step 4: Run the content-integrity reviewer on the tone**
+- [ ] **Step 4: Add a content-backed regression witness (Codex plan Major — the demo needs an explicit before/after assertion)**
+
+The demo is the *sole* intended behaviour delta (spec §9); it needs its own test so a reviewer can
+distinguish it from a regression. Create `src/engine/__tests__/phase5DemoChoice.test.ts`. Fill in the
+concrete case dir + choice id chosen in Step 1:
+
+```ts
+import { describe, it, expect } from 'vitest';
+import { resolveChoiceVisibility } from '../choiceVisibility';
+import type { Choice, GameState } from '../../types';
+// Import/parse the shipped choice from its JSON, or inline the exact object.
+import sceneData from '../../../public/content/<cases|side-cases>/<case>/<file>.json';
+
+function ungatedState(): GameState {
+  // The demo choice's gate is UNMET here (empty clues/flags/etc.).
+  return { investigator: { archetype: 'detective', faculties: { reason: 10, perception: 10, nerve: 10, vigor: 10, influence: 10, lore: 10 } },
+    clues: {}, deductions: {}, flags: {}, npcs: {}, factionReputation: {} } as unknown as GameState;
+}
+
+describe('Phase 5 demo choice — the one intended behaviour delta', () => {
+  const demo = /* locate the choice by id in sceneData */ (() => {
+    // e.g. sceneData.scenes.flatMap(s => s.choices ?? []).find(c => c.id === '<demo-id>')
+    return (sceneData as any).scenes
+      .flatMap((s: any) => s.choices ?? [])
+      .find((c: Choice) => c.id === '<demo-id>') as Choice;
+  })();
+
+  it('the authored (disabled) form resolves to disabled with its reason when the gate is unmet', () => {
+    expect(demo.visibility).toBe('disabled');
+    expect(typeof demo.gateReason).toBe('string');
+    expect(demo.gateReason!.trim().length).toBeGreaterThan(0);
+    expect(resolveChoiceVisibility(demo, ungatedState())).toBe('disabled');
+  });
+
+  it('an equivalent choice WITHOUT the two new fields would resolve to hidden (old/default behaviour)', () => {
+    const { visibility, gateReason, ...oldForm } = demo;
+    expect(resolveChoiceVisibility(oldForm as Choice, ungatedState())).toBe('hidden');
+  });
+});
+```
+
+Run: `npm run test:run -- phase5DemoChoice 2>&1 | tail -12`
+Expected: PASS (proves disabled-under-new / hidden-under-old for the real shipped choice).
+
+- [ ] **Step 5: Run the content-integrity reviewer on the tone**
 
 Use the `/review-content` skill (content-integrity-reviewer subagent) against the changed case, focused on the `gateReason` tone. Fold any tone feedback.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add public/content/
-git commit -m "content: demo one disabled-with-reason choice (Phase 5 end-to-end anchor)"
+git add public/content/ src/engine/__tests__/phase5DemoChoice.test.ts
+git commit -m "content+test: demo one disabled-with-reason choice + before/after regression witness (Phase 5)"
 ```
 
 ---
@@ -965,3 +1135,33 @@ Load a case in the dev server (or Playwright) that reaches the demo choice while
 - **Spec coverage:** §3 schema → T1; §4 resolver + barrel + index cleanup → T2/T5; §5 validator (5 errors + warning + Ctx plumbing) → T3; §6 rendering (nav + locked ul, LockedChoice) → T4/T5/T6; §7 tests → across T2/T3/T4/T5/T6; §8 docs → T8; §9 demo → T7; §10 review path → T9 + the Codex impl pass after. All covered.
 - **Type consistency:** `resolveChoiceVisibility`/`choiceGateConditions` names, `ChoiceVisibilityState` union, and the `LockedChoice` props (`text`, `gateReason`) are used identically across tasks.
 - **Backward-compat:** the `requiresFlag: ''` compat test (T2) and the shipped-content validator run (T3 step 7) guard it.
+
+---
+
+## Codex plan review (folded)
+
+File-based Codex plan review
+([review](../../../codex/output/2026-07-17-phase5-choice-gating-plan-review.md)) returned 1 Blocker + 4
+Majors + 1 Minor, **all verified against real code and folded**:
+- **Blocker** — T3 test imported `ContentBundle` from `../../types`, but it's exported by
+  `contentValidation.ts:31` → TS2305 at build (vitest transpiles without type-checking → latent). Fixed
+  the import + added a type-check step right after T3 (not deferred to T9).
+- **Major (contrast)** — `LockedChoice` `opacity-60` on the subtree dropped `stone-400`/`stone-500` on
+  `#1a1a2e` ink to ~3.23:1 / ~2.10:1 (below AA 4.5:1). Removed the opacity; both text runs now
+  `text-stone-400` (6.60:1) at `text-sm`; state conveyed by icon + line-through + muted border/bg.
+- **Major (validator tests)** — the soft-gate warning test only checked "no error contains phrase"
+  (false-green); now asserts `errors === []`. Added non-string/`null` `gateReason` cases (T3) and
+  `requiresFlag: null` (T2); added a bundle-level "warning + zero errors = CLI exit 0" assertion.
+- **Major (component tests)** — ChoicePanel test now asserts `list`/`listitem` roles, nav-before-list
+  DOM order, non-focusability, and the `shown` soft-gate interaction; added an EncounterPanel RED test
+  (T6 Step 3b) so the panel render change has its own failing test, not just engine tests.
+- **Major (demo witness)** — T7 now adds a content-backed regression test proving the real shipped
+  choice resolves `disabled` under its authored form and `hidden` with the two fields stripped.
+- **Minor** — T6 test used a nonexistent `makeEmptyState`/duplicate import → corrected to the file's
+  real `makeGameState` + existing barrel import; note to drop the now-unused `Condition` import in
+  `encounters.ts`; single partition loop in EncounterPanel (resolve once); T5 commit now stages its test.
+
+Codex confirmed sound: T1's field union + T2's four conditions match the real `Condition` variants; T2's
+direct `./conditions` import introduces no barrel cycle and preserves empty-string behaviour; T6's escape
+branch is behaviourally identical to today; T3's `warnings` plumbing + `worseAlternative` recursion are
+appropriate; T5 preserves the F-045 memoisation contract and no existing test queries the `nav` as root.
