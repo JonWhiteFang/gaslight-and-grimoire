@@ -55,10 +55,10 @@
         },
         {
           "id": "cc-choice-hub-halloway",
-          "text": "Lady Halloway will receive you now.",
+          "text": "Present yourself at Lady Halloway's drawing room.",
           "requiresFlag": "cc-halloway-trusts",
           "visibility": "disabled",
-          "gateReason": "Her drawing room opens only to those she has chosen to trust — and she has not yet chosen you.",
+          "gateReason": "Her drawing room does not open to callers she has not chosen — and she has not chosen you. Not yet.",
           "outcomes": {
             "critical": "cc-act2-halloway-diary",
             "success": "cc-act2-halloway-diary",
