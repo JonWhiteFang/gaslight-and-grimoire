@@ -610,7 +610,8 @@ function nonCriticalOutgoingEdges(scene: SceneNode): string[] {
 
 /**
  * Clues discoverable from reachable scenes: any clue listed in a reachable
- * scene's cluesAvailable, or referenced by a reachable choice's requiresClue /
+ * scene's cluesAvailable, granted by a reachable scene's `onEnter`
+ * `discoverClue` effect, or referenced by a reachable choice's requiresClue /
  * advantageIf. Variant cluesAvailable count when the variant's base is reachable.
  */
 function computeDiscoverableClues(bundle: ContentBundle, reachable: Set<string>): Set<string> {
@@ -623,6 +624,10 @@ function computeDiscoverableClues(bundle: ContentBundle, reachable: Set<string>)
     for (const choice of allChoices(scene)) {
       if (choice.requiresClue) discoverable.add(choice.requiresClue);
       for (const clueId of choice.advantageIf ?? []) discoverable.add(clueId);
+    }
+    // Parity with computeObtainableClues: an onEnter discoverClue IS a source.
+    for (const effect of scene.onEnter ?? []) {
+      if (effect.type === 'discoverClue' && effect.target) discoverable.add(effect.target);
     }
   };
 
