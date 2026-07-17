@@ -368,11 +368,10 @@ aren't presented as work. Ordered by *value*, annotated with *evidence strength*
 
 **Do now — small, verified, real gaps:**
 1. ✅ **Global live announcer** — **done (Phase 1, PR #80):** `src/announcer.ts` + `<LiveAnnouncer>` at the app root. Phases 2/3 route deduction/dice feedback through `announce()`. [Part IV](#part-iv--accessibility-acceptance-criteria-per-surface)
-2. **`connected` clue-state color-only fix** (🟡; High-conf) — add an icon/text cue. [G2](#g2--color-independence--contrast)
-3. **Reduced-motion coverage audit** (🟡; High-conf) — confirm CSS animations respect the flag; add
-   per-source criteria. [F1](#f1--reduced-motion-must-cover-every-animation-source-not-just-motion-components)
-4. **Focus-restore + inertness across *all* overlays** (⭕; High-conf) — not just the board. [Part IV](#part-iv--accessibility-acceptance-criteria-per-surface)
-5. **Contrast/focus-indicator pass** on the dark theme against SC 1.4.3/1.4.11/2.4.11 (⭕; High-conf).
+2. ✅ **`connected` clue-state color-only fix** — **done (Phase 2a, PR #82):** derived 🔗 cue + ring. [G2](#g2--color-independence--contrast)
+3. ✅ **Reduced-motion coverage audit** — **done (Phase 4, PR #85):** direct per-gate guards (framer-motion mock) + structural CSS guard; live-verified the `.reduced-motion` class zeroes CSS animation. [F1](#f1--reduced-motion-must-cover-every-animation-source-not-just-motion-components)
+4. ✅ **Focus-restore + inertness across *all* overlays** — **done (Phase 4, PR #85):** SettingsPanel → `useFocusTrap`; title-screen inert; **fixed the inert-blurs-invoker WCAG 2.4.3 bug** (open-time `restoreFocusTo` capture) so focus restores to the trigger, not `<body>`. [Part IV](#part-iv--accessibility-acceptance-criteria-per-surface)
+5. ✅ **Contrast/focus-indicator pass** — **done (Phase 4, PR #85):** all keyboard rings standardized to `focus-visible:ring-2 ring-amber-400` (glob-guarded), computed contrast table (amber ring 9.90:1 on ink), live-verified visible on dark + high-contrast; targets SC 1.4.3/1.4.11/2.4.7 (2.4.11 was a mis-cite, corrected).
 
 **Preserve (don't re-solve):**
 - Self-paced prose ([A1](#a1--prose-must-be-self-paced)); polite/assertive save toast; the board's

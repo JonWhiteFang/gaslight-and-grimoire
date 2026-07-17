@@ -86,7 +86,7 @@ export function LoadGameScreen({ onLoad, onBack }: LoadGameScreenProps) {
                   type="button"
                   onClick={() => onLoad(save.id)}
                   aria-label={`Load investigation: ${save.investigatorName}, ${save.caseName}, saved ${formatTimestamp(save.timestamp)}`}
-                  className="flex-1 min-h-[44px] px-4 py-3 bg-stone-800 hover:bg-stone-700 active:bg-stone-900 text-left rounded border border-stone-600 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  className="flex-1 min-h-[44px] px-4 py-3 bg-stone-800 hover:bg-stone-700 active:bg-stone-900 text-left rounded border border-stone-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
                 >
                   <div className="flex justify-between items-baseline gap-2">
                     <span className="font-serif text-amber-300 font-semibold truncate">
@@ -133,7 +133,7 @@ export function LoadGameScreen({ onLoad, onBack }: LoadGameScreenProps) {
           type="button"
           onClick={onBack}
           aria-label="Back to title screen"
-          className="w-full min-h-[44px] px-6 py-3 bg-transparent hover:bg-stone-900 text-stone-500 hover:text-stone-300 font-serif text-base rounded border border-stone-800 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-600"
+          className="w-full min-h-[44px] px-6 py-3 bg-transparent hover:bg-stone-900 text-stone-500 hover:text-stone-300 font-serif text-base rounded border border-stone-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
         >
           ← Back
         </button>

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, lazy, Suspense } from 'react';
+import { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
 import { CharacterCreation } from './components/CharacterCreation';
 import { HeaderBar } from './components/HeaderBar';
 import { AccessibilityProvider } from './components/AccessibilityProvider/AccessibilityProvider';
@@ -73,7 +73,7 @@ export function GameContent({ onCompleteCase, onHalt, reviewSceneId, onDismissRe
             <button
               type="button"
               onClick={onDismissReview}
-              className="self-center px-6 py-2 bg-amber-800 hover:bg-amber-700 text-amber-100 font-serif rounded border border-amber-600 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="self-center px-6 py-2 bg-amber-800 hover:bg-amber-700 text-amber-100 font-serif rounded border border-amber-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             >
               Return to present
             </button>
@@ -99,7 +99,7 @@ export function GameContent({ onCompleteCase, onHalt, reviewSceneId, onDismissRe
             <button
               type="button"
               onClick={onCompleteCase}
-              className="px-8 py-3 bg-amber-700 hover:bg-amber-600 text-amber-50 font-serif text-lg rounded border border-amber-500 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="px-8 py-3 bg-amber-700 hover:bg-amber-600 text-amber-50 font-serif text-lg rounded border border-amber-500 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             >
               Case Complete
             </button>
@@ -128,6 +128,11 @@ export default function App() {
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [reviewSceneId, setReviewSceneId] = useState<string | null>(null);
+  // The element focused when an overlay opens — captured BEFORE the inert
+  // ancestor blurs it to <body>, so useFocusTrap can restore focus to the real
+  // invoker on close instead of dumping keyboard users at the top of the
+  // document (WCAG 2.4.3). See useFocusTrap's `restoreTo` option (Task 9b).
+  const invokerRef = useRef<HTMLElement | null>(null);
 
   const archetype = useStore((s) => s.investigator.archetype);
   const abilityUsed = useStore((s) => s.investigator.abilityUsed);
@@ -232,16 +237,22 @@ export default function App() {
   if (screen === 'title') {
     return (
       <AccessibilityProvider>
-        <TitleScreen
-          onNewGame={() => setScreen('character-creation')}
-          onLoadGame={() => setScreen('load-game')}
-          onSettings={() => setIsSettingsOpen(true)}
-          loadError={loadError}
-          onDismissError={() => setLoadError(null)}
-        />
+        {/* Background is inert while Settings is open, so focus/pointer/AT
+            cannot reach the title behind the overlay. Gate on the state (not the
+            resolved lazy chunk) so isolation holds during the Suspense fallback.
+            React 19 sets/removes the real `inert` boolean attribute. */}
+        <div data-testid="title-inert-region" inert={isSettingsOpen}>
+          <TitleScreen
+            onNewGame={() => setScreen('character-creation')}
+            onLoadGame={() => setScreen('load-game')}
+            onSettings={() => { invokerRef.current = document.activeElement as HTMLElement; setIsSettingsOpen(true); }}
+            loadError={loadError}
+            onDismissError={() => setLoadError(null)}
+          />
+        </div>
         <Suspense fallback={<OverlayFallback />}>
           {isSettingsOpen && (
-            <SettingsPanel onClose={() => setIsSettingsOpen(false)} />
+            <SettingsPanel onClose={() => setIsSettingsOpen(false)} restoreFocusTo={invokerRef.current} />
           )}
         </Suspense>
       </AccessibilityProvider>
@@ -341,11 +352,11 @@ export default function App() {
           Skip to scene
         </a>
         <HeaderBar
-          onOpenEvidenceBoard={() => setIsEvidenceBoardOpen(true)}
-          onOpenJournal={() => setIsJournalOpen(true)}
-          onOpenNPCGallery={() => setIsGalleryOpen(true)}
+          onOpenEvidenceBoard={() => { invokerRef.current = document.activeElement as HTMLElement; setIsEvidenceBoardOpen(true); }}
+          onOpenJournal={() => { invokerRef.current = document.activeElement as HTMLElement; setIsJournalOpen(true); }}
+          onOpenNPCGallery={() => { invokerRef.current = document.activeElement as HTMLElement; setIsGalleryOpen(true); }}
           onActivateAbility={handleActivateAbility}
-          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenSettings={() => { invokerRef.current = document.activeElement as HTMLElement; setIsSettingsOpen(true); }}
           onSaveGame={handleSaveGame}
           onReviewPrevious={() => {
             const history = useStore.getState().sceneHistory;
@@ -361,16 +372,16 @@ export default function App() {
         {/* Overlays — lazy-loaded (F-043), behind a Suspense boundary. */}
         <Suspense fallback={<OverlayFallback />}>
           {isEvidenceBoardOpen && (
-            <EvidenceBoard onClose={() => setIsEvidenceBoardOpen(false)} />
+            <EvidenceBoard onClose={() => setIsEvidenceBoardOpen(false)} restoreFocusTo={invokerRef.current} />
           )}
           {isJournalOpen && (
-            <CaseJournal onClose={() => setIsJournalOpen(false)} onReviewScene={(id) => setReviewSceneId(id)} />
+            <CaseJournal onClose={() => setIsJournalOpen(false)} onReviewScene={(id) => setReviewSceneId(id)} restoreFocusTo={invokerRef.current} />
           )}
           {isGalleryOpen && (
-            <NPCGallery onClose={() => setIsGalleryOpen(false)} />
+            <NPCGallery onClose={() => setIsGalleryOpen(false)} restoreFocusTo={invokerRef.current} />
           )}
           {isSettingsOpen && (
-            <SettingsPanel onClose={() => setIsSettingsOpen(false)} />
+            <SettingsPanel onClose={() => setIsSettingsOpen(false)} restoreFocusTo={invokerRef.current} />
           )}
         </Suspense>
 

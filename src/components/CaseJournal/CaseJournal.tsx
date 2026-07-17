@@ -57,9 +57,10 @@ function JournalSection({
 export interface CaseJournalProps {
   onClose: () => void;
   onReviewScene?: (sceneId: string) => void;
+  restoreFocusTo?: HTMLElement | null;
 }
 
-export function CaseJournal({ onClose, onReviewScene }: CaseJournalProps) {
+export function CaseJournal({ onClose, onReviewScene, restoreFocusTo }: CaseJournalProps) {
   const clues = useStore((s) => s.clues);
   const flags = useStore((s) => s.flags);
   const deductions = useStore((s) => s.deductions);
@@ -67,7 +68,7 @@ export function CaseJournal({ onClose, onReviewScene }: CaseJournalProps) {
   const sceneHistory = useStore((s) => s.sceneHistory);
   const currentScene = useStore((s) => s.currentScene);
   const caseData = useStore((s) => s.caseData);
-  const dialogRef = useFocusTrap<HTMLDivElement>();
+  const dialogRef = useFocusTrap<HTMLDivElement>({ restoreTo: restoreFocusTo });
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {

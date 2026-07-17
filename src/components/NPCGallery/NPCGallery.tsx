@@ -83,12 +83,13 @@ function NPCRow({ npc }: { npc: NPCState }) {
 
 export interface NPCGalleryProps {
   onClose: () => void;
+  restoreFocusTo?: HTMLElement | null;
 }
 
-export function NPCGallery({ onClose }: NPCGalleryProps) {
+export function NPCGallery({ onClose, restoreFocusTo }: NPCGalleryProps) {
   const npcs = useNpcs();
   const accessibleNpcs = Object.values(npcs).filter((n) => n.isAccessible);
-  const dialogRef = useFocusTrap<HTMLDivElement>();
+  const dialogRef = useFocusTrap<HTMLDivElement>({ restoreTo: restoreFocusTo });
 
   // Escape key closes
   useEffect(() => {

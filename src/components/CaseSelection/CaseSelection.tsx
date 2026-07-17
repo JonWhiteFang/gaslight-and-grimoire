@@ -37,7 +37,7 @@ export function CaseSelection({ onSelectCase, onBack }: CaseSelectionProps) {
         <button
           type="button"
           onClick={onBack}
-          className="min-h-[44px] px-6 py-3 bg-transparent hover:bg-stone-900 text-stone-400 hover:text-stone-200 font-serif rounded border border-stone-700 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-600"
+          className="min-h-[44px] px-6 py-3 bg-transparent hover:bg-stone-900 text-stone-400 hover:text-stone-200 font-serif rounded border border-stone-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
         >
           Back
         </button>
@@ -80,7 +80,7 @@ export function CaseSelection({ onSelectCase, onBack }: CaseSelectionProps) {
               key={entry.id}
               type="button"
               onClick={() => onSelectCase(entry.id, entry.type)}
-              className="w-full text-left min-h-[44px] p-4 bg-stone-900/80 hover:bg-stone-800 border border-stone-700 hover:border-gaslight-amber/50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="w-full text-left min-h-[44px] p-4 bg-stone-900/80 hover:bg-stone-800 border border-stone-700 hover:border-gaslight-amber/50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             >
               <h2 className="font-serif text-lg text-gaslight-amber">{entry.title}</h2>
               <p className="mt-1 text-sm text-stone-400 leading-snug">{entry.synopsis}</p>
@@ -102,7 +102,7 @@ export function CaseSelection({ onSelectCase, onBack }: CaseSelectionProps) {
                   type="button"
                   disabled={!unlocked}
                   onClick={() => unlocked && onSelectCase(entry.id, entry.type)}
-                  className={`w-full text-left min-h-[44px] p-4 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400 ${
+                  className={`w-full text-left min-h-[44px] p-4 rounded-lg border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                     unlocked
                       ? 'bg-stone-900/80 hover:bg-stone-800 border-stone-700 hover:border-gaslight-amber/50'
                       : 'bg-stone-900/40 border-stone-800 opacity-50 cursor-not-allowed'
@@ -127,7 +127,7 @@ export function CaseSelection({ onSelectCase, onBack }: CaseSelectionProps) {
         <button
           type="button"
           onClick={onBack}
-          className="w-full min-h-[44px] px-6 py-3 bg-transparent hover:bg-stone-900 text-stone-500 hover:text-stone-300 font-serif text-base rounded border border-stone-800 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-600"
+          className="w-full min-h-[44px] px-6 py-3 bg-transparent hover:bg-stone-900 text-stone-500 hover:text-stone-300 font-serif text-base rounded border border-stone-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
         >
           Back
         </button>

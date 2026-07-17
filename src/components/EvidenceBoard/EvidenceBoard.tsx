@@ -16,6 +16,7 @@ import { DeductionButton } from './DeductionButton';
 
 export interface EvidenceBoardProps {
   onClose: () => void;
+  restoreFocusTo?: HTMLElement | null;
 }
 
 // Stable empty-array reference for the recipes selector — a fresh `[]` from a
@@ -98,7 +99,7 @@ function getCentre(el: HTMLElement, container: HTMLElement): ThreadPoint {
   };
 }
 
-export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
+export function EvidenceBoard({ onClose, restoreFocusTo }: EvidenceBoardProps) {
   const clues = useClues();
   const deductions = useDeductions();
   const storeConnections = useConnections();
@@ -119,7 +120,7 @@ export function EvidenceBoard({ onClose }: EvidenceBoardProps) {
   const [pointsVersion, setPointsVersion] = useState(0);
 
   const boardRef = useRef<HTMLDivElement>(null);
-  const dialogRef = useFocusTrap<HTMLDivElement>();
+  const dialogRef = useFocusTrap<HTMLDivElement>({ restoreTo: restoreFocusTo });
 
   // Track board visit for hint engine
   useEffect(() => {

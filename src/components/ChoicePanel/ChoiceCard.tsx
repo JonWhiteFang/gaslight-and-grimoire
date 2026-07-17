@@ -128,7 +128,7 @@ function ChoiceCardComponent({
       onClick={() => onSelect(choice.id)}
       className="w-full text-left px-4 py-3 rounded-lg border border-gaslight-amber/30
                  bg-gaslight-ink/60 hover:bg-gaslight-ink/90 hover:border-gaslight-amber/60
-                 focus:outline-none focus:ring-2 focus:ring-gaslight-amber/60
+                 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400
                  transition-colors duration-150 group"
       aria-label={odds ? `${choice.text}. ${describeCheckOdds(odds)}` : choice.text}
     >

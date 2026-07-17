@@ -7,61 +7,31 @@
  *   3. Audio — ambient and SFX volume sliders
  *   4. Gameplay — auto-save frequency, hints toggle
  */
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useSettings, useMetaActions } from '../../store';
 import type { GameSettings } from '../../types';
 
 interface SettingsPanelProps {
   onClose: () => void;
+  restoreFocusTo?: HTMLElement | null;
 }
 
-export function SettingsPanel({ onClose }: SettingsPanelProps) {
+export function SettingsPanel({ onClose, restoreFocusTo }: SettingsPanelProps) {
   const settings = useSettings();
   const { updateSettings } = useMetaActions();
-  const panelRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useFocusTrap<HTMLDivElement>({ restoreTo: restoreFocusTo });
 
-  // Focus the close button on mount for keyboard users
-  useEffect(() => {
-    closeButtonRef.current?.focus();
-  }, []);
-
-  // Close on Escape
+  // Close on Escape. useFocusTrap owns focus-in, Tab-wrap, and focus-restore;
+  // it does not own Escape, so keep this handler. Listen on `window` to match
+  // the other three overlays (Codex Major 5).
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose();
     }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
-
-  // Trap focus within the panel
-  useEffect(() => {
-    const panel = panelRef.current;
-    if (!panel) return;
-
-    function handleTab(e: KeyboardEvent) {
-      if (e.key !== 'Tab') return;
-      const focusable = panel!.querySelectorAll<HTMLElement>(
-        'button, input, select, [tabindex]:not([tabindex="-1"])',
-      );
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (e.shiftKey) {
-        if (document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        }
-      } else {
-        if (document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    }
-    document.addEventListener('keydown', handleTab);
-    return () => document.removeEventListener('keydown', handleTab);
-  }, []);
 
   function patch(partial: Partial<GameSettings>) {
     updateSettings(partial);
@@ -92,7 +62,6 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-amber-300">Settings</h2>
           <button
-            ref={closeButtonRef}
             type="button"
             aria-label="Close settings"
             onClick={onClose}
