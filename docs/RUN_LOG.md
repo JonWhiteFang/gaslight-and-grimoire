@@ -19,6 +19,14 @@
 
 ---
 
+## 2026-07-17 — Phase 4 MERGED (PR #85) + post-merge checkpoint
+
+- **Goal:** Merge the completed Phase 4 a11y-sweep branch and sync `main`; refresh the spine from "PR #85 open" to "merged".
+- **Did:** Verified all 6 CI checks green on PR #85, merged via `gh pr merge 85 --merge` (merge commit `8e1c2b0`, never squashed). Synced local `main` (`git pull --ff-only`), deleted the merged branch local + remote. No code touched this session — docs/spine only.
+- **Verified:** on `main` at `8e1c2b0`: `npm run test:run` → **766 passed (766)** / **78** files. CI on PR #85: all 6 checks pass (test, build, npm-audit, OWASP, Cloudflare Workers Build, dependency-check).
+- **Open / blockers:** None. UI/UX track complete through Phase 4. Next code work: **Phase 5 (choice-gating content model)** — the last roadmap item — or content resumes with **The Orrery Room** (Grey Dawn vignette). No branch open. Unchanged: #20 (media, user-blocked). Minor pre-existing lint-clean TS hint (`React` unused in TitleScreen/CaseSelection/VitalityMeter) noted for a trivial future cleanup.
+- **Memory updated:** STATE ☑ · RUN_LOG ☑ · ADR ☐ (no decision — merge + sync only). **Sweep:** PROJECT_STATE `_Last updated:_` → 2026-07-17 (merge line prepended; the 07-16 implementation line kept as prior-update record); U4 tracker row `open`→**MERGED (`8e1c2b0`)**; Branch-focus updated (was stale on `feat/phase3-dice-legibility`) → none/`main`; Next-actions "merge PR #85" → track-complete. Also fixed one adjacent stale line caught in the sweep: the **Stage** line still said "8 cases once PR #76 merges; 7 on `main` today" — PR #76 merged long ago, `main` has 8 cases; corrected.
+
 ## 2026-07-16 — Phase 4 IMPLEMENTED — a11y hardening sweep shipped (PR #85)
 
 - **Goal:** The last scheduled UI/UX phase — an accessibility hardening sweep against WCAG (roadmap items 3/4/5 + the "preserve" regression tests): reduced-motion coverage, focus-restore + background inertness across all overlays, and a contrast/focus-indicator pass. Verify-and-close-gaps, components/CSS/tests only.
