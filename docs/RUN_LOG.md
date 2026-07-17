@@ -19,6 +19,14 @@
 
 ---
 
+## 2026-07-17 — Phase 5 MERGED (PR #86) — UI/UX roadmap complete
+
+- **Goal:** Merge the completed Phase 5 branch once CI passed; sync `main`; flip the spine from "PR open" to "merged".
+- **Did:** All 6 CI checks green on PR #86 → merged via `gh pr merge 86 --merge --delete-branch` (merge commit `a1ddbd0`, never squashed); synced local `main` (`git pull --ff-only`), pruned the deleted remote branch. Spine updated: PROJECT_STATE header (merge line prepended), Branch-focus → none/`main`, U5 tracker row → MERGED, Next-actions → UI/UX track fully complete, content resumes (The Orrery Room). No code touched post-merge.
+- **Verified:** CI on PR #86: test, build, npm audit, OWASP, dependency-check, Cloudflare Workers Build — all pass. `main` at `a1ddbd0` carries the full 24-commit Phase 5 history (no squash).
+- **Open / blockers:** None. **The UI/UX roadmap (Phases 0–5) is fully complete.** Next: The Orrery Room (Grey Dawn vignette). Unchanged: #20 (media, user-blocked).
+- **Memory updated:** STATE ☑ · RUN_LOG ☑ · ADR ☐ (merge + sync only).
+
 ## 2026-07-17 — Phase 5 IMPLEMENTED — choice-gating content model shipped (PR #86, final UI/UX roadmap item)
 
 - **Goal:** Build the last UI/UX roadmap item: a `visibility`/`gateReason` vocabulary so authors can show a gated choice disabled-with-a-diegetic-reason instead of hard-hidden — schema, engine resolver, validator rules, rendering, one demo conversion, docs; backward-compatible with all 8 shipped cases.
