@@ -68,7 +68,7 @@ describe('choice-gating validation', () => {
 
   it('error: escape-path choice sets visibility/gateReason', () => {
     const errs = errorsOf(baseChoice({ requiresFlag: 'f', isEscapePath: true, visibility: 'disabled', gateReason: 'r' }));
-    expect(errs.some((e) => /escape-path choice .* may not set/.test(e))).toBe(true);
+    expect(errs.some((e) => /escape-path choice may not set/.test(e))).toBe(true);
   });
 
   it('warning (not error): shown on a gated choice — and NO errors at all', () => {
@@ -81,6 +81,11 @@ describe('choice-gating validation', () => {
     const result = validateBundle(bundleWithChoice(baseChoice({ requiresClue: 'clue-1', visibility: 'shown' })));
     expect(result.errors).toEqual([]);
     expect(result.warnings.some((w) => /shown despite a gate/.test(w))).toBe(true);
+  });
+
+  it('a valid escape path (gated, no visibility/gateReason) produces no gating error', () => {
+    const errs = errorsOf(baseChoice({ requiresFlag: 'f', isEscapePath: true }));
+    expect(errs.filter((e) => /visibility|gateReason|escape-path/.test(e))).toEqual([]);
   });
 
   it('a valid disabled choice with a real gateReason produces no gating error', () => {

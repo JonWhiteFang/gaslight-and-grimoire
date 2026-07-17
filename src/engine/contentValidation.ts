@@ -72,6 +72,8 @@ const SUSPICION_TIERS: ReadonlySet<NpcSuspicionTier> = new Set<NpcSuspicionTier>
   'normal', 'evasive', 'concealing', 'hostile',
 ]);
 
+const VISIBILITY_VALUES: ReadonlySet<string> = new Set(['shown', 'hidden', 'disabled']);
+
 // ─── Public API ────────────────────────────────────────────────────────────
 
 /**
@@ -402,18 +404,17 @@ function validateChoice(choice: Choice, where: string, ctx: Ctx): void {
   }
 
   // ── Phase 5: choice-gating vocabulary ──
-  const VISIBILITY_VALUES = ['shown', 'hidden', 'disabled'];
   const hasGate = choiceGateConditions(choice).length > 0;
   const reasonPresent = choice.gateReason !== undefined;
   const reasonNonEmpty = typeof choice.gateReason === 'string' && choice.gateReason.trim().length > 0;
 
-  if (choice.visibility !== undefined && !VISIBILITY_VALUES.includes(choice.visibility)) {
+  if (choice.visibility !== undefined && !VISIBILITY_VALUES.has(choice.visibility)) {
     ctx.errors.push(`${at} -> invalid visibility "${choice.visibility}" (expected shown | hidden | disabled)`);
   }
 
   if (choice.isEscapePath && (choice.visibility === 'disabled' || choice.visibility === 'shown' || reasonPresent)) {
     // Escape paths are out of the vocabulary's scope (spec §4.1); they stay hard-gated.
-    ctx.errors.push(`${at} -> escape-path choice "${choice.id}" may not set visibility/gateReason`);
+    ctx.errors.push(`${at} -> escape-path choice may not set visibility/gateReason`);
   } else {
     // Rule 1: disabled requires a non-empty gateReason.
     if (choice.visibility === 'disabled' && !reasonNonEmpty) {
