@@ -381,7 +381,7 @@ aren't presented as work. Ordered by *value*, annotated with *evidence strength*
 **Larger bets — product-facing, need a design decision first:**
 6. **Deduction feedback legibility** ([D3](#d3--deduction-verification-avoid-binary-whole-puzzle-rightwrong) → [Part V](#part-v--choice--deduction-from-abstract-to-acceptance-criteria)) — decide the role of the DC-14 roll vs. deterministic set-correctness; add partial-tier directional feedback. *Highest product value; Medium-conf evidence.*
 7. **Dice/probability legibility** ([C-open](#c-skill-check--dice-ux)) — surface the DC, modifier, and advantage state before/at the roll. *No verified pattern yet — research + design.*
-8. **Choice-gating signalling** ([B1](#b1--choice-presentation-is-a-taxonomizable-design-space)/[B2](#b2--choices-that-matter-pace-coerce-foreshadow) → [Part V](#part-v--choice--deduction-from-abstract-to-acceptance-criteria)) — schema + validator + authoring rules for hidden vs. disabled-with-reason.
+8. ✅ **Choice-gating signalling** ([B1](#b1--choice-presentation-is-a-taxonomizable-design-space)/[B2](#b2--choices-that-matter-pace-coerce-foreshadow) → [Part V](#part-v--choice--deduction-from-abstract-to-acceptance-criteria)) — **done (Phase 5, PR #86):** `visibility`/`gateReason` schema + validator rules + authoring rules for hidden vs. disabled-with-reason; rendering via `LockedChoice`.
 9. **Save-resume / drop-off UX** ([H](#h-onboarding-pacing--retention)) — *unresearched*; needs its own study.
 
 **Deprioritized / likely-YAGNI:**
