@@ -7,7 +7,6 @@
 import type {
   Choice,
   ChoiceResult,
-  Condition,
   EncounterRound,
   EncounterState,
   GameState,
@@ -15,6 +14,7 @@ import type {
 import type { EngineActions } from './engineActions';
 import { performCheck, rollD20 } from './diceEngine';
 import { evaluateConditions } from './conditions';
+import { choiceGateConditions, resolveChoiceVisibility } from './choiceVisibility';
 import { resolveCheckOutcome } from './choiceResolution';
 
 // ─── Encounter System ─────────────────────────────────────────────────────────
@@ -174,8 +174,11 @@ export function processEncounterChoice(
 /**
  * Returns the choices available for a given encounter round.
  *
- * - Filters choices using `evaluateConditions`
- * - Always includes escape path choices when their flag condition is met
+ * - Non-escape choices resolve through the shared `resolveChoiceVisibility`
+ *   resolver: included when 'shown' OR 'disabled' (the panel greys disabled
+ *   ones), excluded when 'hidden'.
+ * - Escape paths stay hard-gated: included only when their gate conditions
+ *   are met, never disabled.
  *
  * The occult/Veil-Sight Advantage that applies to the actual roll is computed
  * in `processEncounterChoice` (the single source of truth for the roll), so this
@@ -189,35 +192,19 @@ export function getEncounterChoices(
   const filtered: Choice[] = [];
 
   for (const choice of round.choices) {
-    // Evaluate standard conditions
-    const conditions: Condition[] = [];
-    if (choice.requiresClue) {
-      conditions.push({ type: 'hasClue', target: choice.requiresClue });
-    }
-    if (choice.requiresDeduction) {
-      conditions.push({ type: 'hasDeduction', target: choice.requiresDeduction });
-    }
-    if (choice.requiresFlag) {
-      conditions.push({ type: 'hasFlag', target: choice.requiresFlag });
-    }
-    if (choice.requiresFaculty) {
-      conditions.push({
-        type: 'facultyMin',
-        target: choice.requiresFaculty.faculty,
-        value: choice.requiresFaculty.minimum,
-      });
-    }
-
-    const conditionsMet = evaluateConditions(conditions, state);
-
-    // Escape paths are always included when their flag condition is met.
     if (choice.isEscapePath) {
-      if (conditionsMet) filtered.push(choice);
+      // Escape paths stay hard-gated (spec §4.1): included only when their gate
+      // is met, never disabled.
+      const conditions = choiceGateConditions(choice);
+      if (evaluateConditions(conditions, state)) filtered.push(choice);
       continue;
     }
 
-    if (!conditionsMet) continue;
-    filtered.push(choice);
+    // Non-escape: include when shown OR disabled (the panel greys disabled ones).
+    const visibility = resolveChoiceVisibility(choice, state);
+    if (visibility === 'shown' || visibility === 'disabled') {
+      filtered.push(choice);
+    }
   }
 
   return filtered;

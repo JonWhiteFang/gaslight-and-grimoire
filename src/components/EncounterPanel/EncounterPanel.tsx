@@ -12,7 +12,9 @@ import {
 import { computeAdvantage } from '../../engine/advantage';
 import { checkAutoSucceeds } from '../../engine/flags';
 import { resolveDC, isFacultyCheck } from '../../engine/diceEngine';
+import { resolveChoiceVisibility } from '../../engine/choiceVisibility';
 import { ChoiceCard } from '../ChoicePanel/ChoiceCard';
+import { LockedChoice } from '../shared';
 import type { Choice, EncounterRound, EncounterState } from '../../types';
 
 export interface EncounterPanelProps {
@@ -119,6 +121,14 @@ export function EncounterPanel({ sceneId, rounds, isSupernatural, onComplete }: 
   const gameState = buildGameState(useStore.getState());
   const availableChoices = getEncounterChoices(currentRound, gameState);
 
+  const shownChoices: Choice[] = [];
+  const lockedChoices: Choice[] = [];
+  for (const c of availableChoices) {
+    const visibility = resolveChoiceVisibility(c, gameState);
+    if (visibility === 'shown') shownChoices.push(c);
+    else if (visibility === 'disabled') lockedChoices.push(c);
+  }
+
   const revealedClueIds = new Set(
     Object.values(clues).filter((c) => c.isRevealed).map((c) => c.id),
   );
@@ -143,20 +153,30 @@ export function EncounterPanel({ sceneId, rounds, isSupernatural, onComplete }: 
       </div>
 
       {/* Choices */}
-      <nav aria-label="Encounter choices" className="flex flex-col gap-2">
-        {availableChoices.map((choice) => (
-          <ChoiceCard
-            key={choice.id}
-            choice={choice}
-            investigator={investigator}
-            revealedClueIds={revealedClueIds}
-            deductionIds={deductionIds}
-            hasAdvantage={computeAdvantage(choice, gameState)}
-            autoSucceeds={choice.faculty ? checkAutoSucceeds(choice.faculty, flags) : false}
-            onSelect={handleChoiceSelect}
-          />
-        ))}
-      </nav>
+      {shownChoices.length > 0 && (
+        <nav aria-label="Encounter choices" className="flex flex-col gap-2">
+          {shownChoices.map((choice) => (
+            <ChoiceCard
+              key={choice.id}
+              choice={choice}
+              investigator={investigator}
+              revealedClueIds={revealedClueIds}
+              deductionIds={deductionIds}
+              hasAdvantage={computeAdvantage(choice, gameState)}
+              autoSucceeds={choice.faculty ? checkAutoSucceeds(choice.faculty, flags) : false}
+              onSelect={handleChoiceSelect}
+            />
+          ))}
+        </nav>
+      )}
+      {lockedChoices.length > 0 && (
+        // role="list" required: list-none strips list semantics in Safari/VoiceOver.
+        <ul role="list" aria-label="Locked choices" className="flex flex-col gap-2 list-none">
+          {lockedChoices.map((choice) => (
+            <LockedChoice key={choice.id} text={choice.text} gateReason={choice.gateReason ?? ''} />
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

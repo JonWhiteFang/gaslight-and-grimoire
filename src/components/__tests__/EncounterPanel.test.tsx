@@ -99,6 +99,29 @@ describe('EncounterPanel', () => {
     expect(screen.queryByText(/overwhelms you/i)).toBeNull();
   });
 
+  it('renders a disabled encounter choice greyed & non-interactive with its reason (Phase 5)', () => {
+    // The real resolveChoiceVisibility runs (choiceVisibility is NOT mocked):
+    // the seeded store has empty clues, so requiresClue 'missing' is genuinely unmet.
+    mockGetEncounterChoices.mockReturnValue([
+      {
+        id: 'fight', text: 'Fight', faculty: 'vigor', difficulty: 10,
+        outcomes: { critical: 's1', success: 's1', partial: 's1', failure: 's1', fumble: 's1' },
+      },
+      {
+        id: 'ritual', text: 'Perform the ritual', requiresClue: 'missing',
+        visibility: 'disabled', gateReason: 'You do not yet grasp the sigil.',
+        outcomes: { success: 's1' },
+      },
+    ]);
+    render(<EncounterPanel sceneId="s1" rounds={[baseRound]} isSupernatural={false} onComplete={() => {}} />);
+
+    expect(screen.getByRole('button', { name: /Fight/ })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Perform the ritual/ })).toBeNull();
+    expect(screen.getByText('You do not yet grasp the sigil.')).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: /Locked choices/ })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: /Encounter choices/ })).toBeInTheDocument();
+  });
+
   it('runs startEncounter when there is no persisted state for this scene', () => {
     useStore.setState({ encounterState: null });
     render(<EncounterPanel sceneId="s1" rounds={[baseRound]} isSupernatural={false} onComplete={() => {}} />);
