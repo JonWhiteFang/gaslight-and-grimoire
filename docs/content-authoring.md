@@ -253,6 +253,15 @@ per choice:
   `"shown"`, or a `gateReason` (an explicit `"hidden"` is an allowed no-op).
 - **Warning** (non-fatal, always-on) — `visibility: "shown"` on a gated choice
   (the soft gate above).
+- **Warning** (non-fatal, always-on) — the **soft-lock** check: a non-empty
+  scene choice list or an encounter round with **no guaranteed-selectable
+  choice** — i.e. nothing that is an ungated non-escape choice, a soft-gated
+  (`"shown"`) choice, or an ungated escape path. If no gate is met at runtime
+  such a collection renders nothing interactive. Also fires for a supernatural
+  encounter's round 1 when the `worseAlternative` replacement after a failed
+  reaction check would leave the round with no guaranteed-selectable choice.
+  (An empty `choices` array on a plain scene is a terminal/ending scene and
+  does not warn; an empty encounter round does.)
 
 **Outcome tiers.** For a faculty-check choice (`faculty` + `difficulty` set) the
 validator requires **all five** outcome tiers to be present. Non-check choices

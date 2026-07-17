@@ -27,15 +27,33 @@ function baseChoice(over: Partial<Choice> = {}): Choice {
 }
 
 // Build a minimal bundle with one encounter scene holding a single round of choices.
-function bundleWithEncounterRound(choices: Choice[]): ContentBundle {
+function bundleWithEncounterRound(choices: Choice[], isSupernatural = false): ContentBundle {
   const scene: SceneNode = {
     id: 'scene-a',
     text: 'x',
     choices: [],
     encounter: {
-      isSupernatural: false,
-      rounds: [{ roundNumber: 1, isSupernatural: false, choices }],
+      isSupernatural,
+      rounds: [{ roundNumber: 1, isSupernatural, choices }],
     },
+  } as unknown as SceneNode;
+  return {
+    firstScene: 'scene-a',
+    scenes: [scene],
+    variants: [],
+    clues: [{ id: 'clue-1' } as never],
+    npcs: [],
+    recipes: [],
+    sharedSceneIds: [],
+  } as unknown as ContentBundle;
+}
+
+// Build a minimal bundle with one plain (non-encounter) scene holding the given choices.
+function bundleWithSceneChoices(choices: Choice[]): ContentBundle {
+  const scene: SceneNode = {
+    id: 'scene-a',
+    text: 'x',
+    choices,
   } as unknown as SceneNode;
   return {
     firstScene: 'scene-a',
@@ -117,8 +135,8 @@ describe('choice-gating validation', () => {
   });
 });
 
-describe('encounter round all-gated warning', () => {
-  const ROUND_WARNING = /encounter round 1 has no ungated non-escape choice/;
+describe('soft-lock warning: encounter rounds', () => {
+  const ROUND_WARNING = /encounter round 1 has no guaranteed-selectable choice/;
 
   it('warns (zero errors) when a round\'s only non-escape choice is gated', () => {
     const result = validateBundle(bundleWithEncounterRound([
@@ -136,10 +154,83 @@ describe('encounter round all-gated warning', () => {
     expect(result.warnings.some((w) => ROUND_WARNING.test(w))).toBe(false);
   });
 
-  it('warns when the round has zero non-escape choices (all escape) — same soft-lock hazard', () => {
+  it('does NOT warn when the only choice is a gated soft-gate (visibility: shown) — it is always selectable; the soft-gate warning still fires', () => {
+    const result = validateBundle(bundleWithEncounterRound([
+      baseChoice({ id: 'soft', requiresClue: 'clue-1', visibility: 'shown' }),
+    ]));
+    expect(result.errors).toEqual([]);
+    expect(result.warnings.some((w) => ROUND_WARNING.test(w))).toBe(false);
+    expect(result.warnings.some((w) => /shown despite a gate/.test(w))).toBe(true);
+  });
+
+  it('does NOT warn when the round\'s only choice is an UNGATED escape path — always offered', () => {
+    const result = validateBundle(bundleWithEncounterRound([
+      baseChoice({ id: 'flee-open', isEscapePath: true }),
+    ]));
+    expect(result.warnings.some((w) => ROUND_WARNING.test(w))).toBe(false);
+  });
+
+  it('warns when the round\'s only choice is a GATED escape path — hard-hidden when its gate is unmet', () => {
     const result = validateBundle(bundleWithEncounterRound([
       baseChoice({ id: 'flee', requiresFlag: 'f', isEscapePath: true }),
     ]));
     expect(result.warnings.some((w) => ROUND_WARNING.test(w))).toBe(true);
+  });
+
+  it('warns on an EMPTY round (zero choices) — a real authoring hole', () => {
+    const result = validateBundle(bundleWithEncounterRound([]));
+    expect(result.warnings.some((w) => ROUND_WARNING.test(w))).toBe(true);
+  });
+});
+
+describe('soft-lock warning: scene choices', () => {
+  const SCENE_WARNING = /has no guaranteed-selectable choice/;
+
+  it('warns (zero errors) when a scene\'s only choice is gated + disabled', () => {
+    const result = validateBundle(bundleWithSceneChoices([
+      baseChoice({ id: 'c1', requiresClue: 'clue-1', visibility: 'disabled', gateReason: 'Not yet.' }),
+    ]));
+    expect(result.errors).toEqual([]);
+    expect(result.warnings.some((w) => SCENE_WARNING.test(w))).toBe(true);
+  });
+
+  it('does not warn when the scene has one ungated choice alongside a gated one', () => {
+    const result = validateBundle(bundleWithSceneChoices([
+      baseChoice({ id: 'open' }),
+      baseChoice({ id: 'gated', requiresClue: 'clue-1', visibility: 'disabled', gateReason: 'Not yet.' }),
+    ]));
+    expect(result.warnings.some((w) => SCENE_WARNING.test(w))).toBe(false);
+  });
+
+  it('does not warn on an EMPTY scene choices array (terminal/ending scene)', () => {
+    const result = validateBundle(bundleWithSceneChoices([]));
+    expect(result.warnings.some((w) => SCENE_WARNING.test(w))).toBe(false);
+  });
+});
+
+describe('soft-lock warning: reaction-replaced first round (worseAlternative)', () => {
+  const REACTION_WARNING = /may render nothing interactive after a failed reaction check/;
+
+  it('warns when a supernatural round 1\'s ungated first choice carries a GATED worseAlternative and the rest are gated', () => {
+    const result = validateBundle(bundleWithEncounterRound([
+      baseChoice({
+        id: 'primary',
+        worseAlternative: baseChoice({ id: 'worse', requiresClue: 'clue-1' }),
+      }),
+      baseChoice({ id: 'gated', requiresClue: 'clue-1', visibility: 'disabled', gateReason: 'Not yet.' }),
+    ], true));
+    expect(result.errors).toEqual([]);
+    expect(result.warnings.some((w) => REACTION_WARNING.test(w))).toBe(true);
+  });
+
+  it('does not warn when the worseAlternative is itself UNGATED', () => {
+    const result = validateBundle(bundleWithEncounterRound([
+      baseChoice({
+        id: 'primary',
+        worseAlternative: baseChoice({ id: 'worse' }),
+      }),
+      baseChoice({ id: 'gated', requiresClue: 'clue-1', visibility: 'disabled', gateReason: 'Not yet.' }),
+    ], true));
+    expect(result.warnings.some((w) => REACTION_WARNING.test(w))).toBe(false);
   });
 });

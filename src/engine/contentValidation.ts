@@ -78,8 +78,12 @@ const VISIBILITY_VALUES: ReadonlySet<string> = new Set(['shown', 'hidden', 'disa
 
 /**
  * Validates a content bundle. Structural defects are `errors`; non-fatal
- * observations are `warnings` — the opt-in reachability checks plus the
- * always-on choice-gating soft-gate warning (Phase 5).
+ * observations are `warnings` — the opt-in reachability checks plus two
+ * always-on Phase 5 choice-gating warnings: the soft-gate warning
+ * (`visibility: "shown"` on a gated choice) and the soft-lock warning (a
+ * non-empty scene choice list, an encounter round, or round 1 after a failed
+ * reaction check's `worseAlternative` replacement, with no guaranteed-selectable
+ * choice).
  */
 export function validateBundle(
   bundle: ContentBundle,
@@ -325,6 +329,22 @@ interface Ctx {
   warnings: string[];
 }
 
+/**
+ * True when at least one choice in the collection is guaranteed to be
+ * selectable at runtime regardless of game state:
+ *   - a non-escape choice that is ungated, or soft-gated (`visibility: 'shown'`
+ *     keeps a gated choice selectable even when its gate is unmet);
+ *   - an ungated escape path (escape paths ignore `visibility`; a gated one is
+ *     hard-hidden until its gate is met, so it is not guaranteed).
+ */
+function isGuaranteedActionable(choices: Choice[]): boolean {
+  return choices.some((c) =>
+    c.isEscapePath
+      ? choiceGateConditions(c).length === 0
+      : choiceGateConditions(c).length === 0 || c.visibility === 'shown',
+  );
+}
+
 function validateScene(scene: SceneNode, ctx: Ctx): void {
   const where = `Scene "${scene.id}"`;
 
@@ -334,6 +354,17 @@ function validateScene(scene: SceneNode, ctx: Ctx): void {
 
   for (const choice of scene.choices ?? []) {
     validateChoice(choice, where, ctx);
+  }
+
+  // Soft-lock hazard (warning, not error — the gates may legitimately be met by
+  // the time the player arrives): a non-empty choice list where nothing is
+  // guaranteed selectable can render zero interactive elements. An EMPTY
+  // scene.choices is a terminal/ending scene, not a hazard.
+  const sceneChoices = scene.choices ?? [];
+  if (sceneChoices.length > 0 && !isGuaranteedActionable(sceneChoices)) {
+    ctx.warnings.push(
+      `${where} has no guaranteed-selectable choice — if no gate is met at runtime the scene renders nothing interactive`,
+    );
   }
 
   for (const discovery of scene.cluesAvailable ?? []) {
@@ -351,15 +382,29 @@ function validateScene(scene: SceneNode, ctx: Ctx): void {
       for (const choice of round.choices ?? []) {
         validateChoice(choice, `${where} -> encounter round ${round.roundNumber}`, ctx);
       }
-      // Soft-lock hazard: escape paths stay hard-hidden when their own gate is
-      // unmet, so a round whose every non-escape choice is gated (or that has
-      // none at all) can render with zero interactive elements. Warning, not
-      // error — the gates may legitimately be met by the time the player arrives.
-      const nonEscape = (round.choices ?? []).filter((c) => !c.isEscapePath);
-      if (nonEscape.every((c) => choiceGateConditions(c).length > 0)) {
+      // Soft-lock hazard: a round with no guaranteed-selectable choice (empty
+      // rounds included — that is a real authoring hole) can render with zero
+      // interactive elements.
+      const roundChoices = round.choices ?? [];
+      if (!isGuaranteedActionable(roundChoices)) {
         ctx.warnings.push(
-          `${where} -> encounter round ${round.roundNumber} has no ungated non-escape choice — if no gate is met at runtime the round renders nothing interactive`,
+          `${where} -> encounter round ${round.roundNumber} has no guaranteed-selectable choice — if no gate is met at runtime the round renders nothing interactive`,
         );
+      }
+      // Reaction-replacement hazard: on a failed supernatural reaction check the
+      // engine (startEncounter) swaps round 1's FIRST choice for its
+      // `worseAlternative` before rendering. If that post-replacement collection
+      // has no guaranteed-selectable choice, a failed reaction can soft-lock the
+      // encounter even though the authored round looks fine. Only supernatural
+      // encounters run the reaction check, so only they can replace.
+      const first = roundChoices[0];
+      if (scene.encounter.isSupernatural && round.roundNumber === 1 && first?.worseAlternative) {
+        const replaced = [first.worseAlternative, ...roundChoices.slice(1)];
+        if (isGuaranteedActionable(roundChoices) && !isGuaranteedActionable(replaced)) {
+          ctx.warnings.push(
+            `${where} -> encounter round ${round.roundNumber} may render nothing interactive after a failed reaction check (worseAlternative replacement)`,
+          );
+        }
       }
     }
   }
