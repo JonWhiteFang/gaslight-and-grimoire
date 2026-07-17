@@ -167,7 +167,7 @@ via choice outcome edges.
 | `gateReason` | string? | Diegetic explanation rendered on a locked choice. Required iff `visibility: "disabled"` |
 | `npcEffect` | `{ npcId, dispositionDelta, suspicionDelta }?` | Applied when the choice is taken |
 | `worseAlternative` | `Choice?` | (Encounters) replaces this choice on a failed reaction check |
-| `isEscapePath` | boolean? | (Encounters) the non-combat escape option; always offered when its gates pass. May **not** set `visibility`/`gateReason` |
+| `isEscapePath` | boolean? | (Encounters) the non-combat escape option; always offered when its gates pass. May **not** set `visibility: "disabled"` or `"shown"`, or a `gateReason` (an explicit `"hidden"` is an allowed no-op) |
 | `encounterDamage` | `{ composureDelta?, vitalityDelta? }?` | (Encounters) damage on failure/fumble |
 
 **Choice gating.** Gating is driven by the four `requiresClue` /
@@ -231,8 +231,9 @@ non-fatal validator warning so it can't happen by accident.
 
 **Escape paths are exempt — and forbidden.** Encounter escape-path choices
 (`isEscapePath`) stay hard-gated: offered only when their gate is met, never
-disabled. Setting `visibility` or `gateReason` on an escape path is a validator
-**error**.
+disabled. Setting `visibility: "disabled"` or `"shown"`, or a `gateReason`, on
+an escape path is a validator **error** (an explicit `"hidden"` is an allowed
+no-op — it is the hard-gate behaviour the escape path already has).
 
 **Validator rules (what fails CI).** `node scripts/validateCase.mjs` enforces,
 per choice:
@@ -244,7 +245,8 @@ per choice:
   `requires*` gate (nothing to act on; an explicit `"hidden"` on an ungated
   choice is an allowed no-op).
 - **Error** — a `visibility` value outside `shown | hidden | disabled`.
-- **Error** — an `isEscapePath` choice setting `visibility` or `gateReason`.
+- **Error** — an `isEscapePath` choice setting `visibility: "disabled"` or
+  `"shown"`, or a `gateReason` (an explicit `"hidden"` is an allowed no-op).
 - **Warning** (non-fatal, always-on) — `visibility: "shown"` on a gated choice
   (the soft gate above).
 
