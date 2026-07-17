@@ -115,6 +115,19 @@ Each ending scene has a `variantOf` twin gated on
 the player leaves knowing *what the number is*, and says nothing. The pattern is never
 named in prose (Part 4 rule: never named, never seen).
 
+**Cross-content persistence (corrects an ideas-doc premise):** `resetForNewCase` wipes
+`state.deductions` on every case/vignette load (`narrativeSlice.ts`), while flags
+persist. So the ideas doc's plan to gate downstream content on
+`hasDeduction: mythos-pattern-named` only works *within this playthrough of this
+vignette* (the ending variants use it). For the cross-content contract, each keystone
+ending **variant**'s `onEnter` also sets a persistent flag
+`{ type: "flag", target: "mythos-pattern-named", value: true }` — the variant only
+resolves when the deduction is held, so the flag faithfully records the mint. Downstream
+content (Mr. Nine, future cases) must gate on **`hasFlag: mythos-pattern-named`**, not
+`hasDeduction`. The recipe id and the flag share the name deliberately: they are the same
+fact in two namespaces (in-run deduction, cross-run flag), and `Condition.type`
+disambiguates.
+
 Rep math note: Vervain and Coyle are both Grey Dawn-aligned, so `adjustDisposition`
 propagates `delta * 0.5` to faction rep. The ending effect values above are the
 **authored** effects; net faction movement = authored rep delta + propagation from the
