@@ -113,6 +113,8 @@ export async function loadVignette(vignetteId: string): Promise<VignetteData> {
   ]);
 
   // deductions.json / variants.json are optional — most vignettes ship neither.
+  // Deliberate asymmetry vs loadCase: recipes fall back to `undefined` (field
+  // genuinely absent) rather than `[]`; vignetteToCaseData normalizes.
   const recipes = await fetchJson<{ deductions: KeyDeduction[] }>(`${base}/deductions.json`)
     .then((f) => f.deductions)
     .catch(() => undefined);

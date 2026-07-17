@@ -4,7 +4,8 @@
  * Vignettes historically load only meta/scenes/clues/npcs; main cases also load
  * key-deduction recipes and variant scenes. `loadVignette` must treat both
  * files as optional: absent files (404 → fetchJson throws → .catch fallback)
- * leave existing vignettes byte-identical, present files are loaded through.
+ * leave existing vignettes' adapter output identical, present files are loaded
+ * through.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { loadVignette, _resetSharedScenesCache } from '../contentLoader';
@@ -58,7 +59,7 @@ describe('loadVignette optional recipes/variants', () => {
     mockFetch(BASE_FILES);
     const data = await loadVignette('v-test');
     expect(data.recipes).toBeUndefined();
-    expect(data.variants ?? []).toEqual([]);
+    expect(data.variants).toEqual([]);
   });
 
   it('present files -> recipes and variants loaded', async () => {
