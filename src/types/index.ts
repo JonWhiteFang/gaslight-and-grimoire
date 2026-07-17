@@ -217,6 +217,17 @@ export interface Choice {
   requiresDeduction?: string;
   requiresFlag?: string;
   requiresFaculty?: { faculty: Faculty; minimum: number };
+  /**
+   * Governs what happens when this choice's requires* gates are UNMET.
+   * - 'hidden'  (default when absent): filtered out — the option is not shown at all.
+   * - 'disabled': rendered greyed & non-interactive, with gateReason explaining why.
+   * - 'shown':   rendered normal & interactive despite unmet gates (soft-gate escape hatch).
+   * No effect when the gates are MET, when the choice has no requires* gate, or on
+   * isEscapePath choices (which the validator forbids from setting it).
+   */
+  visibility?: 'shown' | 'hidden' | 'disabled';
+  /** Diegetic explanation shown when the choice is in the resolved disabled state. Required iff visibility === 'disabled'. */
+  gateReason?: string;
   npcEffect?: {
     npcId: string;
     dispositionDelta: number;
