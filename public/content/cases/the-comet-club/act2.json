@@ -57,6 +57,8 @@
           "id": "cc-choice-hub-halloway",
           "text": "Lady Halloway will receive you now.",
           "requiresFlag": "cc-halloway-trusts",
+          "visibility": "disabled",
+          "gateReason": "Her drawing room opens only to those she has chosen to trust — and she has not yet chosen you.",
           "outcomes": {
             "critical": "cc-act2-halloway-diary",
             "success": "cc-act2-halloway-diary",
