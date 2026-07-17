@@ -351,6 +351,16 @@ function validateScene(scene: SceneNode, ctx: Ctx): void {
       for (const choice of round.choices ?? []) {
         validateChoice(choice, `${where} -> encounter round ${round.roundNumber}`, ctx);
       }
+      // Soft-lock hazard: escape paths stay hard-hidden when their own gate is
+      // unmet, so a round whose every non-escape choice is gated (or that has
+      // none at all) can render with zero interactive elements. Warning, not
+      // error — the gates may legitimately be met by the time the player arrives.
+      const nonEscape = (round.choices ?? []).filter((c) => !c.isEscapePath);
+      if (nonEscape.every((c) => choiceGateConditions(c).length > 0)) {
+        ctx.warnings.push(
+          `${where} -> encounter round ${round.roundNumber} has no ungated non-escape choice — if no gate is met at runtime the round renders nothing interactive`,
+        );
+      }
     }
   }
 }

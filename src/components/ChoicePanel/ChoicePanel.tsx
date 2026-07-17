@@ -53,6 +53,10 @@ export function ChoicePanel({ choices, onChoiceSelected }: ChoicePanelProps) {
 
       const store = useStore.getState();
       const currentState = buildGameState(store);
+
+      // Defense-in-depth: a non-shown choice must never process, whatever the caller.
+      if (resolveChoiceVisibility(choice, currentState) !== 'shown') return;
+
       const result = processChoice(choice, currentState, store);
 
       // Show dice roll overlay for faculty checks

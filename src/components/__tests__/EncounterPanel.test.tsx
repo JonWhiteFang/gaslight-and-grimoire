@@ -2,7 +2,7 @@
  * EncounterPanel component tests.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { useStore } from '../../store';
 import type { EncounterRound } from '../../types';
 
@@ -126,5 +126,31 @@ describe('EncounterPanel', () => {
     useStore.setState({ encounterState: null });
     render(<EncounterPanel sceneId="s1" rounds={[baseRound]} isSupernatural={false} onComplete={() => {}} />);
     expect(mockStartEncounter).toHaveBeenCalledTimes(1);
+  });
+
+  // Defense-in-depth (Phase 5 review fold): handleChoiceSelect re-resolves
+  // visibility at click time. A locked choice renders no button, so the guard is
+  // exercised via its real seam — the gate collapsing between render and click.
+  it('does not process a choice whose gate became unmet between render and click', async () => {
+    const { processEncounterChoice } = await import('../../engine/narrativeEngine');
+    const gated = {
+      id: 'gated', text: 'Invoke the ward', requiresFlag: 'ward-known',
+      faculty: 'lore', difficulty: 10,
+      outcomes: { critical: 's1', success: 's1', partial: 's1', failure: 's1', fumble: 's1' },
+    };
+    const round = { ...baseRound, choices: [gated] } as EncounterRound;
+    mockStartEncounter.mockReturnValue({
+      id: 'enc-1', rounds: [round], currentRound: 0, isComplete: false, reactionCheckPassed: null,
+    });
+    mockGetEncounterChoices.mockReturnValue([gated]);
+
+    useStore.setState({ flags: { 'ward-known': true } }); // met at render time
+    render(<EncounterPanel sceneId="s1" rounds={[round]} isSupernatural={false} onComplete={() => {}} />);
+    const button = screen.getByRole('button', { name: /Invoke the ward/ });
+
+    useStore.setState({ flags: { 'ward-known': false } }); // gate collapses pre-click
+    fireEvent.click(button);
+
+    expect(processEncounterChoice).not.toHaveBeenCalled();
   });
 });

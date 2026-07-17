@@ -235,6 +235,10 @@ disabled. Setting `visibility: "disabled"` or `"shown"`, or a `gateReason`, on
 an escape path is a validator **error** (an explicit `"hidden"` is an allowed
 no-op — it is the hard-gate behaviour the escape path already has).
 
+**Don't set `visibility: "disabled"` on an encounter choice that carries a
+`worseAlternative`** — the reaction-check replacement ignores visibility, so the
+lock would silently vanish on a failed reaction check.
+
 **Validator rules (what fails CI).** `node scripts/validateCase.mjs` enforces,
 per choice:
 

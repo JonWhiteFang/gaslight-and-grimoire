@@ -26,6 +26,28 @@ function baseChoice(over: Partial<Choice> = {}): Choice {
   return { id: 'c1', text: 't', outcomes: { success: 'scene-a' } as Choice['outcomes'], ...over };
 }
 
+// Build a minimal bundle with one encounter scene holding a single round of choices.
+function bundleWithEncounterRound(choices: Choice[]): ContentBundle {
+  const scene: SceneNode = {
+    id: 'scene-a',
+    text: 'x',
+    choices: [],
+    encounter: {
+      isSupernatural: false,
+      rounds: [{ roundNumber: 1, isSupernatural: false, choices }],
+    },
+  } as unknown as SceneNode;
+  return {
+    firstScene: 'scene-a',
+    scenes: [scene],
+    variants: [],
+    clues: [{ id: 'clue-1' } as never],
+    npcs: [],
+    recipes: [],
+    sharedSceneIds: [],
+  } as unknown as ContentBundle;
+}
+
 const errorsOf = (c: Choice) => validateBundle(bundleWithChoice(c)).errors.filter((e) => e.includes('"c1"'));
 const warningsOf = (c: Choice) => validateBundle(bundleWithChoice(c)).warnings.filter((w) => w.includes('"c1"'));
 
@@ -92,5 +114,32 @@ describe('choice-gating validation', () => {
     const c = baseChoice({ requiresClue: 'clue-1', visibility: 'disabled', gateReason: 'The lock holds fast.' });
     const gating = errorsOf(c).filter((e) => /visibility|gateReason|gate/.test(e));
     expect(gating).toEqual([]);
+  });
+});
+
+describe('encounter round all-gated warning', () => {
+  const ROUND_WARNING = /encounter round 1 has no ungated non-escape choice/;
+
+  it('warns (zero errors) when a round\'s only non-escape choice is gated', () => {
+    const result = validateBundle(bundleWithEncounterRound([
+      baseChoice({ id: 'gated-only', requiresClue: 'clue-1', visibility: 'disabled', gateReason: 'Not yet.' }),
+    ]));
+    expect(result.errors).toEqual([]);
+    expect(result.warnings.some((w) => ROUND_WARNING.test(w))).toBe(true);
+  });
+
+  it('does not warn when the round has at least one ungated non-escape choice', () => {
+    const result = validateBundle(bundleWithEncounterRound([
+      baseChoice({ id: 'open', text: 'Stand your ground' }),
+      baseChoice({ id: 'gated', requiresClue: 'clue-1', visibility: 'disabled', gateReason: 'Not yet.' }),
+    ]));
+    expect(result.warnings.some((w) => ROUND_WARNING.test(w))).toBe(false);
+  });
+
+  it('warns when the round has zero non-escape choices (all escape) — same soft-lock hazard', () => {
+    const result = validateBundle(bundleWithEncounterRound([
+      baseChoice({ id: 'flee', requiresFlag: 'f', isEscapePath: true }),
+    ]));
+    expect(result.warnings.some((w) => ROUND_WARNING.test(w))).toBe(true);
   });
 });

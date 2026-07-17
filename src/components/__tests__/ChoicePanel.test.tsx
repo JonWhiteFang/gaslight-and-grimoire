@@ -609,6 +609,56 @@ describe('ChoicePanel — Phase 5 disabled choices', () => {
   });
 });
 
+// ─── ChoicePanel — defense-in-depth select guard (Phase 5 review fold) ────────
+//
+// handleSelect re-resolves visibility from live store state before processing.
+// The guard is unreachable via a plain click (locked choices render no button),
+// so this test exercises the real seam it defends: state changing between
+// render and click. The button renders while the gate is met; the store's flag
+// is then flipped OFF before clicking — the handler must refuse to process.
+describe('ChoicePanel — select guard re-checks visibility at click time', () => {
+  let savedFlags: Record<string, boolean>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    savedFlags = { ...useStore.getState().flags };
+  });
+
+  afterEach(() => {
+    (useStore.getState() as { flags: Record<string, boolean> }).flags = savedFlags;
+  });
+
+  const gatedChoice: Choice = {
+    id: 'gated-live',
+    text: 'Mention the inspector again',
+    requiresFlag: 'spoke-to-inspector', // true in the mocked store at render time
+    outcomes: { critical: 's2', success: 's2', partial: 's2', failure: 's2', fumble: 's2' },
+  };
+
+  it('does not process a choice whose gate became unmet after render', () => {
+    const onChoiceSelected = vi.fn();
+    render(<ChoicePanel choices={[gatedChoice]} onChoiceSelected={onChoiceSelected} />);
+    const button = screen.getByRole('button', { name: /Mention the inspector again/ });
+
+    // The gate collapses between render and click.
+    (useStore.getState() as { flags: Record<string, boolean> }).flags = {
+      ...savedFlags,
+      'spoke-to-inspector': false,
+    };
+    fireEvent.click(button);
+
+    expect(onChoiceSelected).not.toHaveBeenCalled();
+    expect((useStore.getState() as unknown as { goToScene: ReturnType<typeof vi.fn> }).goToScene).not.toHaveBeenCalled();
+  });
+
+  it('still processes normally when the gate remains met at click time', () => {
+    const onChoiceSelected = vi.fn();
+    render(<ChoicePanel choices={[gatedChoice]} onChoiceSelected={onChoiceSelected} />);
+    fireEvent.click(screen.getByRole('button', { name: /Mention the inspector again/ }));
+    expect(onChoiceSelected).toHaveBeenCalledWith('gated-live');
+  });
+});
+
 // ─── ChoicePanel — end-to-end Advantage badge wiring (F-014) ──────────────────
 //
 // Proves that ChoicePanel (the real parent) threads computeAdvantage(choice,

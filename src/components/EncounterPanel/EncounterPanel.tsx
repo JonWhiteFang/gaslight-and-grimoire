@@ -83,6 +83,10 @@ export function EncounterPanel({ sceneId, rounds, isSupernatural, onComplete }: 
       if (!choice) return;
 
       const gameState = buildGameState(useStore.getState());
+
+      // Defense-in-depth: a non-shown choice must never process, whatever the caller.
+      if (resolveChoiceVisibility(choice, gameState) !== 'shown') return;
+
       const { encounterState: newState, result } = processEncounterChoice(
         choice,
         encounterState,
