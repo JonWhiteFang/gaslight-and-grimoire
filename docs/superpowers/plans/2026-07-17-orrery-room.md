@@ -4,7 +4,13 @@
 
 **Goal:** Build The Orrery Room — the flagship Grey Dawn side vignette carrying the Mythos thread's keystone deduction — plus the 5 engine changes that make vignette recipes/variants first-class (spec: `docs/superpowers/specs/2026-07-17-orrery-room-design.md`).
 
-**Architecture:** Engine first (5 small TDD deltas: unlock registry, vignette loader, CLI validator loader, discoverable-clues warning fix, `KeyDeduction.onForm`), then content (18 base scenes + 4 variants + 7 clues + 2 recipes + 3 NPCs as JSON under `public/content/side-cases/the-orrery-room/`), then content-backed witness tests, docs, and the full review gate.
+**Architecture:** Engine first (5 small TDD deltas: unlock registry, vignette loader, CLI validator loader, discoverable-clues warning fix, `KeyDeduction.onForm`), then content (21 base scenes + 4 variants + 7 clues + 2 recipes + 3 NPCs as JSON under `public/content/side-cases/the-orrery-room/`), then content-backed witness tests, docs, and the full review gate.
+
+**Content commit discipline (Codex plan Major 4):** T6 and T7 author files but do **not**
+commit — the validator cannot pass mid-authoring (forward references to unauthored
+scenes). The single content commit happens at the end of T8, after the full validator
+run is zero errors / zero warnings. "Zero/zero after every content task" means every
+content **commit**, and there is exactly one.
 
 **Tech Stack:** React 19 + Zustand/Immer store, pure engine modules in `src/engine/`, Vitest 4, content JSON validated by `scripts/validateCase.mjs`.
 
@@ -40,7 +46,7 @@
 | `public/content/side-cases/the-orrery-room/npcs.json` | T6 | New (3 NPCs) |
 | `public/content/side-cases/the-orrery-room/clues.json` | T6 | New (7 clues) |
 | `public/content/side-cases/the-orrery-room/deductions.json` | T6 | New (2 recipes) |
-| `public/content/side-cases/the-orrery-room/scenes.json` | T7, T8 | New (18 base scenes) |
+| `public/content/side-cases/the-orrery-room/scenes.json` | T7, T8 | New (21 base scenes: 11 act 1, 10 act 2) |
 | `public/content/side-cases/the-orrery-room/variants.json` | T8 | New (4 variants) |
 | `src/engine/__tests__/orreryRoom.content.test.ts` | T9 | New: content-backed witness tests |
 | `docs/status.md`, `docs/engine-reference.md`, `docs/content-authoring.md`, `docs/architecture.md` | T10 | Doc deltas |
@@ -59,18 +65,17 @@ via the `vignette-unlocked-<id>` flag minted from `VIGNETTE_CONDITIONS` in
 
 - [ ] **Step 1: Write the failing tests**
 
-Append to `src/engine/__tests__/caseProgression.test.ts` (match the file's existing
-`makeGameState` helper — if it has one, reuse it; the shape below is a minimal
-`GameState`):
+Append to `src/engine/__tests__/caseProgression.test.ts`. The file's existing helper is
+**`makeState(overrides: Partial<GameState>)`** (Codex plan Minor 7 — not
+`baseGameState`/`makeGameState`):
 
 ```ts
 describe('the-orrery-room unlock', () => {
   function stateWithGreyDawnRep(rep: number, flags: Record<string, boolean> = {}) {
-    return {
-      ...baseGameState(), // reuse the file's existing base-state helper/fixture
+    return makeState({
       factionReputation: { 'Hermetic Order of the Grey Dawn': rep },
       flags,
-    };
+    });
   }
 
   it('unlocks at Grey Dawn reputation 2 (threshold inclusive)', () => {
@@ -95,8 +100,10 @@ describe('the-orrery-room unlock', () => {
 - [ ] **Step 2: Run to verify RED**
 
 Run: `npx vitest run src/engine/__tests__/caseProgression.test.ts`
-Expected: the first two new tests FAIL (`the-orrery-room` never in the list); third may
-pass vacuously — that's fine, the pair proves the behavior.
+Expected: the **threshold test** FAILs (`the-orrery-room` never in the list). The
+below-threshold and already-unlocked tests pass vacuously pre-implementation — they are
+regression guards whose value arrives with the entry; the single genuine RED is the
+threshold test (Codex plan Minor 7).
 
 - [ ] **Step 3: Implement**
 
@@ -137,13 +144,19 @@ git commit -m "feat(engine): register the-orrery-room vignette unlock (Grey Dawn
 - [ ] **Step 1: Write the failing loader tests**
 
 Create `src/engine/__tests__/contentLoader.vignette.test.ts`. Mock `fetch` the way
-`sharedSceneCache.test.ts` does (a URL→response map; 404 = rejected/`ok:false` response):
+`sharedSceneCache.test.ts` does. **Two hard requirements the naive fixture misses
+(Codex plan Blocker 2):** `loadVignette` ALWAYS fetches the shared halt scenes as two
+separate files — `/content/shared/breakdown.json` and
+`/content/shared/incapacitation.json`, each a single `SceneNode` object (NOT a
+`{ scenes: [] }` wrapper) — and the shared-scene promise is module-cached, so
+`_resetSharedScenesCache()` must be called per test or results are order-dependent:
 
 ```ts
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { loadVignette } from '../contentLoader';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { loadVignette, _resetSharedScenesCache } from '../contentLoader';
 
-const SHARED = { scenes: [] };
+const BREAKDOWN = { id: 'breakdown', act: 1, narrative: 'b', cluesAvailable: [], choices: [] };
+const INCAP = { id: 'incapacitation', act: 1, narrative: 'i', cluesAvailable: [], choices: [] };
 const META = { id: 'v-test', title: 'T', synopsis: 'S', firstScene: 'v-s1' };
 const SCENES = { scenes: [{ id: 'v-s1', act: 1, narrative: 'n', cluesAvailable: [], choices: [] }] };
 const CLUES = { clues: [] };
@@ -171,14 +184,16 @@ function mockFetch(files: Record<string, unknown>) {
 }
 
 const BASE_FILES = {
-  'shared/scenes.json': SHARED,
+  'shared/breakdown.json': BREAKDOWN,
+  'shared/incapacitation.json': INCAP,
   'meta.json': META,
   'scenes.json': SCENES,
   'clues.json': CLUES,
   'npcs.json': NPCS,
 };
 
-beforeEach(() => vi.unstubAllGlobals());
+beforeEach(() => _resetSharedScenesCache());
+afterEach(() => vi.unstubAllGlobals());
 
 describe('loadVignette optional recipes/variants', () => {
   it('absent files -> recipes undefined, variants [] (existing vignettes unaffected)', async () => {
@@ -199,9 +214,9 @@ describe('loadVignette optional recipes/variants', () => {
 });
 ```
 
-> Note: check how `contentLoader.ts`'s `fetchJson` treats a non-`ok` response before
-> finalizing the mock — mirror whatever `sharedSceneCache.test.ts` already stubs so the
-> 404 path exercises the real `.catch` fallback.
+> Before finalizing, open `sharedSceneCache.test.ts` and match its exact stub/reset
+> idiom — it already provides both real shared URLs and calls the reset; deviate only
+> where this test's purpose requires (the two optional files 404ing).
 
 - [ ] **Step 2: Run to verify RED**
 
@@ -314,9 +329,73 @@ git commit -m "feat(engine): vignettes load optional deductions.json + variants.
 
 **Files:**
 - Modify: `scripts/validateCase.ts` (`loadBundle`, ~lines 30–46)
+- Create: `src/engine/__tests__/validateCase.vignetteVariants.test.ts` (fixture-driven
+  RED — Codex plan Major 3: without it, both this task's CLI run and T8's pass
+  regardless of whether the fix landed, because no shipped vignette has variants yet)
+- Create: `src/engine/__tests__/fixtures/vignette-broken-variant/` (test fixture dir:
+  `meta.json`, `scenes.json`, `clues.json`, `npcs.json`, `variants.json`)
 
-No unit-test harness exists for `scripts/`; verification is behavioral via the validator
-CLI (T6+ depends on this, and `tsconfig.scripts.json` type-checks it in the build).
+- [ ] **Step 0: Write the failing fixture test**
+
+The fixture is a minimal vignette whose `variants.json` contains a variant with a
+**broken edge** (a choice outcome pointing at a scene that doesn't exist). If the CLI's
+`loadBundle` feeds variants to `validateBundle`, validation errors; if it silently
+drops them (today's behavior), validation passes — that asymmetry is the RED.
+
+Fixture files (complete):
+
+`meta.json`: `{ "id": "v-fix", "title": "F", "synopsis": "s", "firstScene": "vf-s1" }`
+`scenes.json`: `{ "scenes": [{ "id": "vf-s1", "act": 1, "narrative": "n", "cluesAvailable": [], "choices": [] }] }`
+`clues.json`: `{ "clues": [] }`
+`npcs.json`: `{ "npcs": [] }`
+`variants.json`:
+
+```json
+{
+  "variants": [
+    {
+      "id": "vf-s1-alt",
+      "act": 1,
+      "narrative": "alt",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "vf-broken",
+          "text": "go",
+          "outcomes": { "critical": "vf-nowhere", "success": "vf-nowhere", "partial": "vf-nowhere", "failure": "vf-nowhere", "fumble": "vf-nowhere" }
+        }
+      ],
+      "variantOf": "vf-s1",
+      "variantCondition": { "type": "hasFlag", "target": "x" }
+    }
+  ]
+}
+```
+
+Test (`validateCase.vignetteVariants.test.ts`) — import `loadBundle`/`validateUnit`
+from `scripts/validateCase.ts` if exported; if they are file-local, export `loadBundle`
+(a pure function over a directory path — safe to export):
+
+```ts
+import { describe, it, expect } from 'vitest';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+import { loadBundle } from '../../../scripts/validateCase';
+import { validateBundle } from '../contentValidation';
+
+const FIXTURE = join(dirname(fileURLToPath(import.meta.url)), 'fixtures/vignette-broken-variant');
+
+it('CLI loadBundle feeds vignette variants to validation (broken variant edge is caught)', () => {
+  const bundle = loadBundle(FIXTURE);
+  const { errors } = validateBundle(bundle);
+  expect(errors.some((e) => e.includes('vf-nowhere'))).toBe(true);
+});
+```
+
+Run: `npx vitest run src/engine/__tests__/validateCase.vignetteVariants.test.ts`
+Expected: **FAIL** — `loadBundle` returns `variants: []` for the vignette, so the broken
+edge is never seen. (If importing from `scripts/` trips the test tsconfig, move the
+export or add the path to the vitest include — resolve it, don't skip the RED.)
 
 - [ ] **Step 1: Implement**
 
@@ -344,14 +423,18 @@ content types get it:
 
 - [ ] **Step 2: Verify**
 
+Run: `npx vitest run src/engine/__tests__/validateCase.vignetteVariants.test.ts` →
+PASS (the fixture's broken edge is now caught).
 Run: `npm run typecheck:scripts` → clean.
-Run: `node scripts/validateCase.mjs` → 8 cases, zero errors, zero warnings (unchanged —
-no vignette ships variants yet; T8 exercises the new path for real).
+Run: `node scripts/validateCase.mjs` → 8 cases, zero errors, zero warnings (shipped
+content unchanged; the fixture dir lives under `__tests__/` so the CLI's content walk
+never sees it).
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add scripts/validateCase.ts
+git add scripts/validateCase.ts src/engine/__tests__/validateCase.vignetteVariants.test.ts \
+  src/engine/__tests__/fixtures/vignette-broken-variant/
 git commit -m "fix(validator): CLI loads variants.json for vignettes, not only main cases"
 ```
 
@@ -365,33 +448,31 @@ git commit -m "fix(validator): CLI loads variants.json for vignettes, not only m
 
 - [ ] **Step 1: Write the failing test**
 
-Append to `src/engine/__tests__/contentValidation.test.ts` (reuse the file's existing
-bundle-builder helpers; the shape below shows the required content):
+Append to `src/engine/__tests__/contentValidation.test.ts`, using the file's REAL
+helpers — `makeBundle`, `makeScene`, `makeClue` (Codex plan Minor 7; `makeClue`
+supplies the required `tags`/`status`/`isRevealed` fields the raw-object sketch
+missed):
 
 ```ts
 describe('computeDiscoverableClues counts onEnter discoverClue (F-102 sibling parity)', () => {
   it('does not warn "never discoverable" for a clue granted only via onEnter', () => {
-    const bundle = {
+    const bundle = makeBundle({
       scenes: [
-        {
-          id: 's1', act: 1, narrative: 'n', cluesAvailable: [],
+        makeScene({
+          id: 's1',
           choices: [{
             id: 'c1', text: 'go',
-            outcomes: { critical: 's2', success: 's2', partial: 's2', failure: 's2' },
+            outcomes: { critical: 's2', success: 's2', partial: 's2', failure: 's2', fumble: 's2' },
           }],
-        },
-        {
-          id: 's2', act: 1, narrative: 'n', cluesAvailable: [], choices: [],
+        }),
+        makeScene({
+          id: 's2',
           onEnter: [{ type: 'discoverClue', target: 'clue-on-enter' }],
-        },
+        }),
       ],
-      variants: [],
-      clues: [{ id: 'clue-on-enter', title: 't', description: 'd', type: 'physical', discovered: false }],
-      npcs: [],
-      recipes: [],
+      clues: [makeClue({ id: 'clue-on-enter' })],
       firstScene: 's1',
-      sharedSceneIds: [],
-    };
+    });
     const { warnings } = validateBundle(bundle, { includeReachability: true });
     expect(warnings.filter((w) => w.includes('never discoverable'))).toEqual([]);
   });
@@ -462,19 +543,21 @@ export interface KeyDeduction {
 
 - [ ] **Step 2: Write the failing validator test**
 
-Append to `src/engine/__tests__/contentValidation.deduction.test.ts` (reuse its bundle
-helpers):
+Append to `src/engine/__tests__/contentValidation.deduction.test.ts` — its file-local
+helper is **`bundle(over: Partial<ContentBundle>)`** (Codex plan Minor 7, not
+`bundleWith`), and its existing clue fixture id is `c-a`; use it so the only error is
+the missing `onForm` target:
 
 ```ts
 it('validates onForm effect targets like any other effect list', () => {
-  const bundle = bundleWith({
+  const b = bundle({
     recipes: [{
-      id: 'r-onform', requiredClues: ['clue-a'], title: 'T', description: 'D',
+      id: 'r-onform', requiredClues: ['c-a'], title: 'T', description: 'D',
       isRedHerring: false,
       onForm: [{ type: 'disposition', target: 'npc-missing', delta: 1 }],
     }],
   });
-  const { errors } = validateBundle(bundle);
+  const { errors } = validateBundle(b);
   expect(errors.some((e) => e.includes('npc-missing'))).toBe(true);
 });
 ```
@@ -639,7 +722,25 @@ Append to the `cases` array (after `the-unfinished-case`):
 | `npc-coyle` | Magister Coyle | `Hermetic Order of the Grey Dawn` | 1 | Preservationist. Wants it enshrined. Expansive, scholarly warmth over an acquisitive core; quotes dead members approvingly. |
 | `npc-finch` | Mr. Abelard Finch | `Rationalists Circle` | 0 | Horologist consulted for the appraisal. Found the gearing sound and cannot say so. Precise, miserable, over-explains small mechanisms to avoid the large one. |
 
-- [ ] **Step 4: clues.json** — 7 clues (shape per shipped clues; `discovered: false`):
+- [ ] **Step 4: clues.json** — 7 clues. Field shape (Codex plan Minor 8 — there is no
+`discovered` field; the required fields are `tags`, `status`, `isRevealed`, exactly as
+`the-rationalists-dilemma/clues.json` ships them):
+
+```json
+{
+  "id": "or-clue-gear-train",
+  "type": "physical",
+  "title": "The Thirteenth Gear Train",
+  "description": "…",
+  "sceneSource": "or-act1-orrery-room",
+  "connectsTo": ["or-clue-finch-admission", "or-clue-forged-provenance"],
+  "tags": ["orrery", "authenticity"],
+  "status": "new",
+  "isRevealed": false
+}
+```
+
+The 7 clues:
 
 | id | type | sceneSource | title | description brief |
 |---|---|---|---|---|
@@ -659,8 +760,8 @@ Add `connectsTo` edges (undirected authored hints for the generic oracle path):
 - `or-clue-orrery-period` ↔ `or-clue-adjustment-diary` and `or-clue-orrery-period` ↔
   `or-clue-night-observation` (keystone strand)
 
-(Match the exact `connectsTo` field shape used by shipped clues — check
-`the-comet-club/clues.json`.)
+(`connectsTo` is a plain `string[]` of clue ids, undirected at oracle level — verify
+against `the-comet-club/clues.json` before authoring.)
 
 - [ ] **Step 5: deductions.json**
 
@@ -690,16 +791,15 @@ Add `connectsTo` edges (undirected authored hints for the generic oracle path):
 
 (Note the description names no pattern — it describes convergence only. Keep it that way.)
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 6: Do NOT commit yet**
 
-```bash
-git add public/content/side-cases/the-orrery-room/ public/content/manifest.json
-git commit -m "content: Orrery Room skeleton — meta, manifest entry, 3 NPCs, 7 clues, 2 recipes"
-```
+The clue `sceneSource` fields forward-reference scenes authored in T7/T8; the validator
+cannot pass until they exist (Codex plan Major 4). The single content commit is
+T8 Step 5. Continue straight to T7.
 
 ---
 
-### Task 7: Act 1 scenes (10 scenes)
+### Task 7: Act 1 scenes (11 scenes)
 
 **Files:**
 - Create: `public/content/side-cases/the-orrery-room/scenes.json` (act-1 half)
@@ -707,7 +807,14 @@ git commit -m "content: Orrery Room skeleton — meta, manifest entry, 3 NPCs, 7
 Prose is final copy, 2–4 paragraphs per scene, tone bar as above. Structure is binding;
 narrative briefs say what each scene must accomplish. Every choice id below is binding
 (witness tests reference them). Choices marked *(check)* carry `faculty` + `difficulty`
-+ four `outcomes` (all four tiers required; `partial` routes where noted).
++ **all FIVE `outcomes` tiers** — `critical`, `success`, `partial`, `failure`, and
+`fumble` (Codex plan Blocker 1: `OUTCOME_TIERS` has five members and the validator
+errors on any missing tier). Unless a scene says otherwise, route `fumble` with
+`failure`.
+
+> **Do not commit at the end of this task** — clue `sceneSource` and act-2 references
+> resolve only after T8. The single content commit is T8 Step 5 (see Content commit
+> discipline, header).
 
 - [ ] **Step 1: Author the act-1 scenes**
 
@@ -745,12 +852,13 @@ Choices:
     "critical": "or-act1-period-match",
     "success": "or-act1-period-match",
     "partial": "or-act1-period-match",
-    "failure": "or-act1-orrery-room"
+    "failure": "or-act1-orrery-room",
+    "fumble": "or-act1-orrery-room"
   }
 }
 ```
 
-(Failure routes back to the hub — retry allowed, keystone never lost to one roll.
+(Failure/fumble route back to the hub — retry allowed, keystone never lost to one roll.
 `partial` counts as success here: the comparison either lands or it doesn't; the tier
 flavours the check overlay only.)
 
@@ -776,7 +884,7 @@ Choices: `or-choice-rooms-back` → `or-act1-orrery-room`; `or-choice-rooms-finc
 **`or-act1-finch-workshop`** — Finch among his escapements, over-explaining. Brief: he
 has finished the appraisal and not delivered it. Choices:
 - `or-choice-finch-press` *(check: influence, difficulty 13)* — outcomes: critical/
-  success → `or-act1-finch-admission`; partial → `or-act1-finch-doorstep`; failure →
+  success → `or-act1-finch-admission`; partial/failure/fumble →
   `or-act1-finch-doorstep`.
 - `or-choice-finch-leave` (ungated) → `or-act1-orrery-room`.
 
@@ -804,23 +912,16 @@ chapterhouse's hospitality for the night; the player knows the instrument questi
 the death question are separate. Choices: `or-choice-close-vigil` (ungated) →
 `or-act2-night-vigil`. (`act: 1` for all scenes above; `act: 2` below.)
 
-- [ ] **Step 2: Validate**
+- [ ] **Step 2: Sanity-check, do NOT commit**
 
-Run: `node scripts/validateCase.mjs public/content/side-cases/the-orrery-room`
-Expected: errors ONLY for the not-yet-authored act-2 scene references
-(`or-act2-night-vigil`) — every other reference resolves. (If the validator has no
-single-target mode flag, run it plain and filter output for `the-orrery-room`.)
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add public/content/side-cases/the-orrery-room/scenes.json
-git commit -m "content: Orrery Room act 1 — 10 scenes incl. keystone period-match beat (Phase 5 disabled-with-reason)"
-```
+Optionally run `node scripts/validateCase.mjs public/content/side-cases/the-orrery-room`
+to confirm the ONLY errors are unresolved act-2 references (`or-act2-night-vigil`) —
+anything else is an act-1 authoring bug to fix now. No commit here (Codex plan Major 4);
+continue straight to T8, which completes the graph and makes the single content commit.
 
 ---
 
-### Task 8: Act 2 scenes (8 scenes) + variants (4)
+### Task 8: Act 2 scenes (10 scenes) + variants (4) — the single content commit
 
 **Files:**
 - Modify: `public/content/side-cases/the-orrery-room/scenes.json` (append act-2 scenes)
@@ -830,8 +931,8 @@ git commit -m "content: Orrery Room act 1 — 10 scenes incl. keystone period-ma
 
 **`or-act2-night-vigil`** — Alone with the running orrery at night. Choice
 `or-choice-vigil-watch` *(check: nerve, difficulty 12)*: critical/success →
-`or-act2-vigil-held`; partial/failure → `or-act2-vigil-broken`. Brief: the vigil scene
-carries the dread; the machine's sound changes when the gas is down.
+`or-act2-vigil-held`; partial/failure/fumble → `or-act2-vigil-broken`. Brief: the vigil
+scene carries the dread; the machine's sound changes when the gas is down.
 
 **`or-act2-vigil-held`** — The player holds and watches. cluesAvailable:
 `{ "clueId": "or-clue-night-observation", "method": "automatic" }`. Brief: twelve bodies
@@ -842,7 +943,7 @@ orbit; the thirteenth does something else — describe the difference behavioral
 **`or-act2-vigil-broken`** — Nerve fails; the player leaves the room before dawn.
 onEnter: `[{ "type": "composure", "delta": -1 }]`. The clue is NOT granted here — but
 the scene offers `or-choice-vigil-return` *(check: nerve, difficulty 12)*: critical/
-success → `or-act2-vigil-held`; partial/failure → `or-act2-dosage` (the night is spent;
+success → `or-act2-vigil-held`; partial/failure/fumble → `or-act2-dosage` (the night is spent;
 the observation clue is missable, and with it the keystone — acceptable: the keystone
 is optional by design). Also `or-choice-vigil-leave` (ungated) → `or-act2-dosage`.
 
@@ -879,7 +980,8 @@ stewardship; the Order keeps what it fears, that is what the Order is for. Choic
     "critical": "or-act2-ending-sealed",
     "success": "or-act2-ending-sealed",
     "partial": "or-act2-verdict-hub",
-    "failure": "or-act2-verdict-hub"
+    "failure": "or-act2-verdict-hub",
+    "fumble": "or-act2-verdict-hub"
   }
 }
 ```
@@ -957,8 +1059,8 @@ Run: `npm run test:run` → all pass (integration tests load all content).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add public/content/side-cases/the-orrery-room/
-git commit -m "content: Orrery Room act 2 — vigil, dosage resolution, 3 endings + 4 variants (veil sight, keystone-named)"
+git add public/content/side-cases/the-orrery-room/ public/content/manifest.json
+git commit -m "content: The Orrery Room — 21 scenes, 4 variants, 7 clues, 2 recipes, 3 NPCs (T6-T8, single zero/zero commit)"
 ```
 
 ---
@@ -968,8 +1070,15 @@ git commit -m "content: Orrery Room act 2 — vigil, dosage resolution, 3 ending
 **Files:**
 - Create: `src/engine/__tests__/orreryRoom.content.test.ts`
 
-Model on `phase5DemoChoice.test.ts`: load the real JSON with `readFileSync` (no fetch),
-assert against actual shipped content. All ids referenced here were fixed in T6–T8.
+Model on `phase5DemoChoice.test.ts`: load the real JSON, assert against actual shipped
+content. All ids referenced here were fixed in T6–T8.
+
+**ESM constraints (Codex plan Major 5):** the package is ESM — `__dirname` does not
+exist. Prefer direct JSON imports the way `phase5DemoChoice.test.ts` does; if a dynamic
+path is unavoidable use `fileURLToPath(import.meta.url)`. And there is no shared
+`stateWith` helper — define a local `makeState` fixture modeled on the file-local one in
+`choiceVisibility.test.ts` (`resolveChoiceVisibility(choice, state)` takes a
+`GameState`-shaped object and returns `'shown' | 'disabled' | 'hidden'`).
 
 - [ ] **Step 1: Write the tests** (these are GREEN-on-arrival guards against future
 content edits — mutation-check each by temporarily breaking the content field it
@@ -977,16 +1086,24 @@ watches, seeing it fail, and restoring):
 
 ```ts
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import type { Clue, KeyDeduction, SceneNode, Choice } from '../../types';
+import type { Clue, GameState, KeyDeduction, SceneNode } from '../../types';
 import { choiceGateConditions, resolveChoiceVisibility } from '../choiceVisibility';
+// Direct JSON imports — the phase5DemoChoice.test.ts idiom (ESM: no __dirname).
+import scenesFile from '../../../public/content/side-cases/the-orrery-room/scenes.json';
+import variantsFile from '../../../public/content/side-cases/the-orrery-room/variants.json';
+import cluesFile from '../../../public/content/side-cases/the-orrery-room/clues.json';
+import deductionsFile from '../../../public/content/side-cases/the-orrery-room/deductions.json';
 
-const DIR = join(__dirname, '../../../public/content/side-cases/the-orrery-room');
-const scenes: SceneNode[] = JSON.parse(readFileSync(join(DIR, 'scenes.json'), 'utf-8')).scenes;
-const variants: SceneNode[] = JSON.parse(readFileSync(join(DIR, 'variants.json'), 'utf-8')).variants;
-const clues: Clue[] = JSON.parse(readFileSync(join(DIR, 'clues.json'), 'utf-8')).clues;
-const recipes: KeyDeduction[] = JSON.parse(readFileSync(join(DIR, 'deductions.json'), 'utf-8')).deductions;
+const scenes = scenesFile.scenes as SceneNode[];
+const variants = variantsFile.variants as SceneNode[];
+const clues = cluesFile.clues as Clue[];
+const recipes = deductionsFile.deductions as KeyDeduction[];
+
+// Local GameState fixture — model on the file-local makeState in
+// choiceVisibility.test.ts (there is no shared/exported helper).
+function makeState(overrides: Partial<GameState> = {}): GameState {
+  /* copy the choiceVisibility.test.ts fixture body, spread overrides */
+}
 
 const allScenes = [...scenes, ...variants];
 const sceneById = (id: string) => allScenes.find((s) => s.id === id)!;
@@ -1022,13 +1139,11 @@ describe('keystone gating chain (spec §4/§5)', () => {
     )!;
     expect(choice.visibility).toBe('disabled');
     expect(choice.gateReason).toBeTruthy();
-    // Resolve through the real Phase 5 resolver, flagless then flagged
-    // (match resolveChoiceVisibility's actual GameState-shaped signature —
-    // see choiceVisibility.test.ts for the state fixture it uses):
-    const flagless = resolveChoiceVisibility(choice, stateWith({ flags: {} }));
+    // Resolve through the real Phase 5 resolver, flagless then flagged:
+    const flagless = resolveChoiceVisibility(choice, makeState({ flags: {} }));
     expect(flagless).toBe('disabled'); // locked list, non-interactive
     const flagged = resolveChoiceVisibility(
-      choice, stateWith({ flags: { 'mythos-period-computed': true } }),
+      choice, makeState({ flags: { 'mythos-period-computed': true } }),
     );
     expect(flagged).toBe('shown');
   });
@@ -1115,6 +1230,57 @@ ending's literal onEnter array read from content, assert
 disposition-first the +2 lands last and clamps UP to 10 — the authored order is
 strictly better at the boundary, which is the point of the rule.)
 
+- [ ] **Step 1b: Behavioral integration witnesses (Codex plan Major 6)**
+
+The structural assertions above can stay green while the integrated behavior is broken.
+Add a second describe-block (same file or `orreryRoom.integration.test.ts`) that drives
+the REAL machinery — store + oracle + resolver — with the shipped content. Five
+witnesses, each named by the spec (§2 tests / §8.3):
+
+```ts
+// Setup for all five: seed useStore with the vignette content converted through the
+// real path — vignetteToCaseData({ meta, scenes: indexById(scenes), clues: indexById(clues),
+// npcs: indexById(npcs), recipes, variants }) — then resetForNewCase-equivalent via the
+// public loadAndStartVignette seam where possible (mock fetch as in T2), else seed
+// caseData/clues/deductions/flags directly the way sliceIsolation.property.test.ts does.
+
+it('1. loadGame round-trip: an in-progress vignette save restores recipes + variants into caseData', () => {
+  // Drive metaSlice.saveGame -> loadGame with mocked fetch serving the orrery files;
+  // assert store.caseData.recipes contains 'mythos-pattern-named' and
+  // store.caseData.variants includes 'or-act2-night-vigil-veil' after load.
+});
+
+it('2. both recipes form through the real oracle', () => {
+  // classifyBoard with player edges over {gear-train, finch-admission} -> correct,
+  // recipe or-genuine-instrument matched; same for the three keystone clues ->
+  // mythos-pattern-named matched. Use the REAL clues/recipes from content.
+});
+
+it('3. keystone formed AFTER entering a terminal ending still records the flag', () => {
+  // goToScene('or-act2-ending-destroyed'); then form mythos-pattern-named via the
+  // EvidenceBoard formation path (or the extracted handler with applyEffects);
+  // assert flags['mythos-pattern-named'] === true AND deductions['mythos-pattern-named']
+  // exists. This is THE Codex spec Major 5 scenario — do not drop it.
+});
+
+it('4. each ending resolves to its -named variant when the keystone deduction is held', () => {
+  // resolveScene(baseEndingId, stateWithDeduction) -> variant id for all three endings;
+  // resolveScene(baseEndingId, stateWithout) -> base id.
+});
+
+it('5. flagless run: or-genuine-instrument forms and the broker choice becomes selectable', () => {
+  // flags: {} (no mythos-period-computed). Form or-genuine-instrument via classifyBoard,
+  // add it to state.deductions, then resolveChoiceVisibility(brokerChoice, state) === 'shown'
+  // and, flagless-without-deduction, === 'hidden' (default). Proves the sealed ending is
+  // reachable on a flagless run and the keystone was never needed for it.
+});
+```
+
+Use the real exported functions (`classifyBoard`, `resolveScene`,
+`resolveChoiceVisibility`, `vignetteToCaseData`, store actions). Where the EvidenceBoard
+component is needed (witness 3), follow the T5 test's seeding pattern rather than
+duplicating formation logic.
+
 - [ ] **Step 2: Run + mutation-verify**
 
 Run: `npx vitest run src/engine/__tests__/orreryRoom.content.test.ts` → PASS.
@@ -1185,6 +1351,20 @@ git commit -m "docs: vignette recipes/variants, KeyDeduction.onForm, Orrery Room
 - [ ] **Step 6:** Push branch, open PR (merge commit, never squash), `/checkpoint`.
 
 ---
+
+## Codex plan-review fold (2026-07-17)
+
+All 9 findings from `codex/output/2026-07-17-orrery-room-plan-review.md` folded:
+B1 five outcome tiers (`fumble`) on every check; B2 T2 fixture serves the two real
+shared-scene URLs + `_resetSharedScenesCache()`; M3 T3 gains a broken-variant fixture
+RED test; M4 single zero/zero content commit at T8 (T6/T7 don't commit); M5 T9 uses
+JSON imports + local `makeState` (ESM, no `__dirname`/`stateWith`); M6 five behavioral
+integration witnesses added (T9 Step 1b); m7 real helper names (`makeState`,
+`makeBundle`/`makeScene`/`makeClue`, `bundle`, `c-a`) + honest T1 RED expectation;
+m8 real `Clue` fields (`tags`/`status`/`isRevealed`, no `discovered`); m9 21 base
+scenes everywhere (spec updated to match). Codex confirmed sound: T5 once-guard,
+F-102 zero/zero after T3+T4, Phase 5 rule compliance, ending-variant onEnter
+(no double-fire on terminal scenes), clamp arithmetic.
 
 ## Self-review notes (already applied)
 

@@ -99,8 +99,9 @@ operate on `CaseData` and are agnostic to whether it came from a case or a vigne
 
 ## 3. Structure & scene graph
 
-~18 base scenes + 4 variants (one per ending, §3.10, plus the night-scene Veil Sight
-variant, §3.7), prefix `or-`. Two acts.
+21 base scenes (11 act 1, 10 act 2 — settled during planning; the pitch's ~16–20 grew
+by the retry/transition scenes the graph needs) + 4 variants (one per ending, §3.10,
+plus the night-scene Veil Sight variant, §3.7), prefix `or-`. Two acts.
 
 ### Act 1 — the appraisal (9–10 scenes)
 
