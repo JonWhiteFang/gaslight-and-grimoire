@@ -27,7 +27,7 @@ function readJson<T>(file: string): T {
 }
 
 /** Assembles a ContentBundle from a case or vignette directory. */
-function loadBundle(dir: string): ContentBundle {
+export function loadBundle(dir: string): ContentBundle {
   const isMainCase = existsSync(join(dir, 'act1.json'));
 
   let scenes: SceneNode[];
@@ -38,11 +38,15 @@ function loadBundle(dir: string): ContentBundle {
     const act2 = readJson<{ scenes: SceneNode[] }>(join(dir, 'act2.json'));
     const act3 = readJson<{ scenes: SceneNode[] }>(join(dir, 'act3.json'));
     scenes = [...act1.scenes, ...act2.scenes, ...act3.scenes];
-    if (existsSync(join(dir, 'variants.json'))) {
-      variants = readJson<{ variants: SceneNode[] }>(join(dir, 'variants.json')).variants;
-    }
   } else {
     scenes = readJson<{ scenes: SceneNode[] }>(join(dir, 'scenes.json')).scenes;
+  }
+
+  // variants.json is optional for BOTH cases and vignettes (Orrery Room spec §2.6):
+  // vignette variants must reach validateBundle or they get no structural/Phase 5/
+  // F-102 validation at all.
+  if (existsSync(join(dir, 'variants.json'))) {
+    variants = readJson<{ variants: SceneNode[] }>(join(dir, 'variants.json')).variants;
   }
 
   const clues = readJson<{ clues: Clue[] }>(join(dir, 'clues.json')).clues;
@@ -116,4 +120,8 @@ function main(): void {
   }
 }
 
-main();
+// Skip CLI execution when this module is imported by the test suite
+// (vitest sets VITEST=true); tests import loadBundle, not the CLI run.
+if (!process.env.VITEST) {
+  main();
+}

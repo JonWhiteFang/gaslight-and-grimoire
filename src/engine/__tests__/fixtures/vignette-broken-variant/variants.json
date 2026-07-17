@@ -1,0 +1,19 @@
+{
+  "variants": [
+    {
+      "id": "vf-s1-alt",
+      "act": 1,
+      "narrative": "alt",
+      "cluesAvailable": [],
+      "choices": [
+        {
+          "id": "vf-broken",
+          "text": "go",
+          "outcomes": { "critical": "vf-nowhere", "success": "vf-nowhere", "partial": "vf-nowhere", "failure": "vf-nowhere", "fumble": "vf-nowhere" }
+        }
+      ],
+      "variantOf": "vf-s1",
+      "variantCondition": { "type": "hasFlag", "target": "x" }
+    }
+  ]
+}
