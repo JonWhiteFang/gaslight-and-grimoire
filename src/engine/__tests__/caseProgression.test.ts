@@ -337,6 +337,34 @@ describe('checkVignetteUnlocks — multiple simultaneous unlocks (F-057)', () =>
   });
 });
 
+// ─── the-orrery-room unlock ──────────────────────────────────────────────────
+
+describe('the-orrery-room unlock', () => {
+  function stateWithGreyDawnRep(rep: number, flags: Record<string, boolean> = {}) {
+    return makeState({
+      factionReputation: { 'Hermetic Order of the Grey Dawn': rep },
+      flags,
+    });
+  }
+
+  it('unlocks at Grey Dawn reputation 2 (threshold inclusive)', () => {
+    const unlocked = CaseProgression.checkVignetteUnlocks(stateWithGreyDawnRep(2));
+    expect(unlocked).toContain('the-orrery-room');
+  });
+
+  it('does not unlock below threshold', () => {
+    const unlocked = CaseProgression.checkVignetteUnlocks(stateWithGreyDawnRep(1));
+    expect(unlocked).not.toContain('the-orrery-room');
+  });
+
+  it('skips when already unlocked', () => {
+    const unlocked = CaseProgression.checkVignetteUnlocks(
+      stateWithGreyDawnRep(5, { 'vignette-unlocked-the-orrery-room': true }),
+    );
+    expect(unlocked).not.toContain('the-orrery-room');
+  });
+});
+
 // ─── Test 4: grantFacultyBonus caps at 20 ────────────────────────────────────
 
 describe('grantFacultyBonus — cap at 20', () => {

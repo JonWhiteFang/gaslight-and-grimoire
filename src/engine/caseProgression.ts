@@ -50,6 +50,10 @@ const VIGNETTE_CONDITIONS: VignetteUnlockCondition[] = [
     id: 'the-unfinished-case',
     requiredFlag: 'wc-case-complete',
   },
+  {
+    id: 'the-orrery-room',
+    factionReputation: { faction: 'Hermetic Order of the Grey Dawn', threshold: 2 },
+  },
 ];
 
 // ─── CaseProgression ─────────────────────────────────────────────────────────
