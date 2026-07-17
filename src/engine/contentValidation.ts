@@ -152,6 +152,9 @@ export function validateBundle(
         errors.push(`KeyDeduction "${recipe.id}" -> requiredClues references unknown clue "${clueId}"`);
       }
     }
+    for (const effect of recipe.onForm ?? []) {
+      validateEffect(effect, `KeyDeduction "${recipe.id}" -> onForm`, ctx);
+    }
   }
 
   // ── Reachability (warnings, opt-in) ──

@@ -43,6 +43,16 @@ describe('validateBundle — key deductions', () => {
     expect(errors.some((e) => e.includes('r-ghost'))).toBe(true);
   });
 
+  it('validates onForm effect targets like any other effect list', () => {
+    const recipes: KeyDeduction[] = [{
+      id: 'r-onform', requiredClues: ['c-a'], title: 'T', description: 'D',
+      isRedHerring: false,
+      onForm: [{ type: 'disposition', target: 'npc-missing', delta: 1 }],
+    }];
+    const { errors } = validateBundle(bundle({ recipes }));
+    expect(errors.some((e) => e.includes('npc-missing'))).toBe(true);
+  });
+
   it('passes when recipe clues exist and gates target a real recipe', () => {
     const recipes: KeyDeduction[] = [{ id: 'r1', requiredClues: ['c-a', 'c-b'], title: 't', description: 'd', isRedHerring: false }];
     const scene: SceneNode = {

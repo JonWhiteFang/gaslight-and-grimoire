@@ -110,6 +110,7 @@ export function EvidenceBoard({ onClose, restoreFocusTo }: EvidenceBoardProps) {
   const markCluesDeduced = useStore((s) => s.markCluesDeduced);
   const contestClues = useStore((s) => s.contestClues);
   const recipes = useStore((s) => s.caseData?.recipes ?? NO_RECIPES);
+  const applyEffects = useStore((s) => s.applyEffects);
 
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
   const [slackConnections, setSlackConnections] = useState<Connection[]>([]);
@@ -318,8 +319,13 @@ export function EvidenceBoard({ onClose, restoreFocusTo }: EvidenceBoardProps) {
         if (comp.recipes.length > 0) {
           // Blocker 1: form EVERY matched recipe, not just one.
           const members = new Set<string>();
+          const alreadyFormed = useStore.getState().deductions;
           for (const r of comp.recipes) {
+            const isNew = !alreadyFormed[r.id];
             addDeduction(buildDeductionFromRecipe(r, comp.clueIds));
+            // onForm fires exactly once per playthrough: only on first formation
+            // (spec §2.8 — formation-time so a mint on a terminal scene still records).
+            if (isNew && r.onForm?.length) applyEffects(r.onForm);
             for (const id of r.requiredClues) members.add(id);
             formedCount += 1;
           }

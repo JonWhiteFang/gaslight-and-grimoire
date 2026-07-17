@@ -104,6 +104,14 @@ export interface KeyDeduction {
   title: string;
   description: string;
   isRedHerring: boolean;
+  /**
+   * Optional effects applied exactly once, at the moment this recipe's deduction
+   * is first formed on the evidence board (never re-applied on repeat formation
+   * or save/load — the deductions record is the once-guard). Orrery Room spec §2.8:
+   * scene-entry effects can't record a mint that happens after entering a terminal
+   * scene; formation-time effects can.
+   */
+  onForm?: Effect[];
 }
 
 export type DeductionCorrectness = 'correct' | 'false' | 'partial' | 'incorrect';
