@@ -624,6 +624,65 @@ describe('getEncounterChoices — escape path', () => {
   });
 });
 
+// ─── Phase 5: visibility-aware filtering ──────────────────────────────────────
+
+describe('getEncounterChoices — Phase 5 visibility', () => {
+  it('includes a non-escape disabled choice (gate unmet, visibility disabled)', () => {
+    const round = makeRound([
+      makeChoice({ id: 'a', text: 'fight' }),
+      makeChoice({
+        id: 'b',
+        text: 'ritual',
+        requiresClue: 'missing',
+        visibility: 'disabled',
+        gateReason: 'r',
+      }),
+    ]);
+    const state = makeGameState(); // empty clues -> 'missing' is unmet
+
+    const ids = getEncounterChoices(round, state).map((c) => c.id);
+
+    expect(ids).toContain('a');
+    expect(ids).toContain('b'); // disabled, but returned so the panel can grey it
+  });
+
+  it('keeps an escape path hard-gated (excluded when its gate is unmet)', () => {
+    const round = makeRound([
+      makeChoice({ id: 'esc', text: 'flee', isEscapePath: true, requiresFlag: 'has-exit' }),
+    ]);
+    const state = makeGameState(); // has-exit flag not set
+
+    expect(getEncounterChoices(round, state).map((c) => c.id)).not.toContain('esc');
+  });
+
+  it('drops a non-escape gated choice with default (absent) visibility', () => {
+    const round = makeRound([
+      makeChoice({ id: 'h', text: 'hidden ritual', requiresClue: 'missing' }), // no visibility field
+    ]);
+    const state = makeGameState(); // empty clues -> gate unmet -> hidden
+
+    expect(getEncounterChoices(round, state).map((c) => c.id)).not.toContain('h');
+  });
+
+  // The validator forbids visibility/gateReason on escape paths, but the engine's
+  // "escape paths are never disabled" claim deserves its own pin (defense in depth).
+  it('excludes an escape path with unmet gate even if it (invalidly) sets visibility disabled', () => {
+    const round = makeRound([
+      makeChoice({
+        id: 'esc-bad',
+        text: 'flee',
+        isEscapePath: true,
+        requiresFlag: 'has-exit',
+        visibility: 'disabled',
+        gateReason: 'r',
+      }),
+    ]);
+    const state = makeGameState(); // has-exit flag not set
+
+    expect(getEncounterChoices(round, state).map((c) => c.id)).not.toContain('esc-bad');
+  });
+});
+
 // ─── Test 4: Revealed advantage clue grants Advantage on the roll ─────────────
 //
 // Advantage is applied where it actually matters — the roll in

@@ -6,8 +6,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useStore } from '../../store';
-import { ChoicePanel, isChoiceVisible } from '../ChoicePanel/ChoicePanel';
+import { ChoicePanel } from '../ChoicePanel/ChoicePanel';
 import { ChoiceCard } from '../ChoicePanel/ChoiceCard';
+import { resolveChoiceVisibility } from '../../engine/choiceVisibility';
 import type { Choice, GameState, Investigator, Clue, Deduction } from '../../types';
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
@@ -80,15 +81,15 @@ const unconditionalChoice: Choice = {
   outcomes: { critical: 's2', success: 's2', partial: 's2', failure: 's2', fumble: 's2' },
 };
 
-// ─── isChoiceVisible — unit tests (pure function) ─────────────────────────────
+// ─── resolveChoiceVisibility — unit tests (pure function) ─────────────────────
 
-describe('isChoiceVisible — no requirements', () => {
-  it('returns true for a choice with no requirements', () => {
-    expect(isChoiceVisible(unconditionalChoice, makeGameState())).toBe(true);
+describe('resolveChoiceVisibility — no requirements', () => {
+  it('resolves shown for a choice with no requirements', () => {
+    expect(resolveChoiceVisibility(unconditionalChoice, makeGameState())).toBe('shown');
   });
 });
 
-describe('isChoiceVisible — requiresClue', () => {
+describe('resolveChoiceVisibility — requiresClue', () => {
   const choice: Choice = {
     ...unconditionalChoice,
     id: 'choice-clue',
@@ -97,25 +98,25 @@ describe('isChoiceVisible — requiresClue', () => {
 
   it('hides choice when required clue is not in inventory', () => {
     const state = makeGameState({ clues: {} });
-    expect(isChoiceVisible(choice, state)).toBe(false);
+    expect(resolveChoiceVisibility(choice, state)).toBe('hidden');
   });
 
   it('hides choice when required clue exists but is not revealed', () => {
     const state = makeGameState({
       clues: { 'clue-bloodstain': makeClue('clue-bloodstain', false) },
     });
-    expect(isChoiceVisible(choice, state)).toBe(false);
+    expect(resolveChoiceVisibility(choice, state)).toBe('hidden');
   });
 
   it('shows choice when required clue is revealed', () => {
     const state = makeGameState({
       clues: { 'clue-bloodstain': makeClue('clue-bloodstain', true) },
     });
-    expect(isChoiceVisible(choice, state)).toBe(true);
+    expect(resolveChoiceVisibility(choice, state)).toBe('shown');
   });
 });
 
-describe('isChoiceVisible — requiresDeduction', () => {
+describe('resolveChoiceVisibility — requiresDeduction', () => {
   const choice: Choice = {
     ...unconditionalChoice,
     id: 'choice-deduction',
@@ -124,18 +125,18 @@ describe('isChoiceVisible — requiresDeduction', () => {
 
   it('hides choice when required deduction is absent', () => {
     const state = makeGameState({ deductions: {} });
-    expect(isChoiceVisible(choice, state)).toBe(false);
+    expect(resolveChoiceVisibility(choice, state)).toBe('hidden');
   });
 
   it('shows choice when required deduction is present', () => {
     const state = makeGameState({
       deductions: { 'deduction-motive': makeDeduction('deduction-motive') },
     });
-    expect(isChoiceVisible(choice, state)).toBe(true);
+    expect(resolveChoiceVisibility(choice, state)).toBe('shown');
   });
 });
 
-describe('isChoiceVisible — requiresFlag', () => {
+describe('resolveChoiceVisibility — requiresFlag', () => {
   const choice: Choice = {
     ...unconditionalChoice,
     id: 'choice-flag',
@@ -144,21 +145,21 @@ describe('isChoiceVisible — requiresFlag', () => {
 
   it('hides choice when required flag is false', () => {
     const state = makeGameState({ flags: { 'spoke-to-inspector': false } });
-    expect(isChoiceVisible(choice, state)).toBe(false);
+    expect(resolveChoiceVisibility(choice, state)).toBe('hidden');
   });
 
   it('hides choice when required flag is absent', () => {
     const state = makeGameState({ flags: {} });
-    expect(isChoiceVisible(choice, state)).toBe(false);
+    expect(resolveChoiceVisibility(choice, state)).toBe('hidden');
   });
 
   it('shows choice when required flag is true', () => {
     const state = makeGameState({ flags: { 'spoke-to-inspector': true } });
-    expect(isChoiceVisible(choice, state)).toBe(true);
+    expect(resolveChoiceVisibility(choice, state)).toBe('shown');
   });
 });
 
-describe('isChoiceVisible — requiresFaculty', () => {
+describe('resolveChoiceVisibility — requiresFaculty', () => {
   const choice: Choice = {
     ...unconditionalChoice,
     id: 'choice-faculty',
@@ -169,21 +170,21 @@ describe('isChoiceVisible — requiresFaculty', () => {
     const state = makeGameState({
       investigator: { ...baseInvestigator, faculties: { ...baseInvestigator.faculties, reason: 10 } },
     });
-    expect(isChoiceVisible(choice, state)).toBe(false);
+    expect(resolveChoiceVisibility(choice, state)).toBe('hidden');
   });
 
   it('shows choice when faculty score meets minimum exactly', () => {
     const state = makeGameState({
       investigator: { ...baseInvestigator, faculties: { ...baseInvestigator.faculties, reason: 14 } },
     });
-    expect(isChoiceVisible(choice, state)).toBe(true);
+    expect(resolveChoiceVisibility(choice, state)).toBe('shown');
   });
 
   it('shows choice when faculty score exceeds minimum', () => {
     const state = makeGameState({
       investigator: { ...baseInvestigator, faculties: { ...baseInvestigator.faculties, reason: 18 } },
     });
-    expect(isChoiceVisible(choice, state)).toBe(true);
+    expect(resolveChoiceVisibility(choice, state)).toBe('shown');
   });
 });
 
@@ -543,6 +544,118 @@ describe('ChoicePanel — visibility filtering', () => {
     render(<ChoicePanel choices={choices} onChoiceSelected={onChoiceSelected} />);
     fireEvent.click(screen.getByText('Look around'));
     expect(onChoiceSelected).toHaveBeenCalledWith('open');
+  });
+});
+
+// ─── ChoicePanel — Phase 5 disabled choices ───────────────────────────────────
+//
+// The mocked store above holds ONLY clue-bloodstain / deduction-motive /
+// spoke-to-inspector, so `missing-clue` is genuinely unmet at render time —
+// these tests exercise real gate failure, not vacuous passes.
+describe('ChoicePanel — Phase 5 disabled choices', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders a disabled choice greyed, non-interactive, non-focusable, with its reason in a list', () => {
+    const choices = [
+      { id: 'open', text: 'Open ledger', outcomes: { critical: 's2', success: 's2', partial: 's2', failure: 's2', fumble: 's2' } },
+      { id: 'force', text: 'Force the safe', requiresClue: 'missing-clue',
+        visibility: 'disabled', gateReason: 'You would need the key first.',
+        outcomes: { critical: 's2', success: 's2', partial: 's2', failure: 's2', fumble: 's2' } },
+    ] as unknown as Choice[];
+
+    render(<ChoicePanel choices={choices} />);
+
+    expect(screen.getByRole('button', { name: /Open ledger/ })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Force the safe/ })).toBeNull();
+    expect(screen.getByText('You would need the key first.')).toBeInTheDocument();
+    expect(screen.getByText('Force the safe')).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: /Locked choices/ })).toBeInTheDocument();
+    expect(screen.getAllByRole('listitem').length).toBe(1);
+    const locked = screen.getByRole('listitem');
+    expect(locked.querySelector('button, a, [tabindex]')).toBeNull();
+  });
+
+  it('places the interactive nav BEFORE the locked list in DOM order', () => {
+    const choices = [
+      { id: 'open', text: 'Open ledger', outcomes: { critical: 's2', success: 's2', partial: 's2', failure: 's2', fumble: 's2' } },
+      { id: 'force', text: 'Force the safe', requiresClue: 'missing-clue',
+        visibility: 'disabled', gateReason: 'Locked.',
+        outcomes: { critical: 's2', success: 's2', partial: 's2', failure: 's2', fumble: 's2' } },
+    ] as unknown as Choice[];
+    render(<ChoicePanel choices={choices} />);
+    const nav = screen.getByRole('navigation', { name: /Available choices/ });
+    const list = screen.getByRole('list', { name: /Locked choices/ });
+    expect(nav.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('renders a shown-soft-gate choice as interactive despite an unmet gate', () => {
+    const choices = [
+      { id: 'soft', text: 'Soft gate', requiresClue: 'missing-clue', visibility: 'shown',
+        outcomes: { critical: 's2', success: 's2', partial: 's2', failure: 's2', fumble: 's2' } },
+    ] as unknown as Choice[];
+    render(<ChoicePanel choices={choices} />);
+    expect(screen.getByRole('button', { name: /Soft gate/ })).toBeInTheDocument();
+  });
+
+  it('still hides a gated choice with default (absent) visibility', () => {
+    const choices = [
+      { id: 'open', text: 'Open ledger', outcomes: { critical: 's2', success: 's2', partial: 's2', failure: 's2', fumble: 's2' } },
+      { id: 'secret', text: 'Secret path', requiresClue: 'missing-clue', outcomes: { critical: 's2', success: 's2', partial: 's2', failure: 's2', fumble: 's2' } },
+    ] as unknown as Choice[];
+    render(<ChoicePanel choices={choices} />);
+    expect(screen.queryByText('Secret path')).toBeNull();
+  });
+});
+
+// ─── ChoicePanel — defense-in-depth select guard (Phase 5 review fold) ────────
+//
+// handleSelect re-resolves visibility from live store state before processing.
+// The guard is unreachable via a plain click (locked choices render no button),
+// so this test exercises the real seam it defends: state changing between
+// render and click. The button renders while the gate is met; the store's flag
+// is then flipped OFF before clicking — the handler must refuse to process.
+describe('ChoicePanel — select guard re-checks visibility at click time', () => {
+  let savedFlags: Record<string, boolean>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    savedFlags = { ...useStore.getState().flags };
+  });
+
+  afterEach(() => {
+    (useStore.getState() as { flags: Record<string, boolean> }).flags = savedFlags;
+  });
+
+  const gatedChoice: Choice = {
+    id: 'gated-live',
+    text: 'Mention the inspector again',
+    requiresFlag: 'spoke-to-inspector', // true in the mocked store at render time
+    outcomes: { critical: 's2', success: 's2', partial: 's2', failure: 's2', fumble: 's2' },
+  };
+
+  it('does not process a choice whose gate became unmet after render', () => {
+    const onChoiceSelected = vi.fn();
+    render(<ChoicePanel choices={[gatedChoice]} onChoiceSelected={onChoiceSelected} />);
+    const button = screen.getByRole('button', { name: /Mention the inspector again/ });
+
+    // The gate collapses between render and click.
+    (useStore.getState() as { flags: Record<string, boolean> }).flags = {
+      ...savedFlags,
+      'spoke-to-inspector': false,
+    };
+    fireEvent.click(button);
+
+    expect(onChoiceSelected).not.toHaveBeenCalled();
+    expect((useStore.getState() as unknown as { goToScene: ReturnType<typeof vi.fn> }).goToScene).not.toHaveBeenCalled();
+  });
+
+  it('still processes normally when the gate remains met at click time', () => {
+    const onChoiceSelected = vi.fn();
+    render(<ChoicePanel choices={[gatedChoice]} onChoiceSelected={onChoiceSelected} />);
+    fireEvent.click(screen.getByRole('button', { name: /Mention the inspector again/ }));
+    expect(onChoiceSelected).toHaveBeenCalledWith('gated-live');
   });
 });
 

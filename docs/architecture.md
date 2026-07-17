@@ -13,7 +13,13 @@ split between two domains:
   these at runtime as `/content/...` (prefixed with `import.meta.env.BASE_URL`
   for the `/gaslight-and-grimoire/` base path — the Worker's routed prefix).
 - **`src/engine/`** — game logic, written as pure functions where possible, with
-  no imports of the store.
+  no imports of the store. The modules (each documented in
+  [engine-reference.md](./engine-reference.md)): `narrativeEngine` (barrel),
+  `contentLoader`, `conditions`, `choiceResolution`, `choiceVisibility`,
+  `encounters`, `advantage`, `checkOdds`, `flags`, `constants`,
+  `contentValidation`, `engineActions`, `diceEngine`, `buildDeduction`,
+  `deductionOracle`, `caseProgression`, `haltScenes`, `hintEngine`,
+  `saveManager`, `audioManager`, `cluePrompts`, `effectMessages`.
 
 See [./Gaslight_&_Grimoire_design.md](./Gaslight_&_Grimoire_design.md) for design intent.
 
@@ -59,9 +65,13 @@ component directories under `src/components/` are
 `LiveAnnouncer`, `NPCGallery`, `NarrativePanel`, `SettingsPanel`, `StatusBar`,
 `TitleScreen`, `shared`). `LiveAnnouncer` mounts at the app root in `main.tsx`
 (outside the tree above); `shared/` holds cross-surface presentational pieces —
-currently `CheckOddsTag`, the decorative pre-roll odds tag (`aria-hidden`) that
+`CheckOddsTag`, the decorative pre-roll odds tag (`aria-hidden`) that
 `ChoiceCard`, `ChoicePanel`, `EncounterPanel`, and `SceneCluePrompts` render, with
-the odds phrase folded into each host's own button `aria-label` (Phase 3).
+the odds phrase folded into each host's own button `aria-label` (Phase 3); and
+`LockedChoice`, the non-interactive disabled-choice `<li>` (lock icon +
+line-through + `gateReason` prose, no opacity for AA contrast) that `ChoicePanel`
+and `EncounterPanel` render in a "Locked choices" `<ul>` after the interactive
+`<nav>` (Phase 5).
 
 ## Store: six slices
 
@@ -144,7 +154,12 @@ CaseSelection → loadAndStartCase(id)  (or loadAndStartVignette)
       stale lastCheckResult on cross-scene nav (F-106); apply onEnter effects
       once per resolved scene (gated on visitedScenes, base-or-variant — F-006/F-118)
       → NarrativePanel renders scene (auto-discovers clues; shows lastEffectMessages)
-      → ChoicePanel → each ChoiceCard shows pre-roll odds (checkOdds.computeCheckOdds,
+      → ChoicePanel → partitions scene choices via choiceVisibility.resolveChoiceVisibility
+          (content visibility/gateReason → 'shown' | 'disabled' | 'hidden'): shown choices
+          render as interactive cards in the <nav>; disabled ones as a LockedChoice list
+          (aria-label "Locked choices") AFTER the nav; hidden ones not at all.
+          EncounterPanel does the same three-way render (escape paths stay hard-gated).
+        → each ChoiceCard shows pre-roll odds (checkOdds.computeCheckOdds,
           gated on diceEngine.isFacultyCheck) → processChoice(choice, state, actions)
           → diceEngine (resolveDC, performCheck / rollD20)
           → setCheckResult({...roll, dc}) → NarrativePanel's DiceRollOverlay shows "vs DC N"

@@ -15,3 +15,4 @@ export * from './contentLoader';
 export * from './conditions';
 export * from './choiceResolution';
 export * from './encounters';
+export * from './choiceVisibility';

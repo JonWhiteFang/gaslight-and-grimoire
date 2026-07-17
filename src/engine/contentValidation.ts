@@ -25,6 +25,7 @@ import type {
 } from '../types';
 import { FACTIONS, OUTCOME_TIERS } from './constants';
 import { isFacultyCheck } from './diceEngine';
+import { choiceGateConditions } from './choiceVisibility';
 
 // ─── Bundle shape ──────────────────────────────────────────────────────────
 
@@ -71,11 +72,18 @@ const SUSPICION_TIERS: ReadonlySet<NpcSuspicionTier> = new Set<NpcSuspicionTier>
   'normal', 'evasive', 'concealing', 'hostile',
 ]);
 
+const VISIBILITY_VALUES: ReadonlySet<string> = new Set(['shown', 'hidden', 'disabled']);
+
 // ─── Public API ────────────────────────────────────────────────────────────
 
 /**
- * Validates a content bundle. Structural defects are `errors`; reachability
- * observations (opt-in) are `warnings`.
+ * Validates a content bundle. Structural defects are `errors`; non-fatal
+ * observations are `warnings` — the opt-in reachability checks plus two
+ * always-on Phase 5 choice-gating warnings: the soft-gate warning
+ * (`visibility: "shown"` on a gated choice) and the soft-lock warning (a
+ * non-empty scene choice list, an encounter round, or round 1 after a failed
+ * reaction check's `worseAlternative` replacement, with no guaranteed-selectable
+ * choice).
  */
 export function validateBundle(
   bundle: ContentBundle,
@@ -97,7 +105,7 @@ export function validateBundle(
   const npcIds = new Set(bundle.npcs.map((n) => n.id));
   const recipeIds = new Set((bundle.recipes ?? []).map((r) => r.id));
 
-  const ctx: Ctx = { edgeTargetIds, clueIds, npcIds, recipeIds, errors };
+  const ctx: Ctx = { edgeTargetIds, clueIds, npcIds, recipeIds, errors, warnings };
 
   // Scenes + their conditions/onEnter/choices/encounters.
   for (const scene of bundle.scenes) {
@@ -318,6 +326,23 @@ interface Ctx {
   npcIds: Set<string>;
   recipeIds: Set<string>;
   errors: string[];
+  warnings: string[];
+}
+
+/**
+ * True when at least one choice in the collection is guaranteed to be
+ * selectable at runtime regardless of game state:
+ *   - a non-escape choice that is ungated, or soft-gated (`visibility: 'shown'`
+ *     keeps a gated choice selectable even when its gate is unmet);
+ *   - an ungated escape path (escape paths ignore `visibility`; a gated one is
+ *     hard-hidden until its gate is met, so it is not guaranteed).
+ */
+function isGuaranteedActionable(choices: Choice[]): boolean {
+  return choices.some((c) =>
+    c.isEscapePath
+      ? choiceGateConditions(c).length === 0
+      : choiceGateConditions(c).length === 0 || c.visibility === 'shown',
+  );
 }
 
 function validateScene(scene: SceneNode, ctx: Ctx): void {
@@ -329,6 +354,17 @@ function validateScene(scene: SceneNode, ctx: Ctx): void {
 
   for (const choice of scene.choices ?? []) {
     validateChoice(choice, where, ctx);
+  }
+
+  // Soft-lock hazard (warning, not error — the gates may legitimately be met by
+  // the time the player arrives): a non-empty choice list where nothing is
+  // guaranteed selectable can render zero interactive elements. An EMPTY
+  // scene.choices is a terminal/ending scene, not a hazard.
+  const sceneChoices = scene.choices ?? [];
+  if (sceneChoices.length > 0 && !isGuaranteedActionable(sceneChoices)) {
+    ctx.warnings.push(
+      `${where} has no guaranteed-selectable choice — if no gate is met at runtime the scene renders nothing interactive`,
+    );
   }
 
   for (const discovery of scene.cluesAvailable ?? []) {
@@ -345,6 +381,30 @@ function validateScene(scene: SceneNode, ctx: Ctx): void {
     for (const round of scene.encounter.rounds ?? []) {
       for (const choice of round.choices ?? []) {
         validateChoice(choice, `${where} -> encounter round ${round.roundNumber}`, ctx);
+      }
+      // Soft-lock hazard: a round with no guaranteed-selectable choice (empty
+      // rounds included — that is a real authoring hole) can render with zero
+      // interactive elements.
+      const roundChoices = round.choices ?? [];
+      if (!isGuaranteedActionable(roundChoices)) {
+        ctx.warnings.push(
+          `${where} -> encounter round ${round.roundNumber} has no guaranteed-selectable choice — if no gate is met at runtime the round renders nothing interactive`,
+        );
+      }
+      // Reaction-replacement hazard: on a failed supernatural reaction check the
+      // engine (startEncounter) swaps round 1's FIRST choice for its
+      // `worseAlternative` before rendering. If that post-replacement collection
+      // has no guaranteed-selectable choice, a failed reaction can soft-lock the
+      // encounter even though the authored round looks fine. Only supernatural
+      // encounters run the reaction check, so only they can replace.
+      const first = roundChoices[0];
+      if (scene.encounter.isSupernatural && round.roundNumber === 1 && first?.worseAlternative) {
+        const replaced = [first.worseAlternative, ...roundChoices.slice(1)];
+        if (isGuaranteedActionable(roundChoices) && !isGuaranteedActionable(replaced)) {
+          ctx.warnings.push(
+            `${where} -> encounter round ${round.roundNumber} may render nothing interactive after a failed reaction check (worseAlternative replacement)`,
+          );
+        }
       }
     }
   }
@@ -396,6 +456,37 @@ function validateChoice(choice: Choice, where: string, ctx: Ctx): void {
 
   if (choice.npcEffect && !ctx.npcIds.has(choice.npcEffect.npcId)) {
     ctx.errors.push(`${at} -> npcEffect references unknown npc "${choice.npcEffect.npcId}"`);
+  }
+
+  // ── Phase 5: choice-gating vocabulary ──
+  const hasGate = choiceGateConditions(choice).length > 0;
+  const reasonPresent = choice.gateReason !== undefined;
+  const reasonNonEmpty = typeof choice.gateReason === 'string' && choice.gateReason.trim().length > 0;
+
+  if (choice.visibility !== undefined && !VISIBILITY_VALUES.has(choice.visibility)) {
+    ctx.errors.push(`${at} -> invalid visibility "${choice.visibility}" (expected shown | hidden | disabled)`);
+  }
+
+  if (choice.isEscapePath && (choice.visibility === 'disabled' || choice.visibility === 'shown' || reasonPresent)) {
+    // Escape paths are out of the vocabulary's scope (spec §4.1); they stay hard-gated.
+    ctx.errors.push(`${at} -> escape-path choice may not set visibility/gateReason`);
+  } else {
+    // Rule 1: disabled requires a non-empty gateReason.
+    if (choice.visibility === 'disabled' && !reasonNonEmpty) {
+      ctx.errors.push(`${at} -> is disabled but has no gateReason`);
+    }
+    // Rule 2: a gateReason is only allowed when disabled.
+    if (reasonPresent && choice.visibility !== 'disabled') {
+      ctx.errors.push(`${at} -> has a gateReason but is not disabled — the reason will never render`);
+    }
+    // Rule 3: disabled/shown are meaningless on an ungated choice (explicit hidden is an allowed no-op).
+    if (!hasGate && (choice.visibility === 'disabled' || choice.visibility === 'shown')) {
+      ctx.errors.push(`${at} -> sets visibility "${choice.visibility}" but has no requires* gate to act on`);
+    }
+    // Rule 6 (warning): shown on a gated choice is a legal-but-suspect soft-gate.
+    if (hasGate && choice.visibility === 'shown') {
+      ctx.warnings.push(`${at} -> is shown despite a gate — the gate will not hide or disable it`);
+    }
   }
 
   // Recurse into the Reaction_Check replacement choice, if any.

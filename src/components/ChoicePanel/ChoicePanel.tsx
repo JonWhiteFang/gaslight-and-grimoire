@@ -3,47 +3,20 @@
  */
 import { useCallback, useMemo } from 'react';
 import { useStore, useGameState, buildGameState } from '../../store';
-import { evaluateConditions, processChoice } from '../../engine/narrativeEngine';
+import { processChoice } from '../../engine/narrativeEngine';
+import { resolveChoiceVisibility } from '../../engine/choiceVisibility';
 import { computeAdvantage } from '../../engine/advantage';
 import { checkAutoSucceeds } from '../../engine/flags';
 import { resolveDC, isFacultyCheck } from '../../engine/diceEngine';
 import { ChoiceCard } from './ChoiceCard';
-import type { Choice, GameState } from '../../types';
+import { LockedChoice } from '../shared';
+import type { Choice } from '../../types';
 
 export interface ChoicePanelProps {
   /** Choices from the current SceneNode */
   choices: Choice[];
   /** Called after processChoice resolves — parent handles navigation */
   onChoiceSelected?: (choiceId: string) => void;
-}
-
-// ─── Condition helpers ────────────────────────────────────────────────────────
-
-/**
- * Returns true when all explicit requirements on a Choice are satisfied.
- * Uses evaluateConditions for consistency with the narrative engine.
- */
-export function isChoiceVisible(choice: Choice, state: GameState): boolean {
-  const conditions = [];
-
-  if (choice.requiresClue) {
-    conditions.push({ type: 'hasClue' as const, target: choice.requiresClue });
-  }
-  if (choice.requiresDeduction) {
-    conditions.push({ type: 'hasDeduction' as const, target: choice.requiresDeduction });
-  }
-  if (choice.requiresFlag) {
-    conditions.push({ type: 'hasFlag' as const, target: choice.requiresFlag });
-  }
-  if (choice.requiresFaculty) {
-    conditions.push({
-      type: 'facultyMin' as const,
-      target: choice.requiresFaculty.faculty,
-      value: choice.requiresFaculty.minimum,
-    });
-  }
-
-  return evaluateConditions(conditions, state);
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -64,7 +37,14 @@ export function ChoicePanel({ choices, onChoiceSelected }: ChoicePanelProps) {
 
   const deductionIds = useMemo(() => new Set(Object.keys(deductions)), [deductions]);
 
-  const visibleChoices = choices.filter((c) => isChoiceVisible(c, gameState));
+  const shownChoices: Choice[] = [];
+  const lockedChoices: Choice[] = [];
+  for (const c of choices) {
+    const visibility = resolveChoiceVisibility(c, gameState);
+    if (visibility === 'shown') shownChoices.push(c);
+    else if (visibility === 'disabled') lockedChoices.push(c);
+    // 'hidden' -> dropped
+  }
 
   const handleSelect = useCallback(
     (choiceId: string) => {
@@ -73,6 +53,10 @@ export function ChoicePanel({ choices, onChoiceSelected }: ChoicePanelProps) {
 
       const store = useStore.getState();
       const currentState = buildGameState(store);
+
+      // Defense-in-depth: a non-shown choice must never process, whatever the caller.
+      if (resolveChoiceVisibility(choice, currentState) !== 'shown') return;
+
       const result = processChoice(choice, currentState, store);
 
       // Show dice roll overlay for faculty checks
@@ -98,27 +82,36 @@ export function ChoicePanel({ choices, onChoiceSelected }: ChoicePanelProps) {
     [choices, setCheckResult, onChoiceSelected],
   );
 
-  if (visibleChoices.length === 0) {
+  if (shownChoices.length === 0 && lockedChoices.length === 0) {
     return null;
   }
 
   return (
-    <nav
-      aria-label="Available choices"
-      className="flex flex-col gap-2 p-4 max-w-2xl mx-auto w-full"
-    >
-      {visibleChoices.map((choice) => (
-        <ChoiceCard
-          key={choice.id}
-          choice={choice}
-          investigator={investigator}
-          revealedClueIds={revealedClueIds}
-          deductionIds={deductionIds}
-          hasAdvantage={computeAdvantage(choice, gameState)}
-          autoSucceeds={choice.faculty ? checkAutoSucceeds(choice.faculty, gameState.flags) : false}
-          onSelect={handleSelect}
-        />
-      ))}
-    </nav>
+    <section className="flex flex-col gap-2 p-4 max-w-2xl mx-auto w-full">
+      {shownChoices.length > 0 && (
+        <nav aria-label="Available choices" className="flex flex-col gap-2">
+          {shownChoices.map((choice) => (
+            <ChoiceCard
+              key={choice.id}
+              choice={choice}
+              investigator={investigator}
+              revealedClueIds={revealedClueIds}
+              deductionIds={deductionIds}
+              hasAdvantage={computeAdvantage(choice, gameState)}
+              autoSucceeds={choice.faculty ? checkAutoSucceeds(choice.faculty, gameState.flags) : false}
+              onSelect={handleSelect}
+            />
+          ))}
+        </nav>
+      )}
+      {/* role="list" is explicit: list-none strips list semantics in Safari/VoiceOver */}
+      {lockedChoices.length > 0 && (
+        <ul role="list" aria-label="Locked choices" className="flex flex-col gap-2 list-none">
+          {lockedChoices.map((choice) => (
+            <LockedChoice key={choice.id} text={choice.text} gateReason={choice.gateReason ?? ''} />
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
