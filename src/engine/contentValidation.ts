@@ -165,7 +165,7 @@ export function validateBundle(
     const discoverable = computeDiscoverableClues(bundle, reachable);
     for (const clue of bundle.clues) {
       if (!discoverable.has(clue.id)) {
-        warnings.push(`clue "${clue.id}" is never discoverable (no reachable scene lists it in cluesAvailable)`);
+        warnings.push(`clue "${clue.id}" is never discoverable (no reachable scene lists it in cluesAvailable or grants it via onEnter)`);
       }
     }
 
