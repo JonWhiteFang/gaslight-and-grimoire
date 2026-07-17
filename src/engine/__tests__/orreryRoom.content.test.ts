@@ -53,18 +53,18 @@ const ENDINGS = [
 
 describe('keystone gating chain (spec §4/§5)', () => {
   it('the comparison scene is the keystone clue\'s SOLE source', () => {
+    // Collect-then-compare so a deleted/renamed comparison scene fails loudly
+    // (zero sources) instead of passing vacuously.
+    const sources: string[] = [];
     for (const s of allScenes) {
       const inClues = (s.cluesAvailable ?? []).some((d) => d.clueId === KEYSTONE_CLUE);
       const inOnEnter = (s.onEnter ?? []).some(
         (e) => e.type === 'discoverClue' && e.target === KEYSTONE_CLUE,
       );
       expect(inClues, `${s.id} must not list the keystone clue in cluesAvailable`).toBe(false);
-      if (s.id === COMPARISON) {
-        expect(inOnEnter, 'comparison scene grants the clue via onEnter').toBe(true);
-      } else {
-        expect(inOnEnter, `${s.id} must not grant the keystone clue`).toBe(false);
-      }
+      if (inOnEnter) sources.push(s.id);
     }
+    expect(sources).toEqual([COMPARISON]);
   });
 
   it('the flag-gated choice is the comparison scene\'s sole inbound edge', () => {
