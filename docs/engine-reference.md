@@ -7,9 +7,10 @@ section, plus a Determinism note.
 > **`narrativeEngine.ts` is a barrel, not a module (F-019).** It was split into
 > four focused modules — `contentLoader`, `conditions`, `choiceResolution`, and
 > `encounters` — and now only re-exports their full surface
-> (`export * from './contentLoader'`, etc.), so every existing
+> (`export * from './contentLoader'`, etc.; `choiceVisibility` is also
+> barrel-exported since Phase 5), so every existing
 > `import { X } from '.../narrativeEngine'` continues to resolve unchanged. The
-> four sections below document those modules directly; import from either the
+> sections below document those modules directly; import from either the
 > barrel or the specific module.
 
 See [architecture.md](./architecture.md) for the engine↔store boundary, the
@@ -70,7 +71,7 @@ Async JSON content loading (under `/content/`, prefixed with
 - `fetchManifest(): Promise<CaseManifest>` — fetches `/content/manifest.json`.
 - `loadCase(caseId: string): Promise<CaseData>` — fetches `meta.json`, `act1/2/3.json`, `clues.json`, `npcs.json`, `variants.json` in parallel; indexes scenes/clues/npcs into `Record<string, T>` by id; injects the shared `breakdown` and `incapacitation` scenes. Also fetches the optional `deductions.json` (**outside** the parallel batch, `.catch(() => [])`) into `CaseData.recipes` (`KeyDeduction[]`) — a case without key deductions simply has an empty list.
 - `loadVignette(vignetteId: string): Promise<VignetteData>` — same shape for a two-act vignette (single `scenes.json`), also injecting the shared scenes.
-- `validateContent(caseData: CaseData): ValidationResult` — delegates to the shared `contentValidation.validateBundle` (errors only; reachability is CLI-only). Checks scene-graph edges, clue/npc references, condition targets, variant structure, `npcEffect` refs, encounter-round edges, and tier completeness (incl. `dynamicDifficulty`). Logs each error via `console.error`; returns `{ valid, errors }`. See the `contentValidation.ts` section below.
+- `validateContent(caseData: CaseData): ValidationResult` — delegates to the shared `contentValidation.validateBundle` (errors only; warnings — reachability and the soft-gate warning — surface via the CLI, not at runtime load). Checks scene-graph edges, clue/npc references, condition targets, variant structure, `npcEffect` refs, encounter-round edges, tier completeness (incl. `dynamicDifficulty`), and the Phase 5 choice-gating rules. Logs each error via `console.error`; returns `{ valid, errors }`. See the `contentValidation.ts` section below.
 - (internal `loadSharedScenes` — module-cached, so the breakdown/incapacitation scenes are fetched at most once and reused across loads, F-047 — plus `mergeSharedScenes`, `fetchJson`, `indexById` are not exported. A `_resetSharedScenesCache` test hook clears the cache.)
 
 ## conditions.ts
@@ -82,6 +83,30 @@ Re-exported by the `narrativeEngine` barrel.
 - `evaluateCondition(condition: Condition, state: GameState): boolean` — the single-condition primitive `evaluateConditions` folds over (a module-internal helper; `evaluateConditions` is the exported entry point). `Condition` is a discriminated union on `type`, so the switch is exhaustive (F-026).
 - `resolveScene(sceneId: string, state: GameState, caseData: CaseData): SceneNode` — returns the first variant whose `variantOf === sceneId` and whose `variantCondition` is met, else the base scene. Throws if the base scene is missing.
 - `canDiscoverClue(discovery: ClueDiscovery, state: GameState): boolean` — pure gate: `requiresFaculty` (score `>=` minimum) and `requiresDeduction` (deduction must exist) must both pass.
+
+## choiceVisibility.ts
+
+The **single source of truth** for whether a `Choice` is shown, shown-but-disabled
+(with a `gateReason`), or hidden, given current game state (Phase 5). Pure +
+RNG-free. Consumed by `ChoicePanel` and the encounter path
+(`getEncounterChoices` / `EncounterPanel`); the content validator shares
+`choiceGateConditions` as its "has a gate" predicate, so the three surfaces
+cannot drift. Re-exported by the `narrativeEngine` barrel (the module itself
+imports `evaluateConditions` directly from `./conditions` to avoid a barrel
+cycle).
+
+- `type ChoiceVisibilityState = 'shown' | 'disabled' | 'hidden'`.
+- `choiceGateConditions(choice: Choice): Condition[]` — builds the derived gate:
+  `requiresClue` → `hasClue`, `requiresDeduction` → `hasDeduction`,
+  `requiresFlag` → `hasFlag`, `requiresFaculty` → `facultyMin`. Conditions are
+  built **only for truthy** `requires*` fields, so a malformed
+  `requiresFlag: ""` stays ungated (backward-compat). A choice "has a gate" iff
+  the returned array is non-empty — this is the shared gate predicate.
+- `resolveChoiceVisibility(choice: Choice, state: GameState): ChoiceVisibilityState`
+  — no gate, or gate met (`evaluateConditions`) → `'shown'`. On an **unmet**
+  gate, `choice.visibility` governs: `'disabled'` → `'disabled'`, `'shown'` →
+  `'shown'` (soft-gate escape hatch), `'hidden'`/absent → `'hidden'` (the
+  default). `visibility` never affects a met or absent gate.
 
 ## choiceResolution.ts
 
@@ -99,7 +124,7 @@ barrel.
 
 - `startEncounter(encounterId: string, rounds: EncounterRound[], isSupernatural: boolean, state: GameState, actions: EngineActions): EncounterState` — for supernatural encounters, performs a reaction check at DC 12 using the higher of Nerve or Lore (Nerve on a tie). On failure, reduces composure by 1–2 and replaces round 1's first choice with its `worseAlternative` (when present). Returns an `EncounterState` (`currentRound: 0`, `reactionCheckPassed` = `null` for mundane).
 - `processEncounterChoice(choice: Choice, encounterState: EncounterState, state: GameState, actions: EngineActions): { encounterState: EncounterState; result: ChoiceResult }` — **escape paths (`isEscapePath`) are terminal**: they navigate to their `success`/`critical` outcome and mark the encounter `isComplete` immediately, before the round-advance logic, applying no damage (F-004). Otherwise resolves the check through the **shared `resolveCheckOutcome`** (the same unit `processChoice` uses, F-107) — so encounters honour the archetype auto-succeed ability (**consumed on use** via `actions.setFlag`, F-101), dynamic-difficulty DCs, and advantage (a revealed `advantageIf` clue or active Veil Sight on a `lore` check). On failure/fumble applies `choice.encounterDamage`: **supernatural = dual-axis** (both composure and vitality); **mundane = single axis** (composure if set, else vitality). Calls `actions.setLastCriticalFaculty` on critical, applies `npcEffect`, advances `currentRound`, marks `isComplete` when rounds are exhausted, and calls `goToScene` once complete.
-- `getEncounterChoices(round: EncounterRound, state: GameState): Choice[]` — filters a round's choices by their derived conditions (`requiresClue`/`requiresDeduction`/`requiresFlag`/`requiresFaculty`); escape-path choices (`isEscapePath`) are included whenever their conditions are met. (Advantage is applied where it matters — the roll in `processEncounterChoice`; the former no-consumer `_hasAdvantage` annotation was removed — F-027.)
+- `getEncounterChoices(round: EncounterRound, state: GameState): Choice[]` — filters a round's choices. Non-escape choices resolve through the shared `resolveChoiceVisibility` (see `choiceVisibility.ts`): included when `'shown'` **or** `'disabled'` (`EncounterPanel` renders disabled ones as locked, non-interactive items), excluded when `'hidden'`. Escape-path choices (`isEscapePath`) stay **hard-gated**: included only when their `choiceGateConditions` are met, never disabled. (Advantage is applied where it matters — the roll in `processEncounterChoice`; the former no-consumer `_hasAdvantage` annotation was removed — F-027.)
 
 ## advantage.ts
 
@@ -118,7 +143,7 @@ Pure pre-roll odds classifier — turns a faculty check into a diegetic "Prospec
 
 Pure content validator shared by the runtime `validateContent` and the CLI (`scripts/validateCase.ts` via `vite-node`), so the two can't drift. Operates on an in-memory `ContentBundle` (arrays of scenes/variants/clues/npcs + `firstScene` + `sharedSceneIds`), independent of how content was loaded.
 
-- `validateBundle(bundle: ContentBundle, options?: { includeReachability?: boolean }): { errors: string[]; warnings: string[] }` — errors: choice-outcome edges (base/variant/shared ids valid), `requiresClue`/`advantageIf`/`cluesAvailable`/`onEnter` discoverClue clue refs, `onEnter` npc refs, `npcEffect.npcId` (incl. inside encounter rounds and `worseAlternative`), condition targets (clue/npc/faculty/archetype/faction/suspicion-tier allowlists; `hasFlag value:false` allowed), variant `variantOf`+`variantCondition` presence, encounter-round edge + tier recursion, tier completeness (fixed **or** `dynamicDifficulty`), `clue.sceneSource`, and **key-deduction recipes** (`KeyDeduction.requiredClues` clue refs, plus `choice.requiresDeduction` and `hasDeduction`-condition targets against the recipe-id registry — a gate pointing at an undefined recipe is an error). With `includeReachability`, warns on scenes unreachable from `firstScene` and clues no reachable scene can discover, and **errors** when a clue required by a *gated* key deduction (referenced by `requiresDeduction`/`hasDeduction`/`ClueDiscovery.requiresDeduction`) is only obtainable on a `critical`-tier scene edge — i.e. the gated content would be reachable only by a lucky roll (F-102).
+- `validateBundle(bundle: ContentBundle, options?: { includeReachability?: boolean }): { errors: string[]; warnings: string[] }` — errors: choice-outcome edges (base/variant/shared ids valid), `requiresClue`/`advantageIf`/`cluesAvailable`/`onEnter` discoverClue clue refs, `onEnter` npc refs, `npcEffect.npcId` (incl. inside encounter rounds and `worseAlternative`), condition targets (clue/npc/faculty/archetype/faction/suspicion-tier allowlists; `hasFlag value:false` allowed), variant `variantOf`+`variantCondition` presence, encounter-round edge + tier recursion, tier completeness (fixed **or** `dynamicDifficulty`), `clue.sceneSource`, **key-deduction recipes** (`KeyDeduction.requiredClues` clue refs, plus `choice.requiresDeduction` and `hasDeduction`-condition targets against the recipe-id registry — a gate pointing at an undefined recipe is an error), and **choice-gating rules** (Phase 5): `disabled` without a non-empty `gateReason`; `gateReason` without `disabled`; `disabled`/`shown` on a choice with no `requires*` gate (explicit `hidden` is an allowed no-op); a `visibility` value outside `shown | hidden | disabled`; and an `isEscapePath` choice setting `visibility`/`gateReason`. Warnings are no longer reachability-only: the choice-gating **soft-gate warning** (`visibility: "shown"` on a gated choice) is **always on**, independent of `includeReachability`. With `includeReachability`, additionally warns on scenes unreachable from `firstScene` and clues no reachable scene can discover, and **errors** when a clue required by a *gated* key deduction (referenced by `requiresDeduction`/`hasDeduction`/`ClueDiscovery.requiresDeduction`) is only obtainable on a `critical`-tier scene edge — i.e. the gated content would be reachable only by a lucky roll (F-102).
 - `computeReachableScenes(bundle: ContentBundle): Set<string>` — BFS from `firstScene` over all choice + encounter outcome edges.
 - `computeNonCriticalReachableScenes(bundle: ContentBundle): Set<string>` — BFS like `computeReachableScenes` but excludes edges reachable *only* via a check's `critical` tier; used by the F-102 gated-deduction reachability error.
 - `computeMaxDisposition(bundle: ContentBundle, npcId: string): number` — start disposition + every positive reachable disposition delta (onEnter + `npcEffect`); used to check whether a disposition-gated vignette threshold is attainable.

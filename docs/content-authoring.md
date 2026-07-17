@@ -163,19 +163,90 @@ via choice outcome edges.
 | `requiresDeduction` | string? | Gate: requires this deduction |
 | `requiresFlag` | string? | Gate: requires this world flag |
 | `requiresFaculty` | `{ faculty, minimum }?` | Gate: requires a faculty score |
+| `visibility` | `'shown' \| 'hidden' \| 'disabled'?` | What an **unmet** gate does to the choice: `hidden` (default) removes it, `disabled` shows it locked with `gateReason`, `shown` leaves it selectable (soft gate). See "Choice visibility" below |
+| `gateReason` | string? | Diegetic explanation rendered on a locked choice. Required iff `visibility: "disabled"` |
 | `npcEffect` | `{ npcId, dispositionDelta, suspicionDelta }?` | Applied when the choice is taken |
 | `worseAlternative` | `Choice?` | (Encounters) replaces this choice on a failed reaction check |
-| `isEscapePath` | boolean? | (Encounters) the non-combat escape option; always offered when its gates pass |
+| `isEscapePath` | boolean? | (Encounters) the non-combat escape option; always offered when its gates pass. May **not** set `visibility`/`gateReason` |
 | `encounterDamage` | `{ composureDelta?, vitalityDelta? }?` | (Encounters) damage on failure/fumble |
 
-**Choice gating.** Visibility is driven by the four `requiresClue` /
-`requiresDeduction` / `requiresFlag` / `requiresFaculty` fields, which the UI maps
-to `hasClue` / `hasDeduction` / `hasFlag` / `facultyMin` conditions and runs
-through `evaluateConditions` (`isChoiceVisible` in `ChoicePanel`). Use these
-fields to gate a choice — a bare `conditions` array on a `Choice` is **not** part
-of the `Choice` type and is not evaluated at runtime. For an archetype-only
-choice, prefer authoring an `archetypeExclusive` scene branch or gating on a flag
-set for that archetype.
+**Choice gating.** Gating is driven by the four `requiresClue` /
+`requiresDeduction` / `requiresFlag` / `requiresFaculty` fields, which the engine
+maps to `hasClue` / `hasDeduction` / `hasFlag` / `facultyMin` conditions
+(`choiceGateConditions`) and runs through `evaluateConditions`
+(`resolveChoiceVisibility` in `src/engine/choiceVisibility.ts` — the single
+resolver both `ChoicePanel` and encounters consume). Use these fields to gate a
+choice — a bare `conditions` array on a `Choice` is **not** part of the `Choice`
+type and is not evaluated at runtime. For an archetype-only choice, prefer
+authoring an `archetypeExclusive` scene branch or gating on a flag set for that
+archetype. What an *unmet* gate does to the choice — hide it, or show it locked —
+is controlled by the `visibility` field, next.
+
+### Choice visibility — hide vs. disable-with-reason
+
+`visibility` governs **only the unmet-gate case**. An ungated choice, or a gated
+choice whose gate is met, always renders as a normal selectable choice
+regardless of `visibility`. When the gate is unmet:
+
+| `visibility` | Unmet-gate behaviour |
+|---|---|
+| *(absent)* or `hidden` | The choice is removed from the panel — the player never sees it. **This is the default.** |
+| `disabled` | The choice renders in a separate "Locked choices" list below the interactive choices: non-interactive, struck-through, lock icon, with the `gateReason` prose beneath it. |
+| `shown` | The choice stays fully selectable despite the unmet gate (**soft gate** — rare escape hatch; always triggers a validator warning). |
+
+**When to hide (the default).** Hide when the option's very existence would
+spoil a twist ("Confront the butler about the poison" before the poison is
+known) or would confuse a player who lacks the context to parse it. Most gates
+should stay hidden — that was the only behaviour before Phase 5 and remains the
+correct one for reveal-driven content.
+
+**When to disable-with-reason.** Disable when a visible-but-locked option builds
+tension or teaches the player a pursuable prerequisite — the lock itself is the
+information. The shipped exemplar is The Comet Club's `cc-act2-hub` choice
+`cc-choice-hub-halloway` ("Present yourself at Lady Halloway's drawing room.",
+`requiresFlag: "cc-halloway-trusts"`): the player sees the drawing room exists
+and learns that Lady Halloway's trust is the key, without being told which flag
+to flip.
+
+**`gateReason` — required, and diegetic.** A `disabled` choice **must** carry a
+non-empty `gateReason` (validator error otherwise). Tone: measured, in-world,
+hinting at what would unlock the choice without naming ids or mechanics —
+**never** mechanical ("Requires: Occult 12" is forbidden register). The demo's
+prose is the register to match:
+
+> Her drawing room does not open to callers she has not chosen — and she has
+> not chosen you. Not yet.
+
+**Author the choice text gate-neutral.** A `disabled` choice's label renders
+struck-through while locked and as a normal button once unlocked, so the same
+text must read sensibly in **both** states. "Lady Halloway will receive you
+now." argues with its own lock (it asserts the thing the lock denies); it was
+reworded to "Present yourself at Lady Halloway's drawing room.", which reads as
+an intention whether or not the door is open.
+
+**The `shown` soft gate.** `visibility: "shown"` on a gated choice deliberately
+defeats the gate — the choice stays selectable. It exists as a rare escape hatch
+(e.g. an option that should tempt the player regardless) and always emits a
+non-fatal validator warning so it can't happen by accident.
+
+**Escape paths are exempt — and forbidden.** Encounter escape-path choices
+(`isEscapePath`) stay hard-gated: offered only when their gate is met, never
+disabled. Setting `visibility` or `gateReason` on an escape path is a validator
+**error**.
+
+**Validator rules (what fails CI).** `node scripts/validateCase.mjs` enforces,
+per choice:
+
+- **Error** — `visibility: "disabled"` without a non-empty `gateReason`.
+- **Error** — `gateReason` present but `visibility` is not `disabled` (the
+  reason would never render).
+- **Error** — `visibility: "disabled"` or `"shown"` on a choice with **no**
+  `requires*` gate (nothing to act on; an explicit `"hidden"` on an ungated
+  choice is an allowed no-op).
+- **Error** — a `visibility` value outside `shown | hidden | disabled`.
+- **Error** — an `isEscapePath` choice setting `visibility` or `gateReason`.
+- **Warning** (non-fatal, always-on) — `visibility: "shown"` on a gated choice
+  (the soft gate above).
 
 **Outcome tiers.** For a faculty-check choice (`faculty` + `difficulty` set) the
 validator requires **all five** outcome tiers to be present. Non-check choices
