@@ -343,6 +343,10 @@ export interface VignetteData {
   scenes: Record<string, SceneNode>;
   clues: Record<string, Clue>;
   npcs: Record<string, NPCState>;
+  /** Optional key-deduction recipes (deductions.json) — vignettes may omit. */
+  recipes?: KeyDeduction[];
+  /** Optional variant scenes (variants.json) — vignettes may omit. */
+  variants?: SceneNode[];
 }
 
 export interface ValidationResult {

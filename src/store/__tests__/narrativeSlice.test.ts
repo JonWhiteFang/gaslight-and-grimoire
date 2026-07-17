@@ -9,6 +9,8 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { useStore } from '../index';
+import { vignetteToCaseData } from '../slices/narrativeSlice';
+import type { KeyDeduction, SceneNode, VignetteData } from '../../types';
 
 function resetNarrative() {
   useStore.setState({
@@ -223,5 +225,33 @@ describe('narrativeSlice.loadAndStartCase — does not leak the previous scene i
     await useStore.getState().loadAndStartCase('test-case');
     expect(useStore.getState().sceneHistory).toEqual([]);
     expect(useStore.getState().currentScene).toBe('test-scene-1');
+  });
+});
+
+// Orrery Room T2: vignettes may ship optional deductions.json (recipes) and
+// variants.json — the adapter must pass both through to CaseData instead of
+// stubbing variants: [] and dropping recipes.
+describe('vignetteToCaseData recipes/variants passthrough', () => {
+  const baseVignette: VignetteData = {
+    meta: { id: 'v', title: 't', synopsis: 's', firstScene: 'v-s1' },
+    scenes: {}, clues: {}, npcs: {},
+  };
+
+  it('passes recipes and variants through', () => {
+    const recipes: KeyDeduction[] = [
+      { id: 'r1', requiredClues: [], title: 'T', description: 'D', isRedHerring: false },
+    ];
+    const variants: SceneNode[] = [
+      { id: 'v-s1-alt', act: 1, narrative: 'n', cluesAvailable: [], choices: [], variantOf: 'v-s1' },
+    ];
+    const caseData = vignetteToCaseData({ ...baseVignette, recipes, variants });
+    expect(caseData.recipes).toBe(recipes);
+    expect(caseData.variants).toBe(variants);
+  });
+
+  it('defaults absent fields (backward compatible)', () => {
+    const caseData = vignetteToCaseData({ ...baseVignette });
+    expect(caseData.recipes).toBeUndefined();
+    expect(caseData.variants).toEqual([]);
   });
 });

@@ -112,11 +112,19 @@ export async function loadVignette(vignetteId: string): Promise<VignetteData> {
     fetchJson<{ npcs: NPCState[] }>(`${base}/npcs.json`),
   ]);
 
+  // deductions.json / variants.json are optional — most vignettes ship neither.
+  const recipes = await fetchJson<{ deductions: KeyDeduction[] }>(`${base}/deductions.json`)
+    .then((f) => f.deductions)
+    .catch(() => undefined);
+  const variants = await fetchJson<{ variants: SceneNode[] }>(`${base}/variants.json`)
+    .then((f) => f.variants)
+    .catch(() => [] as SceneNode[]);
+
   const scenes = mergeSharedScenes(indexById(scenesFile.scenes), await sharedPromise);
   const clues = indexById(cluesFile.clues);
   const npcs = indexById(npcsFile.npcs);
 
-  return { meta, scenes, clues, npcs };
+  return { meta, scenes, clues, npcs, recipes, variants };
 }
 
 // ─── Content Validation ───────────────────────────────────────────────────────
