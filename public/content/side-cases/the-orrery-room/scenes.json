@@ -94,7 +94,7 @@
         },
         {
           "id": "or-choice-hub-period-match",
-          "text": "Set the extra body's gearing against a figure you have seen before.",
+          "text": "Reduce the extra body's gearing to a period, and seek its match.",
           "faculty": "reason",
           "difficulty": 12,
           "requiresFlag": "mythos-period-computed",
@@ -111,6 +111,7 @@
         {
           "id": "or-choice-hub-onward",
           "text": "The examination is as complete as daylight will make it. Report to the Order.",
+          "requiresClue": "or-clue-gear-train",
           "outcomes": {
             "critical": "or-act1-close",
             "success": "or-act1-close",
@@ -192,7 +193,7 @@
           "outcomes": {
             "critical": "or-act1-finch-admission",
             "success": "or-act1-finch-admission",
-            "partial": "or-act1-finch-doorstep",
+            "partial": "or-act1-finch-admission",
             "failure": "or-act1-finch-doorstep",
             "fumble": "or-act1-finch-doorstep"
           }
@@ -252,7 +253,9 @@
           }
         }
       ],
-      "onEnter": []
+      "onEnter": [
+        { "type": "disposition", "target": "npc-finch", "delta": -1, "description": "Finch's courtesy has acquired a bolt on the inside" }
+      ]
     },
     {
       "id": "or-act1-whispering-gallery",

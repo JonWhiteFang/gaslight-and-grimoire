@@ -225,7 +225,7 @@ have. No oracle change.
 
 In the orrery-room hub scene, one choice:
 
-- **Text:** "Set the extra body's gearing against a figure you have seen before."
+- **Text:** "Reduce the extra body's gearing to a period, and seek its match." (reworded gate-neutral per content-integrity review)
 - **Gate:** `requiresFlag: mythos-period-computed`
 - **`visibility: "disabled"`** with diegetic
   **`gateReason`:** "The gearing implies a period. You have nothing to set it against."

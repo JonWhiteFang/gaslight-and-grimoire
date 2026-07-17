@@ -39,7 +39,7 @@
       "title": "The Laudanum Arithmetic",
       "description": "The bottle on the nightstand, the dosage book beside it, the pharmacist's dates in the receipts drawer. The sums are exact and they close: a weak heart, documented for years, and a nightly draught increased by careful, deliberate degrees until the heart gave out ahead of schedule. Whether the hand that measured the drops meant mercy or merely sleep, the arithmetic is the same. He died of heart failure, hastened. Nothing in these figures requires the orrery to explain them.",
       "sceneSource": "or-act1-collectors-rooms",
-      "connectsTo": [],
+      "connectsTo": ["or-clue-adjustment-diary"],
       "tags": ["death", "mundane", "collector"],
       "status": "new",
       "isRevealed": false
