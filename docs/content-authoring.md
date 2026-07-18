@@ -123,6 +123,14 @@ bounded-state table).
 into that NPC's faction reputation (a hidden cross-slice coupling — see
 architecture.md).
 
+**`onEnter` fires once per resolved scene per playthrough** (the F-006
+`visitedScenes` gate). Don't author an `onEnter` effect as a *per-attempt* cost
+on a retryable check's failure scene — a second failed attempt re-enters the
+scene without re-firing it, so the cost lands exactly once ever (e.g. the
+Orrery Room's Finch-doorstep disposition −1 is a one-time standing cost by
+design). A genuinely per-attempt cost needs a per-selection mechanism
+(`Choice.npcEffect`, which applies on every selection regardless of outcome).
+
 **Ordering rule — disposition before reputation.** When an ending's `onEnter`
 list combines a `disposition` effect on a faction-aligned NPC with a direct
 `reputation` effect on that NPC's faction, put the `disposition` effect(s)
