@@ -109,8 +109,8 @@ ambient `*.mp3`, and no `*.png`/`*.jpg`/`*.webp` illustrations yet.
 
 As of 2026-07-17, running `npm run test:run`:
 
-- **Tests: 849 passed (849)**
-- **Test Files: 88 passed (88)**
+- **Tests: 858 passed (858)**
+- **Test Files: 89 passed (89)**
 
 The suite includes property-based tests using fast-check (six
 `*.property.test.ts` files covering the dice engine, narrative engine, deduction

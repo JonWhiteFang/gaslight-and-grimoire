@@ -102,4 +102,41 @@ describe('EvidenceBoard — KeyDeduction.onForm (Orrery Room §2.8)', () => {
     // Once-guard held: the deduction already existed, so onForm did NOT re-apply.
     expect(st.flags['mythos-test-flag']).toBe(false);
   });
+
+  it('a throwing onForm does NOT publish the deduction (retry can still mint it)', () => {
+    // An effect type the runtime switch rejects (assertNever throws). The
+    // validator now errors on this at load, but the board must ALSO stay safe:
+    // effects run before addDeduction, so a throw leaves the recipe unformed
+    // rather than stranding a half-formed deduction whose onForm never fired
+    // and never retries (Codex impl review, Major 2).
+    const badRecipe: KeyDeduction = {
+      id: 'r-bad', requiredClues: ['a', 'b'], title: 'Bad', description: 'x',
+      isRedHerring: false,
+      onForm: [{ type: 'not-a-real-type' as never, target: 'x', value: true }],
+    };
+    initStore(
+      { a: clue('a'), b: clue('b') },
+      [{ fromId: 'a', toId: 'b' }],
+      [badRecipe],
+    );
+    render(<EvidenceBoard onClose={() => {}} />);
+    // React re-dispatches handler throws as window 'error' events rather than
+    // rethrowing through fireEvent — capture (and suppress) it there.
+    const errors: unknown[] = [];
+    const onError = (e: ErrorEvent) => {
+      errors.push(e.error);
+      e.preventDefault();
+    };
+    window.addEventListener('error', onError);
+    try {
+      fireEvent.click(screen.getByRole('button', { name: /Attempt Deduction/i }));
+    } finally {
+      window.removeEventListener('error', onError);
+    }
+    expect(errors.length).toBeGreaterThan(0);
+
+    // The deduction was NOT recorded — the once-guard won't block a retry after
+    // the content is fixed.
+    expect(useStore.getState().deductions['r-bad']).toBeUndefined();
+  });
 });

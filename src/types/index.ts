@@ -334,7 +334,7 @@ export interface CaseData {
   clues: Record<string, Clue>;
   npcs: Record<string, NPCState>;
   variants: SceneNode[];
-  /** Authored key-deduction recipes (main cases only; optional so vignettes may omit). */
+  /** Authored key-deduction recipes (optional — cases and vignettes alike may ship them). */
   recipes?: KeyDeduction[];
 }
 

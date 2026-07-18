@@ -33,8 +33,12 @@ const VARIANTS = {
 // Full-path keys so the vignette's own files can never cross-match the shared
 // scene URLs (e.g. a bare 'scenes.json' key would also suffix-match nothing
 // today, but full paths make the mapping unambiguous by construction).
-function mockFetch(files: Record<string, unknown>) {
+// `overrides` maps a URL suffix to a custom Response (e.g. a 500, or ok-but-
+// malformed JSON) that takes precedence over both the file map and the 404 path.
+function mockFetch(files: Record<string, unknown>, overrides: Record<string, Response> = {}) {
   vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+    const over = Object.keys(overrides).find((k) => url.endsWith(k));
+    if (over) return overrides[over];
     const key = Object.keys(files).find((k) => url.endsWith(k));
     // deductions.json / variants.json are optional (.catch fallback); 404 them.
     if (!key) return { ok: false, status: 404, statusText: 'Not Found', json: async () => ({}) } as Response;
@@ -73,5 +77,26 @@ describe('loadVignette optional recipes/variants', () => {
     expect(data.recipes![0].id).toBe('v-recipe');
     expect(data.variants).toHaveLength(1);
     expect(data.variants![0].variantOf).toBe('v-s1');
+  });
+
+  // Only a genuine 404 may fall back — any other failure on an optional file
+  // must reject the load, or a transient 500/bad deploy would silently strip a
+  // vignette's variants/recipes while it still played (Codex impl review, Major 1).
+  it('a 500 on variants.json rejects the load (not silently dropped)', async () => {
+    mockFetch(BASE_FILES, {
+      'side-cases/v-test/variants.json': {
+        ok: false, status: 500, statusText: 'Server Error', json: async () => ({}),
+      } as Response,
+    });
+    await expect(loadVignette('v-test')).rejects.toThrow(/500/);
+  });
+
+  it('malformed JSON in deductions.json rejects the load (not silently dropped)', async () => {
+    mockFetch(BASE_FILES, {
+      'side-cases/v-test/deductions.json': {
+        ok: true, json: async () => { throw new SyntaxError('Unexpected token'); },
+      } as unknown as Response,
+    });
+    await expect(loadVignette('v-test')).rejects.toThrow(/Unexpected token/);
   });
 });

@@ -53,6 +53,19 @@ describe('validateBundle — key deductions', () => {
     expect(errors.some((e) => e.includes('npc-missing'))).toBe(true);
   });
 
+  it('rejects an unknown effect type (the one shape that throws at runtime)', () => {
+    // worldSlice.applyEffects hits assertNever on an unknown type — content JSON
+    // bypasses the compile-time union, so the validator must catch it at load
+    // (Codex impl review, Major 2).
+    const recipes: KeyDeduction[] = [{
+      id: 'r-badfx', requiredClues: ['c-a'], title: 'T', description: 'D',
+      isRedHerring: false,
+      onForm: [{ type: 'summonEntity' as never, target: 'x', value: true }],
+    }];
+    const { errors } = validateBundle(bundle({ recipes }));
+    expect(errors.some((e) => e.includes('unknown effect type "summonEntity"'))).toBe(true);
+  });
+
   it('passes when recipe clues exist and gates target a real recipe', () => {
     const recipes: KeyDeduction[] = [{ id: 'r1', requiredClues: ['c-a', 'c-b'], title: 't', description: 'd', isRedHerring: false }];
     const scene: SceneNode = {

@@ -498,7 +498,22 @@ function validateChoice(choice: Choice, where: string, ctx: Ctx): void {
   }
 }
 
+/** Every Effect['type'] the runtime switch handles — see worldSlice.applyEffects. */
+const EFFECT_TYPES: ReadonlySet<string> = new Set([
+  'composure', 'vitality', 'flag', 'disposition', 'suspicion', 'reputation',
+  'discoverClue', 'setMemoryFlag',
+]);
+
 function validateEffect(effect: Effect, where: string, ctx: Ctx): void {
+  // Unknown effect types are the one shape that THROWS at runtime (worldSlice's
+  // assertNever exhaustiveness guard). Content JSON bypasses the compile-time
+  // union, so reject it here — otherwise a malformed future effect passes load
+  // validation and detonates mid-play (e.g. inside a recipe's onForm, where a
+  // throw would strand a half-formed deduction — Codex impl review, Major 2).
+  if (!EFFECT_TYPES.has(effect.type)) {
+    ctx.errors.push(`${where} -> unknown effect type "${effect.type as string}"`);
+    return;
+  }
   if (effect.type === 'discoverClue' && effect.target && !ctx.clueIds.has(effect.target)) {
     ctx.errors.push(`${where} -> onEnter discoverClue references unknown clue "${effect.target}"`);
   }

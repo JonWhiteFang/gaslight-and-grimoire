@@ -87,7 +87,7 @@ export async function loadCase(caseId: string): Promise<CaseData> {
   // deductions.json is optional — a case without key deductions simply has none.
   const recipes = await fetchJson<{ deductions: KeyDeduction[] }>(`${base}/deductions.json`)
     .then((f) => f.deductions)
-    .catch(() => [] as KeyDeduction[]);
+    .catch(orIfMissing([] as KeyDeduction[]));
 
   const allScenes = [...act1.scenes, ...act2.scenes, ...act3.scenes];
   const scenes = mergeSharedScenes(indexById(allScenes), await sharedPromise);
@@ -117,10 +117,10 @@ export async function loadVignette(vignetteId: string): Promise<VignetteData> {
   // genuinely absent) rather than `[]`; vignetteToCaseData normalizes.
   const recipes = await fetchJson<{ deductions: KeyDeduction[] }>(`${base}/deductions.json`)
     .then((f) => f.deductions)
-    .catch(() => undefined);
+    .catch(orIfMissing<KeyDeduction[] | undefined>(undefined));
   const variants = await fetchJson<{ variants: SceneNode[] }>(`${base}/variants.json`)
     .then((f) => f.variants)
-    .catch(() => [] as SceneNode[]);
+    .catch(orIfMissing([] as SceneNode[]));
 
   const scenes = mergeSharedScenes(indexById(scenesFile.scenes), await sharedPromise);
   const clues = indexById(cluesFile.clues);
@@ -165,9 +165,27 @@ async function fetchJson<T>(url: string): Promise<T> {
   const fullUrl = `${base.replace(/\/$/, '')}${url}`;
   const response = await fetch(fullUrl);
   if (!response.ok) {
-    throw new Error(`[NarrativeEngine] Failed to fetch "${fullUrl}": ${response.status} ${response.statusText}`);
+    throw response.status === 404
+      ? new NotFoundError(`[NarrativeEngine] Failed to fetch "${fullUrl}": 404 ${response.statusText}`)
+      : new Error(`[NarrativeEngine] Failed to fetch "${fullUrl}": ${response.status} ${response.statusText}`);
   }
   return response.json() as Promise<T>;
+}
+
+/** A 404 on an OPTIONAL content file — the only rejection optional loading may swallow. */
+class NotFoundError extends Error {}
+
+/**
+ * Optional-file guard: map a genuine 404 to `fallback`, rethrow everything else.
+ * A 500, network failure, or malformed JSON on an optional file must fail the
+ * load visibly — silently dropping (e.g.) a vignette's variants.json would strip
+ * its variant scenes while the vignette still played (Codex impl review, Major 1).
+ */
+function orIfMissing<T>(fallback: T): (err: unknown) => T {
+  return (err: unknown) => {
+    if (err instanceof NotFoundError) return fallback;
+    throw err;
+  };
 }
 
 function indexById<T extends { id: string }>(items: T[]): Record<string, T> {

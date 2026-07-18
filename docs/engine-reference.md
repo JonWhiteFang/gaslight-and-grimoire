@@ -168,7 +168,7 @@ Pure classification of the evidence board's player-connected components (Phase 2
   2. **Union-find** over the surviving edges → connected components; a component with `< 2` distinct clues is dropped (forms nothing).
   3. **Classify** each component (size ≥ 2) into `DeductionCorrectness = 'correct' | 'false' | 'partial' | 'incorrect'`:
      - **Recipe path** — every recipe whose `requiredClues ⊆ S` (matched against the **player's topology**, never `connectsTo` — 2 of 7 shipped recipes aren't `connectsTo`-connected). `correct` if any matched recipe is non-red-herring, else `false`. `recipes` carries **all** matches (Blocker 1), ordered for presentation only (non-red-herring → most required → lowest id).
-     - **Generic path** (no recipe matched — the only path for vignettes) — classify the component's player-edges against **undirected** `connectsTo`: all authored → `correct` (or `false` if the cluster contains a `redHerring` clue, N4); some authored → `partial`; none → `incorrect`. `recipes: []`.
+     - **Generic path** (no recipe matched — the path for any component matching no recipe) — classify the component's player-edges against **undirected** `connectsTo`: all authored → `correct` (or `false` if the cluster contains a `redHerring` clue, N4); some authored → `partial`; none → `incorrect`. `recipes: []`.
   `correct`/`false` components form deductions; `partial`/`incorrect` form nothing. The roll never enters this function — it only flavours the banner copy of a formed `correct` result (ADR-0012).
 
 ## caseProgression.ts

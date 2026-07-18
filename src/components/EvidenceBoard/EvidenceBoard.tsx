@@ -322,10 +322,16 @@ export function EvidenceBoard({ onClose, restoreFocusTo }: EvidenceBoardProps) {
           const alreadyFormed = useStore.getState().deductions;
           for (const r of comp.recipes) {
             const isNew = !alreadyFormed[r.id];
-            addDeduction(buildDeductionFromRecipe(r, comp.clueIds));
             // onForm fires exactly once per playthrough: only on first formation
             // (spec §2.8 — formation-time so a mint on a terminal scene still records).
+            // Effects run BEFORE the deduction is published: if applyEffects threw
+            // (a malformed effect the validator missed), publishing first would
+            // strand a recorded deduction whose onForm never fired AND never
+            // retries — the once-guard would see it as already formed (Codex impl
+            // review, Major 2). Effects-first means a throw leaves the recipe
+            // unformed, so a corrected retry can still mint it.
             if (isNew && r.onForm?.length) applyEffects(r.onForm);
+            addDeduction(buildDeductionFromRecipe(r, comp.clueIds));
             for (const id of r.requiredClues) members.add(id);
             formedCount += 1;
           }
