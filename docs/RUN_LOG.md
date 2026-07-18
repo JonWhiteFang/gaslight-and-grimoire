@@ -19,6 +19,14 @@
 
 ---
 
+## 2026-07-18 — The Orrery Room MERGED (PR #87)
+
+- **Goal:** Merge the completed Orrery Room branch once CI passed; sync `main`; flip the spine to "merged".
+- **Did:** All 6 CI checks green on PR #87 → merged via `gh pr merge 87 --merge --delete-branch` (merge commit `1aba478`, never squashed); local `main` synced (`git pull --ff-only`), remote branch pruned. Spine updated: PROJECT_STATE header (merge line prepended), Branch-focus → none/`main`, C2 tracker row → MERGED, Next-actions → The Drowned Archive. No code touched post-merge.
+- **Verified:** CI on PR #87: test, build, npm audit, OWASP, dependency-check, Cloudflare Workers Build — all pass. `main` at `1aba478` carries the full 16-commit branch history (no squash).
+- **Open / blockers:** None. Catalog: 9 units (4 main + 5 vignettes); Mythos keystone pair live. Next: The Drowned Archive → The Tidewaiter's Log. Unchanged: #20 (media, user-blocked).
+- **Memory updated:** STATE ☑ · RUN_LOG ☑ · ADR ☐ (merge + sync only).
+
 ## 2026-07-18 — The Orrery Room BUILT — Grey Dawn vignette + Mythos keystone (PR #87)
 
 - **Goal:** Build The Orrery Room end-to-end — the fifth side vignette (Grey Dawn faction gap + the Mythos thread's keystone deduction), including the engine work to make vignette recipes/variants first-class.
