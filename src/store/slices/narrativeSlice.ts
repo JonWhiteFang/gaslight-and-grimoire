@@ -12,11 +12,17 @@ import { snapshotGameState } from '../../utils/gameState';
 /**
  * Adapts a loaded {@link VignetteData} into the {@link CaseData} shape the store
  * and engine operate on. Vignettes are a 2-act subset with no faculty
- * distribution and no cross-case variants. Shared by `loadAndStartVignette` and
+ * distribution; their optional recipes/variants (deductions.json /
+ * variants.json) pass straight through. Shared by `loadAndStartVignette` and
  * `metaSlice.loadGame` (F-066) — keep the single source of truth here.
  */
 export function vignetteToCaseData(data: VignetteData): CaseData {
-  return { ...data, meta: { ...data.meta, acts: 2, facultyDistribution: {} }, variants: [] };
+  return {
+    ...data,
+    meta: { ...data.meta, acts: 2, facultyDistribution: {} },
+    variants: data.variants ?? [],
+    recipes: data.recipes,
+  };
 }
 
 /**

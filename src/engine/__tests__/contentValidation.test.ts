@@ -526,3 +526,30 @@ describe('computeMaxDisposition', () => {
     expect(computeMaxDisposition(bundle, 'npc-a')).toBe(0);
   });
 });
+
+// ─── computeDiscoverableClues onEnter parity (F-102 sibling) ─────────────────
+
+describe('computeDiscoverableClues counts onEnter discoverClue (F-102 sibling parity)', () => {
+  it('does not warn "never discoverable" for a clue granted only via onEnter', () => {
+    const bundle = makeBundle({
+      firstScene: 's1',
+      scenes: [
+        makeScene({
+          id: 's1',
+          choices: [makeChoice({
+            id: 'c1',
+            text: 'go',
+            outcomes: { critical: 's2', success: 's2', partial: 's2', failure: 's2', fumble: 's2' },
+          })],
+        }),
+        makeScene({
+          id: 's2',
+          onEnter: [{ type: 'discoverClue', target: 'clue-on-enter' }],
+        }),
+      ],
+      clues: [makeClue({ id: 'clue-on-enter', sceneSource: 's2' })],
+    });
+    const { warnings } = validateBundle(bundle, { includeReachability: true });
+    expect(warnings.filter((w) => w.includes('never discoverable'))).toEqual([]);
+  });
+});

@@ -1,0 +1,81 @@
+{
+  "clues": [
+    {
+      "id": "or-clue-gear-train",
+      "type": "physical",
+      "title": "The Thirteenth Gear Train",
+      "description": "The gearing that drives the extra body admits no forger's shortcuts. Every wheel is cut to the same hand as its twelve siblings, every arbor burnished by the same centuries of running; the wear inside the train is continuous, unbroken, old. A forger grafting a thirteenth orbit onto a genuine instrument would have left a seam — new brass against old, a modern tooth-count, a mismatch in the oil-blackened grime. There is no seam. Whoever built the twelve built the thirteenth, and built it first.",
+      "sceneSource": "or-act1-orrery-room",
+      "connectsTo": ["or-clue-finch-admission", "or-clue-forged-provenance"],
+      "tags": ["orrery", "authenticity"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "or-clue-finch-admission",
+      "type": "testimony",
+      "title": "Finch's Admission",
+      "description": "With the door shut, Mr. Finch says what his report will not: the gearing is sound, original, and correct to a tolerance he could not reproduce in his own workshop with his own tools and a year to try. He has checked the figures four times. He would rather they were wrong. He will deny having said any of this, and you believe both the denial and the admission equally.",
+      "sceneSource": "or-act1-finch-admission",
+      "connectsTo": ["or-clue-gear-train"],
+      "tags": ["orrery", "authenticity", "finch"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "or-clue-adjustment-diary",
+      "type": "occult",
+      "title": "The Adjustment Diary",
+      "description": "A quarto notebook, open on the desk where he left it. Nightly entries across his last five months, each recording a correction to the thirteenth body's gearing — a tooth's width here, a half-degree there, converging on some figure he never states. His health was failing through those months; the apothecary's dates prove it. The entries do not fail with him. The hand grows steadier, the figures finer, the corrections smaller and surer, as though the work were teaching the man rather than the man doing the work. The final entry is the most beautiful thing he ever wrote.",
+      "sceneSource": "or-act1-collectors-rooms",
+      "connectsTo": ["or-clue-night-observation", "or-clue-orrery-period"],
+      "tags": ["orrery", "collector", "diary"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "or-clue-laudanum-arithmetic",
+      "type": "physical",
+      "title": "The Laudanum Arithmetic",
+      "description": "The bottle on the nightstand, the dosage book beside it, the pharmacist's dates in the receipts drawer. The sums are exact and they close: a weak heart, documented for years, and a nightly draught increased by careful, deliberate degrees until the heart gave out ahead of schedule. Whether the hand that measured the drops meant mercy or merely sleep, the arithmetic is the same. He died of heart failure, hastened. Nothing in these figures requires the orrery to explain them.",
+      "sceneSource": "or-act1-collectors-rooms",
+      "connectsTo": ["or-clue-adjustment-diary"],
+      "tags": ["death", "mundane", "collector"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "or-clue-orrery-period",
+      "type": "occult",
+      "title": "The Period in the Gearing",
+      "description": "Worked backward from tooth-counts and ratios, the thirteenth body's gearing resolves to a single period — a figure in years and days, exact to the limit of the brass. You have seen that figure before, computed in a dead astronomer's careful hand, in a case you did not solve so much as survive. Two instruments, two centuries, two men who never met, keeping the same number. You write nothing down.",
+      "sceneSource": "or-act1-period-match",
+      "connectsTo": ["or-clue-adjustment-diary", "or-clue-night-observation"],
+      "tags": ["orrery", "period", "occult"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "or-clue-night-observation",
+      "type": "occult",
+      "title": "The Night Observation",
+      "description": "Left running in the dark, the orrery keeps honest time. Twelve bodies swing through their arcs at the pace the gearing dictates, smooth as water. The thirteenth does something else. It pauses where no escapement should let it pause. It waits, by whole seconds, at one particular quarter of its track. Then it resumes, and arrives at each station exactly when the gearing says it should — as though the pauses cost it nothing, as though the schedule were being kept from the other end.",
+      "sceneSource": "or-act2-vigil-held",
+      "connectsTo": ["or-clue-adjustment-diary", "or-clue-orrery-period"],
+      "tags": ["orrery", "vigil", "occult"],
+      "status": "new",
+      "isRevealed": false
+    },
+    {
+      "id": "or-clue-forged-provenance",
+      "type": "redHerring",
+      "title": "The Forged Provenance",
+      "description": "The paperwork that came with the orrery — a chain of bills of sale reaching back to a Continental workshop — is a fabrication. The ink is recent, the watermarks are wrong for their supposed decades, and the notary's seal belongs to a man who died before the earliest document claims he witnessed it. A seller's fraud, competently done, wrapped around an article that needed no lies to sell. The forgery proves only that the seller wanted the orrery's history obscured. It says nothing about the orrery.",
+      "sceneSource": "or-act1-seller",
+      "connectsTo": ["or-clue-gear-train"],
+      "tags": ["provenance", "forgery", "misdirection"],
+      "status": "new",
+      "isRevealed": false
+    }
+  ]
+}

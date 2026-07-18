@@ -35,6 +35,8 @@ public/content/
     scenes.json                       # { scenes: SceneNode[] }
     clues.json                        # { clues: Clue[] }
     npcs.json                         # { npcs: NPCState[] }
+    variants.json                     # optional — same shape as main cases
+    deductions.json                   # optional — same shape as main cases
 ```
 
 **File shapes — read carefully.** Every array-bearing content file is a JSON
@@ -56,6 +58,12 @@ public/content/
 into one scene set, and the shared `breakdown` + `incapacitation` scenes are
 injected into every case and vignette (their ids are `breakdown` and
 `incapacitation`, both `act: 0`).
+
+Vignettes **may** ship `variants.json` and `deductions.json` — both optional,
+same shapes and semantics as main cases (variant resolution, recipe matching,
+and `requiresDeduction`/`hasDeduction` gating all work identically at runtime,
+and the CLI validator checks both for vignettes too). Most vignettes ship
+neither; The Orrery Room is the first that ships both.
 
 ### meta and manifest fields
 
@@ -114,6 +122,23 @@ bounded-state table).
 \* Adjusting a faction-aligned NPC's disposition also propagates `delta * 0.5`
 into that NPC's faction reputation (a hidden cross-slice coupling — see
 architecture.md).
+
+**`onEnter` fires once per resolved scene per playthrough** (the F-006
+`visitedScenes` gate). Don't author an `onEnter` effect as a *per-attempt* cost
+on a retryable check's failure scene — a second failed attempt re-enters the
+scene without re-firing it, so the cost lands exactly once ever (e.g. the
+Orrery Room's Finch-doorstep disposition −1 is a one-time standing cost by
+design). A genuinely per-attempt cost needs a per-selection mechanism
+(`Choice.npcEffect`, which applies on every selection regardless of outcome).
+
+**Ordering rule — disposition before reputation.** When an ending's `onEnter`
+list combines a `disposition` effect on a faction-aligned NPC with a direct
+`reputation` effect on that NPC's faction, put the `disposition` effect(s)
+**first** and the `reputation` effect **after**. Clamps apply per-write: a
+negative disposition delta propagates a negative half-delta into the faction's
+reputation, and ordering the explicit `+reputation` last lets it apply (up to
+the clamp) *after* that propagation instead of being clamped away at the
+ceiling and then eroded by it. The Orrery Room endings follow this ordering.
 
 **`description` (optional).** Authored feedback text shown when the effect
 fires. When present it is used verbatim and the mechanical annotation is still
@@ -322,12 +347,12 @@ match's `Deduction` is stored under the recipe's **authored `id`** so a
 the Reason roll — gates formation (ADR-0012):** a qualifying set forms even on a
 `failure` roll; a non-qualifying set forms nothing even on a `critical`. The roll
 only flavours the outcome banner's copy. A component that matches no recipe takes
-the **generic path** (the only path for vignettes, which ship no `deductions.json`):
+the **generic path** (the only path in content that ships no `deductions.json`):
 it forms one deduction under a **canonical stable id** `deduction-generic-<sorted
 clue ids joined by +>` (idempotent — re-forming the same set never inflates the
 Journal) when **all** its player-edges are authored `connectsTo` links.
 
-`deductions.json` (main cases; optional — vignettes omit it) has shape
+`deductions.json` (optional — for main cases and vignettes alike) has shape
 `{ "deductions": KeyDeduction[] }`:
 
 | Field | Type | Notes |
@@ -337,6 +362,7 @@ Journal) when **all** its player-edges are authored `connectsTo` links.
 | `title` | string | Display name of the conclusion |
 | `description` | string | Narrative statement of the deduction |
 | `isRedHerring` | boolean | `false` for a sound conclusion |
+| `onForm` | `Effect[]` (optional) | Effects applied **once**, at the recipe's first formation on the evidence board |
 
 Authoring rules:
 - Every `requiredClues` id must exist in the case's `clues.json`, and every
@@ -357,6 +383,14 @@ Authoring rules:
   `false` outcome — the deduction still *forms* (under `isRedHerring: true`,
   framed "Questionable connection: …") but is flagged uneasy in board + Journal.
   This rewards spotting the real authored link while signalling the dead end.
+- **`onForm` effects** fire once per playthrough, at the moment the recipe first
+  forms on the evidence board (re-forming the same recipe never re-fires them;
+  the guard survives save/load). Use `onForm` chiefly to set a **persistent
+  flag** recording that the deduction was minted: the cross-content contract for
+  "did the player deduce X in an earlier case?" is `hasFlag`, **not**
+  `hasDeduction` — deductions are wiped on every case/vignette load, while flags
+  persist across cases. Effect targets in `onForm` are validated like any other
+  effect list.
 - Gate the **true/best resolution** behind a key deduction, but keep the case
   completable without it (leave other endings reachable) — never single-gate
   critical progress. Every clue a *gated* recipe requires must be obtainable
@@ -410,7 +444,7 @@ Successful output:
 ```
 ✓ cases/the-whitechapel-cipher — 67 scenes, 14 clues
 ...
-All 7 case(s) validated successfully.
+All 9 case(s) validated successfully.
 ```
 
 Both the CLI (`scripts/validateCase.mjs`, a `vite-node` launcher for

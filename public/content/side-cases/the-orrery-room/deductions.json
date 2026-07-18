@@ -1,0 +1,21 @@
+{
+  "deductions": [
+    {
+      "id": "or-genuine-instrument",
+      "requiredClues": ["or-clue-gear-train", "or-clue-finch-admission"],
+      "title": "A Genuine Instrument",
+      "description": "The gear train carries no forger's shortcuts and the one man qualified to fake doubt could not manage it. The orrery is exactly as old as it looks, and the thirteenth body was always there.",
+      "isRedHerring": false
+    },
+    {
+      "id": "mythos-pattern-named",
+      "requiredClues": ["or-clue-orrery-period", "or-clue-adjustment-diary", "or-clue-night-observation"],
+      "title": "The Period Holds",
+      "description": "The dead astronomer's figure, the collector's corrections, the thirteenth body's motion at night: three hands, none acquainted, keeping the same number. The orrery is not predicting anything. It is keeping time with it.",
+      "isRedHerring": false,
+      "onForm": [
+        { "type": "flag", "target": "mythos-pattern-named", "value": true }
+      ]
+    }
+  ]
+}

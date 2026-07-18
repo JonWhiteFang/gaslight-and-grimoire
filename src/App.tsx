@@ -14,7 +14,10 @@ import { InvestigationHalted } from './components/InvestigationHalted';
 import { useStore, useCurrentScene } from './store';
 import { isHaltScene, haltReason } from './engine/haltScenes';
 import { ARCHETYPE_ABILITY_FLAG } from './engine/flags';
+import { resolveScene } from './engine/conditions';
+import { snapshotGameState } from './utils/gameState';
 import type { CaseCompletionResult } from './engine/caseProgression';
+import type { CaseData, GameState } from './types';
 
 // Overlays + the case-completion screen are off the first-paint path — a
 // Title-screen visitor shouldn't download the Evidence Board, Journal, NPC
@@ -51,6 +54,26 @@ export function OverlayFallback() {
 }
 
 type Screen = 'title' | 'character-creation' | 'case-selection' | 'game' | 'load-game' | 'loading' | 'case-complete';
+
+/**
+ * The ending narrative quoted on the Case Complete screen, VARIANT-RESOLVED.
+ * `currentScene` always holds the base id and `caseData.scenes` is the base
+ * map, but a terminal scene may have an active variant (e.g. the Orrery Room's
+ * `-named` endings gated on `hasDeduction`) — reading the base map here would
+ * silently drop the earned closing paragraph from the completion screen.
+ */
+export function resolveEndingNarrative(
+  sceneId: string,
+  state: GameState,
+  caseData: CaseData | null,
+): string | null {
+  if (!caseData || !caseData.scenes[sceneId]) return null;
+  try {
+    return resolveScene(sceneId, state, caseData).narrative;
+  } catch {
+    return null;
+  }
+}
 
 export function GameContent({ onCompleteCase, onHalt, reviewSceneId, onDismissReview }: { onCompleteCase: () => void; onHalt: () => void; reviewSceneId: string | null; onDismissReview: () => void }) {
   const scene = useCurrentScene();
@@ -221,8 +244,9 @@ export default function App() {
     if (!currentCase) return;
     const caseData = useStore.getState().caseData;
     const sceneId = useStore.getState().currentScene;
-    const scene = caseData?.scenes[sceneId];
-    setEndingNarrative(scene?.narrative ?? null);
+    setEndingNarrative(
+      resolveEndingNarrative(sceneId, snapshotGameState(useStore.getState()), caseData),
+    );
     const result = completeCase(currentCase);
     setCompletionResult(result);
     setScreen('case-complete');

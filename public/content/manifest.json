@@ -65,6 +65,17 @@
         "type": "hasFlag",
         "target": "wc-case-complete"
       }
+    },
+    {
+      "id": "the-orrery-room",
+      "title": "The Orrery Room",
+      "synopsis": "The Grey Dawn asks you to appraise an orrery seized from a dead member's estate before the Order's factions go to war over it. It models a sky with one body too many.",
+      "type": "vignette",
+      "triggerCondition": {
+        "type": "factionReputation",
+        "target": "Hermetic Order of the Grey Dawn",
+        "value": 2
+      }
     }
   ]
 }

@@ -1,6 +1,6 @@
 # Status
 
-Current state of Gaslight & Grimoire as of 2026-07-09. This is a factual
+Current state of Gaslight & Grimoire as of 2026-07-17. This is a factual
 snapshot of what exists — not a roadmap. For architectural and API detail it
 links to the sibling docs rather than repeating them.
 
@@ -26,7 +26,8 @@ from each case's `npcs.json`.
 | The Rationalist's Dilemma | vignette (2-act) | 10 | 5 | 2 |
 | The Debt of Smoke | vignette (2-act) | 9 | 4 | 2 |
 | The Unfinished Case | vignette (2-act) | 8 | 4 | 2 |
-| **Total** | **8 cases** | **276** | **74** | **40** |
+| The Orrery Room | vignette (2-act) | 25 | 7 | 3 |
+| **Total** | **9 cases** | **301** | **81** | **43** |
 
 All four factions appear in the content: Rationalists Circle, Hermetic Order of
 the Grey Dawn, Lamplighters, and Court of Smoke. Archetype-exclusive scenes
@@ -108,8 +109,8 @@ ambient `*.mp3`, and no `*.png`/`*.jpg`/`*.webp` illustrations yet.
 
 As of 2026-07-17, running `npm run test:run`:
 
-- **Tests: 816 passed (816)**
-- **Test Files: 82 passed (82)**
+- **Tests: 858 passed (858)**
+- **Test Files: 89 passed (89)**
 
 The suite includes property-based tests using fast-check (six
 `*.property.test.ts` files covering the dice engine, narrative engine, deduction
@@ -118,5 +119,5 @@ by `node scripts/validateCase.mjs`, which delegates to the shared
 `src/engine/contentValidation.ts` module (the same one the runtime
 `validateContent` uses) — checking scene-graph edges, clue references, condition
 targets, variant structure, `npcEffect` refs, encounter-round edges, and (CLI
-only) reachability across all eight cases — including that every clue required by
+only) reachability across all nine cases — including that every clue required by
 a *gated* key deduction is obtainable without a critical roll (F-102).

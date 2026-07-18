@@ -104,6 +104,14 @@ export interface KeyDeduction {
   title: string;
   description: string;
   isRedHerring: boolean;
+  /**
+   * Optional effects applied exactly once, at the moment this recipe's deduction
+   * is first formed on the evidence board (never re-applied on repeat formation
+   * or save/load — the deductions record is the once-guard). Orrery Room spec §2.8:
+   * scene-entry effects can't record a mint that happens after entering a terminal
+   * scene; formation-time effects can.
+   */
+  onForm?: Effect[];
 }
 
 export type DeductionCorrectness = 'correct' | 'false' | 'partial' | 'incorrect';
@@ -326,7 +334,7 @@ export interface CaseData {
   clues: Record<string, Clue>;
   npcs: Record<string, NPCState>;
   variants: SceneNode[];
-  /** Authored key-deduction recipes (main cases only; optional so vignettes may omit). */
+  /** Authored key-deduction recipes (optional — cases and vignettes alike may ship them). */
   recipes?: KeyDeduction[];
 }
 
@@ -343,6 +351,10 @@ export interface VignetteData {
   scenes: Record<string, SceneNode>;
   clues: Record<string, Clue>;
   npcs: Record<string, NPCState>;
+  /** Optional key-deduction recipes (deductions.json) — vignettes may omit. */
+  recipes?: KeyDeduction[];
+  /** Optional variant scenes (variants.json) — vignettes may omit. */
+  variants?: SceneNode[];
 }
 
 export interface ValidationResult {

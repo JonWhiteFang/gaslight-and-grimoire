@@ -152,6 +152,9 @@ export function validateBundle(
         errors.push(`KeyDeduction "${recipe.id}" -> requiredClues references unknown clue "${clueId}"`);
       }
     }
+    for (const effect of recipe.onForm ?? []) {
+      validateEffect(effect, `KeyDeduction "${recipe.id}" -> onForm`, ctx);
+    }
   }
 
   // ── Reachability (warnings, opt-in) ──
@@ -165,7 +168,7 @@ export function validateBundle(
     const discoverable = computeDiscoverableClues(bundle, reachable);
     for (const clue of bundle.clues) {
       if (!discoverable.has(clue.id)) {
-        warnings.push(`clue "${clue.id}" is never discoverable (no reachable scene lists it in cluesAvailable)`);
+        warnings.push(`clue "${clue.id}" is never discoverable (no reachable scene lists it in cluesAvailable or grants it via onEnter)`);
       }
     }
 
@@ -495,7 +498,22 @@ function validateChoice(choice: Choice, where: string, ctx: Ctx): void {
   }
 }
 
+/** Every Effect['type'] the runtime switch handles — see worldSlice.applyEffects. */
+const EFFECT_TYPES: ReadonlySet<string> = new Set([
+  'composure', 'vitality', 'flag', 'disposition', 'suspicion', 'reputation',
+  'discoverClue', 'setMemoryFlag',
+]);
+
 function validateEffect(effect: Effect, where: string, ctx: Ctx): void {
+  // Unknown effect types are the one shape that THROWS at runtime (worldSlice's
+  // assertNever exhaustiveness guard). Content JSON bypasses the compile-time
+  // union, so reject it here — otherwise a malformed future effect passes load
+  // validation and detonates mid-play (e.g. inside a recipe's onForm, where a
+  // throw would strand a half-formed deduction — Codex impl review, Major 2).
+  if (!EFFECT_TYPES.has(effect.type)) {
+    ctx.errors.push(`${where} -> unknown effect type "${effect.type as string}"`);
+    return;
+  }
   if (effect.type === 'discoverClue' && effect.target && !ctx.clueIds.has(effect.target)) {
     ctx.errors.push(`${where} -> onEnter discoverClue references unknown clue "${effect.target}"`);
   }
@@ -610,7 +628,8 @@ function nonCriticalOutgoingEdges(scene: SceneNode): string[] {
 
 /**
  * Clues discoverable from reachable scenes: any clue listed in a reachable
- * scene's cluesAvailable, or referenced by a reachable choice's requiresClue /
+ * scene's cluesAvailable, granted by a reachable scene's `onEnter`
+ * `discoverClue` effect, or referenced by a reachable choice's requiresClue /
  * advantageIf. Variant cluesAvailable count when the variant's base is reachable.
  */
 function computeDiscoverableClues(bundle: ContentBundle, reachable: Set<string>): Set<string> {
@@ -623,6 +642,10 @@ function computeDiscoverableClues(bundle: ContentBundle, reachable: Set<string>)
     for (const choice of allChoices(scene)) {
       if (choice.requiresClue) discoverable.add(choice.requiresClue);
       for (const clueId of choice.advantageIf ?? []) discoverable.add(clueId);
+    }
+    // Parity with computeObtainableClues: an onEnter discoverClue IS a source.
+    for (const effect of scene.onEnter ?? []) {
+      if (effect.type === 'discoverClue' && effect.target) discoverable.add(effect.target);
     }
   };
 
