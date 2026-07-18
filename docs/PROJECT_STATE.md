@@ -8,7 +8,9 @@
 > [../CLAUDE.md](../CLAUDE.md) and the [docs/](README.md) set. This file tracks *progress and live
 > decisions only*.
 
-_Last updated: 2026-07-17 (**Phase 5 MERGED — PR [#86](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/86) merged to `main` via merge commit `a1ddbd0` (never squashed); branch deleted; local `main` synced. All 6 CI checks passed. The UI/UX roadmap (Phases 0–5) is now FULLY COMPLETE.** Next: content resumes — The Orrery Room (Grey Dawn vignette), authoring with the `hidden`/`disabled-with-reason` vocabulary from day one. — Prior update below.)_
+_Last updated: 2026-07-18 (**The Orrery Room BUILT — flagship Grey Dawn vignette + Mythos keystone shipped on `feat/orrery-room`; PR [#87](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/87) open (merge commit, never squash).** Fifth vignette (21 base scenes + 4 variants / 7 clues / 2 recipes / 3 NPCs; unlock Grey Dawn rep ≥ 2), carrying the thread's keystone deduction `mythos-pattern-named` (mintable only with `mythos-period-computed` from The Comet Club; `onForm` sets the persistent cross-content flag). Engine made vignettes first-class recipe/variant citizens: `loadVignette` optional `deductions.json`/`variants.json`, CLI validator vignette variants, `computeDiscoverableClues` onEnter parity, **`KeyDeduction.onForm`** (effects-before-publish, once-guard), status-aware optional loading (404-only fallback), completion screen resolves terminal-scene variants (`resolveEndingNarrative`). First authored use of Phase 5 disabled-with-reason (the keystone choice). Full review trail: Codex spec (10) / plan (9) / impl (2M+2m) passes all folded; content-integrity review (1 Major: missing mundane connectsTo edge + gate-neutral keystone label); whole-branch review (1 Major: completion screen dropped the variant paragraph). Live Playwright verify clean. Baseline **816/82 → 858/89**. Next: merge PR #87; then The Drowned Archive or The Tidewaiter's Log per the ideation order. — Prior update below.)_
+
+_Prior update: 2026-07-17 (**Phase 5 MERGED — PR [#86](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/86) merged to `main` via merge commit `a1ddbd0` (never squashed); branch deleted; local `main` synced. All 6 CI checks passed. The UI/UX roadmap (Phases 0–5) is now FULLY COMPLETE.** Next: content resumes — The Orrery Room (Grey Dawn vignette), authoring with the `hidden`/`disabled-with-reason` vocabulary from day one. — Prior update below.)_
 
 _Prior update: 2026-07-17 (**Phase 5 IMPLEMENTED — choice-gating content model shipped on `feat/phase5-choice-gating`; PR [#86](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/86) open (merge commit, never squash). The FINAL UI/UX-roadmap item.** Authors can now show a gated choice **disabled-with-a-diegetic-reason** instead of hard-hidden: `Choice.visibility` (`shown`/`hidden`/`disabled`, governs the unmet-gate case only, default `hidden` = today's behaviour — zero edits to shipped content except the one demo) + validator-required `gateReason`. Pure `src/engine/choiceVisibility.ts` (`choiceGateConditions` + `resolveChoiceVisibility`) replaces the two hand-rolled gate-builders (ChoicePanel `isChoiceVisible` deleted, encounters inline block deleted) as the single gating source of truth; the validator shares the same predicate. **Validator:** 5 errors (disabled-without-reason both directions, ungated-visibility, invalid value, escape-path exclusion) + 2 always-on warnings (soft-gate `shown`; soft-lock — scene/round/reaction-replaced-round with no guaranteed-selectable choice), `warnings` threaded into `Ctx`. **UI:** shared non-interactive `LockedChoice` `<li>` (🔒 + line-through + reason, no opacity, AA 6.60:1); both panels render interactive `<nav>` then `<ul role="list" aria-label="Locked choices">`; defense-in-depth visibility guards in both select handlers; escape paths never disabled. **Demo:** Comet Club `cc-act2-hub`/`cc-choice-hub-halloway` (gate-neutral label + softened reason after content-integrity review) + content-backed before/after witness test. Built via subagent-driven-development (9 tasks, per-task spec+quality reviews, all folds committed separately); whole-branch integration review (4 Minors, 3 folded); live Playwright verify (locked render, non-focusable, DOM order, flag-met unlock, 0 console errors); **full file-based Codex trail: spec 5+2, plan 1 Blocker+4+1, impl 1 Major+2 Minor — all folded** (impl pass fixed soft-lock warning false positives + scene/reaction-replacement coverage). Baseline **766/78 → 816/82** (+50). **Next:** merge PR #86 — then the UI/UX track is fully complete and content resumes (The Orrery Room, now authoring with the new vocabulary from day one). — Prior update below.)_
 
@@ -167,13 +169,13 @@ build artifacts (`vite.config.js`/`.d.ts`) `tsconfig.node.json`'s `composite:tru
   drops its `<6.1.0` peer cap). Runtime: React 19, framer-motion 12, zustand 5, immer 11. Toolchain: Vite 8 (Rolldown),
   Vitest 4, jsdom 29, Tailwind 4 (CSS-first `@theme`), ESLint 10. See ADR-0008 + [[dependabot-major-group-migration]] for
   the clustering approach and the emnapi lockfile gotcha.
-- **Branch focus:** none — on `main` at `a1ddbd0`, clean. **Phase 5 (choice-gating) MERGED — PR
-  [#86](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/86)** (merge commit `a1ddbd0`, never
-  squashed; branch deleted); gate green (816/82, lint, validator 8/8 zero warnings, build); all 6 CI
-  checks passed. **The UI/UX roadmap (Phases 0–5) is fully complete.** Prior branches merged: #85
-  (Phase 4), #84 (Phase 3), #83 (Phase 2b), #82 (Phase 2a), #76 (Comet Club), #79/#80 (UI/UX Phase 0/1).
-  All audit backlogs cleared except #20 (media, user-blocked). **Next code work:** content — The Orrery
-  Room. No branch open; start from `main`.
+- **Branch focus:** `feat/orrery-room` at `e7e1b86` — **The Orrery Room built; PR
+  [#87](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/87) open** (merge commit, never
+  squash). Gate green: **858/89**, lint clean, validator **9 units zero errors zero warnings**, build
+  green. 15 commits: 5 engine TDD tasks, single zero/zero content commit + content-integrity fold,
+  witness/integration tests, docs, whole-branch fold, Codex impl fold. Prior branches merged: #86
+  (Phase 5), #85 (Phase 4), #84 (Phase 3), #83 (Phase 2b), #82 (Phase 2a), #76 (Comet Club).
+  All audit backlogs cleared except #20 (media, user-blocked). **Next:** merge PR #87.
 - **Verification:** 2026-07-09 — on merged `main`: `npm run test:run` → **611 passed (611)** across **58** files;
   `npm run lint` clean, validator clean (7 cases), `npm ci --ignore-scripts` + `npm run build` green (build now also
   type-checks `scripts/` + `vite.config.ts`; emits `dist/gaslight-and-grimoire/` + `dist/_headers`). **CI green on PR #68**
@@ -218,7 +220,18 @@ build artifacts (`vite.config.js`/`.d.ts`) `tsconfig.node.json`'s `composite:tru
   in the locked list (🔒 + line-through + gateReason prose), is non-focusable/non-clickable, sits after the
   interactive nav in DOM order, and becomes a normal interactive button when `cc-halloway-trusts` is set;
   zero console errors. Whole-branch integration review (Ready to merge, 4 Minors — 3 folded) + Codex
-  spec/plan/impl passes (5+2 / 1B+4M+1m / 1M+2m) all folded.
+  spec/plan/impl passes (5+2 / 1B+4M+1m / 1M+2m) all folded. **2026-07-18 (The Orrery Room, PR #87):**
+  on `feat/orrery-room` at `e7e1b86` — `npm run test:run` → **858 passed (858)** / **89** files
+  (was 816/82, +42/+7), `npm run lint` clean, `node scripts/validateCase.mjs` → **9 units, zero
+  errors, zero warnings** (orrery: 25 scenes [21 base + 4 variants], 7 clues), `npm run build` green.
+  Live-verified in-browser (Playwright, injected v5 saves): keystone choice locked flagless
+  (🔒 + diegetic reason, non-focusable, after the interactive nav), selectable with
+  `mythos-period-computed`; taking it granted the period clue; forming the three-clue keystone on the
+  board recorded BOTH `deductions['mythos-pattern-named']` and the persistent flag; the destroyed
+  ending rendered its `-named` variant and the Case Complete screen quoted the variant's closing
+  paragraph (the whole-branch-review Major fix, confirmed live); zero app console errors.
+  Witness tests mutation-verified (keystone visibility flip, ending effect-order swap, completion
+  seam reversion — each watched RED then restored).
 
 ---
 
@@ -261,23 +274,26 @@ Source of truth for each phase's scope: [status.md](status.md) (systems present 
 | U4 | UI/UX Phase 4 — a11y hardening sweep | `[x]` | **MERGED — PR [#85](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/85) (`8e1c2b0`)**, 2026-07-17. Roadmap items 3/4/5 + preserve tests. SettingsPanel → shared `useFocusTrap`; title-screen `inert={isSettingsOpen}` (fixes Settings-over-title background-interactive bug); **fixed a pre-existing app-wide WCAG 2.4.3 bug — the `inert` ancestor blurred the invoker to `<body>` before the trap captured it, so all overlays restored focus to `<body>`; fixed via open-time `restoreFocusTo` capture** (found by whole-branch review, browser-confirmed). ALL keyboard focus rings → `focus-visible:ring-2 ring-amber-400` (~11 components, 2 documented exceptions), glob-driven tree-wide inventory guard; direct reduced-motion guards for every Motion gate (framer-motion mock) + structural CSS guard; preserve tests (focus-restore ×4, save-toast roles, keyboard connect, dice-as-status). Codex spec/plan/impl passes all folded (4+3 / 6+1 / 3). 733/74 → **766/78**. [Spec](superpowers/specs/2026-07-16-phase4-a11y-hardening-design.md) · [plan](superpowers/plans/2026-07-16-phase4-a11y-hardening.md) · [Codex impl review](../codex/output/2026-07-16-phase4-a11y-hardening-impl-review.md). |
 | U3 | UI/UX Phase 3 — dice/probability legibility | `[x]` | **IMPLEMENTED — PR [#84](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/84) open**, 2026-07-16. DC + diegetic "Prospects" band + advantage pre-roll on all 3 check surfaces; `vs DC N` at-roll; "Assured" for auto-succeed abilities. Pure `checkOdds.ts`; single `isFacultyCheck` gate (roll + odds can't drift); decorative `CheckOddsTag` (odds on the host button's own `aria-label`); `CheckResult.dc?` (transient, `loadGame` clears it); data-driven partial-tier policy for choices. 8 TDD tasks + refactor; whole-branch review + live verify + Codex spec/plan/impl (5/9/2, all folded). 684/64 → **733/74**. [Spec](superpowers/specs/2026-07-16-phase3-dice-legibility-design.md) · [plan](superpowers/plans/2026-07-16-phase3-dice-legibility.md) · [Codex impl review](../codex/output/2026-07-16-phase3-dice-legibility-impl-review.md). |
 | U5 | UI/UX Phase 5 — choice-gating content model | `[x]` | **MERGED — PR [#86](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/86) (`a1ddbd0`)**, 2026-07-17. The FINAL roadmap item. `Choice.visibility` (`shown`/`hidden`/`disabled`, unmet-gate case only, default `hidden` — backward-compatible) + validator-required `gateReason`. Pure `choiceVisibility.ts` resolver (single gating source of truth; replaced ChoicePanel `isChoiceVisible` + encounters' inline builder); 5 validator errors + 2 always-on warnings (`warnings` in `Ctx`); shared `LockedChoice` non-interactive `<li>`; both panels render nav-then-locked-`ul`; escape paths never disabled; select-handler visibility guards. Demo: Comet Club `cc-choice-hub-halloway` + content-backed witness test. Codex spec/plan/impl (5+2 / 1B+4M+1m / 1M+2m) all folded. 766/78 → **816/82**. [Spec](superpowers/specs/2026-07-17-phase5-choice-gating-design.md) · [plan](superpowers/plans/2026-07-17-phase5-choice-gating.md) · [Codex impl review](../codex/output/2026-07-17-phase5-choice-gating-impl-review.md). |
+| C2 | Content — The Orrery Room (fifth vignette, Grey Dawn + Mythos keystone) | `[~]` | **PR [#87](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/87) open**, 2026-07-18. 21 base scenes + 4 variants / 7 clues / 2 recipes / 3 NPCs; keystone `mythos-pattern-named` (`onForm` → persistent flag; downstream gates on `hasFlag`, never `hasDeduction`). Engine: vignette recipes/variants first-class, `KeyDeduction.onForm`, status-aware optional loading, variant-resolved completion screen. Codex spec/plan/impl (10 / 9 / 2M+2m) + content-integrity (1M+3m) + whole-branch (1M+1m) all folded. 816/82 → **858/89**. [Spec](superpowers/specs/2026-07-17-orrery-room-design.md) · [plan](superpowers/plans/2026-07-17-orrery-room.md) · [Codex impl review](../codex/output/2026-07-18-orrery-room-impl-review.md). |
 | U2b | UI/UX Phase 2b — deduction formation model | `[x]` | **IMPLEMENTED — PR [#83](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/83) open**, 2026-07-16. **Enacts ADR-0012** (`Accepted → Enacted`). Pure `deductionOracle.ts` classifies each player-connected component (`correct`/`false`/`partial`/`incorrect`); board forms every qualifying deduction (all matched recipes, Blocker 1); `DeductionButton` rolls only; `'connected'` derived from membership (N1); store-owned contested-revert with generation tokens; canonical stable generic-deduction id (N5); validator reserves the `deduction-generic-` namespace + clue-id charset; save v4→v5. Internal review + Codex impl pass (3 findings folded). 649/61 → **684/64**. [Spec](superpowers/specs/2026-07-15-phase2b-deduction-formation-design.md) · [plan](superpowers/plans/2026-07-16-phase2b-deduction-formation.md) · [Codex review](../codex/output/2026-07-16-phase2b-deduction-formation-impl-review.md). |
 
 ---
 
 ## Next actions (explicit order)
 
-**UI/UX track — FULLY COMPLETE (Phases 0–5, all merged).** Phase 5 merged via PR
-[#86](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/86) (`a1ddbd0`). No UI/UX work open.
+**1. Merge PR [#87](https://github.com/JonWhiteFang/gaslight-and-grimoire/pull/87) (The Orrery Room)**
+— merge commit, never squash. All review gates passed; branch gate green (858/89, lint, validator 9/9
+zero/zero, build).
 
-**Content resumes: The Orrery Room** (Grey Dawn vignette — fills the one missing faction vignette +
-consumes the live `mythos-period-computed` flag), now authoring with the `hidden`/`disabled-with-reason`
-vocabulary from day one (the roadmap's live caveat is satisfied — Phase 5 landed before the next content
-build). Suggested order after it (from [`content-ideas-2026-07-10.md`](content-ideas-2026-07-10.md)):
-The Drowned Archive → The Tidewaiter's Log. Small open decision still pending from the Comet Club build:
-three bookkeeping flags set but unread (`cc-tonic-dissolved`, `cc-ost-confided`, `cc-midpoint-passed`) —
-wire or drop at next content session. Also noted for a future touch (whole-branch review Minor, not
-blocking): have `getEncounterChoices` return the shown/locked partition so the panel doesn't re-resolve.
+**2. Content continues** (from [`content-ideas-2026-07-10.md`](content-ideas-2026-07-10.md)): with the
+Comet Club → Orrery Room keystone pair live, the Mythos thread's suggested build order continues
+**The Drowned Archive** (main case; sets `mythos-estuary-survey`, unlocks The Tidewaiter's Log) →
+**The Tidewaiter's Log**. Small open decisions carried forward: three Comet Club bookkeeping flags set
+but unread (`cc-tonic-dissolved`, `cc-ost-confided`, `cc-midpoint-passed`) — wire or drop; and the
+`getEncounterChoices` shown/locked-partition future touch (Phase 5 whole-branch Minor, not blocking).
+New authoring notes now in `content-authoring.md`: `onForm` persistent-flag rule (cross-content gating
+uses `hasFlag`, never `hasDeduction`), the disposition-before-reputation ending ordering rule, and the
+onEnter once-per-playthrough retry-cost caveat.
 
 **Audit-2 code backlog: CLEAR.** All of #53–#60 merged (PRs #62–#68). The only open GitHub issue is #20 (media,
 user-blocked). No open code work. **#52 (agent-perspective interview) answered** 2026-07-09 — a first-person response to
