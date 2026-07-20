@@ -57,10 +57,18 @@ adds `.gitlab-ci.yml` (no window where both or neither CI exists on the GitLab s
 - Node version from `.nvmrc`. npm cache keyed on `package-lock.json`.
 - `interruptible: false` on both jobs (maps GitHub's `concurrency: cancel-in-progress: false`).
 
-**Security** (mirrors `security.yml`) — runs on MRs + a weekly **pipeline schedule**
-(Mon 08:00 UTC, created in GitLab UI; the schedule itself is not representable in-repo):
+**Security** (mirrors `security.yml`) — runs on MRs, on manual (web) dispatch (preserving
+`workflow_dispatch`), and on a weekly **pipeline schedule** (Mon 08:00 UTC, created in GitLab
+UI; the schedule itself is not representable in-repo):
 - `npm audit` step.
-- OWASP Dependency-Check, fail on CVSS ≥ 7 (same threshold as today).
+- OWASP Dependency-Check, fail on CVSS ≥ 7 (same threshold as today), NVD database cached
+  between runs (only the first run pays the cold download; requires an `NVD_API_KEY` CI
+  variable set before the cutover MR).
+
+**Merge enforcement:** a green pipeline is made a hard merge requirement via
+`only_allow_merge_if_pipeline_succeeds=true` (+ `allow_merge_on_skipped_pipeline=false`) —
+GitLab's importer does not carry GitHub's required-status-check protection, and without this
+the gate would be advisory only.
 
 Note: `deploy.yml`'s name ("CI") and its build-compiles-only role carry over unchanged in
 spirit — GitLab CI never publishes anything; deploy remains Cloudflare-side (§5).
@@ -69,8 +77,11 @@ spirit — GitLab CI never publishes anything; deploy remains Cloudflare-side (�
 
 GitLab has no native Dependabot. Renovate replaces `.github/dependabot.yml`:
 - `renovate.json` in-repo replicating current behaviour: weekly schedule, npm minor+patch
-  grouped, majors grouped, and GitLab CI component/image updates in place of the
-  github-actions ecosystem.
+  grouped, majors grouped (both rules scoped `matchManagers: ["npm"]`), and a separate
+  `gitlabci` group for CI image updates in place of the github-actions ecosystem. Two
+  accepted parity deltas: the 5-PR limit is repo-wide (Dependabot's was per-ecosystem), and
+  the `node:20.19` CI image is Renovate-managed while `.nvmrc` must be bumped by hand in the
+  same MR.
 - Runner: the **hosted Mend Renovate app for GitLab** (zero-maintenance). Fallback if the hosted
   app is undesirable: a scheduled GitLab CI job running the `renovate/renovate` image.
 
@@ -113,9 +124,13 @@ audit reports describe the past accurately and are not rewritten):
    confirm the pipeline is green on GitLab.
 5. Create the weekly security pipeline schedule; enable Renovate.
 6. Re-point Cloudflare (§5); verify deploy.
-7. Docs sweep + new ADR committed; run `/checkpoint`.
-8. Archive the GitHub repo (Settings → Archive). **Point of no return is only this step, and
-   even it is reversible (unarchive).**
+7. Docs sweep + new ADR (status Accepted) committed — the sweep states the archive is
+   *pending*, not done.
+8. Archive the GitHub repo (Settings → Archive), then run `/checkpoint` + flip ADR-0014 to
+   Enacted and **commit + push** those final memory-spine edits (docs-only push to main).
+   **Point of no return is only the archive, and even it is reversible (unarchive).**
+   _(Order amended per Codex plan review 2026-07-20: checkpoint must follow the archive so the
+   spine never claims an archive that hasn't happened, and its edits must be persisted.)_
 
 **Rollback:** at any point before step 8, GitHub remains fully intact and connected — abandon
 the GitLab project and reconnect Cloudflare to GitHub if needed.

@@ -77,8 +77,16 @@ Wait for user confirmation before continuing.
 
 ```bash
 git ls-remote https://gitlab.com/<username>/gaslight-and-grimoire.git refs/heads/main
+git remote add gitlab https://gitlab.com/<username>/gaslight-and-grimoire.git 2>/dev/null; git fetch gitlab main
+git rev-list --count gitlab/main
+git remote remove gitlab
 ```
-Expected: exactly the `main` SHA recorded in Task 1 Step 4. (Substitute the real username — ask the user for it at Task 2 Step 1 if not yet known — and reuse it everywhere `<username>` appears below.)
+Expected: the `main` SHA AND the commit count both exactly match the Task 1 Step 4 fingerprint
+(Codex Minor 1: the count must actually be compared, not just recorded — SHA equality already
+implies it, but the spec demands both checks explicitly). The temporary `gitlab` remote is
+removed because Task 3 re-points `origin` properly. (Substitute the real username — ask the
+user for it at Task 2 Step 1 if not yet known — and reuse it everywhere `<username>` appears
+below.)
 
 - [ ] **Step 3: Verify issues and MRs arrived**
 
@@ -106,12 +114,19 @@ glab auth login
 ```
 🧑 USER ACTION: complete the browser/token auth flow. Verify with `glab auth status` → expected: logged in to gitlab.com.
 
-- [ ] **Step 2: Set merge method to merge-commit and disable squash**
+- [ ] **Step 2: Set merge method, disable squash, and make a green pipeline a merge REQUIREMENT**
+
+GitLab's default is `only_allow_merge_if_pipeline_succeeds=false`, and the importer does NOT
+carry GitHub's required-status-check branch protection — without this, a red MR is mergeable
+and the gate is decorative (Codex Blocker 1). `-F` sends booleans as booleans.
 
 ```bash
-glab api "projects/<username>%2Fgaslight-and-grimoire" -X PUT -f merge_method=merge -f squash_option=never
+glab api "projects/<username>%2Fgaslight-and-grimoire" -X PUT -f merge_method=merge -f squash_option=never -F only_allow_merge_if_pipeline_succeeds=true -F allow_merge_on_skipped_pipeline=false
 ```
-Expected: JSON response containing `"merge_method":"merge"` and `"squash_option":"never"`. Verify visibility while at it: response contains `"visibility":"public"` — if the importer created it private, add `-f visibility=public` and re-run.
+Expected: JSON response containing `"merge_method":"merge"`, `"squash_option":"never"`,
+`"only_allow_merge_if_pipeline_succeeds":true`, and `"allow_merge_on_skipped_pipeline":false`.
+Verify visibility while at it: response contains `"visibility":"public"` — if the importer
+created it private, add `-f visibility=public` and re-run.
 
 - [ ] **Step 3: Point the local clone at GitLab**
 
@@ -127,6 +142,15 @@ Expected: fetch succeeds; `main...origin/main` shows up to date (same SHA as Tas
 git push origin main
 ```
 Expected: "Everything up-to-date". Local cutover done — `gh` is now only used for the final archive step (it still targets the GitHub repo by name).
+
+- [ ] **Step 5: 🧑 USER ACTION — NVD API key (needed BEFORE the Task-4 cutover MR)**
+
+The Task-4 pipeline's `dependency-check` job downloads the NVD database on its first (cold)
+run; without a key, requests are throttled 8s-per-request and the job may time out — and since
+Task 3 Step 2 just made pipeline success a merge requirement, a flaky first security run would
+block the cutover MR (Codex Major 2). Tell the user: request a free key at
+https://nvd.nist.gov/developers/request-an-api-key, then add it as a **masked** CI/CD variable
+named `NVD_API_KEY` (GitLab: Settings → CI/CD → Variables). Wait for confirmation.
 
 ---
 
@@ -160,15 +184,27 @@ stages:
 
 # Keep the image tag in sync with .nvmrc (GitLab cannot read .nvmrc for
 # image selection the way actions/setup-node can).
+#
+# interruptible:false preserves deploy.yml's `cancel-in-progress: false`
+# guarantee (a running pipeline is never cancelled by a newer push). Known,
+# accepted divergence: GitHub's concurrency.group also SERIALIZED same-ref
+# runs; GitLab has no workflow-level equivalent (resource_group is per-job
+# and would only serialize jobs, adding latency for no gate benefit here).
+# Rapid pushes may run pipelines concurrently — harmless: jobs are read-only
+# checks and nothing here publishes.
 default:
   image: node:20.19
-  interruptible: false   # maps deploy.yml's `cancel-in-progress: false`
+  interruptible: false
 
+# `web` = manually dispatched from the GitLab UI (Pipelines → Run pipeline) —
+# preserves both workflows' workflow_dispatch. A web run on main executes all
+# four jobs (gate + security).
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
     - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
 
 .npm-cache: &npm-cache
   key:
@@ -211,12 +247,14 @@ build:
     - *install
     - npm run build
 
-# Security jobs run on MRs and on the weekly schedule (Mon 08:00 UTC —
-# created as a GitLab pipeline schedule, Task 5), not on plain main pushes.
+# Security jobs run on MRs, on the weekly schedule (Mon 08:00 UTC — created
+# as a GitLab pipeline schedule, Task 5), and on manual (web) dispatch — not
+# on plain main pushes.
 .security-rules: &security-rules
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
 
 npm-audit:
   stage: security
@@ -229,8 +267,10 @@ npm-audit:
 
 # OWASP Dependency-Check, fail on CVSS >= 7 (same threshold as security.yml).
 # Pinned image version — Renovate keeps it current (replaces the pinned-SHA
-# github-action). Set an NVD_API_KEY CI/CD variable (Task 5) or NVD feed
-# downloads will be slow/throttled.
+# github-action). NVD_API_KEY is a required CI/CD variable (set in Task 3 —
+# without it every NVD request is throttled to 8s vs 3.5s). The NVD database
+# is cached under the project dir via --data + a GitLab cache so only the
+# first run pays the cold download; MRs and weekly runs after that are warm.
 dependency-check:
   stage: security
   needs: []
@@ -238,16 +278,22 @@ dependency-check:
   image:
     name: owasp/dependency-check:12.1.0
     entrypoint: [""]
+  cache:
+    key: dependency-check-data-v1
+    paths:
+      - .dependency-check-data/
   script:
     - >
       /usr/share/dependency-check/bin/dependency-check.sh
       --project gaslight-and-grimoire
       --scan .
+      --data "$CI_PROJECT_DIR/.dependency-check-data"
       --format SARIF --format HTML
       --out reports
       --failOnCVSS 7
       --enableRetired
       --exclude "**/node_modules/.cache/**"
+      --exclude "**/.dependency-check-data/**"
       ${NVD_API_KEY:+--nvdApiKey "$NVD_API_KEY"}
   artifacts:
     when: always
@@ -258,7 +304,7 @@ dependency-check:
 
 - [ ] **Step 3: Write `renovate.json`**
 
-Replicates `dependabot.yml`: weekly Monday cadence, minor+patch grouped, majors grouped, 5-PR limit. Renovate's `gitlabci` manager (on by default in `config:recommended`) keeps the pinned `owasp/dependency-check` image current — the equivalent of the old `github-actions` ecosystem entry.
+Replicates `dependabot.yml`: weekly Monday cadence, npm minor+patch grouped, npm majors grouped. The grouping rules are **scoped to the npm manager** (Codex Major 1: unscoped rules would fold GitLab CI image bumps — the Node runtime and the security scanner — into app-dependency PRs); the `gitlabci` manager (on by default) gets its own group, the equivalent of the old `github-actions` ecosystem entry. Two acknowledged parity deltas from Dependabot: `prConcurrentLimit` is repo-wide (Dependabot allowed 5 npm + 5 actions PRs independently) — 5 total is ample at this repo's PR volume; and the `node:20.19` CI image joins the gitlab-ci group, so a Node bump PR is the reminder to bump `.nvmrc` in the same MR (they must move together).
 
 ```json
 {
@@ -270,16 +316,29 @@ Replicates `dependabot.yml`: weekly Monday cadence, minor+patch grouped, majors 
   "labels": ["dependencies"],
   "packageRules": [
     {
+      "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "minor-and-patch"
     },
     {
+      "matchManagers": ["npm"],
       "matchUpdateTypes": ["major"],
       "groupName": "major"
+    },
+    {
+      "matchManagers": ["gitlabci"],
+      "groupName": "gitlab-ci"
     }
   ]
 }
 ```
+
+Validate before committing:
+
+```bash
+npx --yes --package renovate renovate-config-validator renovate.json
+```
+Expected: `Config validated successfully`.
 
 - [ ] **Step 4: Delete the GitHub automation directory**
 
@@ -314,7 +373,7 @@ git push -u origin chore/gitlab-cutover
 glab mr create --title "ci: GitLab CI cutover (merge gate + security + Renovate)" --description "Ports deploy.yml + security.yml to .gitlab-ci.yml, replaces Dependabot with Renovate. Part of the GitLab migration (spec: docs/superpowers/specs/2026-07-20-gitlab-migration-design.md)." --source-branch chore/gitlab-cutover --target-branch main
 glab ci status --live
 ```
-Expected: pipeline runs `test` → `build` + both security jobs; **all green**. If `dependency-check` fails only on NVD throttling, note it — the NVD_API_KEY variable lands in Task 5; a temporary retry after setting it is acceptable, but a genuine CVSS ≥ 7 finding must be triaged, not waved through.
+Expected: pipeline runs `test` → `build` + both security jobs; **all green**. A genuine CVSS ≥ 7 finding must be triaged, not waved through. **Also verify the gate actually gates** (Codex Blocker 1): while the pipeline is still running (or if any job is red), `glab mr merge` must be REFUSED — confirm the refusal before the pipeline finishes, or check the MR widget shows "Merge blocked: pipeline must succeed". Only a demonstrated refusal + subsequent green merge counts as the end-to-end test.
 
 - [ ] **Step 8: Merge with a merge commit (never squash)**
 
@@ -336,9 +395,19 @@ glab api "projects/<username>%2Fgaslight-and-grimoire/pipeline_schedules" -X POS
 ```
 Expected: JSON response with `"active":true` and the cron string.
 
-- [ ] **Step 2: 🧑 USER ACTION — NVD API key**
+- [ ] **Step 2: Verify the Dependency-Check cache is warm**
 
-Tell the user: request a free key at https://nvd.nist.gov/developers/request-an-api-key, then add it as a **masked** CI/CD variable `NVD_API_KEY` (Settings → CI/CD → Variables). Skippable — the job runs without it, just slowly — but recommended before the first scheduled run.
+The Task-4 MR pipeline paid the cold NVD download. Trigger one scheduled-style run to prove the
+warm path (this also validates the schedule created in Step 1 — run it manually):
+
+```bash
+glab api "projects/<username>%2Fgaslight-and-grimoire/pipeline_schedules" | jq '.[0].id'
+glab api "projects/<username>%2Fgaslight-and-grimoire/pipeline_schedules/<schedule-id>/play" -X POST
+```
+Expected: the played pipeline runs ONLY `npm-audit` + `dependency-check`; the dependency-check
+log shows the cached `.dependency-check-data` being used (update, not full download) and the
+job completes in minutes, not tens of minutes. (Codex Major 2: exercise both a warm scheduled
+run and an MR run before calling the security port complete — the MR run was Task 4 Step 7.)
 
 - [ ] **Step 3: 🧑 USER ACTION — enable hosted Renovate**
 
@@ -407,7 +476,7 @@ In the CI/CD section: replace the `deploy.yml`/`security.yml`/`dependabot.yml` d
 - [ ] **Step 4: Update README.md, PROJECT_STATE.md, DECISIONS/README.md, .mcp.json**
 
 - `README.md` lines 42–44: the two workflow bullets → one `.gitlab-ci.yml` bullet (merge gate) + one security bullet (MRs + weekly schedule). The Zustand upstream link at line 14 stays — it points at Zustand's repo, not ours.
-- `docs/PROJECT_STATE.md`: prepend a new "last updated 2026-07-20" block: migrated to GitLab (URL), GitHub archived, CI/Renovate/Cloudflare re-established; prior updates untouched.
+- `docs/PROJECT_STATE.md`: prepend a new "last updated 2026-07-20" block: migrated to GitLab (URL), CI/Renovate/Cloudflare re-established, **GitHub archive pending final checks** — do NOT claim the archive has happened; it is Task 8, after this MR merges (Codex Major 3).
 - `docs/DECISIONS/README.md`: add ADR-0014 to the index.
 - `.mcp.json`: remove the `github` server entry (`api.githubcopilot.com` — useless once archived).
 
@@ -449,9 +518,22 @@ gh repo archive JonWhiteFang/gaslight-and-grimoire --yes
 ```
 Expected: `Archived repository JonWhiteFang/gaslight-and-grimoire`. (Reversible via unarchive if ever needed.)
 
-- [ ] **Step 3: Run the checkpoint skill**
+- [ ] **Step 3: Record the archive — checkpoint, ADR to Enacted, commit, push**
 
-Invoke `/checkpoint` to update `docs/PROJECT_STATE.md` and prepend the `docs/RUN_LOG.md` entry recording the migration (spec, plan, MRs, archive), per the repo's session protocol.
+The archive is now fact, so the memory spine can say so (Codex Major 3: Task 7 deliberately
+left it "pending"). Invoke `/checkpoint` to update `docs/PROJECT_STATE.md` (archive done) and
+prepend the `docs/RUN_LOG.md` entry recording the migration (spec, plan, MRs, archive). In the
+same pass, flip `docs/DECISIONS/ADR-0014-gitlab-migration.md` status `Accepted` → `Enacted`
+(the decision is now realised in the repo, per `docs/DECISIONS/README.md`). Then persist —
+these edits must not be left uncommitted:
+
+```bash
+git add docs/PROJECT_STATE.md docs/RUN_LOG.md docs/DECISIONS/ADR-0014-gitlab-migration.md
+git commit -m "docs: checkpoint — GitHub archived, GitLab migration complete (ADR-0014 Enacted)"
+git push origin main
+```
+Expected: pushed to GitLab `main`; pipeline green. (A docs-only direct push to main is this
+repo's normal checkpoint pattern — no MR needed.)
 
 ---
 
@@ -461,8 +543,8 @@ Invoke `/checkpoint` to update `docs/PROJECT_STATE.md` and prepend the `docs/RUN
 |---|---|
 | History identical | `git ls-remote` main SHA on GitLab == pre-migration GitHub SHA |
 | Issues/PRs imported | x-total counts match; PR #87's MR merged-with-comments spot-check |
-| Merge gate live | Task 4 MR blocked-until-green, then merged via merge commit |
-| Security port live | npm-audit + dependency-check green on an MR; schedule exists |
+| Merge gate live | Task 4 MR: merge REFUSED while pipeline pending/red (only_allow_merge_if_pipeline_succeeds), then merged via merge commit once green |
+| Security port live | npm-audit + dependency-check green on an MR (cold) AND a played schedule run (warm cache); schedule exists |
 | Renovate live | onboarding/bump MR appeared |
 | Deploy live | site 200s from a GitLab-sourced Cloudflare build |
 | Docs true | grep sweep leaves only historical GitHub references |
